@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/*
+ * Phase 0: just the agreed palette, registered as Tailwind tokens so nothing
+ * in a component ever writes a raw hex value. The full design system (type
+ * scale, fonts, graph-paper surfaces) is Phase 1.
+ *
+ * Colours come from the school crest - see CLAUDE.md "Design direction".
+ */
+@theme {
+  --color-paper: #fbfcf8;
+  --color-grid: #d6e2ec;
+  --color-graphite: #262a2e;
+  --color-navy: #0f4574;
+  --color-navy-deep: #0a3157;
+  --color-crimson: #da2127;
+  --color-highlight: #f1d54a;
+}
+
+body {
+  background-color: var(--color-paper);
+  color: var(--color-graphite);
+}

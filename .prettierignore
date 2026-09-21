@@ -1,0 +1,12 @@
+node_modules
+.next
+out
+build
+coverage
+package-lock.json
+public
+assets
+*.rules
+
+# hand-written docs - keep the tables exactly as authored
+*.md
