@@ -145,17 +145,20 @@ Below, "everyone" means public mode; in school mode those rows become "signed-in
 
 ---
 
-## Phase 0 — Project setup
+## Phase 0 — Project setup — DONE (2026-09-21)
 
-- [ ] Create Next.js app (App Router, TS strict, Tailwind, ESLint, `src/` dir)
-- [ ] Add Prettier, Vitest, Playwright
-- [ ] `firebase init` for Firestore, Storage, Emulators (auth 9099, firestore 8080, storage 9199, UI 4000) using a demo project ID (`demo-lskc-maths`) so nothing can reach a real project
-- [ ] `src/lib/firebase.ts` with emulator wiring; `.env.example`
-- [ ] npm scripts from CLAUDE.md, `dev:all` via `concurrently`
-- [ ] Copy `assets/school-logo*.png` into `public/`; generate favicon from the crest
-- [ ] Initialise git; `.gitignore` covers `.env.local`, emulator data
+- [x] Create Next.js app (App Router, TS strict, Tailwind, ESLint, `src/` dir) — Next 16.3.5, React 19.2.8, Tailwind v4
+- [x] Add Prettier, Vitest — **Playwright deferred to Phase 7**, where the smoke tests are actually written; installing a browser runtime now would add ~400 MB for nothing
+- [x] Firebase config for Firestore, Storage, Emulators (auth 9099, firestore 8080, storage 9199, UI 4000) under the demo project ID `demo-lskc-maths`, so nothing can reach a real project
+- [x] `src/lib/firebase.ts` with emulator wiring; `.env.example` and `.env.local`
+- [x] npm scripts — `dev`, `build`, `start`, `lint`, `format`, `typecheck`, `emulators`, `dev:all`, `test`. **`seed`, `rules:build` and `test:rules` are not wired yet**; they arrive with their scripts in Phases 2–3.
+- [x] Crest copied into `public/`; `src/app/icon.png` + `apple-icon.png` generated from it
+- [x] Git initialised (`main`), first commit made; `.gitignore` covers `.env.local`, emulator data, Playwright output
 
-**Test:** `npm run dev:all` → site on :3000, Emulator UI on :4000.
+**Test:** `npm run dev:all` → site on :3000, Emulator UI on :4000. Verified: both
+respond 200, all three emulators (Auth / Firestore / Storage) report ready, the page
+renders with no console errors, `npm run build`, `npm run lint` and `npm run typecheck`
+are all clean.
 
 ## Phase 1 — Design system, layout and Home
 
@@ -253,6 +256,16 @@ Below, "everyone" means public mode; in school mode those rows become "signed-in
 - **Access: public for now.** The owner asked that anyone be able to view the site. Reading is open to the internet for topics, site content, app listings and student-edition books; teacher-edition material and every write still require a teacher sign-in. Built as a build-time switch (`NEXT_PUBLIC_ACCESS_MODE`) so it can be closed to `lskc.edu.hk` later without touching page code. A Blaze budget alert is required at launch because public read means public egress.
 - Palette taken from the school crest (#DA2127 red, #0F4574 navy) rather than invented colours; the exercise-book theme is rendered in those.
 - Topic codes (`1A01`, `2B07`, `Ch13`) are stored on each topic, so the site matches the file names the department already uses. Senior forms share one Ch0–Ch31 sequence across F4–F6.
+
+### Phase 0 decisions (2026-09-21)
+
+- **The project lives on local disk**, `C:\Users\t28ltk\Projects\lskc-maths`, not in Google Drive. `node_modules` is tens of thousands of small files and would keep Drive syncing constantly. Backup is GitHub, which App Hosting needs anyway. A `MOVED - read me.txt` note was left in the old Drive folder.
+- Installed on the owner's machine via `winget`: **Node.js 24.19.0 LTS** and **Microsoft OpenJDK 21** (the Firestore and Storage emulators are Java programs).
+- `@types/node` raised from create-next-app's `^20` to `^24`, matching the installed Node and required by Vitest 5.
+- npm 11 blocks package install scripts by default. Five are approved by name in `package.json` → `allowScripts` (`@firebase/util`, `protobufjs`, `unrs-resolver`, `esbuild`, `re2`). Adding a dependency with install scripts will need the same approval.
+- `firebase-tools` is a **dev dependency**, not a global install, so the version is pinned in the repo and survives a new machine. Call it via `npx firebase` or an npm script.
+- Next.js telemetry disabled.
+- Markdown files are excluded from Prettier so the hand-written tables in `CLAUDE.md`, `PLAN.md` and `docs/topics.md` keep their layout.
 - File access via SDK `getBlob`, not persistent download URLs, so rules apply on every read.
 - Uploaded HTML rendered only in a sandboxed `srcdoc` iframe without `allow-same-origin`.
 - Teachers edit, students view: every browser-editable collection is teacher-write-only in the rules; students have no write path.
