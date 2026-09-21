@@ -1,23 +1,82 @@
 @import "tailwindcss";
 
 /*
- * Phase 0: just the agreed palette, registered as Tailwind tokens so nothing
- * in a component ever writes a raw hex value. The full design system (type
- * scale, fonts, graph-paper surfaces) is Phase 1.
- *
- * Colours come from the school crest - see CLAUDE.md "Design direction".
+ * Design tokens. Never write a raw hex value in a component - use these.
+ * Colours come from the school crest; see CLAUDE.md "Design direction".
  */
 @theme {
   --color-paper: #fbfcf8;
   --color-grid: #d6e2ec;
+  --color-grid-strong: #9fb5c7;
+  --color-rule: #eaeff4;
   --color-graphite: #262a2e;
+  --color-pencil: #6b7177;
+
   --color-navy: #0f4574;
   --color-navy-deep: #0a3157;
+  --color-navy-soft: #b8cce0;
+  --color-navy-wash: #eaf1f8;
+
   --color-crimson: #da2127;
+  --color-crimson-deep: #a8191e;
+  --color-crimson-wash: #fbe7e8;
+
   --color-highlight: #f1d54a;
+
+  --font-display: var(--font-spectral), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-plex-sans), system-ui, -apple-system, sans-serif;
+
+  --text-hero: clamp(2rem, 4.6vw, 3.25rem);
+  --text-hero--line-height: 1.1;
+  --text-section: 1.375rem;
+  --text-section--line-height: 1.25;
+  --text-card: 1.125rem;
+  --text-card--line-height: 1.3;
+  --text-meta: 0.8125rem;
+  --text-meta--line-height: 1.45;
 }
 
 body {
   background-color: var(--color-paper);
   color: var(--color-graphite);
+  font-family: var(--font-sans);
+  line-height: 1.65;
+}
+
+/* Graph paper. `graph-paper-lg` is for large surfaces like the hero. */
+@utility graph-paper {
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+@utility graph-paper-lg {
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* One visible focus treatment everywhere, on any background. */
+:focus-visible {
+  outline: 3px solid var(--color-highlight);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* KaTeX sizes itself relative to the surrounding text; keep it honest. */
+.katex {
+  font-size: 1.05em;
 }

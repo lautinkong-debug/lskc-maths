@@ -160,17 +160,20 @@ respond 200, all three emulators (Auth / Firestore / Storage) report ready, the 
 renders with no console errors, `npm run build`, `npm run lint` and `npm run typecheck`
 are all clean.
 
-## Phase 1 — Design system, layout and Home
+## Phase 1 — Design system, layout and Home — DONE (2026-09-21)
 
-- [ ] Tailwind tokens (palette, type scale), fonts via `next/font`
-- [ ] Short written design plan (tokens + ASCII wireframe of Home) in the Decision log; owner approves before building
-- [ ] Site header (crest + school name, Home / Web Apps / Mistakes Book, account menu placeholder), footer
-- [ ] `<Math>` KaTeX component
-- [ ] Home: interactive graph-paper hero, two entry points, "Latest uploads" with mock data
-- [ ] Placeholder pages for all routes
-- [ ] Check at 360 px, 768 px, 1440 px, 1920 px
+- [x] Tailwind v4 tokens in `src/app/globals.css` (palette, type scale, graph-paper utilities, one global focus ring, `prefers-reduced-motion`); Spectral + IBM Plex Sans via `next/font`
+- [x] Design plan shown as a rendered mock-up and approved by the owner; recorded below
+- [x] `SiteHeader` (crest + school name, three nav links, active state, `Sign in` placeholder, mobile menu) and `SiteFooter`
+- [x] `<Math>` KaTeX component (`trust: false`, never renders user HTML)
+- [x] Home: graph-paper hero with a draggable parabola, two entry cards, "Latest uploads" on stand-in rows
+- [x] `PagePlaceholder` + pages for all nine remaining routes, each naming the phase that builds it
+- [x] Checked at 360, 760, 900, 1440 and 1920 px; no horizontal overflow at 360 px
 
-**Test:** browse all pages on desktop and phone-sized window (browser dev tools).
+**Test:** `npm run dev:all`, then browse Home and click through to every page. Drag the
+yellow vertex, or tab to it and use the arrow keys — the equation, vertex and roots
+follow. Verified: `npm run build`, `npm run lint`, `npm run typecheck` clean; no console
+errors.
 
 ## Phase 2 — Sign-in, roles and security rules
 
@@ -256,6 +259,48 @@ are all clean.
 - **Access: public for now.** The owner asked that anyone be able to view the site. Reading is open to the internet for topics, site content, app listings and student-edition books; teacher-edition material and every write still require a teacher sign-in. Built as a build-time switch (`NEXT_PUBLIC_ACCESS_MODE`) so it can be closed to `lskc.edu.hk` later without touching page code. A Blaze budget alert is required at launch because public read means public egress.
 - Palette taken from the school crest (#DA2127 red, #0F4574 navy) rather than invented colours; the exercise-book theme is rendered in those.
 - Topic codes (`1A01`, `2B07`, `Ch13`) are stored on each topic, so the site matches the file names the department already uses. Senior forms share one Ch0–Ch31 sequence across F4–F6.
+
+### Phase 1 design decisions (2026-09-21, approved by the owner)
+
+Type: **Spectral** for headings (a text face, not a UI face — keeps the exercise-book
+feel), **IBM Plex Sans** for everything else (unambiguous digits and `1 / l / 7`, which
+matters on a maths site), KaTeX's own fonts for notation. Scale: hero
+`clamp(2rem, 4.6vw, 3.25rem)`, section 1.375rem, card 1.125rem, body 1rem, meta 0.8125rem.
+
+Home, top to bottom:
+
+```
++--------------------------------------------------------------+
+| [crest] LSKC Mathematics          Home  Web apps  Mistakes    |  navy bar
+|         S.T.F.A. Lee Shau Kee College            book [Sign in]
++--------------------------------------------------------------+
+|  . . . . . . . . . . graph paper . . . . . . . . . . . . . .  |
+|   Mathematics Department        |        \        /           |
+|   Interactive tools for the     |         \      /            |
+|   classroom, and every          |          \____/  <- drag    |
+|   Mistakes Book in one place.   |      [ y = 0.5(x-1)^2 - 2 ] |
++--------------------------------------------------------------+
+|  =========== navy              |  =========== crimson         |
+|  Web apps                      |  Mistakes book               |
+|  Interactive tools by level... |  Correction notes by topic...|
++--------------------------------------------------------------+
+|  Latest uploads                                               |
+|  [F5] Ch18  Measures of dispersion - quiz 3           18 Sep  |
+|  [F3] 3A03  Linear inequalities in one unknown        15 Sep  |
++--------------------------------------------------------------+
+```
+
+- The draggable parabola is the one bold element; everything else stays quiet. It links
+  through to the full quadratic explorer (Phase 5) rather than duplicating it.
+- Entry cards carry their identity as a 3px top rule (navy / crimson), not as shadowed
+  boxes. No gradients, no entrance animations.
+- The hero band is literal graph paper (CSS grid lines); the parabola is drawn straight
+  onto it, so there is only ever one grid on screen.
+- **Deviation from the approved mock-up:** on a phone the title and intro come first and
+  the graph follows, rather than the graph on top. A 270 px graph above the title pushed
+  everything below the fold. Easy to flip back if the owner prefers the original.
+- The vertex is keyboard operable (`role="slider"`, arrow keys, 0.5 steps) and
+  touch-draggable; pointer capture keeps a drag alive outside the circle.
 
 ### Phase 0 decisions (2026-09-21)
 
