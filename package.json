@@ -14,7 +14,10 @@
     "emulators": "firebase emulators:start --project demo-lskc-maths",
     "dev:all": "concurrently -n next,firebase -c cyan,yellow -k \"npm:dev\" \"npm:emulators\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "rules:build": "tsx scripts/build-rules.ts",
+    "seed": "tsx scripts/seed.ts",
+    "test:rules": "firebase emulators:exec --only auth,firestore,storage --project demo-lskc-maths \"vitest run --config vitest.rules.config.ts\""
   },
   "dependencies": {
     "firebase": "^12.19.0",

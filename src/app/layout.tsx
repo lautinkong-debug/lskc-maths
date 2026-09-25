@@ -5,6 +5,8 @@ import "./globals.css";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { copy } from "@/lib/copy";
+import { AuthProvider } from "@/lib/auth";
+import { AuthGate } from "@/components/AuthGate";
 
 const spectral = Spectral({
   subsets: ["latin"],
@@ -35,9 +37,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${spectral.variable} ${plexSans.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <SiteHeader />
-        <div className="flex-1">{children}</div>
-        <SiteFooter />
+        <AuthProvider>
+          <SiteHeader />
+          <div className="flex-1">
+            <AuthGate>{children}</AuthGate>
+          </div>
+          <SiteFooter />
+        </AuthProvider>
       </body>
     </html>
   );

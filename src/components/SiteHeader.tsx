@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { copy } from "@/lib/copy";
+import { useAuth } from "@/lib/auth";
 
 const NAV = [
   { href: "/", label: copy.nav.home },
@@ -19,6 +20,59 @@ function isActive(pathname: string, href: string) {
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { user, role, loading, signOutUser } = useAuth();
+  const isTeacher = role === "teacher" || role === "admin";
+  const accountLinks = (
+    <>
+      {isTeacher && (
+        <Link
+          href="/manage/topics"
+          onClick={() => setOpen(false)}
+          className="text-navy-soft text-sm hover:text-white"
+        >
+          {copy.nav.manage}
+        </Link>
+      )}
+      {role === "admin" && (
+        <Link
+          href="/admin/teachers"
+          onClick={() => setOpen(false)}
+          className="text-navy-soft text-sm hover:text-white"
+        >
+          {copy.nav.teachers}
+        </Link>
+      )}
+      {user ? (
+        <div className="flex items-center gap-2 text-sm">
+          <Link
+            href="/login"
+            onClick={() => setOpen(false)}
+            className="text-navy-soft hover:text-white"
+          >
+            {user.email ?? copy.auth.account}
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              void signOutUser();
+            }}
+            className="rounded border border-white/35 px-3 py-1.5 hover:border-white/70"
+          >
+            {copy.nav.signOut}
+          </button>
+        </div>
+      ) : !loading ? (
+        <Link
+          href="/login"
+          onClick={() => setOpen(false)}
+          className="rounded border border-white/35 px-3 py-1.5 text-sm hover:border-white/70"
+        >
+          {copy.nav.signIn}
+        </Link>
+      ) : null}
+    </>
+  );
 
   return (
     <header className="bg-navy text-white">
@@ -64,12 +118,7 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <Link
-            href="/login"
-            className="rounded border border-white/35 px-3 py-1.5 text-sm hover:border-white/70"
-          >
-            {copy.nav.signIn}
-          </Link>
+          {accountLinks}
         </nav>
 
         <button
@@ -104,13 +153,9 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <Link
-            href="/login"
-            onClick={() => setOpen(false)}
-            className="text-navy-soft block border-l-4 border-transparent py-2.5 pl-3"
-          >
-            {copy.nav.signIn}
-          </Link>
+          <div className="flex flex-col gap-3 border-t border-white/15 py-3">
+            {accountLinks}
+          </div>
         </nav>
       )}
     </header>

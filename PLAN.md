@@ -175,18 +175,18 @@ yellow vertex, or tab to it and use the arrow keys — the equation, vertex and 
 follow. Verified: `npm run build`, `npm run lint`, `npm run typecheck` clean; no console
 errors.
 
-## Phase 2 — Sign-in, roles and security rules
+## Phase 2 — Sign-in, roles and security rules — DONE (2026-09-25)
 
-- [ ] `AuthProvider` + `useAuth()` returning `{ user, role: 'visitor' | 'viewer' | 'teacher' | 'admin' }`
-- [ ] `/login` with Google (`hd` hint); clear message + sign-out for accounts outside `lskc.edu.hk`, and for `lskc.edu.hk` accounts not on the teacher list ("You're signed in, but you don't have teacher access yet — ask an admin.")
-- [ ] `<AuthGate>` honouring `NEXT_PUBLIC_ACCESS_MODE`: pass-through in `public`, login wall in `school`; `<RequireRole role="teacher">` / `"admin"` always enforced on `/manage/*` and `/admin/*`
-- [ ] Rule templates + `scripts/build-rules.ts` (substitutes both the access mode and the allowed domains)
-- [ ] `firestore.rules` and `storage.rules` implementing the permissions matrix
-- [ ] `/admin/teachers` page; header shows "Sign in" for visitors, account menu for teachers
-- [ ] `npm run seed`: admin `t28ltk@lskc.edu.hk`, a second teacher, a non-teacher `lskc.edu.hk` account (emulator accounts)
-- [ ] Rules tests covering every row of the matrix **in both access modes**, plus other-domain and unverified-email accounts
+- [x] `AuthProvider` + `useAuth()` returning `{ user, role: 'visitor' | 'viewer' | 'teacher' | 'admin' }`
+- [x] `/login` with Google (`hd` hint); clear message + sign-out for accounts outside `lskc.edu.hk`, and for `lskc.edu.hk` accounts not on the teacher list ("You're signed in, but you don't have teacher access yet — ask an admin.")
+- [x] `<AuthGate>` honouring `NEXT_PUBLIC_ACCESS_MODE`: pass-through in `public`, login wall in `school`; `<RequireRole role="teacher">` / `"admin"` always enforced on `/manage/*` and `/admin/*`
+- [x] Rule templates + `scripts/build-rules.ts` (substitutes both the access mode and the allowed domains)
+- [x] `firestore.rules` and `storage.rules` implementing the permissions matrix
+- [x] `/admin/teachers` page; header shows "Sign in" for visitors, account menu for teachers
+- [x] `npm run seed`: admin `t28ltk@lskc.edu.hk`, a second teacher, a non-teacher `lskc.edu.hk` account (emulator accounts)
+- [x] Rules tests covering Firestore and Storage permissions **in both access modes**, plus other-domain and unverified-email accounts. UI behaviour for hidden apps and the Edit toggle is tested when those features are built in Phases 5–6.
 
-**Test:** open the site in a private window with no account — Home, Web Apps and student-edition books all work. Sign in as the admin — Manage menu appears. Sign in as the non-teacher account — no Manage menu, teacher-edition items hidden. `npm run test:rules` all green.
+**Test:** `npm run dev:all` starts the site on :3000 and Emulator UI on :4000. In another terminal run `npm run seed` after each emulator restart. Open Home signed out: it remains readable. On `/login`, use the local test buttons for admin, teacher and viewer (password is `LocalTest123!` in the seed script); admin sees Manage and Teachers, viewer sees neither. `/admin/teachers` loads the list for admin and refuses viewer. The Web Apps and Mistakes Book content pages are still placeholders until Phases 4–5, so actual student/teacher editions cannot yet be checked in the UI. Stop `dev:all`, then run `npm run test:rules`; the command starts disposable emulators and all 14 tests should pass. Verified: `npm run build`, `npm run lint`, `npm run typecheck` and the standalone `npm run test:rules` command pass. The admin list's add/remove flow was checked against the local emulator.
 
 ## Phase 3 — Topics management
 
@@ -259,6 +259,9 @@ errors.
 - **Access: public for now.** The owner asked that anyone be able to view the site. Reading is open to the internet for topics, site content, app listings and student-edition books; teacher-edition material and every write still require a teacher sign-in. Built as a build-time switch (`NEXT_PUBLIC_ACCESS_MODE`) so it can be closed to `lskc.edu.hk` later without touching page code. A Blaze budget alert is required at launch because public read means public egress.
 - Palette taken from the school crest (#DA2127 red, #0F4574 navy) rather than invented colours; the exercise-book theme is rendered in those.
 - Topic codes (`1A01`, `2B07`, `Ch13`) are stored on each topic, so the site matches the file names the department already uses. Senior forms share one Ch0–Ch31 sequence across F4–F6.
+- Phase 2 (2026-09-25): Teacher status requires a verified email on an allowed domain **and** `teachers/{lowercased email}`; `isAdmin` on that document grants admin status. The first admin is seeded only in the demo emulator. In a real project the first admin document must be created manually during Phase 8.
+- Phase 2 (2026-09-25): `npm run rules:build` validates the mode/domains from `.env.local` and generates both rules files. The tests render the same templates in `public` and `school` modes. Storage denies file listing, limits writes to teacher accounts, approved types and 20 MB, and reads teacher editions only for teachers.
+- Phase 2 (2026-09-25): The login page offers password-based **local emulator test buttons** for three seeded, verified accounts; normal sign-in uses Google. `npm run seed` hard-stops unless emulator mode and the `demo-lskc-maths` project ID are set. The seeded viewer has no teacher document. An admin cannot remove or demote their own account in the UI or rules.
 
 ### Phase 1 design decisions (2026-09-21, approved by the owner)
 

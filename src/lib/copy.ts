@@ -15,6 +15,7 @@ export const copy = {
     apps: "Web apps",
     mistakesBook: "Mistakes book",
     manage: "Manage",
+    teachers: "Teachers",
     signIn: "Sign in",
     signOut: "Sign out",
     editPage: "Edit page",
@@ -78,8 +79,38 @@ export const copy = {
       "That account isn't a school account. Sign in with your @{domain} address.",
     notATeacher:
       "You're signed in, but you don't have teacher access yet. Ask an admin to add you.",
+    signInRequired: "Sign in with your school Google account to continue.",
+    checkingAccess: "Checking your access…",
+    schoolOnlyTitle: "School sign-in required",
+    schoolOnly: "Sign in with a verified school account to view this site.",
+    testAccounts: "Local test accounts",
+    testAccountsIntro:
+      "These accounts work only with the local Firebase emulators.",
+    signInFailed:
+      "Sign-in failed. Check that the emulators are running and try again.",
+    account: "Account",
+    adminRole: "Admin",
+    teacherRole: "Teacher",
+    viewerRole: "Viewer",
+    accessGranted: "Teacher access is active.",
     teachersOnly: "This page is for teachers.",
     adminsOnly: "This page is for admins.",
+  },
+
+  teachers: {
+    title: "Manage teachers",
+    intro: "Admins can add teachers and choose who has admin access.",
+    email: "School email",
+    name: "Name",
+    admin: "Admin access",
+    add: "Add teacher",
+    remove: "Remove",
+    noTeachers: "No teachers found.",
+    invalidEmail: "Enter an email address on an allowed school domain.",
+    saved: "Teacher list updated.",
+    failed: "Could not update the teacher list. Please try again.",
+    ownAccount: "Your account cannot be removed or demoted here.",
+    confirmRemove: "Remove this teacher's access?",
   },
 
   common: {
