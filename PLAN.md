@@ -188,13 +188,21 @@ errors.
 
 **Test:** `npm run dev:all` starts the site on :3000 and Emulator UI on :4000. In another terminal run `npm run seed` after each emulator restart. Open Home signed out: it remains readable. On `/login`, use the local test buttons for admin, teacher and viewer (password is `LocalTest123!` in the seed script); admin sees Manage and Teachers, viewer sees neither. `/admin/teachers` loads the list for admin and refuses viewer. The Web Apps and Mistakes Book content pages are still placeholders until Phases 4–5, so actual student/teacher editions cannot yet be checked in the UI. Stop `dev:all`, then run `npm run test:rules`; the command starts disposable emulators and all 14 tests should pass. Verified: `npm run build`, `npm run lint`, `npm run typecheck` and the standalone `npm run test:rules` command pass. The admin list's add/remove flow was checked against the local emulator.
 
-## Phase 3 — Topics management
+## Phase 3 — Topics management — DONE (2026-09-25)
 
-- [ ] Typed helpers in `src/lib/db/topics.ts`
-- [ ] `/manage/topics`: add, edit, delete (blocked if books use the topic), reorder within a level
-- [ ] Seed script loads `docs/topics.md` (the 69 F1–F6 topics) into `topics/`
+- [x] Typed helpers in `src/lib/db/topics.ts` for listing, live updates, adding, editing, guarded deletion and reordering
+- [x] `/manage/topics`: add, edit, delete (blocked if books use the topic), reorder within a level
+- [x] Seed script loads `docs/topics.md` (the 69 F1–F6 topics) into `topics/`
 
-**Test:** as teacher, add/edit topics; signed out, confirm `/manage/topics` is refused and the rules block writes.
+**Test:** `npm.cmd run dev:all`, then in a second PowerShell window run `npm.cmd run seed`.
+The seed reports 69 topics. Open `/login`, choose the local Teacher account, then open
+`/manage/topics`: F1 has 13 topics, F6 has 6. Add a temporary topic, edit its name,
+move it up or down and delete it. Sign out and open `/manage/topics` directly: the
+teacher-only gate refuses access. Stop `dev:all`, then run `npm.cmd run test:rules`;
+the rules still reject visitor/viewer writes. Verified in the demo emulator: 69 topic
+documents exist, F5 Ch18 is Measures of Dispersion, create/edit/reorder/delete work,
+rerunning the seed updates existing source records without duplicating them, and
+`npm run build`, `npm run lint`, `npm run typecheck` and `npm run test` pass.
 
 ## Phase 4 — Mistakes Book
 
@@ -262,6 +270,8 @@ errors.
 - Phase 2 (2026-09-25): Teacher status requires a verified email on an allowed domain **and** `teachers/{lowercased email}`; `isAdmin` on that document grants admin status. The first admin is seeded only in the demo emulator. In a real project the first admin document must be created manually during Phase 8.
 - Phase 2 (2026-09-25): `npm run rules:build` validates the mode/domains from `.env.local` and generates both rules files. The tests render the same templates in `public` and `school` modes. Storage denies file listing, limits writes to teacher accounts, approved types and 20 MB, and reads teacher editions only for teachers.
 - Phase 2 (2026-09-25): The login page offers password-based **local emulator test buttons** for three seeded, verified accounts; normal sign-in uses Google. `npm run seed` hard-stops unless emulator mode and the `demo-lskc-maths` project ID are set. The seeded viewer has no teacher document. An admin cannot remove or demote their own account in the UI or rules.
+- Phase 3 (2026-09-25): The topic editor handles one level per topic, matching all 69 source rows; `levels` remains an array in Firestore for a future shared-topic feature. Reordering saves sequential `order` values for the selected level. The seeded rows use stable IDs such as `f5-ch18`, so reseeding updates their code, name, strand and order without duplicating them or deleting topics added in the editor.
+- Phase 3 (2026-09-25): Deleting a topic first queries `mistakeBooks` for a matching `topicId` and refuses deletion when any book uses it. Firestore rules still restrict topic writes to teachers. This is an editor integrity check; Phase 4's book workflow must preserve valid topic references when books are added or moved.
 
 ### Phase 1 design decisions (2026-09-21, approved by the owner)
 

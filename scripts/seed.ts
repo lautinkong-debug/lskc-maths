@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
 import { initializeTestEnvironment } from "@firebase/rules-unit-testing";
+import { parseTopicMarkdown } from "./parse-topics";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 loadEnv({ path: resolve(root, ".env.local"), quiet: true });
@@ -88,30 +89,66 @@ async function main() {
   const firestoreRules = readFileSync(resolve(root, "firestore.rules"), "utf8");
   if (!firestoreRules.includes("service cloud.firestore"))
     throw new Error("Run npm run rules:build first.");
+  const sourceTopics = parseTopicMarkdown(
+    readFileSync(resolve(root, "docs/topics.md"), "utf8"),
+  );
   for (const account of accounts) await seedAuthAccount(account.email);
 
+  let created = 0;
+  let updated = 0;
   const testEnv = await initializeTestEnvironment({
     projectId: "demo-lskc-maths",
     firestore: { host: "127.0.0.1", port: 8080 },
   });
   try {
     await testEnv.withSecurityRulesDisabled(async (context) => {
+      const firestore = context.firestore();
       for (const account of accounts.filter(
         (item) => item.email !== "viewer@lskc.edu.hk",
       )) {
-        await context.firestore().doc(`teachers/${account.email}`).set({
+        await firestore.doc(`teachers/${account.email}`).set({
           name: account.name,
           isAdmin: account.isAdmin,
           addedBy: "t28ltk@lskc.edu.hk",
           addedAt: new Date(),
         });
       }
+      const existing = await firestore.collection("topics").get();
+      const byId = new Map(existing.docs.map((item) => [item.id, item.data()]));
+      const batch = firestore.batch();
+      const now = new Date();
+      for (const topic of sourceTopics) {
+        const current = byId.get(topic.id);
+        const fields = {
+          code: topic.code,
+          name: topic.name,
+          levels: topic.levels,
+          strand: topic.strand,
+          order: topic.order,
+        };
+        const ref = firestore.doc(`topics/${topic.id}`);
+        if (!current) {
+          batch.set(ref, { ...fields, createdAt: now, updatedAt: now });
+          created += 1;
+        } else if (
+          current.code !== fields.code ||
+          current.name !== fields.name ||
+          JSON.stringify(current.levels) !== JSON.stringify(fields.levels) ||
+          current.strand !== fields.strand ||
+          current.order !== fields.order
+        ) {
+          batch.update(ref, { ...fields, updatedAt: now });
+          updated += 1;
+        }
+      }
+      if (created + updated > 0) await batch.commit();
     });
   } finally {
     await testEnv.cleanup();
   }
   process.stdout.write(
-    `Seeded 3 verified local accounts (admin, teacher, viewer). Test password: ${password}\n`,
+    `Seeded 3 verified local accounts (admin, teacher, viewer). Test password: ${password}\n` +
+      `Topics: ${sourceTopics.length} total (${created} new, ${updated} updated, ${sourceTopics.length - created - updated} unchanged).\n`,
   );
 }
 

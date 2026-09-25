@@ -12,6 +12,8 @@ Extracted from the owner's `Topic.docx` (screenshots of the department's chapter
   The codes were **not** changed.
 
 Edit this file, then run `npm run seed` (Phase 3) to load it into the emulator.
+Running the seed again updates the original chapter records to match this file,
+including their order. Topics added in the website editor are left alone.
 
 ---
 

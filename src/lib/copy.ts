@@ -113,6 +113,40 @@ export const copy = {
     confirmRemove: "Remove this teacher's access?",
   },
 
+  topics: {
+    title: "Manage topics",
+    intro:
+      "Add chapters, correct their details, and arrange them within each level.",
+    chooseLevel: "Topics for level",
+    topicCount: (count: number) =>
+      `${count} ${count === 1 ? "topic" : "topics"}`,
+    addTitle: "Add a topic",
+    editTitle: "Edit topic",
+    code: "Chapter code",
+    name: "Topic name",
+    level: "Level",
+    strand: "Strand",
+    add: "Add topic",
+    save: "Save changes",
+    cancel: "Cancel",
+    edit: "Edit",
+    delete: "Delete",
+    moveUp: "Move up",
+    moveDown: "Move down",
+    empty: "No topics for this level yet. Add one using the form.",
+    loading: "Loading topics…",
+    saved: "Topic saved.",
+    deleted: "Topic deleted.",
+    reordered: "Topic order saved.",
+    invalid:
+      "Enter a chapter code and topic name, and choose a valid level and strand.",
+    duplicate: "That chapter code already exists in this level.",
+    inUse: "This topic has Mistakes Books and cannot be deleted.",
+    failed: "Could not update topics. Check your connection and try again.",
+    loadFailed: "Could not load topics. Check that the emulators are running.",
+    confirmDelete: "Delete this topic? This cannot be undone.",
+  },
+
   common: {
     loading: "Loading",
     comingSoon: "Coming soon",
