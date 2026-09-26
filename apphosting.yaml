@@ -1,0 +1,12 @@
+# App Hosting supplies FIREBASE_WEBAPP_CONFIG for the linked Firebase web app.
+# next.config.ts maps that public config into NEXT_PUBLIC_FIREBASE_* at build time.
+env:
+  - variable: NEXT_PUBLIC_USE_EMULATORS
+    value: "false"
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_ACCESS_MODE
+    value: public
+    availability: [BUILD, RUNTIME]
+  - variable: NEXT_PUBLIC_ALLOWED_EMAIL_DOMAINS
+    value: lskc.edu.hk
+    availability: [BUILD, RUNTIME]

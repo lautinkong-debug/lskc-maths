@@ -259,12 +259,12 @@ rerunning the seed updates existing source records without duplicating them, and
 
 ## Phase 8 — Go live
 
-- [ ] README, plain-English, step by step: create Firebase project; enable Google sign-in; upgrade to Blaze and **set a budget alert (e.g. HK$20/month) — not optional in public mode**; create Firestore + Storage; set `NEXT_PUBLIC_ACCESS_MODE` and `NEXT_PUBLIC_ALLOWED_EMAIL_DOMAINS`; `npm run rules:build`; deploy rules; create the first admin document `teachers/t28ltk@lskc.edu.hk` by hand; connect GitHub to App Hosting; add the App Hosting domain to Auth authorised domains
-- [ ] `apphosting.yaml` with the public env vars
-- [ ] `firebase.json` rules and indexes deploy config
+- [x] README, plain-English, step by step: create Firebase project; enable Google sign-in; upgrade to Blaze and **set a budget alert (e.g. HK$20/month) — not optional in public mode**; create Firestore + Storage; set `NEXT_PUBLIC_ACCESS_MODE` and `NEXT_PUBLIC_ALLOWED_EMAIL_DOMAINS`; `npm run rules:build`; deploy rules; create the first admin document `teachers/t28ltk@lskc.edu.hk` by hand; connect GitHub to App Hosting; add the App Hosting domain to Auth authorised domains (instructions prepared; live actions pending)
+- [x] `apphosting.yaml` with the public env vars
+- [x] `firebase.json` rules and indexes deploy config (already present and verified)
 - [ ] Post-launch checklist: open the live site signed out, sign in as teacher, upload one test file, check it appears signed out, delete it
 - [ ] Configure Storage bucket CORS for the site's origin so SDK `getBlob` previews and downloads work in production; verify with the post-launch test file
-- [ ] Note in the README how to switch to `school` mode later (one variable, rebuild rules, redeploy)
+- [x] Note in the README how to switch to `school` mode later (one variable, rebuild rules, redeploy)
 
 ---
 
@@ -289,6 +289,7 @@ rerunning the seed updates existing source records without duplicating them, and
 - Phase 6 (2026-09-26): Hidden apps remain visible to teachers for editing. Visitors and viewers cannot see them in the index or open their direct routes. Saved settings are loaded before a detail app renders, so a hidden app is never briefly exposed while loading. The edit toggle resets on sign-out.
 - Phase 7 (2026-09-26): `npm run test:e2e` uses the installed Chrome browser, starts the local app and demo emulators on free ports, waits for all emulators, and seeds the three local test accounts before running four smoke tests. A hard check on the emulator flag and `demo-lskc-maths` project ID prevents this setup from seeding any real Firebase project. Lighthouse was run as a one-off CLI tool against the local production build; it was not added as a project dependency.
 - Phase 7 (2026-09-26): Production Lighthouse mobile performance is 78 on Home and 77 on Quadratic Explorer, with accessibility, best practices and SEO at 100 on both. The report's largest opportunity is unused JavaScript; a larger bundle split was deferred because these pages need the Firebase Auth and Firestore clients and Phase 7 has no performance-score target. Recheck with real content after launch.
+- Phase 8 preparation (2026-09-26): App Hosting uses `apphosting.yaml` for the public access mode, teacher domain and emulator-off flag. The linked Firebase web app supplies `FIREBASE_WEBAPP_CONFIG` at build time; `next.config.ts` maps it to the site's six `NEXT_PUBLIC_FIREBASE_*` values, keeping real project values out of git. The existing `firebase.json` already names both generated rule files and Firestore indexes. README now records the exact live setup, CORS and verification steps. No real Firebase project has been changed; live setup and tests remain open.
 
 ### Phase 1 design decisions (2026-09-21, approved by the owner)
 
