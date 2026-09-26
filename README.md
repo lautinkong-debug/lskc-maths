@@ -48,10 +48,14 @@ the demo emulator setup above for development. Record the **real project ID**,
 **Storage bucket name**, and later the **live site URL** as you go. A project
 name and a project ID are different; use the ID in commands.
 
+Use a **dedicated Mathematics project**. Deploying these Firestore and Storage
+rules to an existing project replaces its rules and could affect other apps
+that already use that project.
+
 ### 1. Create the project, billing alert and databases
 
 1. In the [Firebase console](https://console.firebase.google.com/), choose
-   **Add project**. Name it for the school and record its project ID from
+   **Add project**. Create a separate Mathematics project and record its ID from
    **Project settings (gear) → General**. `demo-lskc-maths` is only local.
 2. In Firebase, upgrade this project to **Blaze**. In the
    [Google Cloud console](https://console.cloud.google.com/), select the same
@@ -139,7 +143,7 @@ Pushing to a connected live branch later triggers another rollout.
 In Firebase, open **Hosting & Serverless → App Hosting → Get started** (or
 **Create backend**). Choose a region suitable for Hong Kong users, connect
 GitHub and select `lautinkong-debug/lskc-maths`, set root directory to `/`,
-choose the live branch, create/select a Firebase **web app** for this backend,
+choose the live branch, create a Mathematics Firebase **web app** for this backend,
 and finish setup. Wait for its first rollout to succeed. Record the
 `https://…hosted.app` address shown in **Backend information**.
 
