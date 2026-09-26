@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { ACTIVE_LEVELS, type Level } from "@/lib/constants";
 import { copy } from "@/lib/copy";
+import { useEditMode } from "@/lib/editMode";
 import {
   sortBooksByNewest,
   watchVisibleBooks,
@@ -13,6 +14,7 @@ import {
 import { sortTopicsForLevel, watchTopics, type Topic } from "@/lib/db/topics";
 
 export default function MistakesBookPage() {
+  const { editing } = useEditMode();
   const { role } = useAuth();
   const isTeacher = role === "teacher" || role === "admin";
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -72,6 +74,19 @@ export default function MistakesBookPage() {
         {copy.books.title}
       </h1>
       <p className="mt-2 max-w-prose">{copy.books.intro}</p>
+      {editing && isTeacher && (
+        <div className="border-highlight mt-5 border-2 border-dashed bg-white p-4">
+          <p>{copy.editor.booksHint}</p>
+          <div className="mt-2 flex flex-wrap gap-4">
+            <Link href="/manage/books" className="text-navy underline">
+              {copy.nav.manageBooks}
+            </Link>
+            <Link href="/manage/topics" className="text-navy underline">
+              {copy.nav.manageTopics}
+            </Link>
+          </div>
+        </div>
+      )}
       {error && (
         <p role="alert" className="text-crimson mt-5">
           {error}

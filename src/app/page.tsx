@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ParabolaHero } from "@/components/home/ParabolaHero";
+import { HomeContent } from "@/components/home/HomeContent";
 import { LatestUploads } from "@/components/home/LatestUploads";
+import { FeaturedApps } from "@/components/home/FeaturedApps";
 import { copy } from "@/lib/copy";
 
 function ParabolaGlyph() {
@@ -60,25 +61,7 @@ function RedPenGlyph() {
 export default function Home() {
   return (
     <main>
-      <section className="graph-paper-lg border-grid border-b">
-        <div className="mx-auto grid w-full max-w-[1400px] items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14 lg:py-16">
-          <div>
-            <h1 className="font-display text-hero text-navy font-semibold">
-              {copy.home.heroTitle}
-            </h1>
-            <p className="text-graphite/85 mt-4 max-w-prose text-base lg:text-lg">
-              {copy.home.heroIntro}
-            </p>
-            <Link
-              href="/apps/quadratic-explorer"
-              className="text-navy text-meta hover:text-navy-deep mt-5 inline-block underline underline-offset-4"
-            >
-              {copy.home.openFullApp} &rarr;
-            </Link>
-          </div>
-          <ParabolaHero />
-        </div>
-      </section>
+      <HomeContent />
 
       <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6">
         <section className="grid gap-5 py-10 sm:grid-cols-2 lg:py-14">
@@ -115,6 +98,7 @@ export default function Home() {
           </Link>
         </section>
 
+        <FeaturedApps />
         <LatestUploads />
       </div>
     </main>

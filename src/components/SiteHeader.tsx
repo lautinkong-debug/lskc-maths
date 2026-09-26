@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { copy } from "@/lib/copy";
 import { useAuth } from "@/lib/auth";
+import { useEditMode } from "@/lib/editMode";
 
 const NAV = [
   { href: "/", label: copy.nav.home },
@@ -21,9 +22,25 @@ export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { user, role, loading, signOutUser } = useAuth();
+  const { editing, toggle } = useEditMode();
   const isTeacher = role === "teacher" || role === "admin";
+  const canEditPage =
+    pathname === "/" || pathname === "/apps" || pathname === "/mistakes-book";
   const accountLinks = (
     <>
+      {isTeacher && canEditPage && (
+        <button
+          type="button"
+          aria-pressed={editing}
+          onClick={() => {
+            toggle();
+            setOpen(false);
+          }}
+          className={`rounded border px-3 py-1.5 text-sm ${editing ? "border-highlight text-highlight" : "border-white/35 text-white hover:border-white/70"}`}
+        >
+          {copy.nav.editPage}
+        </button>
+      )}
       {isTeacher && (
         <Link
           href="/manage/topics"

@@ -66,6 +66,34 @@ function bookData(
   };
 }
 
+function editorEmail(persona: Persona): string {
+  return persona === "visitor"
+    ? "visitor@example.com"
+    : identities[persona].email;
+}
+
+function homeData(persona: Persona) {
+  return {
+    heroTitle: "Mathematics Department",
+    intro: "Welcome",
+    announcement: { text: "", link: "", active: false },
+    updatedBy: editorEmail(persona),
+    updatedAt: new Date(),
+  };
+}
+
+function appData(persona: Persona) {
+  return {
+    title: "",
+    summary: "",
+    featured: false,
+    visible: true,
+    order: 0,
+    updatedBy: editorEmail(persona),
+    updatedAt: new Date(),
+  };
+}
+
 function emulatorToken(
   projectId: string,
   persona: Exclude<Persona, "visitor">,
@@ -153,22 +181,21 @@ for (const mode of ["public", "school"] as const) {
             .set({ name: email, isAdmin, addedBy: ADMIN, addedAt: new Date() });
         }
         await db.doc("topics/topic1").set({ name: "Algebra", levels: ["F1"] });
-        await db.doc("siteContent/home").set({ intro: "Welcome" });
-        await db.doc("appSettings/app1").set({ visible: false });
-        await db
-          .doc("mistakeBooks/student1")
-          .set({
-            edition: "student",
-            title: "Practice",
-            storagePath: "mistake-books/student/student1/student1.pdf",
-          });
-        await db
-          .doc("mistakeBooks/teacher1")
-          .set({
-            edition: "teacher",
-            title: "Answers",
-            storagePath: "mistake-books/teacher/teacher1/teacher1.pdf",
-          });
+        await db.doc("siteContent/home").set(homeData("admin"));
+        await db.doc("appSettings/app1").set({
+          ...appData("admin"),
+          visible: false,
+        });
+        await db.doc("mistakeBooks/student1").set({
+          edition: "student",
+          title: "Practice",
+          storagePath: "mistake-books/student/student1/student1.pdf",
+        });
+        await db.doc("mistakeBooks/teacher1").set({
+          edition: "teacher",
+          title: "Answers",
+          storagePath: "mistake-books/teacher/teacher1/teacher1.pdf",
+        });
       });
       // Storage fixture writes use an authenticated teacher and therefore also
       // check the Firestore teacher lookup in the Storage rules.
@@ -264,8 +291,8 @@ for (const mode of ["public", "school"] as const) {
         const allowed = persona === "teacher" || persona === "admin";
         for (const [path, value] of [
           ["topics/new", { name: "New" }],
-          ["siteContent/new", { intro: "New" }],
-          ["appSettings/new", { visible: true }],
+          ["siteContent/home", homeData(persona)],
+          ["appSettings/new", appData(persona)],
           [
             `mistakeBooks/new-${persona}`,
             bookData(`new-${persona}`, "student", persona),
@@ -276,6 +303,75 @@ for (const mode of ["public", "school"] as const) {
           else await assertFails(write);
         }
       }
+    });
+
+    it("validates Home content and app listing fields", async () => {
+      const teacher = contexts.teacher.firestore();
+      await assertFails(
+        teacher.doc("siteContent/other").set(homeData("teacher")),
+      );
+      await assertFails(
+        teacher.doc("siteContent/home").set({
+          ...homeData("teacher"),
+          heroTitle: "x".repeat(101),
+        }),
+      );
+      await assertFails(
+        teacher.doc("siteContent/home").set({
+          ...homeData("teacher"),
+          announcement: {
+            text: "Open",
+            link: "javascript:alert(1)",
+            active: true,
+          },
+        }),
+      );
+      await assertFails(
+        teacher.doc("siteContent/home").set({
+          ...homeData("teacher"),
+          updatedBy: ADMIN,
+        }),
+      );
+      await assertFails(
+        teacher.doc("appSettings/bad_slug").set(appData("teacher")),
+      );
+      await assertFails(
+        teacher.doc("appSettings/new").set({
+          ...appData("teacher"),
+          summary: "x".repeat(401),
+        }),
+      );
+      await assertFails(
+        teacher.doc("appSettings/new").set({
+          ...appData("teacher"),
+          order: -1,
+        }),
+      );
+      await assertFails(
+        teacher.doc("appSettings/new").set({
+          ...appData("teacher"),
+          unexpected: true,
+        }),
+      );
+      await assertFails(
+        teacher.doc("appSettings/new").set({
+          ...appData("teacher"),
+          updatedBy: ADMIN,
+        }),
+      );
+      await assertSucceeds(
+        teacher.doc("siteContent/home").set({
+          ...homeData("teacher"),
+          announcement: { text: "Revision week", link: "/apps", active: true },
+        }),
+      );
+      await assertSucceeds(
+        teacher.doc("appSettings/quadratic-explorer").set({
+          ...appData("teacher"),
+          featured: true,
+          visible: false,
+        }),
+      );
     });
 
     it("keeps teacher-list reads narrow and writes admin-only", async () => {
@@ -459,8 +555,12 @@ for (const mode of ["public", "school"] as const) {
           }),
         ),
       );
-      expect(await storageRead(projectId, "visitor", unrecordedPath)).toBe(false);
-      expect(await storageRead(projectId, "teacher", unrecordedPath)).toBe(false);
+      expect(await storageRead(projectId, "visitor", unrecordedPath)).toBe(
+        false,
+      );
+      expect(await storageRead(projectId, "teacher", unrecordedPath)).toBe(
+        false,
+      );
       expect(
         await storageRead(
           projectId,

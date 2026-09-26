@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { config as loadEnv } from "dotenv";
 import { initializeTestEnvironment } from "@firebase/rules-unit-testing";
 import { parseTopicMarkdown } from "./parse-topics";
+import { copy } from "../src/lib/copy";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 loadEnv({ path: resolve(root, ".env.local"), quiet: true });
@@ -142,6 +143,16 @@ async function main() {
         }
       }
       if (created + updated > 0) await batch.commit();
+      const home = firestore.doc("siteContent/home");
+      if (!(await home.get()).exists) {
+        await home.set({
+          heroTitle: copy.home.heroTitle,
+          intro: copy.home.heroIntro,
+          announcement: { text: "", link: "", active: false },
+          updatedBy: "t28ltk@lskc.edu.hk",
+          updatedAt: now,
+        });
+      }
     });
   } finally {
     await testEnv.cleanup();

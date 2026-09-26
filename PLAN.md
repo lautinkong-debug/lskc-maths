@@ -232,19 +232,21 @@ rerunning the seed updates existing source records without duplicating them, and
 
 **DONE (2026-09-26):** In the local demo project, the index filters and search, quadratic controls and no-real-roots case, unit-circle angle controls and undefined tangent, and inequality steps/endpoints were checked in the browser. Each app and the index fit a 360 px viewport without horizontal scrolling; the enlarged Presentation layout fit 1920×1080. The in-app browser does not expose native fullscreen, so the owner should also check the Fullscreen API in Chrome. Lint, typecheck, tests and production build pass. No real Firebase project was changed.
 
-## Phase 6 — Teacher edit mode
+## Phase 6 — Teacher edit mode — DONE (2026-09-26)
 
-- [ ] Typed helpers `src/lib/db/siteContent.ts`, `src/lib/db/appSettings.ts`
-- [ ] Rules: `siteContent` and `appSettings` readable per the access mode, writable only by teachers; field validation (types, string lengths)
-- [ ] Header "Edit page" toggle, rendered only for teachers; edit state in a React context
-- [ ] `<EditableText>` component: dashed outline in edit mode, inline editor, Save / Cancel, "Saved" confirmation, "Last edited by … on …"
-- [ ] Home: hero title, intro, announcement banner editable
-- [ ] Web Apps index: edit title/summary, toggle featured and visible, drag to reorder; registry defaults merged with `appSettings`
-- [ ] Non-teachers: hidden apps filtered out of the index; `/apps/[slug]` for a hidden app shows "This app isn't available right now"
-- [ ] Seed default `siteContent/home`
-- [ ] Rules tests: write attempts to `siteContent`, `appSettings`, `topics`, `mistakeBooks` and Storage by a visitor and by a signed-in non-teacher are all rejected; teacher writes succeed
+- [x] Typed helpers `src/lib/db/siteContent.ts`, `src/lib/db/appSettings.ts`
+- [x] Rules: `siteContent` and `appSettings` readable per the access mode, writable only by teachers; field validation (types, string lengths)
+- [x] Header "Edit page" toggle, rendered only for teachers; edit state in a React context
+- [x] `<EditableText>` component: dashed outline in edit mode, inline editor, Save / Cancel, "Saved" confirmation, "Last edited by … on …"
+- [x] Home: hero title, intro, announcement banner editable
+- [x] Web Apps index: edit title/summary, toggle featured and visible, drag to reorder; registry defaults merged with `appSettings`
+- [x] Non-teachers: hidden apps filtered out of the index; `/apps/[slug]` for a hidden app shows "This app isn't available right now"
+- [x] Seed default `siteContent/home`
+- [x] Rules tests: write attempts to `siteContent`, `appSettings`, `topics`, `mistakeBooks` and Storage by a visitor and by a signed-in non-teacher are all rejected; teacher writes succeed
 
 **Test:** sign in as teacher → toggle Edit page → change the Home intro and hide one app → open the site in a private window → see the new intro, no hidden app, no edit controls.
+
+**DONE (2026-09-26):** On the demo emulator, the admin test account saved a Home introduction and announcement, changed an app listing, featured one app and reordered listings. After sign-out, the visitor view showed the saved Home content and featured app, omitted the hidden app from the index and denied its direct URL. No browser errors or warnings appeared. Rules tests passed in both public and school modes (20 tests); unit tests (8), lint, typecheck and production build passed. No real Firebase project was changed.
 
 ## Phase 7 — Polish and hardening
 
@@ -281,6 +283,8 @@ rerunning the seed updates existing source records without duplicating them, and
 - Phase 4 (2026-09-26): The public access decision still applies to student-edition files, including downloads by signed-out visitors. The Home latest list includes student editions only. `react-pdf` is used for in-page PDF rendering. Real-bucket CORS setup is deferred to Phase 8; no real Firebase project was changed.
 - Phase 5 (2026-09-26): Web Apps are registered in a static typed list and lazy-loaded on their detail pages. The index reads the registry directly; Phase 6 will merge saved teacher settings for visibility and ordering. The apps do not use Firebase. New apps add their wording to the central `copy.ts` file and one registry entry.
 - Phase 5 (2026-09-26): The inequality tool accepts a small documented grammar for one linear inequality or a bounded compound inequality; it parses input without evaluating code. Presentation mode enlarges the tool in the page when the browser cannot enter fullscreen, and its button waits for the lazy app to hydrate.
+- Phase 6 (2026-09-26): Home copy lives in `siteContent/home`; per-app title, summary, featured, visible and order settings live in `appSettings/{slug}`. The static app registry supplies defaults and available routes. Teachers can edit in the page; Firestore rules validate every saved field and authorize writes. The seed script creates default Home content only when absent, preserving teacher edits on later runs.
+- Phase 6 (2026-09-26): Hidden apps remain visible to teachers for editing. Visitors and viewers cannot see them in the index or open their direct routes. Saved settings are loaded before a detail app renders, so a hidden app is never briefly exposed while loading. The edit toggle resets on sign-out.
 
 ### Phase 1 design decisions (2026-09-21, approved by the owner)
 

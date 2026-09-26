@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { copy } from "@/lib/copy";
 import { AuthProvider } from "@/lib/auth";
 import { AuthGate } from "@/components/AuthGate";
+import { EditModeProvider } from "@/lib/editMode";
 
 const spectral = Spectral({
   subsets: ["latin"],
@@ -38,11 +39,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col">
         <AuthProvider>
-          <SiteHeader />
-          <div className="flex-1">
-            <AuthGate>{children}</AuthGate>
-          </div>
-          <SiteFooter />
+          <EditModeProvider>
+            <SiteHeader />
+            <div className="flex-1">
+              <AuthGate>{children}</AuthGate>
+            </div>
+            <SiteFooter />
+          </EditModeProvider>
         </AuthProvider>
       </body>
     </html>

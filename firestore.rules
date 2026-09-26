@@ -66,6 +66,41 @@ service cloud.firestore {
         && data.createdAt is timestamp && data.updatedAt is timestamp;
     }
 
+    function validSiteContent(pageId) {
+      let data = request.resource.data;
+      return pageId == 'home'
+        && data.keys().hasAll(['heroTitle', 'intro', 'announcement', 'updatedBy', 'updatedAt'])
+        && data.keys().hasOnly(['heroTitle', 'intro', 'announcement', 'updatedBy', 'updatedAt'])
+        && data.heroTitle is string && data.heroTitle.size() > 0 && data.heroTitle.size() <= 100
+        && data.intro is string && data.intro.size() > 0 && data.intro.size() <= 500
+        && data.announcement is map
+        && data.announcement.keys().hasAll(['text', 'link', 'active'])
+        && data.announcement.keys().hasOnly(['text', 'link', 'active'])
+        && data.announcement.text is string && data.announcement.text.size() <= 300
+        && data.announcement.link is string && data.announcement.link.size() <= 300
+        && (data.announcement.link == ''
+          || data.announcement.link == '/'
+          || data.announcement.link.matches('^/[^/].*$')
+          || data.announcement.link.matches('^https://[^ ]+$'))
+        && data.announcement.active is bool
+        && (!data.announcement.active || data.announcement.text.size() > 0)
+        && data.updatedBy == request.auth.token.email
+        && data.updatedAt is timestamp;
+    }
+
+    function validAppSetting(slug) {
+      let data = request.resource.data;
+      return slug.matches('^[a-z0-9][a-z0-9-]{0,63}$')
+        && data.keys().hasAll(['title', 'summary', 'featured', 'visible', 'order', 'updatedBy', 'updatedAt'])
+        && data.keys().hasOnly(['title', 'summary', 'featured', 'visible', 'order', 'updatedBy', 'updatedAt'])
+        && data.title is string && data.title.size() <= 100
+        && data.summary is string && data.summary.size() <= 400
+        && data.featured is bool && data.visible is bool
+        && data.order is int && data.order >= 0 && data.order <= 10000
+        && data.updatedBy == request.auth.token.email
+        && data.updatedAt is timestamp;
+    }
+
     match /teachers/{email} {
       allow get: if isAdmin() || (isSchoolAccount() && email == request.auth.token.email);
       allow list: if isAdmin();
@@ -82,12 +117,14 @@ service cloud.firestore {
 
     match /siteContent/{pageId} {
       allow read: if canReadContent();
-      allow write: if isTeacher();
+      allow create, update: if isTeacher() && validSiteContent(pageId);
+      allow delete: if false;
     }
 
     match /appSettings/{slug} {
       allow read: if canReadContent();
-      allow write: if isTeacher();
+      allow create, update: if isTeacher() && validAppSetting(slug);
+      allow delete: if false;
     }
 
     match /mistakeBooks/{bookId} {

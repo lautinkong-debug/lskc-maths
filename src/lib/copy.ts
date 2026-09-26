@@ -45,6 +45,18 @@ export const copy = {
     latestTitle: "Latest uploads",
     latestEmpty:
       "Nothing uploaded yet. Teachers can add the first Mistakes Book from Manage.",
+    announcement: "Announcement",
+    noAnnouncement: "No announcement is showing.",
+    heroTitleLabel: "Hero title",
+    heroIntroLabel: "Home introduction",
+    announcementText: "Announcement text",
+    announcementLink: "Link (optional)",
+    announcementActive: "Show announcement",
+    announcementEdit: "Edit announcement",
+    featuredTitle: "Featured web apps",
+    featuredManage: "Choose featured apps",
+    featuredEmpty:
+      "No apps are featured yet. Choose them on the Web Apps page.",
   },
 
   apps: {
@@ -64,6 +76,20 @@ export const copy = {
     openApp: "Open app",
     backToApps: "All web apps",
     loading: "Loading app…",
+    checkingAvailability: "Checking app availability…",
+    settingsFailed: "Could not load app settings. Please try again.",
+    editListing: "Edit listing",
+    featured: "Featured",
+    visible: "Visible to visitors",
+    moveUp: "Move up",
+    moveDown: "Move down",
+    dragToReorder: "Drag to reorder",
+    clearFiltersToReorder: "Clear filters to reorder the app list.",
+    reorderWithinGroup:
+      "Move featured apps among featured apps, or turn off Featured first.",
+    hiddenTeacher: "Hidden from visitors",
+    listingTitle: "Listing title (leave blank for the default)",
+    listingSummary: "Listing summary (leave blank for the default)",
     resultCount: (count: number) =>
       `${count} ${count === 1 ? "app" : "apps"} found`,
     quadratic: {
@@ -126,6 +152,22 @@ export const copy = {
       openDot: "Open dot: endpoint excluded",
       closedDot: "Closed dot: endpoint included",
     },
+  },
+
+  editor: {
+    edit: (label: string) => `Edit ${label.toLowerCase()}`,
+    save: "Save",
+    cancel: "Cancel",
+    saved: "Saved",
+    saveFailed: "Could not save. Check your connection and try again.",
+    invalid: "Enter valid text within the length limit.",
+    invalidLink: "Use an https:// link or a path beginning with /.",
+    lastEdited: (by: string, when: string) => `Last edited by ${by} on ${when}`,
+    neverEdited: "Using the default text.",
+    loading: "Loading editable content…",
+    loadFailed: "Could not load the latest content.",
+    booksHint:
+      "Use Manage Books and Manage Topics to edit Mistakes Book content.",
   },
 
   books: {
