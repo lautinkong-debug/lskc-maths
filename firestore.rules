@@ -34,6 +34,38 @@ service cloud.firestore {
         && request.resource.data.addedAt is timestamp;
     }
 
+    function validBook(bookId) {
+      let data = request.resource.data;
+      return data.keys().hasAll([
+          'title', 'description', 'level', 'topicId', 'topicName', 'edition',
+          'fileType', 'fileName', 'fileSize', 'storagePath', 'uploadedBy',
+          'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'title', 'description', 'level', 'topicId', 'topicName', 'edition',
+          'fileType', 'fileName', 'fileSize', 'storagePath', 'uploadedBy',
+          'createdAt', 'updatedAt'
+        ])
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 160
+        && data.description is string && data.description.size() <= 1000
+        && data.level in ['F1', 'F2', 'F3', 'F4', 'F5', 'F6']
+        && data.topicId is string && data.topicName is string
+        && data.topicName.size() > 0 && data.topicName.size() <= 160
+        && exists(/databases/$(database)/documents/topics/$(data.topicId))
+        && get(/databases/$(database)/documents/topics/$(data.topicId)).data.levels.hasAny([data.level])
+        && data.edition in ['student', 'teacher']
+        && data.fileType in ['pdf', 'docx', 'html']
+        && data.fileName is string && data.fileName.size() > 0 && data.fileName.size() <= 255
+        && data.fileSize is int && data.fileSize > 0 && data.fileSize <= 20 * 1024 * 1024
+        && data.storagePath == 'mistake-books/' + data.edition + '/' + bookId + '/' + bookId + '.' + data.fileType
+        && data.uploadedBy is map
+        && data.uploadedBy.keys().hasAll(['uid', 'email', 'name'])
+        && data.uploadedBy.keys().hasOnly(['uid', 'email', 'name'])
+        && data.uploadedBy.uid is string && data.uploadedBy.uid.size() > 0
+        && data.uploadedBy.email is string && data.uploadedBy.name is string
+        && data.createdAt is timestamp && data.updatedAt is timestamp;
+    }
+
     match /teachers/{email} {
       allow get: if isAdmin() || (isSchoolAccount() && email == request.auth.token.email);
       allow list: if isAdmin();
@@ -61,8 +93,15 @@ service cloud.firestore {
     match /mistakeBooks/{bookId} {
       allow get, list: if isTeacher()
         || (canReadContent() && resource.data.edition == 'student');
-      allow create, update: if isTeacher()
-        && request.resource.data.edition in ['student', 'teacher'];
+      allow create: if isTeacher() && validBook(bookId)
+        && request.resource.data.uploadedBy.uid == request.auth.uid
+        && request.resource.data.uploadedBy.email == request.auth.token.email;
+      allow update: if isTeacher() && validBook(bookId)
+        && request.resource.data.edition == resource.data.edition
+        && request.resource.data.fileType == resource.data.fileType
+        && request.resource.data.storagePath == resource.data.storagePath
+        && request.resource.data.uploadedBy == resource.data.uploadedBy
+        && request.resource.data.createdAt == resource.data.createdAt;
       allow delete: if isTeacher();
     }
 

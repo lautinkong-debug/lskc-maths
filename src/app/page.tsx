@@ -1,48 +1,7 @@
 import Link from "next/link";
 import { ParabolaHero } from "@/components/home/ParabolaHero";
+import { LatestUploads } from "@/components/home/LatestUploads";
 import { copy } from "@/lib/copy";
-
-/**
- * Phase 1 uses stand-in rows so the layout can be judged. Phase 4 replaces
- * this with the five most recent student-edition books from Firestore.
- */
-const MOCK_LATEST = [
-  {
-    id: "1",
-    level: "F5",
-    code: "Ch18",
-    title: "Measures of dispersion - quiz 3",
-    date: "18 Sep",
-  },
-  {
-    id: "2",
-    level: "F3",
-    code: "3A03",
-    title: "Linear inequalities in one unknown",
-    date: "15 Sep",
-  },
-  {
-    id: "3",
-    level: "F1",
-    code: "1A04",
-    title: "Linear equation in one unknown",
-    date: "12 Sep",
-  },
-  {
-    id: "4",
-    level: "F4",
-    code: "Ch4",
-    title: "Quadratic functions and their graphs",
-    date: "9 Sep",
-  },
-  {
-    id: "5",
-    level: "F2",
-    code: "2B10",
-    title: "Pythagoras' theorem and irrational numbers",
-    date: "5 Sep",
-  },
-];
 
 function ParabolaGlyph() {
   return (
@@ -156,30 +115,7 @@ export default function Home() {
           </Link>
         </section>
 
-        <section className="pb-4">
-          <h2 className="font-display border-grid text-section border-b pb-2 font-semibold">
-            {copy.home.latestTitle}
-          </h2>
-          <ul>
-            {MOCK_LATEST.map((book) => (
-              <li key={book.id} className="border-rule border-b last:border-0">
-                <Link
-                  href={`/mistakes-book/${book.id}`}
-                  className="hover:bg-crimson-wash flex flex-wrap items-baseline gap-x-3 gap-y-1 py-3"
-                >
-                  <span className="bg-crimson-wash text-crimson-deep shrink-0 rounded-sm px-2 py-0.5 text-xs font-medium">
-                    {book.level}
-                  </span>
-                  <span className="text-pencil text-meta w-12 shrink-0">
-                    {book.code}
-                  </span>
-                  <span className="min-w-0 flex-1">{book.title}</span>
-                  <span className="text-pencil text-meta">{book.date}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <LatestUploads />
       </div>
     </main>
   );

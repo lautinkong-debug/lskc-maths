@@ -18,17 +18,39 @@ service firebase.storage {
         && firestore.exists(/databases/(default)/documents/teachers/$(request.auth.token.email));
     }
 
+    function bookMatchesEdition(bookId, edition) {
+      return firestore.exists(/databases/(default)/documents/mistakeBooks/$(bookId))
+        && firestore.get(/databases/(default)/documents/mistakeBooks/$(bookId)).data.edition == edition;
+    }
+
+    function isRecordedFile(bookId, edition, fileName) {
+      return bookMatchesEdition(bookId, edition)
+        && firestore.get(/databases/(default)/documents/mistakeBooks/$(bookId)).data.storagePath
+          == 'mistake-books/' + edition + '/' + bookId + '/' + fileName;
+    }
+
+    function isCanonicalFileName(bookId, fileName) {
+      return fileName == bookId + '.pdf'
+        || fileName == bookId + '.docx'
+        || fileName == bookId + '.html';
+    }
+
+    function allowedFile(fileName) {
+      return (fileName.matches('.*[.]pdf') && request.resource.contentType == 'application/pdf')
+        || (fileName.matches('.*[.]docx') && request.resource.contentType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+        || (fileName.matches('.*[.]html') && request.resource.contentType == 'text/html');
+    }
+
     match /mistake-books/{edition}/{bookId}/{fileName} {
-      allow get: if isTeacher() || (edition == 'student' && canReadContent());
+      allow get: if isRecordedFile(bookId, edition, fileName)
+        && (isTeacher() || (edition == 'student' && canReadContent()));
       allow list: if false;
       allow create, update: if isTeacher()
         && edition in ['student', 'teacher']
+        && request.resource.size > 0
         && request.resource.size <= 20 * 1024 * 1024
-        && request.resource.contentType in [
-          'application/pdf',
-          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          'text/html'
-        ];
+        && isCanonicalFileName(bookId, fileName)
+        && allowedFile(fileName);
       allow delete: if isTeacher();
     }
 

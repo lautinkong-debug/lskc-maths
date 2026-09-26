@@ -36,6 +36,36 @@ const identities: Record<
   unverified: { email: "unverified@lskc.edu.hk", verified: false },
 };
 
+function bookData(
+  id: string,
+  edition: "student" | "teacher",
+  persona: Persona,
+) {
+  const now = new Date();
+  return {
+    title: "Practice",
+    description: "",
+    level: "F1",
+    topicId: "topic1",
+    topicName: "Algebra",
+    edition,
+    fileType: "pdf",
+    fileName: "practice.pdf",
+    fileSize: 100,
+    storagePath: `mistake-books/${edition}/${id}/${id}.pdf`,
+    uploadedBy: {
+      uid: persona,
+      email:
+        persona === "visitor"
+          ? "visitor@example.com"
+          : identities[persona].email,
+      name: "Test teacher",
+    },
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
 function emulatorToken(
   projectId: string,
   persona: Exclude<Persona, "visitor">,
@@ -122,15 +152,23 @@ for (const mode of ["public", "school"] as const) {
             .doc(`teachers/${email}`)
             .set({ name: email, isAdmin, addedBy: ADMIN, addedAt: new Date() });
         }
-        await db.doc("topics/topic1").set({ name: "Algebra" });
+        await db.doc("topics/topic1").set({ name: "Algebra", levels: ["F1"] });
         await db.doc("siteContent/home").set({ intro: "Welcome" });
         await db.doc("appSettings/app1").set({ visible: false });
         await db
           .doc("mistakeBooks/student1")
-          .set({ edition: "student", title: "Practice" });
+          .set({
+            edition: "student",
+            title: "Practice",
+            storagePath: "mistake-books/student/student1/student1.pdf",
+          });
         await db
           .doc("mistakeBooks/teacher1")
-          .set({ edition: "teacher", title: "Answers" });
+          .set({
+            edition: "teacher",
+            title: "Answers",
+            storagePath: "mistake-books/teacher/teacher1/teacher1.pdf",
+          });
       });
       // Storage fixture writes use an authenticated teacher and therefore also
       // check the Firestore teacher lookup in the Storage rules.
@@ -138,14 +176,14 @@ for (const mode of ["public", "school"] as const) {
       await assertSucceeds(
         taskPromise(
           teacherStorage
-            .ref("mistake-books/student/student1/a.pdf")
+            .ref("mistake-books/student/student1/student1.pdf")
             .putString("student", "raw", { contentType: "application/pdf" }),
         ),
       );
       await assertSucceeds(
         taskPromise(
           teacherStorage
-            .ref("mistake-books/teacher/teacher1/b.pdf")
+            .ref("mistake-books/teacher/teacher1/teacher1.pdf")
             .putString("teacher", "raw", { contentType: "application/pdf" }),
         ),
       );
@@ -184,7 +222,7 @@ for (const mode of ["public", "school"] as const) {
         const file = await storageRead(
           projectId,
           persona,
-          "mistake-books/teacher/teacher1/b.pdf",
+          "mistake-books/teacher/teacher1/teacher1.pdf",
         );
         expect(file).toBe(allowed);
       }
@@ -197,7 +235,7 @@ for (const mode of ["public", "school"] as const) {
         const file = await storageRead(
           projectId,
           persona,
-          "mistake-books/student/student1/a.pdf",
+          "mistake-books/student/student1/student1.pdf",
         );
         expect(file).toBe(allowed);
       }
@@ -228,7 +266,10 @@ for (const mode of ["public", "school"] as const) {
           ["topics/new", { name: "New" }],
           ["siteContent/new", { intro: "New" }],
           ["appSettings/new", { visible: true }],
-          ["mistakeBooks/new", { edition: "student", title: "New" }],
+          [
+            `mistakeBooks/new-${persona}`,
+            bookData(`new-${persona}`, "student", persona),
+          ],
         ] as const) {
           const write = contexts[persona].firestore().doc(path).set(value);
           if (allowed) await assertSucceeds(write);
@@ -292,7 +333,7 @@ for (const mode of ["public", "school"] as const) {
     });
 
     it("enforces Storage upload role, edition, type, size and path", async () => {
-      const path = "mistake-books/student/student1/upload.pdf";
+      const path = "mistake-books/student/student1/student1.pdf";
       for (const persona of [
         "visitor",
         "viewer",
@@ -320,7 +361,7 @@ for (const mode of ["public", "school"] as const) {
         taskPromise(
           contexts.teacher
             .storage()
-            .ref("mistake-books/other/student1/x.pdf")
+            .ref("mistake-books/other/student1/student1.pdf")
             .putString("x", "raw", { contentType: "application/pdf" }),
         ),
       );
@@ -328,8 +369,43 @@ for (const mode of ["public", "school"] as const) {
         taskPromise(
           contexts.teacher
             .storage()
-            .ref("mistake-books/student/student1/x.exe")
+            .ref("mistake-books/student/student1/student1.exe")
             .putString("x", "raw", { contentType: "application/x-msdownload" }),
+        ),
+      );
+      await assertFails(
+        taskPromise(
+          contexts.teacher
+            .storage()
+            .ref("mistake-books/student/student1/student1.docx")
+            .putString("x", "raw", { contentType: "application/pdf" }),
+        ),
+      );
+      await assertSucceeds(
+        taskPromise(
+          contexts.teacher
+            .storage()
+            .ref("mistake-books/student/docx1/docx1.docx")
+            .putString("x", "raw", {
+              contentType:
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            }),
+        ),
+      );
+      await assertSucceeds(
+        taskPromise(
+          contexts.teacher
+            .storage()
+            .ref("mistake-books/teacher/html1/html1.html")
+            .putString("<p>x</p>", "raw", { contentType: "text/html" }),
+        ),
+      );
+      await assertFails(
+        taskPromise(
+          contexts.teacher
+            .storage()
+            .ref("mistake-books/student/student1/student1.pdf")
+            .put(new Uint8Array(0), { contentType: "application/pdf" }),
         ),
       );
       await assertFails(
@@ -344,7 +420,7 @@ for (const mode of ["public", "school"] as const) {
         taskPromise(
           contexts.teacher
             .storage()
-            .ref("mistake-books/student/student1/too-big.pdf")
+            .ref("mistake-books/student/student1/student1.pdf")
             .put(new Uint8Array(20 * 1024 * 1024 + 1), {
               contentType: "application/pdf",
             }),
@@ -352,6 +428,60 @@ for (const mode of ["public", "school"] as const) {
       );
       await assertFails(contexts.visitor.storage().ref(path).delete());
       await assertSucceeds(contexts.teacher.storage().ref(path).delete());
+      await assertFails(
+        taskPromise(
+          contexts.teacher
+            .storage()
+            .ref("mistake-books/student/student1/extra.pdf")
+            .putString("x", "raw", { contentType: "application/pdf" }),
+        ),
+      );
     }, 60000);
+
+    it("requires a matching book record before a file can be read", async () => {
+      const path = "mistake-books/student/orphan/orphan.pdf";
+      await assertSucceeds(
+        taskPromise(
+          contexts.teacher
+            .storage()
+            .ref(path)
+            .putString("x", "raw", { contentType: "application/pdf" }),
+        ),
+      );
+      expect(await storageRead(projectId, "visitor", path)).toBe(false);
+      expect(await storageRead(projectId, "teacher", path)).toBe(false);
+      const unrecordedPath = "mistake-books/student/student1/student1.docx";
+      await assertSucceeds(
+        taskPromise(
+          contexts.teacher.storage().ref(unrecordedPath).putString("x", "raw", {
+            contentType:
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          }),
+        ),
+      );
+      expect(await storageRead(projectId, "visitor", unrecordedPath)).toBe(false);
+      expect(await storageRead(projectId, "teacher", unrecordedPath)).toBe(false);
+      expect(
+        await storageRead(
+          projectId,
+          "visitor",
+          "mistake-books/teacher/teacher1/teacher1.pdf",
+        ),
+      ).toBe(false);
+    });
+
+    it("keeps book edition, file kind and Storage path fixed", async () => {
+      const ref = contexts.teacher.firestore().doc("mistakeBooks/validated");
+      await assertSucceeds(
+        ref.set(bookData("validated", "student", "teacher")),
+      );
+      await assertFails(ref.update({ edition: "teacher" }));
+      await assertFails(
+        ref.update({ storagePath: "mistake-books/student/other/file.pdf" }),
+      );
+      await assertFails(ref.update({ fileType: "html" }));
+      await assertFails(ref.update({ topicId: "missing" }));
+      await assertSucceeds(ref.update({ title: "Updated practice" }));
+    });
   });
 }

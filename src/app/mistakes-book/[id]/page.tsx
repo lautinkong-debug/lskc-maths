@@ -1,16 +1,8 @@
-import { PagePlaceholder } from "@/components/PagePlaceholder";
-import { copy } from "@/lib/copy";
+import { BookDetail } from "@/components/books/BookDetail";
 
 export default async function Page({
   params,
 }: PageProps<"/mistakes-book/[id]">) {
-  const resolved = await params;
-
-  return (
-    <PagePlaceholder
-      title={copy.books.title}
-      intro={`${resolved.id}`}
-      phase="Phase 4"
-    />
-  );
+  const { id } = await params;
+  return <BookDetail id={id} />;
 }

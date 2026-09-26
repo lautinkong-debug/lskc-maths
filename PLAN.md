@@ -206,15 +206,17 @@ rerunning the seed updates existing source records without duplicating them, and
 
 ## Phase 4 — Mistakes Book
 
-- [ ] Typed helpers in `src/lib/db/books.ts` (student queries always filter `edition == 'student'`)
-- [ ] `/manage/upload`: title, description, level, topic (filtered by level), edition, file; client-side checks for type/size; progress bar; write Firestore doc + Storage file, clean up on failure
-- [ ] `/manage/books`: list, edit metadata, replace file, delete (doc + file)
-- [ ] `/mistakes-book`: level tabs → topics → books, edition badge (teachers see both)
-- [ ] `/mistakes-book/[id]`: PDF via react-pdf; HTML via sandboxed `srcdoc` iframe; DOCX download via `getBlob`
-- [ ] Home "Latest uploads" wired to real data
-- [ ] Rules tests for Storage uploads (size, type, role, edition path)
+- [x] Typed helpers in `src/lib/db/books.ts` (student queries always filter `edition == 'student'`)
+- [x] `/manage/upload`: title, description, level, topic (filtered by level), edition, file; client-side checks for type/size; progress bar; write Firestore doc + Storage file, clean up on failure
+- [x] `/manage/books`: list, edit metadata, replace file, delete (doc + file)
+- [x] `/mistakes-book`: level tabs → topics → books, edition badge (teachers see both)
+- [x] `/mistakes-book/[id]`: PDF via react-pdf; HTML via sandboxed `srcdoc` iframe; DOCX download via `getBlob`
+- [x] Home "Latest uploads" wired to real data
+- [x] Rules tests for Storage uploads (size, type, role, edition path)
 
 **Test:** upload one of each type as teacher; view them signed out in a private window; confirm a signed-out visitor cannot open a teacher-edition link directly, even with the exact URL.
+
+**DONE (2026-09-26):** The demo emulator check uploaded PDF and DOCX student editions and an HTML teacher edition. PDF rendering, sandboxed HTML rendering, teacher browsing of both editions, PDF replacement and metadata edit, student-only Home latest uploads, signed-out student PDF access, and direct teacher-book denial were verified in the local browser. `npm run test:rules` passed all 18 public/school mode tests. `npm run lint`, `npm run typecheck`, and `npm run build` passed. The owner should now run the Phase 4 test above with their own files, including a DOCX download and book deletion, before Phase 5.
 
 ## Phase 5 — Web Apps
 
@@ -255,6 +257,7 @@ rerunning the seed updates existing source records without duplicating them, and
 - [ ] `apphosting.yaml` with the public env vars
 - [ ] `firebase.json` rules and indexes deploy config
 - [ ] Post-launch checklist: open the live site signed out, sign in as teacher, upload one test file, check it appears signed out, delete it
+- [ ] Configure Storage bucket CORS for the site's origin so SDK `getBlob` previews and downloads work in production; verify with the post-launch test file
 - [ ] Note in the README how to switch to `school` mode later (one variable, rebuild rules, redeploy)
 
 ---
@@ -272,6 +275,8 @@ rerunning the seed updates existing source records without duplicating them, and
 - Phase 2 (2026-09-25): The login page offers password-based **local emulator test buttons** for three seeded, verified accounts; normal sign-in uses Google. `npm run seed` hard-stops unless emulator mode and the `demo-lskc-maths` project ID are set. The seeded viewer has no teacher document. An admin cannot remove or demote their own account in the UI or rules.
 - Phase 3 (2026-09-25): The topic editor handles one level per topic, matching all 69 source rows; `levels` remains an array in Firestore for a future shared-topic feature. Reordering saves sequential `order` values for the selected level. The seeded rows use stable IDs such as `f5-ch18`, so reseeding updates their code, name, strand and order without duplicating them or deleting topics added in the editor.
 - Phase 3 (2026-09-25): Deleting a topic first queries `mistakeBooks` for a matching `topicId` and refuses deletion when any book uses it. Firestore rules still restrict topic writes to teachers. This is an editor integrity check; Phase 4's book workflow must preserve valid topic references when books are added or moved.
+- Phase 4 (2026-09-26): A book uses a fixed Storage path `mistake-books/{edition}/{bookId}/{bookId}.{fileType}`. Edition, file type, uploader and path cannot be changed after creation; replacing a file keeps its path. Storage reads require a matching book record and its exact path, so orphan or unrecorded files remain unreadable. Teachers may upload only the three approved types up to 20 MB. Files are read through `getBlob`, not shared download tokens; HTML uses an iframe with `allow-scripts` and no same-origin permission.
+- Phase 4 (2026-09-26): The public access decision still applies to student-edition files, including downloads by signed-out visitors. The Home latest list includes student editions only. `react-pdf` is used for in-page PDF rendering. Real-bucket CORS setup is deferred to Phase 8; no real Firebase project was changed.
 
 ### Phase 1 design decisions (2026-09-21, approved by the owner)
 
