@@ -156,6 +156,9 @@ export function ParabolaHero() {
           tabIndex={0}
           role="slider"
           aria-label={`Vertex. Currently at ${num(h)}, ${num(k)}. Use the arrow keys to move it.`}
+          aria-valuemin={H_RANGE.min}
+          aria-valuemax={H_RANGE.max}
+          aria-valuenow={h}
           aria-valuetext={`${num(h)}, ${num(k)}`}
           onKeyDown={onKeyDown}
           onPointerDown={(e) => {

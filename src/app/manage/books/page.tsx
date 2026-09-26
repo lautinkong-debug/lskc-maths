@@ -27,13 +27,18 @@ export default function ManageBooksPage() {
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [booksLoadError, setBooksLoadError] = useState(false);
+  const [topicsLoadError, setTopicsLoadError] = useState(false);
 
   useEffect(
     () =>
-      watchTopics(setTopics, () => {
-        setMessage(copy.topics.loadFailed);
-        setIsError(true);
-      }),
+      watchTopics(
+        (rows) => {
+          setTopics(rows);
+          setTopicsLoadError(false);
+        },
+        () => setTopicsLoadError(true),
+      ),
     [],
   );
   useEffect(
@@ -43,11 +48,11 @@ export default function ManageBooksPage() {
         (rows) => {
           setBooks(rows);
           setLoading(false);
+          setBooksLoadError(false);
         },
         () => {
-          setMessage(copy.books.loadFailed);
-          setIsError(true);
           setLoading(false);
+          setBooksLoadError(true);
         },
       ),
     [],
@@ -131,8 +136,19 @@ export default function ManageBooksPage() {
           {message}
         </p>
       )}
+      {topicsLoadError && (
+        <p role="alert" className="text-crimson mt-5">
+          {copy.topics.loadFailed}
+        </p>
+      )}
       {loading ? (
-        <p className="mt-8">{copy.books.loading}</p>
+        <p role="status" className="mt-8">
+          {copy.books.loading}
+        </p>
+      ) : booksLoadError ? (
+        <p role="alert" className="text-crimson mt-8">
+          {copy.books.loadFailed}
+        </p>
       ) : books.length === 0 ? (
         <p className="mt-8">{copy.books.noManagedBooks}</p>
       ) : (

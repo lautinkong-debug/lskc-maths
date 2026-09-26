@@ -172,6 +172,7 @@ export const copy = {
 
   books: {
     title: "Mistakes book",
+    detailTitle: "Mistakes Book preview",
     intro:
       "Correction notes by level and topic. Teachers can also see the teacher edition.",
     empty: "No books for this topic yet. Teachers can upload one from Manage.",
@@ -270,6 +271,9 @@ export const copy = {
     add: "Add teacher",
     remove: "Remove",
     noTeachers: "No teachers found.",
+    loading: "Loading teachers…",
+    loadFailed:
+      "Could not load the teacher list. Check your connection and try again.",
     invalidEmail: "Enter an email address on an allowed school domain.",
     saved: "Teacher list updated.",
     failed: "Could not update the teacher list. Please try again.",

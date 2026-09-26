@@ -14,11 +14,18 @@ import { useEditMode } from "@/lib/editMode";
 export function FeaturedApps() {
   const { editing } = useEditMode();
   const [settings, setSettings] = useState<AppSettings[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
   useEffect(
     () =>
       watchAppSettings(
-        (rows) => setSettings(rows),
-        () => setSettings([]),
+        (rows) => {
+          setSettings(rows);
+          setLoadError(false);
+        },
+        () => {
+          setSettings([]);
+          setLoadError(true);
+        },
       ),
     [],
   );
@@ -29,7 +36,7 @@ export function FeaturedApps() {
     .filter((app) => app.featured && app.visible)
     .sort((a, b) => a.order - b.order)
     .slice(0, 3);
-  if (featured.length === 0 && !editing) return null;
+  if (featured.length === 0 && !editing && !loadError) return null;
 
   return (
     <section className="pb-10 lg:pb-14">
@@ -43,7 +50,11 @@ export function FeaturedApps() {
           </Link>
         )}
       </div>
-      {featured.length === 0 ? (
+      {loadError ? (
+        <p role="alert" className="text-crimson mt-3">
+          {copy.apps.settingsFailed}
+        </p>
+      ) : featured.length === 0 ? (
         <p className="mt-3">{copy.home.featuredEmpty}</p>
       ) : (
         <ul className="mt-4 grid gap-4 md:grid-cols-3">

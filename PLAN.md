@@ -248,12 +248,14 @@ rerunning the seed updates existing source records without duplicating them, and
 
 **DONE (2026-09-26):** On the demo emulator, the admin test account saved a Home introduction and announcement, changed an app listing, featured one app and reordered listings. After sign-out, the visitor view showed the saved Home content and featured app, omitted the hidden app from the index and denied its direct URL. No browser errors or warnings appeared. Rules tests passed in both public and school modes (20 tests); unit tests (8), lint, typecheck and production build passed. No real Firebase project was changed.
 
-## Phase 7 — Polish and hardening
+## Phase 7 — Polish and hardening — DONE (2026-09-26)
 
-- [ ] Accessibility pass (keyboard, focus, contrast, labels)
-- [ ] Empty/error states on every page
-- [ ] Playwright smoke tests: login gate, browse books, open an app
-- [ ] Lighthouse check on Home and one app
+- [x] Accessibility pass (keyboard, focus, contrast, labels)
+- [x] Empty/error states on every page
+- [x] Playwright smoke tests: login gate, browse books, open an app
+- [x] Lighthouse check on Home and one app
+
+**DONE (2026-09-26):** Focus indicators now have a dark outline and yellow outer ring on light and navy surfaces; the Home graph's keyboard control exposes its numeric range. The main routes have descriptive page titles. Teacher, topic, upload, book, and featured-app loading failures show errors instead of misleading empty states. Four Chrome Playwright smoke tests pass against the local demo emulators, including mobile keyboard navigation. Lint, typecheck, unit tests and production build pass. A local production-build Lighthouse mobile audit scored Home 78 performance / 100 accessibility / 100 best practices / 100 SEO, and Quadratic Explorer 77 / 100 / 100 / 100. Lighthouse flagged unused JavaScript as the main performance opportunity. No real Firebase project was changed.
 
 ## Phase 8 — Go live
 
@@ -285,6 +287,8 @@ rerunning the seed updates existing source records without duplicating them, and
 - Phase 5 (2026-09-26): The inequality tool accepts a small documented grammar for one linear inequality or a bounded compound inequality; it parses input without evaluating code. Presentation mode enlarges the tool in the page when the browser cannot enter fullscreen, and its button waits for the lazy app to hydrate.
 - Phase 6 (2026-09-26): Home copy lives in `siteContent/home`; per-app title, summary, featured, visible and order settings live in `appSettings/{slug}`. The static app registry supplies defaults and available routes. Teachers can edit in the page; Firestore rules validate every saved field and authorize writes. The seed script creates default Home content only when absent, preserving teacher edits on later runs.
 - Phase 6 (2026-09-26): Hidden apps remain visible to teachers for editing. Visitors and viewers cannot see them in the index or open their direct routes. Saved settings are loaded before a detail app renders, so a hidden app is never briefly exposed while loading. The edit toggle resets on sign-out.
+- Phase 7 (2026-09-26): `npm run test:e2e` uses the installed Chrome browser, starts the local app and demo emulators on free ports, waits for all emulators, and seeds the three local test accounts before running four smoke tests. A hard check on the emulator flag and `demo-lskc-maths` project ID prevents this setup from seeding any real Firebase project. Lighthouse was run as a one-off CLI tool against the local production build; it was not added as a project dependency.
+- Phase 7 (2026-09-26): Production Lighthouse mobile performance is 78 on Home and 77 on Quadratic Explorer, with accessibility, best practices and SEO at 100 on both. The report's largest opportunity is unused JavaScript; a larger bundle split was deferred because these pages need the Firebase Auth and Firestore clients and Phase 7 has no performance-score target. Recheck with real content after launch.
 
 ### Phase 1 design decisions (2026-09-21, approved by the owner)
 

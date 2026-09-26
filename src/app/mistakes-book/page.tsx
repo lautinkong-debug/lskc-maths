@@ -112,8 +112,10 @@ export default function MistakesBookPage() {
         </div>
       </section>
       {loadingTopics || loadingBooks ? (
-        <p className="mt-6">{copy.books.loading}</p>
-      ) : levelTopics.length === 0 ? (
+        <p role="status" className="mt-6">
+          {copy.books.loading}
+        </p>
+      ) : error ? null : levelTopics.length === 0 ? (
         <p className="mt-6">{copy.books.noTopics}</p>
       ) : (
         <div className="mt-8 grid gap-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.5fr)]">

@@ -21,9 +21,22 @@ export default function UploadPage() {
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
+  const [loadingTopics, setLoadingTopics] = useState(true);
+  const [topicsLoadError, setTopicsLoadError] = useState(false);
 
   useEffect(
-    () => watchTopics(setTopics, () => setError(copy.topics.loadFailed)),
+    () =>
+      watchTopics(
+        (rows) => {
+          setTopics(rows);
+          setLoadingTopics(false);
+          setTopicsLoadError(false);
+        },
+        () => {
+          setLoadingTopics(false);
+          setTopicsLoadError(true);
+        },
+      ),
     [],
   );
   const levelTopics = sortTopicsForLevel(topics, level);
@@ -69,6 +82,11 @@ export default function UploadPage() {
       {error && (
         <p role="alert" className="text-crimson mt-5">
           {error}
+        </p>
+      )}
+      {topicsLoadError && (
+        <p role="alert" className="text-crimson mt-5">
+          {copy.topics.loadFailed}
         </p>
       )}
       <form
@@ -131,7 +149,9 @@ export default function UploadPage() {
             required
             value={topicId}
             onChange={(event) => setTopicId(event.target.value)}
-            disabled={levelTopics.length === 0}
+            disabled={
+              loadingTopics || topicsLoadError || levelTopics.length === 0
+            }
             className="border-grid-strong mt-1 block w-full rounded border px-3 py-2 font-normal disabled:opacity-50"
           >
             <option value="">{copy.books.chooseTopicOption}</option>
@@ -141,10 +161,17 @@ export default function UploadPage() {
               </option>
             ))}
           </select>
-          {levelTopics.length === 0 && (
-            <span className="text-pencil mt-1 block font-normal">
-              {copy.books.noTopicForLevel}
+          {loadingTopics ? (
+            <span role="status" className="text-pencil mt-1 block font-normal">
+              {copy.topics.loading}
             </span>
+          ) : (
+            !topicsLoadError &&
+            levelTopics.length === 0 && (
+              <span className="text-pencil mt-1 block font-normal">
+                {copy.books.noTopicForLevel}
+              </span>
+            )
           )}
         </label>
         <label className="block text-sm font-semibold">
@@ -170,7 +197,9 @@ export default function UploadPage() {
         )}
         <button
           type="submit"
-          disabled={busy || levelTopics.length === 0}
+          disabled={
+            busy || loadingTopics || topicsLoadError || levelTopics.length === 0
+          }
           className="bg-crimson hover:bg-crimson-deep rounded px-5 py-2.5 font-semibold text-white disabled:opacity-50"
         >
           {copy.books.uploadAction}

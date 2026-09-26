@@ -12,16 +12,28 @@ export function BookDetail({ id }: { id: string }) {
   const isTeacher = role === "teacher" || role === "admin";
   const [book, setBook] = useState<MistakeBook | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
     let active = true;
     getVisibleBook(id)
       .then((result) => {
-        if (active) setBook(result);
+        if (active) {
+          setBook(result);
+          setLoadError(false);
+        }
       })
-      .catch(() => {
-        if (active) setBook(null);
+      .catch((cause: unknown) => {
+        if (active) {
+          setBook(null);
+          const denied =
+            typeof cause === "object" &&
+            cause !== null &&
+            "code" in cause &&
+            cause.code === "permission-denied";
+          setLoadError(!denied);
+        }
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -41,7 +53,13 @@ export function BookDetail({ id }: { id: string }) {
         ← {copy.books.backToBooks}
       </Link>
       {loading || authLoading || (book !== null && book.id !== id) ? (
-        <p className="mt-8">{copy.books.loading}</p>
+        <p role="status" className="mt-8">
+          {copy.books.loading}
+        </p>
+      ) : loadError ? (
+        <p role="alert" className="text-crimson mt-8">
+          {copy.books.loadFailed}
+        </p>
       ) : !allowed ? (
         <h1 className="font-display text-section text-crimson-deep mt-8 font-semibold">
           {copy.books.unavailable}

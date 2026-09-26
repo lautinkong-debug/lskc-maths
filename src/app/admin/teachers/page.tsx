@@ -19,22 +19,39 @@ export default function TeachersPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   async function refresh() {
     setTeachers(await listTeachers());
+    setLoadError(false);
+    setLoading(false);
   }
   useEffect(() => {
     let active = true;
     void listTeachers()
-      .then((rows) => { if (active) setTeachers(rows); })
-      .catch(() => { if (active) setMessage(copy.teachers.failed); });
-    return () => { active = false; };
+      .then((rows) => {
+        if (!active) return;
+        setTeachers(rows);
+        setLoadError(false);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setLoadError(true);
+        setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (!isAllowedEmail(email)) {
       setMessage(copy.teachers.invalidEmail);
+      setIsError(true);
       return;
     }
     setBusy(true);
@@ -46,8 +63,10 @@ export default function TeachersPage() {
       setName("");
       setIsAdmin(false);
       setMessage(copy.teachers.saved);
+      setIsError(false);
     } catch {
       setMessage(copy.teachers.failed);
+      setIsError(true);
     } finally {
       setBusy(false);
     }
@@ -60,8 +79,10 @@ export default function TeachersPage() {
       await setTeacherAdmin(teacher.email, value);
       await refresh();
       setMessage(copy.teachers.saved);
+      setIsError(false);
     } catch {
       setMessage(copy.teachers.failed);
+      setIsError(true);
     } finally {
       setBusy(false);
     }
@@ -75,8 +96,10 @@ export default function TeachersPage() {
       await removeTeacher(teacher.email);
       await refresh();
       setMessage(copy.teachers.saved);
+      setIsError(false);
     } catch {
       setMessage(copy.teachers.failed);
+      setIsError(true);
     } finally {
       setBusy(false);
     }
@@ -128,12 +151,16 @@ export default function TeachersPage() {
         </button>
       </form>
       {message && (
-        <p role="status" className="mt-4">
+        <p role={isError ? "alert" : "status"} className="mt-4">
           {message}
         </p>
       )}
       <div className="mt-8 space-y-3">
-        {teachers.length === 0 ? (
+        {loading ? (
+          <p role="status">{copy.teachers.loading}</p>
+        ) : loadError ? (
+          <p role="alert">{copy.teachers.loadFailed}</p>
+        ) : teachers.length === 0 ? (
           <p>{copy.teachers.noTeachers}</p>
         ) : (
           teachers.map((teacher) => {

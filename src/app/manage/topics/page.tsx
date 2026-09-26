@@ -29,6 +29,7 @@ export default function TopicsPage() {
   const [strand, setStrand] = useState<Strand>("number-algebra");
   const [editing, setEditing] = useState<Topic | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
@@ -39,11 +40,11 @@ export default function TopicsPage() {
         (rows) => {
           setTopics(rows);
           setLoading(false);
+          setLoadError(false);
         },
         () => {
-          setMessage(copy.topics.loadFailed);
-          setIsError(true);
           setLoading(false);
+          setLoadError(true);
         },
       ),
     [],
@@ -261,7 +262,13 @@ export default function TopicsPage() {
             </p>
           </div>
           {loading ? (
-            <p className="mt-5">{copy.topics.loading}</p>
+            <p role="status" className="mt-5">
+              {copy.topics.loading}
+            </p>
+          ) : loadError ? (
+            <p role="alert" className="text-crimson mt-5">
+              {copy.topics.loadFailed}
+            </p>
           ) : visible.length === 0 ? (
             <p className="mt-5">{copy.topics.empty}</p>
           ) : (

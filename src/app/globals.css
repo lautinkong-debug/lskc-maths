@@ -60,8 +60,9 @@ body {
 
 /* One visible focus treatment everywhere, on any background. */
 :focus-visible {
-  outline: 3px solid var(--color-highlight);
+  outline: 3px solid var(--color-navy);
   outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--color-highlight);
   border-radius: 2px;
 }
 
