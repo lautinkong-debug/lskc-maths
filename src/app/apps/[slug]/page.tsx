@@ -1,14 +1,9 @@
-import { PagePlaceholder } from "@/components/PagePlaceholder";
-import { copy } from "@/lib/copy";
+import { notFound } from "next/navigation";
+import { getApp } from "@/apps/registry";
+import { AppHost } from "@/components/AppHost";
 
 export default async function Page({ params }: PageProps<"/apps/[slug]">) {
-  const resolved = await params;
-
-  return (
-    <PagePlaceholder
-      title={copy.apps.title}
-      intro={`${resolved.slug}`}
-      phase="Phase 5"
-    />
-  );
+  const { slug } = await params;
+  if (!getApp(slug)) notFound();
+  return <AppHost slug={slug} />;
 }

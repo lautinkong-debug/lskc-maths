@@ -59,6 +59,73 @@ export const copy = {
     exitPresentation: "Leave projection mode",
     hidden: "Hidden",
     unavailable: "This app isn't available right now.",
+    allLevels: "All levels",
+    allStrands: "All strands",
+    openApp: "Open app",
+    backToApps: "All web apps",
+    loading: "Loading app…",
+    resultCount: (count: number) =>
+      `${count} ${count === 1 ? "app" : "apps"} found`,
+    quadratic: {
+      title: "Quadratic explorer",
+      topic: "Quadratic Functions and their Graphs",
+      summary:
+        "Change the coefficients and see how the curve, vertex and roots respond.",
+      intro: "Move the sliders to reshape the graph.",
+      coefficient: (name: string) => `Coefficient ${name}`,
+      graphLabel: "Graph of the quadratic function",
+      vertex: "Vertex",
+      axis: "Axis of symmetry",
+      discriminant: "Discriminant",
+      roots: "Roots",
+      oneRoot: "One repeated root",
+      noRealRoots: "No real roots",
+    },
+    unitCircle: {
+      title: "Unit circle",
+      topic: "Trigonometric Functions and their Graphs",
+      summary:
+        "Drag a point around the circle to explore sine, cosine, tangent and their signs.",
+      intro: "Drag the point, use the arrow keys, or move the angle slider.",
+      graphLabel:
+        "Unit circle with a draggable point and sine and cosine projections",
+      pointLabel: "Point on the unit circle",
+      angle: "Angle",
+      sine: "sin θ",
+      cosine: "cos θ",
+      tangent: "tan θ",
+      undefined: "Undefined",
+      quadrant: "Quadrant",
+      onAxis: "On an axis",
+      signs: "Signs",
+    },
+    inequality: {
+      title: "Inequality number line",
+      topic: "Linear Inequalities in One Unknown",
+      summary:
+        "Solve linear or compound inequalities and see open and closed endpoints.",
+      intro:
+        "Enter an inequality, then follow the steps and inspect its number line.",
+      input: "Inequality",
+      solve: "Solve",
+      exampleSimple: "Try 2x - 3 > 5",
+      exampleCompound: "Try -1 ≤ x < 4",
+      sampleSimple: "2x - 3 > 5",
+      sampleCompound: "-1 ≤ x < 4",
+      invalid:
+        "Enter a linear inequality such as 2x - 3 > 5, or a compound inequality such as -1 ≤ x < 4.",
+      noSolution: "No values satisfy these bounds.",
+      steps: "Working",
+      solution: "Solution",
+      subtractConstant: "Move the constant term",
+      divideCoefficient: "Divide by the coefficient",
+      reverseSign:
+        "The inequality sign reverses when dividing by a negative number.",
+      compoundStep: "Keep the values between the two bounds.",
+      numberLine: "Solution shown on a number line",
+      openDot: "Open dot: endpoint excluded",
+      closedDot: "Closed dot: endpoint included",
+    },
   },
 
   books: {

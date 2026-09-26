@@ -218,17 +218,19 @@ rerunning the seed updates existing source records without duplicating them, and
 
 **DONE (2026-09-26):** The demo emulator check uploaded PDF and DOCX student editions and an HTML teacher edition. PDF rendering, sandboxed HTML rendering, teacher browsing of both editions, PDF replacement and metadata edit, student-only Home latest uploads, signed-out student PDF access, and direct teacher-book denial were verified in the local browser. `npm run test:rules` passed all 18 public/school mode tests. `npm run lint`, `npm run typecheck`, and `npm run build` passed. The owner should now run the Phase 4 test above with their own files, including a DOCX download and book deletion, before Phase 5.
 
-## Phase 5 — Web Apps
+## Phase 5 — Web Apps — DONE (2026-09-26)
 
-- [ ] `registry.ts` type + `/apps` index with level/strand filters and search
-- [ ] `<PresentationFrame>` + `usePresentation()`
-- [ ] App: **Quadratic explorer** — sliders for a, b, c; plot of y = ax² + bx + c; vertex, axis of symmetry, roots (or "no real roots" with discriminant); equation shown in KaTeX
-- [ ] App: **Unit circle** — drag a point around the circle; angle in degrees; live sin θ, cos θ, tan θ with projections drawn; quadrant signs
-- [ ] App: **Inequality number line** — enter e.g. `2x - 3 > 5` or compound `-1 ≤ x < 4`; show solving steps and the solution on a number line with open/closed dots
-- [ ] SVG thumbnails for each app
-- [ ] A short `src/apps/README.md` explaining how to add a new app
+- [x] `registry.ts` type + `/apps` index with level/strand filters and search
+- [x] `<PresentationFrame>` + `usePresentation()`
+- [x] App: **Quadratic explorer** — sliders for a, b, c; plot of y = ax² + bx + c; vertex, axis of symmetry, roots (or "no real roots" with discriminant); equation shown in KaTeX
+- [x] App: **Unit circle** — drag a point around the circle; angle in degrees; live sin θ, cos θ, tan θ with projections drawn; quadrant signs
+- [x] App: **Inequality number line** — enter e.g. `2x - 3 > 5` or compound `-1 ≤ x < 4`; show solving steps and the solution on a number line with open/closed dots
+- [x] SVG thumbnails for each app
+- [x] A short `src/apps/README.md` explaining how to add a new app
 
 **Test:** use each app with mouse, on a phone-sized window, and in Presentation mode at 1920×1080.
+
+**DONE (2026-09-26):** In the local demo project, the index filters and search, quadratic controls and no-real-roots case, unit-circle angle controls and undefined tangent, and inequality steps/endpoints were checked in the browser. Each app and the index fit a 360 px viewport without horizontal scrolling; the enlarged Presentation layout fit 1920×1080. The in-app browser does not expose native fullscreen, so the owner should also check the Fullscreen API in Chrome. Lint, typecheck, tests and production build pass. No real Firebase project was changed.
 
 ## Phase 6 — Teacher edit mode
 
@@ -277,6 +279,8 @@ rerunning the seed updates existing source records without duplicating them, and
 - Phase 3 (2026-09-25): Deleting a topic first queries `mistakeBooks` for a matching `topicId` and refuses deletion when any book uses it. Firestore rules still restrict topic writes to teachers. This is an editor integrity check; Phase 4's book workflow must preserve valid topic references when books are added or moved.
 - Phase 4 (2026-09-26): A book uses a fixed Storage path `mistake-books/{edition}/{bookId}/{bookId}.{fileType}`. Edition, file type, uploader and path cannot be changed after creation; replacing a file keeps its path. Storage reads require a matching book record and its exact path, so orphan or unrecorded files remain unreadable. Teachers may upload only the three approved types up to 20 MB. Files are read through `getBlob`, not shared download tokens; HTML uses an iframe with `allow-scripts` and no same-origin permission.
 - Phase 4 (2026-09-26): The public access decision still applies to student-edition files, including downloads by signed-out visitors. The Home latest list includes student editions only. `react-pdf` is used for in-page PDF rendering. Real-bucket CORS setup is deferred to Phase 8; no real Firebase project was changed.
+- Phase 5 (2026-09-26): Web Apps are registered in a static typed list and lazy-loaded on their detail pages. The index reads the registry directly; Phase 6 will merge saved teacher settings for visibility and ordering. The apps do not use Firebase. New apps add their wording to the central `copy.ts` file and one registry entry.
+- Phase 5 (2026-09-26): The inequality tool accepts a small documented grammar for one linear inequality or a bounded compound inequality; it parses input without evaluating code. Presentation mode enlarges the tool in the page when the browser cannot enter fullscreen, and its button waits for the lazy app to hydrate.
 
 ### Phase 1 design decisions (2026-09-21, approved by the owner)
 
