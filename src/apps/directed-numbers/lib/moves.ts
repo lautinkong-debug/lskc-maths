@@ -19,11 +19,16 @@ export function moveFor(op: Operation, b: number) {
       "add-pos" | "add-neg" | "sub-pos" | "sub-neg",
   };
 }
-/** The bird faces according to the operation, then follows the second number. */
+/** Start facing right; each minus sign in this move turns the bird around. */
 export function birdFor(op: Operation, b: number) {
+  const operationTurn = op === "-";
+  const numberTurn = b < 0;
   return {
-    facing: op === "+" ? "right" : "left",
-    step: b > 0 ? "forward" : b < 0 ? "backward" : "stay",
+    operationTurn,
+    numberTurn,
+    afterOperation: operationTurn ? "left" : "right",
+    facing: operationTurn === numberTurn ? "right" : "left",
+    turns: Number(operationTurn) + Number(numberTurn),
     distance: Math.abs(b),
     travel: moveFor(op, b).direction,
   } as const;

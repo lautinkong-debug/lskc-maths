@@ -5,6 +5,8 @@ export function StepControls({
   position,
   total,
   hidden,
+  nextLabel,
+  backEnabled = false,
   onNext,
   onBack,
   onReset,
@@ -13,6 +15,8 @@ export function StepControls({
   position: number;
   total: number;
   hidden: boolean;
+  nextLabel?: string;
+  backEnabled?: boolean;
   onNext: () => void;
   onBack: () => void;
   onReset: () => void;
@@ -23,7 +27,7 @@ export function StepControls({
       <button
         className={button}
         onClick={onBack}
-        disabled={position === 0 && hidden}
+        disabled={position === 0 && hidden && !backEnabled}
       >
         ← {c.back}
       </button>
@@ -32,7 +36,7 @@ export function StepControls({
         onClick={onNext}
         disabled={position === total && !hidden}
       >
-        {hidden ? c.reveal : c.next} →
+        {nextLabel ?? (hidden ? c.reveal : c.next)} →
       </button>
       <button className={button} onClick={onReset}>
         {c.reset}

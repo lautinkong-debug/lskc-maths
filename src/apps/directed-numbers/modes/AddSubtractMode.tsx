@@ -51,6 +51,7 @@ export default function AddSubtractMode({
   const [predict, setPreference] = usePrediction(presenting);
   const [moveIndex, setMoveIndex] = useState(0),
     [step, setStep] = useState(0),
+    [turnStage, setTurnStage] = useState(0),
     [revealed, setRevealed] = useState(false);
   const [skin, setSkin] = useState<Skin>("plain"),
     [showBird, setShowBird] = useState(true),
@@ -63,10 +64,8 @@ export default function AddSubtractMode({
     [op, setOp] = useState<Operation>(journey.moves[0].op);
   const [builderError, setBuilderError] = useState(false);
   const [direction, setDirection] = useState<Direction | null>(null),
-    [faceGuess, setFaceGuess] = useState<"left" | "right" | null>(null),
-    [stepGuess, setStepGuess] = useState<
-      "forward" | "backward" | "stay" | null
-    >(null),
+    [firstGuess, setFirstGuess] = useState<"left" | "right" | null>(null),
+    [secondGuess, setSecondGuess] = useState<"left" | "right" | null>(null),
     [distance, setDistance] = useState(""),
     [landing, setLanding] = useState("");
   const [distanceNote, setDistanceNote] = useState(""),
@@ -106,7 +105,7 @@ export default function AddSubtractMode({
   const birdDirectionHint =
     move.b === 0
       ? c.bird.zero
-      : c.bird.travelHint(bird.facing, bird.step, bird.travel);
+      : c.bird.travelHint(bird.turns, bird.facing, bird.travel);
   const horizontalSentence =
     move.b === 0
       ? c.zeroSentence(signed(start))
@@ -155,8 +154,8 @@ export default function AddSubtractMode({
         : "•";
   function clearAnswers() {
     setDirection(null);
-    setFaceGuess(null);
-    setStepGuess(null);
+    setFirstGuess(null);
+    setSecondGuess(null);
     setDistance("");
     setLanding("");
     setDistanceNote("");
@@ -168,6 +167,7 @@ export default function AddSubtractMode({
     setInput(journeyText(next));
     setMoveIndex(0);
     setStep(0);
+    setTurnStage(0);
     setRevealed(false);
     clearAnswers();
     setBefore(old);
@@ -177,6 +177,10 @@ export default function AddSubtractMode({
     setBuilderError(false);
   }
   function next() {
+    if (showBird && skin === "plain" && turnStage < 2) {
+      setTurnStage(turnStage + 1);
+      return;
+    }
     if (hidden) {
       setRevealed(true);
       return;
@@ -188,16 +192,20 @@ export default function AddSubtractMode({
     if (moveIndex < journey.moves.length - 1) {
       setMoveIndex(moveIndex + 1);
       setStep(0);
+      setTurnStage(0);
       setRevealed(false);
       clearAnswers();
     }
   }
   function back() {
     if (step > 0) setStep(step - 1);
+    else if (showBird && skin === "plain" && turnStage > 0)
+      setTurnStage(turnStage - 1);
     else if (moveIndex > 0) {
       const previous = journey.moves[moveIndex - 1];
       setMoveIndex(moveIndex - 1);
       setStep(hops(0, previous.op, previous.b).length);
+      setTurnStage(2);
       setRevealed(true);
       clearAnswers();
     } else setRevealed(false);
@@ -212,6 +220,7 @@ export default function AddSubtractMode({
     setPreference(nextValue);
     setRevealed(false);
     setStep(0);
+    setTurnStage(0);
     clearAnswers();
   }
   function key(event: KeyboardEvent<HTMLElement>) {
@@ -232,8 +241,8 @@ export default function AddSubtractMode({
       " ": next,
       ArrowLeft: back,
       PageUp: back,
-      r: () => setRevealed(true),
-      R: () => setRevealed(true),
+      r: revealBird,
+      R: revealBird,
       n: newExample,
       N: newExample,
       p: togglePrediction,
@@ -269,9 +278,13 @@ export default function AddSubtractMode({
     );
   }
   function showMe() {
-    setRevealed(true);
+    revealBird();
     setStep(frames.length);
     setLandingNote(fullSentence);
+  }
+  function revealBird() {
+    setTurnStage(2);
+    setRevealed(true);
   }
   function similar() {
     const bounded = Math.max(-20, Math.min(20, start));
@@ -301,7 +314,10 @@ export default function AddSubtractMode({
           <select
             className={field}
             value={skin}
-            onChange={(event) => setSkin(event.target.value as Skin)}
+            onChange={(event) => {
+              setSkin(event.target.value as Skin);
+              if (event.target.value === "plain" && step > 0) setTurnStage(2);
+            }}
           >
             <option value="plain">{c.plain}</option>
             <option value="thermometer">{c.thermometer}</option>
@@ -313,7 +329,10 @@ export default function AddSubtractMode({
             type="checkbox"
             checked={showBird}
             disabled={skin !== "plain"}
-            onChange={(event) => setShowBird(event.target.checked)}
+            onChange={(event) => {
+              setShowBird(event.target.checked);
+              if (event.target.checked && step > 0) setTurnStage(2);
+            }}
             className="accent-navy h-5 w-5"
           />
           {c.bird.toggle}
@@ -333,8 +352,13 @@ export default function AddSubtractMode({
             skin={skin}
             sentence={sentence}
             presenting={presenting}
-            bird={
-              showBird && skin === "plain" && (!hidden || faceGuess !== null)
+            bird={showBird && skin === "plain"}
+            birdFacing={
+              turnStage === 0
+                ? "right"
+                : turnStage === 1
+                  ? bird.afterOperation
+                  : bird.facing
             }
           />
           {showBird && skin === "plain" && (
@@ -342,19 +366,32 @@ export default function AddSubtractMode({
               start={start}
               end={end}
               move={move}
+              turnStage={turnStage}
               hidden={hidden}
               complete={complete}
               presenting={presenting}
-              faceGuess={faceGuess}
-              stepGuess={stepGuess}
-              onFaceGuess={setFaceGuess}
-              onStepGuess={setStepGuess}
-              onReveal={() => setRevealed(true)}
+              firstGuess={firstGuess}
+              secondGuess={secondGuess}
+              onFirstGuess={(answer) => {
+                setFirstGuess(answer === bird.afterOperation ? null : answer);
+                if (answer === bird.afterOperation) setTurnStage(1);
+              }}
+              onSecondGuess={(answer) => {
+                setSecondGuess(answer === bird.facing ? null : answer);
+                if (answer === bird.facing) {
+                  setTurnStage(2);
+                  setRevealed(true);
+                }
+              }}
+              onAdvanceTurn={() => setTurnStage(Math.min(2, turnStage + 1))}
+              onReveal={revealBird}
               onExample={(index) =>
                 load(
                   index === 0
                     ? { start: 3, moves: [{ op: "+", b: -7 }] }
-                    : { start: -2, moves: [{ op: "-", b: -4 }] },
+                    : index === 1
+                      ? { start: -2, moves: [{ op: "-", b: -4 }] }
+                      : { start: 3, moves: [{ op: "-", b: -5 }] },
                 )
               }
             />
@@ -599,6 +636,14 @@ export default function AddSubtractMode({
           position={position}
           total={total}
           hidden={hidden}
+          nextLabel={
+            showBird && skin === "plain" && turnStage < 2
+              ? turnStage === 0
+                ? c.bird.readOperation
+                : c.bird.readNumber
+              : undefined
+          }
+          backEnabled={showBird && skin === "plain" && turnStage > 0}
           onNext={next}
           onBack={back}
           onReset={() => load(journey)}

@@ -6,7 +6,6 @@ import {
   journeyHops,
   signed,
   moveText,
-  birdFor,
   type Journey,
 } from "../lib/moves";
 export type Skin = "plain" | "thermometer" | "lift";
@@ -19,6 +18,7 @@ export function NumberLine({
   sentence,
   presenting,
   bird = false,
+  birdFacing = "right",
 }: {
   journey: Journey;
   position: number;
@@ -27,6 +27,7 @@ export function NumberLine({
   sentence: string;
   presenting: boolean;
   bird?: boolean;
+  birdFacing?: "left" | "right";
 }) {
   const id = useId().replaceAll(":", "");
   const frames = journeyHops(journey),
@@ -34,10 +35,6 @@ export function NumberLine({
   const range = autoRange([journey.start, ...frames.map((frame) => frame.to)]);
   const current = visible.at(-1)?.to ?? journey.start;
   const vertical = skin !== "plain";
-  const birdFacing = birdFor(
-    journey.moves[active].op,
-    journey.moves[active].b,
-  ).facing;
   const scroller = useRef<HTMLDivElement>(null);
   const currentX = 55 + ((current - range.min) / (range.max - range.min)) * 650;
   useEffect(() => {

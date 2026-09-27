@@ -28,18 +28,30 @@ import {
 
 describe("bird number-line method", () => {
   it.each([
-    ["+", 7, "right", "forward", "right"],
-    ["+", -7, "right", "backward", "left"],
-    ["-", 4, "left", "forward", "left"],
-    ["-", -4, "left", "backward", "right"],
-    ["+", 0, "right", "stay", "none"],
-    ["-", 0, "left", "stay", "none"],
+    ["+", 7, false, false, "right", "right", 0, "right"],
+    ["+", -7, false, true, "right", "left", 1, "left"],
+    ["-", 4, true, false, "left", "left", 1, "left"],
+    ["-", -4, true, true, "left", "right", 2, "right"],
+    ["+", 0, false, false, "right", "right", 0, "none"],
+    ["-", 0, true, false, "left", "left", 1, "none"],
   ] as const)(
-    "faces and steps correctly for %s (%s)",
-    (op, b, facing, step, travel) => {
+    "turns once per minus sign for %s (%s)",
+    (
+      op,
+      b,
+      operationTurn,
+      numberTurn,
+      afterOperation,
+      facing,
+      turns,
+      travel,
+    ) => {
       expect(birdFor(op, b)).toEqual({
+        operationTurn,
+        numberTurn,
+        afterOperation,
         facing,
-        step,
+        turns,
         distance: Math.abs(b),
         travel,
       });
@@ -57,9 +69,10 @@ describe("bird number-line method", () => {
       }
     },
   );
-  it("reaches the two positions from the teaching video", () => {
+  it("reaches the video positions and the teacher's double-minus example", () => {
     expect(hops(3, "+", -7).at(-1)?.to).toBe(-4);
     expect(hops(-2, "-", -4).at(-1)?.to).toBe(2);
+    expect(hops(3, "-", -5).at(-1)?.to).toBe(8);
   });
 });
 describe("exact directed numbers", () => {

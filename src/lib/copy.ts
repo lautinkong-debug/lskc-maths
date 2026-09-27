@@ -217,43 +217,64 @@ export const copy = {
       bird: {
         toggle: "Show the bird method",
         title: "Follow the bird",
-        examples: "Try the examples from the video",
+        examples: "Try these examples",
         exampleOne: "+3 + (−7)",
         exampleTwo: "−2 − (−4)",
-        start: (value: string) => `1. Start: put the bird at ${value}.`,
-        face: (op: string, side: string) =>
-          `2. Face: ${op} means the bird looks ${side}.`,
-        facePending: (op: string) =>
-          `2. Face: the operation is ${op}. Which way will the bird look?`,
-        step: (value: string, count: number, way: string) =>
-          `3. Step: ${value} means ${count} ${count === 1 ? "step" : "steps"} ${way}.`,
-        stepPending: (value: string) =>
-          `3. Step: the second number is ${value}. Forwards or backwards?`,
+        exampleThree: "+3 − (−5)",
+        startNote:
+          "The first number only tells us where to start, even if it is negative. The bird begins facing right.",
+        start: (value: string) =>
+          `1. Start: put the bird at ${value}, facing right.`,
+        firstPending: (op: string) =>
+          `2. Operation sign ${op}: turn around if it is minus.`,
+        first: (op: string, turns: boolean, side: string) =>
+          turns
+            ? `2. Operation sign ${op}: turn once, from right to ${side}.`
+            : `2. Operation sign ${op}: no turn; keep facing ${side}.`,
+        secondPending: (value: string) =>
+          `3. Second number ${value}: turn around if its sign is minus.`,
+        second: (
+          value: string,
+          turns: boolean,
+          turnedBefore: boolean,
+          side: string,
+        ) =>
+          turns
+            ? `3. Second number ${value}: turn ${turnedBefore ? "again" : "once"} to face ${side}.`
+            : `3. Second number ${value}: no turn; keep facing ${side}.`,
+        walkPending: "4. Walk: read both signs before moving.",
+        walk: (count: number) =>
+          `4. Walk: take ${count} ${count === 1 ? "step" : "steps"} forwards.`,
         land: (side: string, value: string) =>
           `The bird travels ${side} and lands at ${value}.`,
         zeroLand: (value: string) =>
           `The bird does not move. It stays at ${value}.`,
-        wait: "Predict the travel direction, then reveal the steps.",
-        faceQuestion: "Which way does the bird face?",
-        stepQuestion: "Will it step forwards, backwards, or stay here?",
-        forward: "Forwards",
-        backward: "Backwards",
-        stay: "Stay here",
-        faceCorrect: "Yes. The operation tells the bird where to face.",
-        faceWrong: (op: string, side: string) =>
-          `${op} makes the bird face ${side}. Facing is not always the same as travelling.`,
-        stepCorrect:
-          "Yes. The sign of the second number tells the bird how to step.",
-        stepWrong: (value: string, way: string) =>
-          `${value} means step ${way}. The sign gives the instruction; the distance tells us how many steps.`,
-        zeroStepWrong: "The second number is 0, so the bird stays here.",
-        travelHint: (facing: string, step: string, travel: string) =>
-          `The bird faces ${facing} and steps ${step}, so it travels ${travel}.`,
+        ready: "Begin facing right. Read the operation sign first.",
+        afterFirst: (side: string) =>
+          `The bird now faces ${side}. Read the second number's sign next.`,
+        firstQuestion: "After the operation sign, which way does it face?",
+        secondQuestion: "After the second sign, which way does it face?",
+        firstWrong: (op: string, side: string) =>
+          op === "−"
+            ? `The minus sign turns it once: right to ${side}.`
+            : `A plus sign means no turn. It still faces ${side}.`,
+        secondWrong: (
+          value: string,
+          from: string,
+          to: string,
+          turnedBefore: boolean,
+        ) =>
+          value.startsWith("−")
+            ? `The minus sign on the second number turns it ${turnedBefore ? "again" : "once"}: ${from} to ${to}.`
+            : `There is no second minus sign, so it keeps facing ${to}.`,
+        travelHint: (turns: number, facing: string, travel: string) =>
+          `${turns === 0 ? "No minus signs: no turns" : turns === 1 ? "One minus sign: one turn" : "Two minus signs: two turns"}. Now facing ${facing}, it walks forwards to the ${travel}.`,
         longHop: (count: number) =>
           `${count} steps are shown as one long jump. The bird still travels ${count} units.`,
         zero: "The second number is 0, so the bird stays where it started.",
-        zeroStep:
-          "3. Step: 0 means no movement. The bird stays where it started.",
+        zeroStep: "4. Walk: 0 steps, so the bird stays where it started.",
+        readOperation: "Read the operation sign",
+        readNumber: "Read the second sign",
       },
       lesson: "Explore the movement",
       scrollLine: "Swipe the number line to see more.",
