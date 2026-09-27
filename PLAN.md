@@ -300,7 +300,41 @@ rerunning the seed updates existing source records without duplicating them, and
 
 **Later-stage design notes from the brief review:** Preserve time to read correction feedback; compare classes under matching question/scoring conditions; the currently specified submit API updates boards on completed runs; expiry must cover all challenge subcollections; no-time-pressure tie-breaking and division-by-zero precedence need explicit treatment. The owner's latest request hides the student's numerical rank on their phone, showing only the gap to the next place. These do not require backend work in Stage A.
 
+## Directed numbers — Stage B (27/09/2026)
+
+- [x] Number line: two to six movable points, keyboard sliders (arrows ±1, Shift+arrows ±5), typed values, automatic range, selected sign/magnitude/opposite, and opposite-point distance braces.
+- [x] Comparing: select two points, predict < / = / >, reveal the matching explanation, including the smaller-magnitude rule for two negatives and the special case of zero.
+- [x] Ordering: shuffled sets of four to six integers, ascending/descending checks, drag controls and keyboard/touch earlier/later buttons, targeted feedback, Show me and retry. Projection has a separate ordering view.
+- [x] Horizontal and vertical lines, plain/thermometer/lift labels, point collision lanes, and internal phone scrolling that follows the selected point.
+- [x] Brackets: tap the highlighted number or remove the next bracket, combine signs with the matching rule highlighted, predict before revealing, and step backwards/forwards at the teacher's pace.
+- [x] Exact additive working for up to five terms, nested/square brackets, fractions and decimals. Decimal questions keep decimal notation in the lesson; equivalent fraction answers are still accepted. Reordering keeps each sign attached to its number.
+- [x] Sign-then-size explanations and gain/loss bars, targeted wrong-sign/wrong-size hints, Show me, and hidden discussion answers. Invalid inputs preserve the current demonstration.
+- [x] Lazy-loaded modes, expression bookmarks, explicit mode/history synchronisation, scoped clicker keys, session prediction preference, and English copy in `copy.ts`.
+
+**Working checkout:** `C:\Users\t28ltk\Projects\lskc-maths (Chatgpt)`, branch `apps/directed-numbers`. Stage B adds no dependencies or Firebase access. Number-line exploration uses integer points from −100 to +100; arrow keys move by whole units. The bracket lesson supports exact rational values within the arithmetic engine's safe limits. Multiplication/division remain Stage C.
+
+**Run locally:** open PowerShell in this checkout and run `npm.cmd run dev:all`. Open `http://localhost:3000/apps/directed-numbers#number-line`. No sign-in or seed is needed. If the local servers are already running, use the existing preview.
+
+**Owner test (Stage B):**
+
+1. Open **Number line**. A is −4 and B is −2. Turn Predict first on and choose >: read the correction. Choose <: the explanation says that −2 is further right and has the smaller magnitude.
+2. Select A and enable **Show opposites**: its opposite is +4 and both distances are 4. Focus A and press Right, then Shift+Right: its value becomes +2. Set it to 0 to see that zero is neither positive nor negative and is its own opposite.
+3. Add points until six are present, drag one, then remove it. Switch Appearance to **Lift**, then **Thermometer**: the labels change and greater numbers are higher. Try −100 or +100 using the value field; the range expands.
+4. In **Put the numbers in order**, check the initial shuffled set. Read the hint, then move the chips using their arrows or drag them. **Show me the order** reveals −8 < −2 < 0 < +3. Change to six numbers and descending order, then retry.
+5. Open **Brackets**. On `(+2) + (−3) − (−8)`, remove the first bracket. With Predict first on, choose + for `+ (−3)`: read the correction, then choose −. Continue to see `2 − 3 + 8`, then −1 + 8, then the double-underlined 7.
+6. Enter `−3/2 + [4 + (−5)]`. Step through: the square bracket becomes −1 before the outer addition is simplified, and the answer is −5/2. Enter −2.5 or −2 1/2 in the answer field: either is accepted. A +2.5 answer gets the specific sign hint.
+7. Enter `(−1) − (+3.8) − (−1.5)`. Show me gives −3.3, with gains 1.5 and losses 4.8. **Reorder the signed terms** keeps the same total. Try `3 × 2` or an unmatched bracket: a clear input message appears without replacing the lesson.
+8. At phone width, switch modes with the selector and enter `5 − (−3)` using the keypad. Check that the page has no horizontal overflow and that the diagrams scroll within their own panels.
+9. In Projection mode at 1920×1080, use **Explore points** / **Put the numbers in order**. In Brackets, focus the lesson area and use PageDown, PageUp, R, N and P. Typing in a field must not advance the lesson; controls and the latest working should remain visible.
+10. Switch modes, use browser Back/Forward, and open a bookmark such as `#brackets:e=%E2%88%923%2F2%20%2B%20%5B4%20%2B%20(%E2%88%925)%5D`. The correct lesson and expression should load.
+
+**Verification (passed):** All 128 unit tests, lint, typecheck, production build and `git diff --check`. Unit tests include step-by-step equality, all four sign combinations, left-to-right working, nested brackets, exact decimals, equivalent fractions, zero, unsafe intermediate totals, rendered highlight spans, ordering and range helpers. Browser review covers phone and projection layouts, keyboard point movement and clicker keys, pointer dragging, sign correction, exact answer entry, keypad input, expression bookmarks, mode changes and browser history. At 360 px, the document width is 345 px with no horizontal page overflow. At 1920×1080, the point controls, ordering controls and bracket input fit in the viewport; the working panel follows its latest line. The final browser check reported no console warnings or errors. Classroom-projector acceptance remains the owner's check.
+
+**Stage boundary:** Stage B completes Number line and Brackets only. Stop for review before Stage C.
+
 ## Decision log
+
+- 27/09/2026 — Directed numbers Stage B: preserve decimal notation for decimal-only bracket questions, retain exact fractions internally, and give the ordering activity its own projection view so all six chips stay visible. Point exploration stays on integer positions; fractions and decimals are available in Brackets. Native history updates keep mode links and browser Back/Forward in sync without reloading the lesson shell.
 
 - Hosting: Firebase App Hosting (one platform with Auth/Firestore/Storage). Requires Blaze plan.
 - UI language: English only — no Chinese topic names (owner's decision, 2026-09-21). Re-addable later as one optional field.

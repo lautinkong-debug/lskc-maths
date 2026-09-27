@@ -75,7 +75,141 @@ export const copy = {
       },
       mode: "Choose a mode",
       later: "Coming in a later stage",
-      laterBody: "For now, explore adding and subtracting on the number line.",
+      laterBody:
+        "Explore Number line, Add & subtract and Brackets while the next lessons are being prepared.",
+      numberLesson: {
+        title: "Meet the numbers",
+        intro:
+          "Move a point. Its position tells you its value; its distance from 0 tells you its magnitude.",
+        points: "Points",
+        explore: "Explore points",
+        point: (name: string) => `Point ${name}`,
+        add: "Add a point",
+        remove: "Remove selected point",
+        value: "Selected point value",
+        range: "Use a whole number from −100 to +100.",
+        selected: "Selected point",
+        magnitude: "Magnitude",
+        opposite: "Opposite",
+        sign: "Sign",
+        positive: "Positive",
+        negative: "Negative",
+        zero: "Neither positive nor negative",
+        opposites: "Show opposites",
+        vertical: "Vertical number line",
+        skin: "Appearance",
+        plain: "Plain",
+        thermometer: "Thermometer",
+        lift: "Lift",
+        drag: "Drag a point, or focus it and use arrow keys. Hold Shift to move 5 units. You can also type its value below.",
+        pointValue: (name: string, value: string) => `Point ${name}, ${value}`,
+        picture: (values: string, vertical: boolean) =>
+          `Number line with points ${values}. Numbers increase ${vertical ? "from bottom to top" : "from left to right"}.`,
+        oppositeNote: (v: string, opposite: string, distance: number) =>
+          `${v} and ${opposite} are both ${distance} units from 0. ${distance === 0 ? "Zero is its own opposite." : "They have the same magnitude and opposite signs."}`,
+        compare: "Compare two points",
+        first: "First point",
+        second: "Second point",
+        predict: "Which comparison is true?",
+        correct: "Yes. Check the positions on the line.",
+        equal: "These points have the same value, so they share a position.",
+        position: (larger: string, smaller: string, vertical: boolean) =>
+          `${larger} is ${vertical ? "higher than" : "further right than"} ${smaller}, so it is greater.`,
+        positiveRule:
+          "For two positive numbers, the larger magnitude gives the greater number.",
+        negativeRule:
+          "For two negative numbers, the smaller magnitude gives the greater number. It is closer to 0.",
+        mixedRule:
+          "Every positive number is greater than every negative number.",
+        zeroRule:
+          "Positive numbers are greater than 0. Negative numbers are less than 0.",
+        checkPositions:
+          "Look at the positions, not just the digits. The number further right (or higher) is greater.",
+        order: "Put the numbers in order",
+        ascending: "Ascending: smallest to greatest",
+        descending: "Descending: greatest to smallest",
+        orderHelp:
+          "Drag a chip onto another place, or use its earlier and later buttons. Its sign always moves with it.",
+        earlier: (value: string) => `Move ${value} earlier`,
+        later: (value: string) => `Move ${value} later`,
+        check: "Check order",
+        ordered: "That's it! Each number is in the right place.",
+        orderHint: (a: string, b: string, ascending: boolean) =>
+          `Check ${a} and ${b}. For ${ascending ? "ascending" : "descending"} order, ${ascending ? "the smaller number" : "the greater number"} goes first.`,
+        show: "Show me the order",
+        retry: "Try this set again",
+        count: "How many numbers?",
+        next: "Next: Add & subtract",
+        play: "Practise in Number Line Town (later stage)",
+        think: "Is −8 greater than −3 because 8 is greater than 3?",
+        thought:
+          "No. −3 is further right, so −3 > −8. The number 8 describes the distance of −8 from 0, not how large −8 is.",
+      },
+      bracketLesson: {
+        title: "Two signs, one operation",
+        intro:
+          "Remove one bracket at a time. Read the signs first, then work out the size.",
+        scope:
+          "Use addition and subtraction with up to five terms. Decimals, fractions and square brackets are welcome. Save × and ÷ for the next lesson.",
+        load: "Show bracket steps",
+        remove: "Remove next bracket",
+        calculate: "Work out next sum",
+        tap: "Tap the highlighted bracket to remove it.",
+        inside: "Work inside the square brackets first.",
+        rules: "How the signs combine",
+        summary:
+          "Two signs next to each other: the same means +; different means −.",
+        rulesTex: {
+          "++": "a + (+b) = a + b",
+          "+-": "a + (-b) = a - b",
+          "-+": "a - (+b) = a - b",
+          "--": "a - (-b) = a + b",
+        },
+        notes: {
+          "++": "Both signs are +. Replace + (+…) with +….",
+          "+-": "The signs are different. Replace + (−…) with −….",
+          "-+": "The signs are different. Replace − (+…) with −….",
+          "--": "Both signs are −. Replace − (−…) with +….",
+          unwrap:
+            "This bracket groups the number. Keep its value when you remove it.",
+          same: "Same signs: add the magnitudes and keep the sign.",
+          different:
+            "Different signs: keep the sign of the larger magnitude. Subtract the smaller magnitude from the larger.",
+          cancel:
+            "Equal magnitudes and opposite signs give 0. Zero has no sign.",
+          zero: "Adding or subtracting 0 leaves the number unchanged.",
+          removeAll: "Remove the brackets by combining each pair of signs.",
+        },
+        predict: "What operation will the two signs become?",
+        predictRight: "Yes. Now remove the bracket to see the change.",
+        predictWrong:
+          "Check the pair of signs: same gives +; different gives −. Try again, or choose Show me.",
+        signSize: "Sign first, then size",
+        gain: "Gains",
+        loss: "Losses",
+        barLabel: (positive: string, negative: string) =>
+          `Gain ${positive}; lose ${negative}. Both bars start at 0. Compare their lengths.`,
+        signExplain: (gain: string, loss: string, result: string) =>
+          `Total gains: ${gain}. Total losses: ${loss}. The difference gives ${result}.`,
+        answer: "What is the final answer?",
+        check: "Check answer",
+        correct: "Yes. Your answer has the right sign and size.",
+        wrongSign:
+          "Your size is right. Check the sign: which is larger, the total gains or the total losses?",
+        wrongSize:
+          "Compare total gains with total losses. Subtract the smaller total from the larger, then use the sign of the larger total.",
+        reorder: "Reorder the signed terms",
+        reorderHelp:
+          "Keep each sign attached to its number. Grouping gains and losses changes the order, but not the total.",
+        think: "Can we reorder subtraction just by swapping the numbers?",
+        thought:
+          "No: 5 − 8 is −3, but 8 − 5 is +3. Write +5 and −8, then move each term with its sign: −8 + 5 is still −3.",
+        next: "Next: Multiply & divide (Stage C)",
+        play: "Practise on Hop Island (later stage)",
+        ready: "All brackets are removed. Now combine the signed terms.",
+        finished: "Complete. The final answer is double-underlined.",
+        keys: "Keys: PageDown / → / Space = next, PageUp / ← = back, R = reveal, N = new, P = Predict first.",
+      },
       returnToLesson: "Open Add & subtract",
       intro:
         "Start at the first number. Choose a direction, count the steps and see where you land.",
@@ -214,6 +348,8 @@ export const copy = {
         n < 0 ? `B${Math.abs(n)}` : n === 0 ? "G" : `${n}/F`,
       temperature: (n: string) => `${n} °C`,
       errors: {
+        additiveOnly:
+          "Use addition and subtraction with up to five terms for this lesson.",
         divisionByZero: "You can't divide by 0.",
         overflow: "These numbers are too large. Try smaller numbers.",
         invalidNumber: "Enter a number, such as −3, 0.5 or −1 1/2.",

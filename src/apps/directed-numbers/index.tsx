@@ -3,6 +3,8 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { copy } from "@/lib/copy";
 import { button, field } from "./components/ui";
 const AddSubtractMode = lazy(() => import("./modes/AddSubtractMode"));
+const NumberLineMode = lazy(() => import("./modes/NumberLineMode"));
+const BracketsMode = lazy(() => import("./modes/BracketsMode"));
 const c = copy.apps.directedNumbers;
 type Mode = keyof typeof c.tabs;
 const modes = Object.keys(c.tabs) as Mode[];
@@ -23,13 +25,39 @@ export default function DirectedNumbers() {
     }
     readHash();
     window.addEventListener("hashchange", readHash);
-    return () => window.removeEventListener("hashchange", readHash);
+    window.addEventListener("popstate", readHash);
+    return () => {
+      window.removeEventListener("hashchange", readHash);
+      window.removeEventListener("popstate", readHash);
+    };
   }, []);
   function choose(next: Mode) {
-    window.location.hash = next;
+    setMode(next);
+    setExpression(undefined);
+    if (window.location.hash !== `#${next}`)
+      window.history.pushState(null, "", `#${next}`);
   }
   return (
-    <div className="min-w-0 space-y-6">
+    <div
+      className="min-w-0 space-y-6"
+      onClickCapture={(event) => {
+        if (
+          event.ctrlKey ||
+          event.metaKey ||
+          event.shiftKey ||
+          event.altKey ||
+          event.button !== 0
+        )
+          return;
+        const href = (event.target as Element)
+          .closest("a")
+          ?.getAttribute("href");
+        if (href?.startsWith("#") && modes.includes(href.slice(1) as Mode)) {
+          event.preventDefault();
+          choose(href.slice(1) as Mode);
+        }
+      }}
+    >
       <nav
         aria-label={c.mode}
         className="border-grid hidden flex-wrap gap-1 border-b pb-3 sm:flex"
@@ -62,6 +90,17 @@ export default function DirectedNumbers() {
       {mode === "add-subtract" ? (
         <Suspense fallback={<p>{copy.apps.loading}</p>}>
           <AddSubtractMode
+            key={expression ?? "default"}
+            initialExpression={expression}
+          />
+        </Suspense>
+      ) : mode === "number-line" ? (
+        <Suspense fallback={<p>{copy.apps.loading}</p>}>
+          <NumberLineMode />
+        </Suspense>
+      ) : mode === "brackets" ? (
+        <Suspense fallback={<p>{copy.apps.loading}</p>}>
+          <BracketsMode
             key={expression ?? "default"}
             initialExpression={expression}
           />
