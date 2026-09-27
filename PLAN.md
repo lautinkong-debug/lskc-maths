@@ -268,6 +268,38 @@ rerunning the seed updates existing source records without duplicating them, and
 
 ---
 
+## Directed numbers — Stage A (27/09/2026)
+
+- [x] Exact rational-number engine, safe parser, answer equivalence and movement helpers, with tests covering the supplied arithmetic fixtures and all 3,362 start/operation/move combinations in the lesson range.
+- [x] Registered F1 app, SVG thumbnail, English copy, hash navigation and expression bookmarks. Unfinished modes explicitly show a later-stage panel.
+- [x] Add & subtract: keyboard/keypad/number controls; four direction rules; teacher-paced hops and long arcs; backwards stepping; up to four chained moves; equivalent-move comparison; thermometer and lift views; worked answers with double underline.
+- [x] Additional student interactions: predict direction, distance and landing; simple correction notes; Show me, retry and a similar question; change only the operation or signed number.
+- [x] Projection controls and scoped clicker keys; session prediction preference; keyboard controls; reduced-motion-safe hop reveal; mobile number-line scrolling with the current point kept visible.
+- [x] Final verification: lint, typecheck, all 82 unit tests and production build pass; reviewed changes are ready for the Stage A commit.
+
+**DONE (27/09/2026):** Browser checks covered wrong direction/distance/landing feedback, a correct landing, Show me, backward/forward steps, a three-move journey ending at +4, the change-one-thing activity, keypad entry, invalid-input messages, expression bookmarks, prediction preferences surviving refresh, and later-stage placeholders. At 360 px there is no horizontal page overflow; the diagram scrolls internally and follows the current point. At 1920×1080, the enlarged lesson and controls fit, including the equivalent-move comparison with the lift view. PageDown/PageUp/R/P and ordinary keyboard buttons were checked. The final browser session reported no console errors or warnings. Hop animation has an explicit reduced-motion override. Review on an actual classroom projector remains the owner's acceptance check.
+
+**Working checkout:** `C:\Users\t28ltk\Projects\lskc-maths (Chatgpt)` is an isolated Git worktree on `apps/directed-numbers`, created from `bee9597`. The original `C:\Users\t28ltk\Projects\lskc-maths` checkout and its untracked v2 brief remain untouched. The brief at that original checkout's `docs/codex-prompt-directed-numbers.md` is the source of requirements. No new dependencies, Firebase permissions or production services were changed in Stage A.
+
+**Run locally:** open PowerShell in the working checkout and run `npm.cmd run dev:all`. Visit `http://localhost:3000/apps/directed-numbers`. No seed or sign-in is needed for this stage. Stop an existing copy of the development servers first if the ports are already in use. A fresh dependency installation needs `npx.cmd next typegen` before a standalone `npm.cmd run typecheck`; `next dev` and `next build` also generate those existing Next.js route types.
+
+**Owner test (Stage A):**
+
+1. Open Web apps and filter to F1: Directed number operations appears. Open it: Add & subtract is ready; the other modes explain that they arrive later.
+2. On the default `(−3) + (+5)`, turn Predict first off and press Next five times: the point moves from −3 to +2 and the final answer is double-underlined. Back removes a hop.
+3. Enter `5 − (−3)` and press Show on number line. Turn on Predict first. Choose Left: the explanation says subtraction reverses the negative addition movement. Choose Right: the distance and landing questions appear.
+4. Enter `−3` for distance: feedback explains that the distance is 3 units. Enter `2` for the landing point: use Show me to see +8, then Try this step again or Try a similar question. These are learning activities without scores.
+5. Turn on Same move, two ways: subtraction of −3 is paired with addition of +3. Expand Change one thing and change only the operation or number's sign; predict again.
+6. Choose Lift, then Thermometer: labels and wording change to floors/up/down and temperature/rises/drops. The arithmetic stays the same.
+7. Expand Use these numbers and choose the three-move journey. Step through +9, −11 and +6: the final position is +4; the 11-unit move uses one long arc.
+8. Try `3 × −2` and an unmatched bracket: a clear input correction appears; the existing diagram remains intact. A valid expression can be bookmarked as `#add-subtract:e=5%20-%20(-3)`.
+9. At phone width, use the mode selector and keypad. The number line can scroll inside its own box, without horizontal page scrolling. Use Tab and Enter to operate controls without a mouse.
+10. On a 1920×1080 screen, enter Projection mode, focus the lesson area, then use PageDown/PageUp, R, N and P. The keypad is hidden, and arrow keys inside a typing field do not advance the lesson. The detailed student prediction forms remain in the normal view; projection is teacher paced.
+
+**Stage boundary:** Only Add & subtract is delivered in Stage A. Number-line comparison/ordering, bracket lessons, multiplication/division, mixed working, games and challenges remain for B–G. The engine already handles fractions and mixed arithmetic, but this visual lesson deliberately accepts integer addition/subtraction within its specified bounds. Stop for the owner's review before Stage B.
+
+**Later-stage design notes from the brief review:** Preserve time to read correction feedback; compare classes under matching question/scoring conditions; the currently specified submit API updates boards on completed runs; expiry must cover all challenge subcollections; no-time-pressure tie-breaking and division-by-zero precedence need explicit treatment. The owner's latest request hides the student's numerical rank on their phone, showing only the gap to the next place. These do not require backend work in Stage A.
+
 ## Decision log
 
 - Hosting: Firebase App Hosting (one platform with Auth/Firestore/Storage). Requires Blaze plan.

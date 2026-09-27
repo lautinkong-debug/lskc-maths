@@ -1,0 +1,18 @@
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hop {
+  animation: appear 220ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hop {
+    animation: none;
+  }
+}

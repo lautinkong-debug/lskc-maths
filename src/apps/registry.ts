@@ -4,6 +4,7 @@ import { copy } from "@/lib/copy";
 import QuadraticThumbnail from "./quadratic-explorer/Thumbnail";
 import UnitCircleThumbnail from "./unit-circle/Thumbnail";
 import InequalityThumbnail from "./inequality-number-line/Thumbnail";
+import DirectedNumbersThumbnail from "./directed-numbers/Thumbnail";
 
 export interface AppEntry {
   slug: string;
@@ -18,6 +19,16 @@ export interface AppEntry {
 
 /** The index and detail route both use this list. New apps register here. */
 export const appRegistry: readonly AppEntry[] = [
+  {
+    slug: "directed-numbers",
+    title: copy.apps.directedNumbers.title,
+    topic: copy.apps.directedNumbers.topic,
+    levels: ["F1"],
+    strand: "number-algebra",
+    summary: copy.apps.directedNumbers.summary,
+    thumbnail: DirectedNumbersThumbnail,
+    load: () => import("./directed-numbers"),
+  },
   {
     slug: "quadratic-explorer",
     title: copy.apps.quadratic.title,
