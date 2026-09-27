@@ -338,6 +338,34 @@ rerunning the seed updates existing source records without duplicating them, and
 
 **Verification of clarified turn rule:** 135 unit tests, lint, typecheck, production build, and `git diff --check` pass. Browser review confirmed right → left → right and the final `+8` for `(+3) − (−5)`, the specific correction after each wrong facing choice, the one-turn `+3 + (−7)` explanation, a negative starting point, and the zero case. At 360 px there is no page-wide horizontal overflow; at 1920×1080 the projection controls fit after removing duplicate guide controls.
 
+## Directed numbers — Stage C (27/09/2026)
+
+- [x] × and ÷ **Pattern**: extend a fixed-factor table and column chart through zero; students predict the first negative multiplier's product and receive a change-per-row hint.
+- [x] **Repeated addition**: adjustable negative hop size and 0–8 equal leftward hops, with one hop per click and cumulative working.
+- [x] **Sign rules**: the four sign pairs for × or ÷, with a highlighted pair, sign-then-magnitude working, exact fraction answers, wrong-sign/wrong-size hints, and a clear division-by-zero message.
+- [x] **Many factors**: build 2–6 factors joined by × or ÷, count negative signs, handle zero, show a reciprocal when dividing by a fraction, and reveal exact working one line at a time. A custom ×÷ expression is available outside projection mode.
+- [x] **Mixed operations**: eight worked examples and custom input; choose the next operation, then reveal one line at a time. Innermost brackets, ×÷ before +−, left-to-right within a level, mixed-to-improper conversion, reciprocal division, exact fractions, written decimal notation until calculation, optional sign working and decimal form, and final-answer feedback are supported.
+- [x] Full-arithmetic working engine and textbook fixtures, including printed minus signs and keyboard hyphens. Existing additive Brackets working remains intact.
+
+**Working checkout:** `C:\Users\t28ltk\Projects\lskc-maths (Chatgpt)`, branch `apps/directed-numbers`. This stage changes only the directed-numbers app, English copy, and this plan. It adds no dependencies or Firebase access.
+
+**Run locally:** open PowerShell in this checkout and run `npm.cmd run dev:all`, then visit `http://localhost:3000/apps/directed-numbers#multiply-divide`. No sign-in or seed is needed. Reuse the local servers if they are already running.
+
+**Owner test (Stage C):**
+
+1. In **× and ÷ → Pattern**, keep +5 and advance to `+5 × 0 = 0`. Predict `+5 × (−1)` incorrectly as +5; read the −5-per-row correction. Enter −5 and continue to −4. Change the fixed factor to −3 and watch the pattern cross zero in the other direction.
+2. In **Repeated addition**, use size 3 and count 4. Press Next hop four times: the marker should land at −3, −6, −9 and −12, with one more `−3` in the sum each time. Set the count to 0 and check the stay-at-zero explanation.
+3. In **Sign rules**, try `−6 × +3` with +18: the feedback should say the size is right but the sign is wrong. Reveal −18. Switch to `−6 ÷ +3`, then test same-sign examples. Set the second number to 0 for the division-by-zero message; try a fractional quotient.
+4. In **Many factors**, use the initial `−2 × +3 ÷ −4`: two negative signs give a positive result; step through to +3/2. Add factors up to six, change one sign and observe odd/even parity, then try 0 and a zero divisor. Enter `(+6) ÷ (−3/5) × (+5)` as a custom expression and inspect the reciprocal and exact working.
+5. Open **Mixed**. For `(+4) + (+3) × (−2)`, choose addition first to see the order correction. Choose multiplication and step to −2. Turn on **Show sign working** and repeat to see the sign before the magnitude calculation.
+6. Choose the bracket example `[(+5) − (−4)] × (−2)` and the mixed-number example `(−2 1/4) ÷ (+3/2) + (+1)`. Check that brackets and mixed-to-improper conversion appear before the remaining arithmetic. Try a wrong final sign in the answer field.
+7. Enter `12/(5 + (−8)) − (−3)` and `[(−15) + (+7) × (−2)] / [(−3)(+2) + 1]`; use Back, Next and Show me. Try invalid input or division by zero: the current lesson should stay in place with a clear message.
+8. At 360 px, switch panels and modes using the phone controls; the page should have no horizontal overflow. At 1920×1080, turn on Projection mode and check that the Mixed step controls and Many-factors step controls remain visible. Try an expression bookmark such as `#mixed:e=%28%2B4%29%20%2B%20%28%2B3%29%20%C3%97%20%28%E2%88%922%29`.
+
+**Verification (passed):** 166 unit tests, typecheck, lint without warnings, production build, and `git diff --check`. Browser review covered the zero-crossing prediction and correction, leftward SVG hop, sign-rule correction and reveal, factor-chain sign and reciprocal working, mixed-order wrong-choice correction, 360 px phone width without document overflow, 1920×1080 projector controls, and no browser-console warnings or errors. Classroom-projector acceptance remains the owner's check.
+
+**Stage boundary:** Stage C completes × and ÷ and Mixed only. Stop for review before Stage D.
+
 ## Decision log
 
 - 27/09/2026 — Directed numbers Stage B: preserve decimal notation for decimal-only bracket questions, retain exact fractions internally, and give the ordering activity its own projection view so all six chips stay visible. Point exploration stays on integer positions; fractions and decimals are available in Brackets. Native history updates keep mode links and browser Back/Forward in sync without reloading the lesson shell.

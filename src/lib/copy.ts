@@ -205,11 +205,167 @@ export const copy = {
         think: "Can we reorder subtraction just by swapping the numbers?",
         thought:
           "No: 5 − 8 is −3, but 8 − 5 is +3. Write +5 and −8, then move each term with its sign: −8 + 5 is still −3.",
-        next: "Next: Multiply & divide (Stage C)",
+        next: "Next: Multiply & divide",
         play: "Practise on Hop Island (later stage)",
         ready: "All brackets are removed. Now combine the signed terms.",
         finished: "Complete. The final answer is double-underlined.",
         keys: "Keys: PageDown / → / Space = next, PageUp / ← = back, R = reveal, N = new, P = Predict first.",
+      },
+      arithmetic: {
+        load: "Show working",
+        notes: {
+          "inner-brackets-first": "Work inside the innermost brackets first.",
+          "mult-div-first": "Multiply or divide before adding or subtracting.",
+          "left-to-right":
+            "For operations at the same level, work from left to right.",
+          "same-sign-product": "Same signs make a positive product.",
+          "diff-sign-product": "Different signs make a negative product.",
+          "same-sign-quotient": "Same signs make a positive quotient.",
+          "diff-sign-quotient": "Different signs make a negative quotient.",
+          "count-negatives":
+            "Count the negative factors: even gives positive; odd gives negative.",
+          reciprocal:
+            "Dividing by a fraction means multiplying by its reciprocal.",
+          "mixed-to-improper":
+            "Change the mixed number to an improper fraction before calculating.",
+        },
+      },
+      multiplyLesson: {
+        title: "Multiply and divide directed numbers",
+        intro:
+          "See where the sign rules come from, then use them with products and quotients.",
+        panels: {
+          pattern: "Pattern",
+          repeated: "Repeated addition",
+          signs: "Sign rules",
+          many: "Many factors",
+        },
+        pattern: {
+          title: "Continue the pattern",
+          intro:
+            "Keep the first factor fixed. The second factor drops by 1 each row. Watch how the product changes through 0.",
+          fixed: "Fixed factor",
+          positivePreset: "+5",
+          negativePreset: "−3",
+          multiplier: "Second factor",
+          product: "Product",
+          next: "Next row",
+          back: "Previous row",
+          reveal: "Show next product",
+          predict: (multiplier: string) =>
+            `What is the product when the second factor is ${multiplier}?`,
+          check: "Check product",
+          correct: "Yes. Keep the pattern going.",
+          wrong: (change: string) =>
+            `Each time the second factor drops by 1, the product changes by ${change}. Follow the rows through 0.`,
+          chart:
+            "Column chart of the products revealed so far; bars cross 0 as the sign changes.",
+          conclusion: (factor: string, change: string) =>
+            `With ${factor} fixed, each step down in the second factor changes the product by ${change}. The same pattern continues below 0.`,
+          range: "Choose a whole number from −9 to +9.",
+        },
+        repeated: {
+          title: "Repeated addition makes equal hops",
+          intro:
+            "A negative number multiplied by a positive whole number is that many equal leftward hops from 0.",
+          magnitude: "Size of the negative number",
+          count: "Number of times",
+          next: "Next hop",
+          back: "Previous hop",
+          reset: "Start again",
+          line: (size: number, count: number, shown: number) =>
+            `${count} hops of −${size} from 0. ${shown} ${shown === 1 ? "hop" : "hops"} shown.`,
+          working: "Repeated addition",
+          result: (value: string) => `We land at ${value}.`,
+          zero: "Zero hops leave us at 0.",
+        },
+        signs: {
+          title: "The same sign rules work for × and ÷",
+          first: "First number",
+          second: "Second number",
+          operation: "Operation",
+          product: "Product or quotient",
+          check: "Check answer",
+          reveal: "Show me",
+          same: "Same signs → positive",
+          different: "Different signs → negative",
+          zero: "A zero factor makes a product 0. Zero has no sign.",
+          dividingZero: "You can't divide by 0. Change the second number.",
+          invalid: "Enter two valid numbers to see the rule.",
+          correct: "Yes. The sign and the size are both right.",
+          wrongSign:
+            "The size is right. Check the signs: same gives +; different gives −.",
+          wrongSize:
+            "Decide the sign first. Then multiply or divide the magnitudes.",
+          fraction: "The same division can be written as a fraction.",
+          row: (a: string, b: string) => `${a} and ${b}`,
+        },
+        many: {
+          title: "Count the negative signs",
+          intro:
+            "Build a chain of up to six factors. Count the negatives, then calculate × and ÷ from left to right.",
+          factor: (index: number) => `Factor ${index}`,
+          operation: (index: number) => `Operation ${index}`,
+          add: "Add a factor",
+          remove: "Remove last factor",
+          apply: "Show chain working",
+          count: (count: number) =>
+            `${count} negative ${count === 1 ? "sign" : "signs"} → ${count % 2 === 0 ? "even" : "odd"} → ${count % 2 === 0 ? "positive" : "negative"}.`,
+          zero: "A factor of 0 makes the result 0, unless you try to divide by 0.",
+          invalid: "Check each factor. A divisor cannot be 0.",
+          reciprocal: (value: string) =>
+            `Dividing by a fraction becomes multiplying by its reciprocal, ${value}.`,
+          scope:
+            "Use only multiplication and division in this lesson. Use Mixed for + and −.",
+          step: "Next working line",
+          complete: "The chain is complete.",
+        },
+        think: "Think about it: why is a negative times a negative positive?",
+        thought:
+          "Look at the pattern as the second factor falls through 0. The products continue changing by the same amount; they do not jump to a new rule.",
+        next: "Next: Mixed operations",
+        play: "Practise in Sign Snap (later stage)",
+      },
+      mixedLesson: {
+        title: "Mixed operations, one step at a time",
+        intro:
+          "Choose what to do first, then reveal one working line at a time. Fractions stay exact.",
+        rules: "Order of operations",
+        order: [
+          "Work inside the innermost brackets first.",
+          "Do × and ÷ before + and −.",
+          "At the same level, work from left to right.",
+        ],
+        nextStep: "Next step",
+        choose: "You choose: what should be done next?",
+        choiceLabel: (index: number) => `Choose operation ${index}`,
+        choiceRight: "Yes. That is the part to work out next.",
+        choiceWrong: (rule: string) =>
+          rule === "inner-brackets-first"
+            ? "Start inside the innermost brackets. Then return to the rest."
+            : rule === "mult-div-first"
+              ? "Multiply or divide before adding or subtracting."
+              : rule === "reciprocal"
+                ? "Before dividing by a fraction, change to multiplication by its reciprocal."
+                : "At the same level, choose the operation furthest left.",
+        predictPrompt:
+          "Which part comes next? Choose it, or reveal the next step.",
+        nextPrompt: "Read the highlighted rule, then show the next line.",
+        finished: "Complete. The final answer is double-underlined.",
+        preset: (index: number) => `Example ${index}`,
+        signWorking: "Show sign working",
+        decimal: "Show decimal too",
+        decimalAnswer: "Decimal form:",
+        answer: "What is the final answer?",
+        check: "Check answer",
+        answerRight: "Yes. Your answer has the right sign and size.",
+        wrongSign: "Your size is right. Check the sign of the final result.",
+        wrongSize:
+          "Check the order: brackets first, then × and ÷, then + and −. Work left to right within each level.",
+        think: "Does left to right mean adding before multiplying?",
+        thought:
+          "No. Multiplication and division come first. Left to right applies only to operations at the same level.",
+        play: "Practise in Order Castle (later stage)",
       },
       returnToLesson: "Open Add & subtract",
       intro:

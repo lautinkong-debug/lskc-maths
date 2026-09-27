@@ -10,6 +10,8 @@ import {
   abs,
   add,
   compare,
+  div,
+  mul,
   neg,
   rational,
   RationalError,
@@ -17,7 +19,7 @@ import {
   type Rational,
 } from "./rational";
 
-export type RuleId =
+export type AdditiveRuleId =
   | "++"
   | "+-"
   | "-+"
@@ -28,6 +30,18 @@ export type RuleId =
   | "cancel"
   | "zero"
   | "removeAll";
+export type RuleId =
+  | AdditiveRuleId
+  | "inner-brackets-first"
+  | "mult-div-first"
+  | "left-to-right"
+  | "same-sign-product"
+  | "diff-sign-product"
+  | "same-sign-quotient"
+  | "diff-sign-quotient"
+  | "count-negatives"
+  | "reciprocal"
+  | "mixed-to-improper";
 export type Step = {
   tex: string;
   highlight?: Span;
@@ -37,6 +51,18 @@ export type Step = {
   ast: Ast;
   before: Ast;
   pair?: [Rational, Rational];
+  kind:
+    | "bracket"
+    | "sum"
+    | "product"
+    | "quotient"
+    | "reciprocal"
+    | "sign"
+    | "mixed";
+};
+export type AdditiveStep = Step & {
+  ruleId: AdditiveRuleId;
+  noteKey: AdditiveRuleId;
   kind: "bracket" | "sum";
 };
 const c = copy.apps.directedNumbers.bracketLesson;
@@ -55,7 +81,20 @@ function texPieces(
   style: NumberStyle = "improper",
 ): { text: string; span: Span }[] {
   if (ast.kind === "number")
-    return [{ text: toTex(ast.value, { signed, style }), span: ast.span }];
+    return [
+      {
+        text: toTex(ast.value, {
+          signed,
+          style:
+            ast.sourceForm === "mixed"
+              ? "mixed"
+              : ast.sourceForm === "decimal"
+                ? "decimal"
+                : style,
+        }),
+        span: ast.span,
+      },
+    ];
   if (ast.kind === "group")
     return [
       {
@@ -80,7 +119,7 @@ function texPieces(
     ast.right.kind === "number" && ast.right.value.n < 0
       ? [
           {
-            text: `\\left(${toTex(ast.right.value, { style })}\\right)`,
+            text: `\\left(${toTex(ast.right.value, { style: ast.right.sourceForm === "mixed" ? "mixed" : ast.right.sourceForm === "decimal" ? "decimal" : style })}\\right)`,
             span: ast.right.span,
           },
         ]
@@ -163,7 +202,7 @@ export function signedTerms(ast: Ast): Rational[] {
     ...signedTerms(ast.right).map((v) => (ast.op === "-" ? neg(v) : v)),
   ];
 }
-export function sumRule(a: Rational, b: Rational): RuleId {
+export function sumRule(a: Rational, b: Rational): AdditiveRuleId {
   if (a.n === 0 || b.n === 0) return "zero";
   if (Math.sign(a.n) === Math.sign(b.n)) return "same";
   return compare(abs(a), abs(b)) === 0 ? "cancel" : "different";
@@ -179,7 +218,7 @@ export function termsTex(terms: Rational[], style: NumberStyle = "improper") {
 }
 type Change = {
   ast: Ast;
-  ruleId: RuleId;
+  ruleId: AdditiveRuleId;
   highlight: Span;
   kind: "bracket" | "sum";
   pair?: [Rational, Rational];
@@ -225,10 +264,10 @@ function removeNext(ast: Ast): Change | null {
     if (left) return { ...left, ast: { ...ast, left: left.ast } };
     if (ast.right.kind === "group" && ast.right.child.kind === "number") {
       const value = ast.right.child.value;
-      const ruleId: RuleId =
+      const ruleId: AdditiveRuleId =
         value.n === 0
           ? "zero"
-          : (`${ast.op}${value.n < 0 ? "-" : "+"}` as RuleId);
+          : (`${ast.op}${value.n < 0 ? "-" : "+"}` as AdditiveRuleId);
       return {
         ast: {
           ...ast,
@@ -251,7 +290,7 @@ function removeNext(ast: Ast): Change | null {
         ruleId:
           value.n === 0
             ? "zero"
-            : (`${ast.op}${value.n < 0 ? "-" : "+"}` as RuleId),
+            : (`${ast.op}${value.n < 0 ? "-" : "+"}` as AdditiveRuleId),
         highlight: ast.span,
         kind: "bracket",
       };
@@ -272,8 +311,8 @@ function removeNext(ast: Ast): Change | null {
   return inner ? { ...inner, ast: { ...ast, child: inner.ast } } : null;
 }
 /** Fine-grained demonstration; square-bracket contents are evaluated before the outer sign. */
-export function bracketSteps(input: Ast): Step[] {
-  const steps: Step[] = [];
+export function bracketSteps(input: Ast): AdditiveStep[] {
+  const steps: AdditiveStep[] = [];
   let ast = input;
   for (let guard = 0; guard < 80; guard++) {
     const change = hasGroup(ast) ? removeNext(ast) : reduceSum(ast);
@@ -290,14 +329,10 @@ export function bracketSteps(input: Ast): Step[] {
   }
   return steps;
 }
-/** Textbook working: adjacent bracket removals share one line, sums remain left to right. */
-export function workOut(
-  ast: Ast,
-  _options: { signWorking?: boolean } = {},
-): Step[] {
-  void _options;
+/** Textbook additive working: adjacent bracket removals share one line. */
+function additiveWorkOut(ast: Ast): AdditiveStep[] {
   const detailed = bracketSteps(ast),
-    steps: Step[] = [];
+    steps: AdditiveStep[] = [];
   for (const step of detailed) {
     const previous = steps.at(-1);
     if (step.kind === "bracket" && previous?.kind === "bracket") {
@@ -324,6 +359,214 @@ export function workOut(
     } else steps.push(step);
   }
   return steps;
+}
+
+type GeneralChange = {
+  ast: Ast;
+  sourceHighlight: Span;
+  ruleId: RuleId;
+  kind: Step["kind"];
+  operation?: { op: "*" | "/"; a: Rational; b: Rational };
+};
+function atomic(ast: Ast): boolean {
+  return (
+    ast.kind === "number" ||
+    ((ast.kind === "group" || ast.kind === "unary") && atomic(ast.child))
+  );
+}
+function contains(ast: Ast, operations: string): boolean {
+  return ast.kind === "binary"
+    ? operations.includes(ast.op) ||
+        contains(ast.left, operations) ||
+        contains(ast.right, operations)
+    : ast.kind === "group" || ast.kind === "unary"
+      ? contains(ast.child, operations)
+      : false;
+}
+function hasMixedNumber(ast: Ast): boolean {
+  return ast.kind === "number"
+    ? ast.sourceForm === "mixed"
+    : ast.kind === "binary"
+      ? hasMixedNumber(ast.left) || hasMixedNumber(ast.right)
+      : hasMixedNumber(ast.child);
+}
+function convertMixed(ast: Ast): GeneralChange | null {
+  if (ast.kind === "number")
+    return ast.sourceForm === "mixed"
+      ? {
+          ast: { ...ast, sourceForm: "fraction" },
+          sourceHighlight: ast.span,
+          ruleId: "mixed-to-improper",
+          kind: "mixed",
+        }
+      : null;
+  if (ast.kind === "group" || ast.kind === "unary") {
+    const change = convertMixed(ast.child);
+    return change ? { ...change, ast: { ...ast, child: change.ast } } : null;
+  }
+  const left = convertMixed(ast.left);
+  if (left) return { ...left, ast: { ...ast, left: left.ast } };
+  const right = convertMixed(ast.right);
+  return right ? { ...right, ast: { ...ast, right: right.ast } } : null;
+}
+function reduceTier(
+  ast: Ast,
+  multiply: boolean,
+  insideGroup: boolean,
+  hasAddition: boolean,
+): GeneralChange | null {
+  if (ast.kind === "number") return null;
+  if (ast.kind === "group" || ast.kind === "unary") {
+    if (atomic(ast)) return null;
+    const inner = reduceTier(ast.child, multiply, insideGroup, hasAddition);
+    return inner ? { ...inner, ast: { ...ast, child: inner.ast } } : null;
+  }
+  const left = reduceTier(ast.left, multiply, insideGroup, hasAddition);
+  if (left) return { ...left, ast: { ...ast, left: left.ast } };
+  const right = reduceTier(ast.right, multiply, insideGroup, hasAddition);
+  if (right) return { ...right, ast: { ...ast, right: right.ast } };
+  if ((ast.op === "*" || ast.op === "/") !== multiply) return null;
+  if (!atomic(ast.left) || !atomic(ast.right)) return null;
+  const a = evaluate(ast.left),
+    b = evaluate(ast.right);
+  if (ast.op === "/" && b.d !== 1) {
+    const reciprocal = div(rational(1), b);
+    if (!reciprocal.ok) throw new RationalError(reciprocal.code);
+    return {
+      ast: {
+        ...ast,
+        op: "*",
+        right: number(reciprocal.value, ast.right.span),
+        implicit: false,
+      },
+      sourceHighlight: ast.span,
+      ruleId: "reciprocal",
+      kind: "reciprocal",
+    };
+  }
+  const result =
+    ast.op === "+"
+      ? add(a, b)
+      : ast.op === "-"
+        ? add(a, neg(b))
+        : ast.op === "*"
+          ? mul(a, b)
+          : div(a, b);
+  if ("ok" in result) {
+    if (!result.ok) throw new RationalError(result.code);
+  }
+  return {
+    ast: number("ok" in result ? result.value : result, ast.span),
+    sourceHighlight: ast.span,
+    ruleId: insideGroup
+      ? "inner-brackets-first"
+      : multiply && hasAddition
+        ? "mult-div-first"
+        : "left-to-right",
+    kind: ast.op === "*" ? "product" : ast.op === "/" ? "quotient" : "sum",
+    operation:
+      ast.op === "*" || ast.op === "/" ? { op: ast.op, a, b } : undefined,
+  };
+}
+function reduceExpression(
+  ast: Ast,
+  insideGroup: boolean,
+): GeneralChange | null {
+  const hasAddition = contains(ast, "+-");
+  return (
+    reduceTier(ast, true, insideGroup, hasAddition) ??
+    reduceTier(ast, false, insideGroup, hasAddition)
+  );
+}
+function reduceInsideGroup(ast: Ast): GeneralChange | null {
+  if (ast.kind === "number") return null;
+  if (ast.kind === "group") {
+    const nested = reduceInsideGroup(ast.child);
+    if (nested) return { ...nested, ast: { ...ast, child: nested.ast } };
+    if (!atomic(ast.child)) {
+      const change = reduceExpression(ast.child, true);
+      if (change) return { ...change, ast: { ...ast, child: change.ast } };
+    }
+    return null;
+  }
+  if (ast.kind === "unary") {
+    const change = reduceInsideGroup(ast.child);
+    return change ? { ...change, ast: { ...ast, child: change.ast } } : null;
+  }
+  const left = reduceInsideGroup(ast.left);
+  if (left) return { ...left, ast: { ...ast, left: left.ast } };
+  const right = reduceInsideGroup(ast.right);
+  return right ? { ...right, ast: { ...ast, right: right.ast } } : null;
+}
+function generalWorkOut(input: Ast, signWorking: boolean): Step[] {
+  const steps: Step[] = [];
+  let ast = input;
+  for (
+    let guard = 0;
+    guard < 100 && (ast.kind !== "number" || ast.sourceForm === "mixed");
+    guard++
+  ) {
+    const change =
+      convertMixed(ast) ??
+      reduceInsideGroup(ast) ??
+      reduceExpression(ast, false) ??
+      (atomic(ast)
+        ? {
+            ast: number(evaluate(ast), ast.span),
+            sourceHighlight: ast.span,
+            ruleId: "inner-brackets-first" as RuleId,
+            kind: "bracket" as Step["kind"],
+          }
+        : null);
+    if (!change) throw new Error("Could not finish the working");
+    const highlight = texHighlight(ast, change.sourceHighlight);
+    if (
+      signWorking &&
+      change.operation &&
+      change.operation.a.n &&
+      change.operation.b.n
+    ) {
+      const { a, b, op } = change.operation;
+      const same = Math.sign(a.n) === Math.sign(b.n);
+      const ruleId: RuleId = `${same ? "same" : "diff"}-sign-${op === "*" ? "product" : "quotient"}`;
+      const previous = expressionTex(ast);
+      const replacement = `${same ? "+" : "-"}\\left(${toTex(abs(a))} ${op === "*" ? "\\times" : "\\div"} ${toTex(abs(b))}\\right)`;
+      steps.push({
+        tex:
+          previous.slice(0, highlight.start) +
+          replacement +
+          previous.slice(highlight.end),
+        highlight,
+        sourceHighlight: change.sourceHighlight,
+        ruleId,
+        noteKey: ruleId,
+        ast,
+        before: ast,
+        kind: "sign",
+      });
+    }
+    steps.push({
+      tex: expressionTex(change.ast),
+      highlight,
+      sourceHighlight: change.sourceHighlight,
+      ruleId: change.ruleId,
+      noteKey: change.ruleId,
+      ast: change.ast,
+      before: ast,
+      kind: change.kind,
+    });
+    ast = change.ast;
+  }
+  return steps;
+}
+/** Full arithmetic working; additive-only examples keep the compact bracket lesson. */
+export function workOut(
+  ast: Ast,
+  { signWorking = false }: { signWorking?: boolean } = {},
+): Step[] {
+  return contains(ast, "*/") || hasMixedNumber(ast)
+    ? generalWorkOut(ast, signWorking)
+    : additiveWorkOut(ast);
 }
 export function totals(terms: Rational[]) {
   return terms.reduce(

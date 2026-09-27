@@ -5,6 +5,8 @@ import { button, field } from "./components/ui";
 const AddSubtractMode = lazy(() => import("./modes/AddSubtractMode"));
 const NumberLineMode = lazy(() => import("./modes/NumberLineMode"));
 const BracketsMode = lazy(() => import("./modes/BracketsMode"));
+const MultiplyDivideMode = lazy(() => import("./modes/MultiplyDivideMode"));
+const MixedMode = lazy(() => import("./modes/MixedMode"));
 const c = copy.apps.directedNumbers;
 type Mode = keyof typeof c.tabs;
 const modes = Object.keys(c.tabs) as Mode[];
@@ -101,6 +103,20 @@ export default function DirectedNumbers() {
       ) : mode === "brackets" ? (
         <Suspense fallback={<p>{copy.apps.loading}</p>}>
           <BracketsMode
+            key={expression ?? "default"}
+            initialExpression={expression}
+          />
+        </Suspense>
+      ) : mode === "multiply-divide" ? (
+        <Suspense fallback={<p>{copy.apps.loading}</p>}>
+          <MultiplyDivideMode
+            key={expression ?? "default"}
+            initialExpression={expression}
+          />
+        </Suspense>
+      ) : mode === "mixed" ? (
+        <Suspense fallback={<p>{copy.apps.loading}</p>}>
+          <MixedMode
             key={expression ?? "default"}
             initialExpression={expression}
           />

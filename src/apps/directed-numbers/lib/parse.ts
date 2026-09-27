@@ -17,6 +17,7 @@ export type Ast =
       span: Span;
       explicitSign: boolean;
       bracketed: boolean;
+      sourceForm?: "mixed" | "fraction" | "decimal" | "integer";
     }
   | { kind: "unary"; op: "+" | "-"; child: Ast; span: Span }
   | { kind: "group"; child: Ast; bracket: string; span: Span }
@@ -103,6 +104,13 @@ export function parse(source: string): ParseResult<Ast> {
       value: readNumber(raw),
       explicitSign: false,
       bracketed: false,
+      sourceForm: /\s+\d+\s*\//.test(raw)
+        ? "mixed"
+        : raw.includes("/")
+          ? "fraction"
+          : raw.includes(".")
+            ? "decimal"
+            : "integer",
       span: { start, end: i },
     };
   }
