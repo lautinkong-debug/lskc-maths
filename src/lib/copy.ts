@@ -139,7 +139,8 @@ export const copy = {
         show: "Show me the order",
         retry: "Try this set again",
         count: "How many numbers?",
-        next: "Next: Add & subtract",
+        next: "Next: Add & subtract with the bird",
+        birdLink: "Learn addition and subtraction with the bird →",
         play: "Practise in Number Line Town (later stage)",
         think: "Is −8 greater than −3 because 8 is greater than 3?",
         thought:
@@ -213,6 +214,47 @@ export const copy = {
       returnToLesson: "Open Add & subtract",
       intro:
         "Start at the first number. Choose a direction, count the steps and see where you land.",
+      bird: {
+        toggle: "Show the bird method",
+        title: "Follow the bird",
+        examples: "Try the examples from the video",
+        exampleOne: "+3 + (−7)",
+        exampleTwo: "−2 − (−4)",
+        start: (value: string) => `1. Start: put the bird at ${value}.`,
+        face: (op: string, side: string) =>
+          `2. Face: ${op} means the bird looks ${side}.`,
+        facePending: (op: string) =>
+          `2. Face: the operation is ${op}. Which way will the bird look?`,
+        step: (value: string, count: number, way: string) =>
+          `3. Step: ${value} means ${count} ${count === 1 ? "step" : "steps"} ${way}.`,
+        stepPending: (value: string) =>
+          `3. Step: the second number is ${value}. Forwards or backwards?`,
+        land: (side: string, value: string) =>
+          `The bird travels ${side} and lands at ${value}.`,
+        zeroLand: (value: string) =>
+          `The bird does not move. It stays at ${value}.`,
+        wait: "Predict the travel direction, then reveal the steps.",
+        faceQuestion: "Which way does the bird face?",
+        stepQuestion: "Will it step forwards, backwards, or stay here?",
+        forward: "Forwards",
+        backward: "Backwards",
+        stay: "Stay here",
+        faceCorrect: "Yes. The operation tells the bird where to face.",
+        faceWrong: (op: string, side: string) =>
+          `${op} makes the bird face ${side}. Facing is not always the same as travelling.`,
+        stepCorrect:
+          "Yes. The sign of the second number tells the bird how to step.",
+        stepWrong: (value: string, way: string) =>
+          `${value} means step ${way}. The sign gives the instruction; the distance tells us how many steps.`,
+        zeroStepWrong: "The second number is 0, so the bird stays here.",
+        travelHint: (facing: string, step: string, travel: string) =>
+          `The bird faces ${facing} and steps ${step}, so it travels ${travel}.`,
+        longHop: (count: number) =>
+          `${count} steps are shown as one long jump. The bird still travels ${count} units.`,
+        zero: "The second number is 0, so the bird stays where it started.",
+        zeroStep:
+          "3. Step: 0 means no movement. The bird stays where it started.",
+      },
       lesson: "Explore the movement",
       scrollLine: "Swipe the number line to see more.",
       working: "Working",

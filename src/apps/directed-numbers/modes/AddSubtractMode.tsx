@@ -7,6 +7,7 @@ import { Working } from "../components/Working";
 import { RuleCard } from "../components/RuleCard";
 import { ExpressionInput } from "../components/ExpressionInput";
 import { StepControls } from "../components/StepControls";
+import { BirdGuide } from "../components/BirdGuide";
 import { usePrediction } from "../components/usePrediction";
 import { button, primary, field } from "../components/ui";
 import {
@@ -14,6 +15,7 @@ import {
   journeyHops,
   journeyText,
   moveFor,
+  birdFor,
   parseJourney,
   signed,
   type Direction,
@@ -51,6 +53,7 @@ export default function AddSubtractMode({
     [step, setStep] = useState(0),
     [revealed, setRevealed] = useState(false);
   const [skin, setSkin] = useState<Skin>("plain"),
+    [showBird, setShowBird] = useState(true),
     [same, setSame] = useState(false),
     [think, setThink] = useState(false);
   const [example, setExample] = useState(0),
@@ -60,6 +63,10 @@ export default function AddSubtractMode({
     [op, setOp] = useState<Operation>(journey.moves[0].op);
   const [builderError, setBuilderError] = useState(false);
   const [direction, setDirection] = useState<Direction | null>(null),
+    [faceGuess, setFaceGuess] = useState<"left" | "right" | null>(null),
+    [stepGuess, setStepGuess] = useState<
+      "forward" | "backward" | "stay" | null
+    >(null),
     [distance, setDistance] = useState(""),
     [landing, setLanding] = useState("");
   const [distanceNote, setDistanceNote] = useState(""),
@@ -95,6 +102,11 @@ export default function AddSubtractMode({
           : c.subtractPositive;
   const hint =
     skin === "plain" ? horizontalHint : c.verticalHint(horizontalHint);
+  const bird = birdFor(move.op, move.b);
+  const birdDirectionHint =
+    move.b === 0
+      ? c.bird.zero
+      : c.bird.travelHint(bird.facing, bird.step, bird.travel);
   const horizontalSentence =
     move.b === 0
       ? c.zeroSentence(signed(start))
@@ -143,6 +155,8 @@ export default function AddSubtractMode({
         : "•";
   function clearAnswers() {
     setDirection(null);
+    setFaceGuess(null);
+    setStepGuess(null);
     setDistance("");
     setLanding("");
     setDistanceNote("");
@@ -294,6 +308,16 @@ export default function AddSubtractMode({
             <option value="lift">{c.lift}</option>
           </select>
         </label>
+        <label className="inline-flex min-h-12 items-center gap-2 font-semibold">
+          <input
+            type="checkbox"
+            checked={showBird}
+            disabled={skin !== "plain"}
+            onChange={(event) => setShowBird(event.target.checked)}
+            className="accent-navy h-5 w-5"
+          />
+          {c.bird.toggle}
+        </label>
         {journey.moves.length > 1 && (
           <span className="text-navy font-semibold">
             {c.journeyProgress(moveIndex + 1, journey.moves.length)}
@@ -309,7 +333,32 @@ export default function AddSubtractMode({
             skin={skin}
             sentence={sentence}
             presenting={presenting}
+            bird={
+              showBird && skin === "plain" && (!hidden || faceGuess !== null)
+            }
           />
+          {showBird && skin === "plain" && (
+            <BirdGuide
+              start={start}
+              end={end}
+              move={move}
+              hidden={hidden}
+              complete={complete}
+              presenting={presenting}
+              faceGuess={faceGuess}
+              stepGuess={stepGuess}
+              onFaceGuess={setFaceGuess}
+              onStepGuess={setStepGuess}
+              onReveal={() => setRevealed(true)}
+              onExample={(index) =>
+                load(
+                  index === 0
+                    ? { start: 3, moves: [{ op: "+", b: -7 }] }
+                    : { start: -2, moves: [{ op: "-", b: -4 }] },
+                )
+              }
+            />
+          )}
           <p
             aria-live="polite"
             className={`border-navy border-l-4 pl-4 font-medium ${presenting ? "text-2xl" : "text-lg"}`}
@@ -381,7 +430,11 @@ export default function AddSubtractMode({
                   role="status"
                   className={`mt-3 ${direction === rule.direction ? "text-navy" : "text-crimson-deep"}`}
                 >
-                  {direction === rule.direction ? c.directionRight : hint}
+                  {direction === rule.direction
+                    ? c.directionRight
+                    : showBird && skin === "plain"
+                      ? birdDirectionHint
+                      : hint}
                 </p>
               )}
               {!hidden && (

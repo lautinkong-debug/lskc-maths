@@ -17,7 +17,51 @@ import {
   toText,
 } from "./rational";
 import { evaluate, parse, parseAnswer } from "./parse";
-import { autoRange, hops, journeyHops, moveFor, parseJourney } from "./moves";
+import {
+  autoRange,
+  birdFor,
+  hops,
+  journeyHops,
+  moveFor,
+  parseJourney,
+} from "./moves";
+
+describe("bird number-line method", () => {
+  it.each([
+    ["+", 7, "right", "forward", "right"],
+    ["+", -7, "right", "backward", "left"],
+    ["-", 4, "left", "forward", "left"],
+    ["-", -4, "left", "backward", "right"],
+    ["+", 0, "right", "stay", "none"],
+    ["-", 0, "left", "stay", "none"],
+  ] as const)(
+    "faces and steps correctly for %s (%s)",
+    (op, b, facing, step, travel) => {
+      expect(birdFor(op, b)).toEqual({
+        facing,
+        step,
+        distance: Math.abs(b),
+        travel,
+      });
+      expect(moveFor(op, b).direction).toBe(travel);
+      for (const start of [-20, -2, 0, 3, 20]) {
+        const last = hops(start, op, b).at(-1)!;
+        expect(last.to).toBe(
+          start +
+            (travel === "left"
+              ? -Math.abs(b)
+              : travel === "right"
+                ? Math.abs(b)
+                : 0),
+        );
+      }
+    },
+  );
+  it("reaches the two positions from the teaching video", () => {
+    expect(hops(3, "+", -7).at(-1)?.to).toBe(-4);
+    expect(hops(-2, "-", -4).at(-1)?.to).toBe(2);
+  });
+});
 describe("exact directed numbers", () => {
   it("normalises fractions and negative zero", () => {
     expect(rational(6, -8)).toEqual({ n: -3, d: 4 });

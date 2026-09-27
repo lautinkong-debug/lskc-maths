@@ -168,7 +168,17 @@ export default function NumberLineMode() {
           </div>
         )}
       </div>
-      {!presenting && <p>{p.intro}</p>}
+      {!presenting && (
+        <>
+          <p>{p.intro}</p>
+          <a
+            className={`${button} inline-flex items-center`}
+            href="#add-subtract"
+          >
+            {p.birdLink}
+          </a>
+        </>
+      )}
       <div
         className={`${presenting && orderView ? "hidden" : "grid"} min-w-0 gap-4 lg:grid-cols-[3fr_2fr]`}
       >

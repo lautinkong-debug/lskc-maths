@@ -19,6 +19,15 @@ export function moveFor(op: Operation, b: number) {
       "add-pos" | "add-neg" | "sub-pos" | "sub-neg",
   };
 }
+/** The bird faces according to the operation, then follows the second number. */
+export function birdFor(op: Operation, b: number) {
+  return {
+    facing: op === "+" ? "right" : "left",
+    step: b > 0 ? "forward" : b < 0 ? "backward" : "stay",
+    distance: Math.abs(b),
+    travel: moveFor(op, b).direction,
+  } as const;
+}
 export interface Hop {
   from: number;
   to: number;

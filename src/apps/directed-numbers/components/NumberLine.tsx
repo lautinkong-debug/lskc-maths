@@ -6,6 +6,7 @@ import {
   journeyHops,
   signed,
   moveText,
+  birdFor,
   type Journey,
 } from "../lib/moves";
 export type Skin = "plain" | "thermometer" | "lift";
@@ -17,6 +18,7 @@ export function NumberLine({
   skin,
   sentence,
   presenting,
+  bird = false,
 }: {
   journey: Journey;
   position: number;
@@ -24,6 +26,7 @@ export function NumberLine({
   skin: Skin;
   sentence: string;
   presenting: boolean;
+  bird?: boolean;
 }) {
   const id = useId().replaceAll(":", "");
   const frames = journeyHops(journey),
@@ -31,6 +34,10 @@ export function NumberLine({
   const range = autoRange([journey.start, ...frames.map((frame) => frame.to)]);
   const current = visible.at(-1)?.to ?? journey.start;
   const vertical = skin !== "plain";
+  const birdFacing = birdFor(
+    journey.moves[active].op,
+    journey.moves[active].b,
+  ).facing;
   const scroller = useRef<HTMLDivElement>(null);
   const currentX = 55 + ((current - range.min) / (range.max - range.min)) * 650;
   useEffect(() => {
@@ -72,7 +79,7 @@ export function NumberLine({
           aria-label={sentence}
           className={
             vertical
-            ? `mx-auto w-full ${presenting ? "max-h-[280px]" : "max-h-[440px]"}`
+              ? `mx-auto w-full ${presenting ? "max-h-[280px]" : "max-h-[440px]"}`
               : presenting
                 ? "h-[275px] w-full min-w-[600px]"
                 : "h-auto w-full min-w-[600px]"
@@ -135,7 +142,7 @@ export function NumberLine({
                       x="155"
                       y={y(n) + 5}
                       textAnchor="end"
-                    className={`${n === 0 ? "fill-graphite font-bold" : "fill-pencil"} ${presenting ? "text-[36px]" : "text-[15px]"}`}
+                      className={`${n === 0 ? "fill-graphite font-bold" : "fill-pencil"} ${presenting ? "text-[36px]" : "text-[15px]"}`}
                     >
                       {label(n)}
                     </text>
@@ -296,6 +303,31 @@ export function NumberLine({
                     {signed(current)}
                   </text>
                 </>
+              )}
+              {bird && (
+                <g
+                  transform={`translate(${x(current)} 184) scale(${birdFacing === "left" ? -1 : 1} 1)`}
+                  className="stroke-navy"
+                  strokeWidth="2.5"
+                  strokeLinejoin="round"
+                >
+                  <ellipse
+                    cx="-3"
+                    cy="-2"
+                    rx="17"
+                    ry="11"
+                    className="fill-paper"
+                  />
+                  <circle cx="12" cy="-11" r="8" className="fill-paper" />
+                  <path d="M18 -12L28 -8L18 -4Z" className="fill-highlight" />
+                  <circle
+                    cx="14"
+                    cy="-13"
+                    r="2"
+                    className="fill-navy stroke-none"
+                  />
+                  <path d="M-10 7l-4 11m13-9l-1 9M-19-4l-9-6" fill="none" />
+                </g>
               )}
             </>
           )}

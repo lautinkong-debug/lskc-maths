@@ -332,6 +332,10 @@ rerunning the seed updates existing source records without duplicating them, and
 
 **Stage boundary:** Stage B completes Number line and Brackets only. Stop for review before Stage C.
 
+**Owner-requested addition to Add & subtract (27/09/2026):** The [linked number-line video](https://www.youtube.com/watch?v=DBSviXhkubg&t=1s) teaches a bird method: start at the first number, face right for + or left for −, then step forwards for a positive second number or backwards for a negative one. The bird's final position is the answer. The lesson now shows an original SVG bird on the existing teacher-paced number line, makes this explanation the default plain-line view, and offers prediction buttons with specific correction notes. It includes the video's two examples, `+3 + (−7) = −4` and `−2 − (−4) = +2`. Zero has a stay-put explanation. The plain line's original direction table, thermometer and lift remain available.
+
+**Quick review of the bird method:** Open `http://localhost:3000/apps/directed-numbers#add-subtract`. Choose **+3 + (−7)** in **Follow the bird**. Turn on **Predict first**. Try **Left** for facing and **Forwards** for stepping to read the two different correction notes. Choose **Right** and **Backwards**, then **Show me**. Press **Next** seven times: the bird moves left from +3 to −4. Choose **−2 − (−4)**, reveal and step four times: it faces left, walks backwards to the right, and stops at +2. Try `(+4) + (0)` to see the no-movement case. On a phone, the page should fit at 360 px with the line scrolling inside its own box; in projection mode the step controls should remain visible at 1920×1080.
+
 ## Decision log
 
 - 27/09/2026 — Directed numbers Stage B: preserve decimal notation for decimal-only bracket questions, retain exact fractions internally, and give the ordering activity its own projection view so all six chips stay visible. Point exploration stays on integer positions; fractions and decimals are available in Brackets. Native history updates keep mode links and browser Back/Forward in sync without reloading the lesson shell.
