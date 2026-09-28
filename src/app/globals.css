@@ -22,6 +22,9 @@
   --color-crimson-wash: #fbe7e8;
 
   --color-highlight: #f1d54a;
+  --color-gold: #e0b43c;
+  --color-silver: #b7c0c8;
+  --color-bronze: #c58a5a;
 
   --font-display: var(--font-spectral), Georgia, "Times New Roman", serif;
   --font-sans: var(--font-plex-sans), system-ui, -apple-system, sans-serif;

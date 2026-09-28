@@ -366,6 +366,30 @@ rerunning the seed updates existing source records without duplicating them, and
 
 **Stage boundary:** Stage C completes × and ÷ and Mixed only. Stop for review before Stage D.
 
+## Directed numbers — Stage D: Play framework (28/09/2026)
+
+**Built:** Play hub with six open worlds, three levels per world, 54 possible stars, XP, six rank titles, avatar frames and device-only progress/settings. Worlds 1 and 5 use the shared Run format, with first-operation choices in mixed questions, short mistake feedback, answer review and links back to the matching Learn mode. Challenge Run uses an eight-character set code that reproduces the same questions. The ten-question daily set uses the Hong Kong date and tracks a streak. Lift Rush has a 16-floor tower, floor-by-floor movement, keyboard controls and a 12-passenger Relaxed option. Pure generators, 11 misconception patterns, nickname/code helpers and directed scoring are ready for the later server challenge stage. No Firebase schema, rules or packages changed.
+
+**Run locally:** open PowerShell in this checkout and run `npm.cmd run dev:all`, then visit `http://localhost:3000/apps/directed-numbers#play`. No sign-in or seed is needed. The local Firebase emulators are needed for the site's app-availability check, but Play progress stays on this device.
+
+**Owner test (Stage D):**
+
+1. Open **Play ★**. Check six worlds and three level buttons in each. Every level should open; World 1 should be recommended at first. The header shows 0 of 54 stars and the Novice rank on a fresh device.
+2. Start **Number Line Town → Level 1**. Answer a comparison, an ordering question and the marked line. Choose a wrong comparison sign once: read the short number-line hint and use **Show me** to open the Learn mode.
+3. Start **Order Castle → Level 1**. Choose **Add first** for a sum that includes multiplication, then enter the correct final number. The answer is still marked wrong because the first step matters; the feedback says to multiply first. Try another question with the correct first step and press Enter in the answer box.
+4. Finish a Run and inspect the directed-number score expression, stars, XP and **Review answers**. Try **Next level**. Progress should remain after a reload, and a replay should keep the higher star count and personal-best score.
+5. Open **Challenge Run**, select five questions and make a set code. Copy the eight characters, finish or leave the run, then enter the same code. The questions should be identical and in the same order. Enter a code containing `O` for the validation message.
+6. Open **Today's challenge**. It should contain ten mixed questions; after completion, the hub says today's challenge is complete and shows the streak. Another device on the same Hong Kong date gets the same questions.
+7. Start **Lift Rush → Level 1**. For a passenger sum, tap the destination floor from B5 through G to 10/F. Also focus the game and use ↑, ↓ and Enter. A wrong floor should reveal the correct destination with a short explanation. Let the 60-second run end and inspect the stars and score.
+8. Open **Settings**. Change nickname, avatar and frame; turn on **Relaxed mode** and play Lift Rush again. It should use 12 passengers without a timer. Reset progress only if you want to erase this device's test stars and XP.
+9. At 360 px, try the map, Run and Lift Rush without horizontal page scrolling. At 1920×1080, enable Projection mode and check the question, controls and feedback from the back of the room. Repeat a Run and Lift Rush using only the keyboard.
+
+**Verification (passed):** 182 unit tests, typecheck, lint without warnings, production build and mobile/projector browser checks. In the browser, the 360 px map, Lift Rush and Order Castle had no document overflow; the 1920×1080 Lift Rush controls fit the viewport. Arrow keys plus Enter reached the correct Lift floor, and keyboard selection plus Enter submitted a correct Order Castle answer. A wrong first-operation choice displayed the correction; a five-question coded Run reached the score/review screen. Classroom-projector acceptance and use on student phones remain the owner's checks.
+
+**Known limitations:** Sign Snap, Target Hop, Red Pen Hero and the full 15-stamp book are Stage E; optional sound/vibration and Relaxed mode still need checks in those games. Class challenge persistence, teacher controls and leaderboards are Stages F–G. On a new device, progress starts afresh because it is local storage, not a student account.
+
+**Stage boundary:** Stage D stops here for owner review. Build Stage E only after approval.
+
 ## Decision log
 
 - 27/09/2026 — Directed numbers Stage B: preserve decimal notation for decimal-only bracket questions, retain exact fractions internally, and give the ordering activity its own projection view so all six chips stay visible. Point exploration stays on integer positions; fractions and decimals are available in Brackets. Native history updates keep mode links and browser Back/Forward in sync without reloading the lesson shell.

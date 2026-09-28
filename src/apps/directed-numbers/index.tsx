@@ -7,6 +7,7 @@ const NumberLineMode = lazy(() => import("./modes/NumberLineMode"));
 const BracketsMode = lazy(() => import("./modes/BracketsMode"));
 const MultiplyDivideMode = lazy(() => import("./modes/MultiplyDivideMode"));
 const MixedMode = lazy(() => import("./modes/MixedMode"));
+const PlayHub = lazy(() => import("./play/PlayHub"));
 const c = copy.apps.directedNumbers;
 type Mode = keyof typeof c.tabs;
 const modes = Object.keys(c.tabs) as Mode[];
@@ -120,6 +121,10 @@ export default function DirectedNumbers() {
             key={expression ?? "default"}
             initialExpression={expression}
           />
+        </Suspense>
+      ) : mode === "play" ? (
+        <Suspense fallback={<p>{copy.apps.loading}</p>}>
+          <PlayHub />
         </Suspense>
       ) : (
         <section className="graph-paper border-grid rounded border p-8">
