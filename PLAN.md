@@ -390,6 +390,28 @@ rerunning the seed updates existing source records without duplicating them, and
 
 **Stage boundary:** Stage D stops here for owner review. Build Stage E only after approval.
 
+## Directed numbers — Stage E: games and rewards (28/09/2026)
+
+**Built:** Sign Snap now uses sign cards for × and ÷, left/right/down keyboard controls, swipe, an occasional zero card, a 45-second timed round with faster correct-card pacing, and exact-value boss cards. Target Hop has ten solvable puzzles per level, an animated −12 to +12 line, reusable-card prevention, Undo, a shortest-route hint and per-puzzle stars. Red Pen Hero has four ordinary pages and a two-mistake boss page per level, with one clean page, three red pens, reason choices and corrected working. The 15-stamp book shows conditions for locked stamps and awards new stamps from saved device progress; new stamp inks unlock with ranks and a certificate appears on collecting all 54 stars. Game feedback uses short, specific sign and operation explanations. Optional sound, vibration and Relaxed mode are wired into the new timed game, and reduced-motion settings reach the shared game effects. Firebase and packages are unchanged.
+
+**Run locally:** in this checkout run `npm.cmd run dev:all`, then open `http://localhost:3000/apps/directed-numbers#play`. If those servers are already running, open the URL directly. The local Firebase emulators provide the site's app-availability check; Play progress is stored only in this browser.
+
+**Owner test (Stage E):**
+
+1. Open **Play ★**. Select **Sign Snap → Level 1**. On a negative card, swipe left or focus the game and press ←; use → for positive and ↓ or 0 for zero. Check that the card moves towards the matching side of the line and a wrong choice explains the sign in simple terms.
+2. Let a Sign Snap round end. Check its score expression, stars and XP. In **Settings**, turn on **Relaxed mode** and replay: 12 cards replace the timer. Try Level 3 and enter the exact value on a fifth-card bonus question.
+3. Select **Hop Island → Level 1**. Use the move cards to reach the flag, press **Undo**, then try **Hint**. Check the avatar moves along the number line, used cards cannot be replayed, and a shortest route earns three puzzle stars. Try **Show solution** on another puzzle.
+4. Select **Red Pen HQ → Level 1**. Tap a wrong line and choose its reason; read the corrected line beneath it. Tap a correct line on another page and check that one red pen is used. Page 2 should accept **All correct!**, and page 5 should ask for two mistakes.
+5. Open **Stamp book**. Check all 15 names and conditions. Earn a world-level result and verify the new stamp appears; reload and check it remains. Rank up to see additional stamp-ink choices in Settings.
+6. With sound and vibration off, then on, compare game feedback. Enable **Reduce motion** and check that card movement, stars and confetti stop animating. Vibration requires a device and browser that support it.
+7. At 360 px, check Sign Snap, Target Hop, Red Pen Hero and the stamp book for page-wide horizontal scrolling. At 1920×1080, enable **Projection mode** and check the working and controls from classroom viewing distance. Try each game using only the keyboard (Tab, Enter or Space; Sign Snap also uses arrow keys).
+
+**Verification (passed):** 186 unit tests, typecheck, lint and production build. Live browser checks at 360 px found no page-wide horizontal scroll in the hub, Sign Snap, Target Hop, Red Pen Hero or the stamp book; a Sign Snap arrow-key answer, a shortest Target Hop route, and a Red Pen correction were exercised. Sign Snap's Relaxed mode showed 12 cards and no timer. Red Pen Hero also worked with keyboard Enter and fit a 1920×1080 projection view with no horizontal scroll. Browser console reported no errors or warnings.
+
+**Known limitations:** The three class-related stamp conditions will unlock only when Stage G connects class challenge results. Progress remains local to one browser/device. The owner's classroom projection, sound and phone-vibration checks are still needed.
+
+**Stage boundary:** Stage E stops here for owner review. Stage F needs separate approval.
+
 ## Decision log
 
 - 27/09/2026 — Directed numbers Stage B: preserve decimal notation for decimal-only bracket questions, retain exact fractions internally, and give the ordering activity its own projection view so all six chips stay visible. Point exploration stays on integer positions; fractions and decimals are available in Brackets. Native history updates keep mode links and browser Back/Forward in sync without reloading the lesson shell.

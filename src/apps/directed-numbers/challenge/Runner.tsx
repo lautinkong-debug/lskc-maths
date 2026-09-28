@@ -12,9 +12,11 @@ import { misconceptionForAnswer } from "../lib/misconceptions";
 import { type GameSettings } from "../play/progress";
 import { parseAnswer } from "../lib/parse";
 import { toText } from "../lib/rational";
+import { runMetrics } from "../play/metrics";
+import { type EarnedMetrics } from "../play/progress";
 
 const c=copy.apps.directedNumbers.playLesson;
-export type RunSummary={score:ScoreBreakdown;stars:number;answers:string[];marks:Mark[];elapsedSec:number|null};
+export type RunSummary={score:ScoreBreakdown;stars:number;answers:string[];marks:Mark[];elapsedSec:number|null;metrics:EarnedMetrics};
 export function starsForRun(marks:readonly Mark[],elapsedSec:number|null,relaxed:boolean):number {
   if (!marks.length) return 0;
   const accuracy=marks.filter((mark)=>mark==="correct").length/marks.length;
@@ -39,7 +41,7 @@ export default function Runner({questions,timeLimitSec,scoring="directed",settin
   const [index,setIndex]=useState(0),[answer,setAnswer]=useState(""),[first,setFirst]=useState("");
   const [submitted,setSubmitted]=useState(false),[answers,setAnswers]=useState<string[]>([]),[marks,setMarks]=useState<Mark[]>([]),[times,setTimes]=useState<number[]>([]);
   const [complete,setComplete]=useState(false),[review,setReview]=useState(false),[remaining,setRemaining]=useState(timeLimitSec ?? 0),[elapsed,setElapsed]=useState<number|null>(null),[keypad,setKeypad]=useState(false);
-  const started=useRef(0),questionStarted=useRef(0),finished=useRef(false);
+  const started=useRef(0),questionStarted=useRef(0),finished=useRef(false),lastBeep=useRef(-1);
   const question=questions[index];
   const sound=useSound(settings.sound),haptic=useHaptics(settings.vibration);
   let liveStreak=0;
@@ -56,16 +58,18 @@ export default function Runner({questions,timeLimitSec,scoring="directed",settin
     const paddedMarks=[...finalMarks,...Array(Math.max(0,questions.length-finalMarks.length)).fill("skipped") as Mark[]];
     const seconds=timeLimitSec===null?null:Math.min(timeLimitSec,(Date.now()-started.current)/1000);
     const score=scoreRun(paddedMarks,scoring,seconds);
-    const result={score,stars:starsForRun(paddedMarks,seconds,settings.relaxed),answers:paddedAnswers,marks:paddedMarks,elapsedSec:seconds};
+    const result={score,stars:starsForRun(paddedMarks,seconds,settings.relaxed),answers:paddedAnswers,marks:paddedMarks,elapsedSec:seconds,metrics:runMetrics(questions,paddedAnswers,paddedMarks,scoring,score.total)};
     setAnswers(paddedAnswers);setMarks(paddedMarks);setElapsed(seconds);setComplete(true);
+    sound("podium");
     onFinish?.(paddedAnswers,finalTimes);onComplete?.(result);
-  },[questions,timeLimitSec,scoring,settings.relaxed,onFinish,onComplete]);
+  },[questions,timeLimitSec,scoring,settings.relaxed,onFinish,onComplete,sound]);
   useEffect(() => {
     if (timeLimitSec===null || complete) return;
     const timer=window.setInterval(() => setRemaining(Math.max(0,timeLimitSec-Math.floor((Date.now()-started.current)/1000))),250);
     return () => window.clearInterval(timer);
   },[timeLimitSec,complete]);
   useEffect(() => { if (timeLimitSec!==null && remaining===0 && !complete) finish(answers,marks,times); },[remaining,timeLimitSec,complete,answers,marks,times,finish]);
+  useEffect(()=>{if(timeLimitSec!==null&&!complete&&remaining>0&&remaining<=10&&lastBeep.current!==remaining){lastBeep.current=remaining;sound("countdown");}},[remaining,timeLimitSec,complete,sound]);
   function submit(skip=false) {
     if (submitted || complete || !question) return;
     if (!skip && (!answer.trim() || (question.firstAnswer && !first))) return;
@@ -80,7 +84,7 @@ export default function Runner({questions,timeLimitSec,scoring="directed",settin
     setIndex(index+1);setAnswer("");setFirst("");setSubmitted(false);questionStarted.current=Date.now();
   }
   function restart() {
-    finished.current=false;started.current=Date.now();questionStarted.current=Date.now();setIndex(0);setAnswer("");setFirst("");setSubmitted(false);setAnswers([]);setMarks([]);setTimes([]);setElapsed(null);setComplete(false);setReview(false);setRemaining(timeLimitSec??0);
+    finished.current=false;lastBeep.current=-1;started.current=Date.now();questionStarted.current=Date.now();setIndex(0);setAnswer("");setFirst("");setSubmitted(false);setAnswers([]);setMarks([]);setTimes([]);setElapsed(null);setComplete(false);setReview(false);setRemaining(timeLimitSec??0);
   }
   function key(value:string) {
     if (value==="enter") {submit();return;}
@@ -90,15 +94,15 @@ export default function Runner({questions,timeLimitSec,scoring="directed",settin
   }
   if (!questions.length) return <p>{c.chooseSkill}</p>;
   if (complete) return <section className="relative space-y-5" aria-label={c.complete}>
-    <PaperConfetti show={stars===3} />
+    <PaperConfetti show={stars===3} reduceMotion={settings.reduceMotion} />
     <h2 className="font-display text-navy text-3xl font-bold">{c.complete}</h2>
     <div className="border-grid bg-paper rounded border p-5 shadow-sm">
-      <StarRating count={stars} />
+      <StarRating count={stars} animate reduceMotion={settings.reduceMotion} />
       <p className="mt-3 text-2xl">{c.score} <CountUpScore value={summaryScore.total} /></p>
       <p className="font-semibold">{c.scoreWorking}</p>
       <p className="overflow-x-auto tabular-nums">{summaryScore.terms.map((term)=>term.label).join(" + ")} = <strong>{signedScore(summaryScore.total)}</strong></p>
       <p>{c.earned(summaryScore.positiveEarned)}</p>
-      {stars===3 && <Stamp label={c.threeStars} />}
+      {stars===3 && <Stamp label={c.threeStars} reduceMotion={settings.reduceMotion} />}
     </div>
     <div className="flex flex-wrap gap-2"><button className={primary} onClick={restart}>{c.tryAgain}</button><button className={button} onClick={()=>setReview(!review)}>{c.review}</button>{onNextLevel && <button className={button} onClick={onNextLevel}>{c.nextLevel}</button>}{onExit && <button className={button} onClick={onExit}>{c.back}</button>}</div>
     {review && <ol className="space-y-3">{questions.map((item,i)=><li key={item.id} className="border-grid bg-paper rounded border p-3"><strong>{c.question(i+1,questions.length)}:</strong> {item.promptText} {item.promptTex && <Tex>{item.promptTex}</Tex>}<p>{c.correctAnswer(presentAnswer(item))}</p>{marks[i]!=="correct" && <a className="text-navy underline" href={showMeUrl(item)}>{c.showMe}</a>}</li>)}</ol>}
@@ -106,7 +110,7 @@ export default function Runner({questions,timeLimitSec,scoring="directed",settin
   const note=question.context ? misconceptionForAnswer(question.context,answer) : null;
   const wrongNote=question.firstAnswer && first!==question.firstAnswer ? c.firstStepWrong+(question.firstAnswer==="brackets"?c.bracketFirst:c.wrongOrder) : note ? c.misconceptionNotes[note] : question.type==="compare" ? c.compareHint : question.type==="order" ? c.orderHint : question.type==="sign" ? c.zeroHint : c.wrongSign;
   return <section className="min-w-0 space-y-4" aria-label={c.question(index+1,questions.length)}>
-    <Hud score={liveScore} index={index+1} total={questions.length} streak={liveStreak} remaining={timeLimitSec===null?undefined:remaining} timeLimit={timeLimitSec??undefined} />
+    <Hud score={liveScore} index={index+1} total={questions.length} streak={liveStreak} remaining={timeLimitSec===null?undefined:remaining} timeLimit={timeLimitSec??undefined} reduceMotion={settings.reduceMotion} />
     <div className="border-grid bg-paper min-w-0 space-y-5 rounded border p-5 shadow-sm rotate-[-1deg]">
       <div className="flex items-center gap-3"><Avatar emoji={avatarEmoji} name={avatarEmoji} /><p className="font-semibold">{question.promptText}</p></div>
       {question.promptTex && <div className="overflow-x-auto text-2xl sm:text-4xl"><Tex className="whitespace-nowrap">{question.promptTex}</Tex></div>}
