@@ -264,6 +264,10 @@ rerunning the seed updates existing source records without duplicating them, and
 - [x] `firebase.json` rules and indexes deploy config (already present and verified)
 - [ ] Post-launch checklist: open the live site signed out, sign in as teacher, upload one test file, check it appears signed out, delete it
 - [ ] Configure Storage bucket CORS for the site's origin so SDK `getBlob` previews and downloads work in production; verify with the post-launch test file
+- [ ] In the dedicated Mathematics Firebase project, enable **Authentication → Sign-in method → Anonymous** before students use public-mode challenges. Keep Google sign-in for teachers. If switching to school mode, confirm the students' Google-account domain with the owner and include it in the allowed domains before enabling student challenges.
+- [ ] In **Firestore Database → Time-to-live**, create an `expireAt` TTL policy for each challenge collection group: `rooms`, `roomCodes`, `entries`, `private`, `runs`, `stats` and `classBoards`. Confirm all seven policies are enabled. TTL deletion is asynchronous, so check the school's privacy policy and the exact join-page notice in `copy.ts` before real students join.
+- [ ] Use **Firebase App Hosting**, with a live Node runtime and default Firebase Admin credentials, for `/api/challenges/join`, `/start`, `/submit` and `/rooms/[roomId]`; confirm these POST/DELETE routes work on the hosted site. A static-only host cannot mark or save challenge scores. Verify a student cannot write a score directly in Firestore.
+- [ ] Decide whether to add Firebase App Check if abuse appears; it is not required or enabled for the first classroom trial. Set the Blaze budget alert before opening public reads and challenge traffic.
 - [x] Note in the README how to switch to `school` mode later (one variable, rebuild rules, redeploy)
 
 ---
@@ -434,8 +438,33 @@ rerunning the seed updates existing source records without duplicating them, and
 
 **Stage boundary:** Stage F stops here for owner review. Stage G needs separate approval.
 
+## Directed numbers — Stage G: challenge experience and boards (28/09/2026)
+
+**Built:** Teachers can create and list live or homework challenges, project a lobby code and QR code, follow a live top-10 board, reveal the podium one place at a time, inspect a per-question accuracy chart with **Show me** links, and see class numbers in a teacher-only result table. Students can join with a generated nickname and avatar, wait for the teacher, complete a server-marked run, see their directed-number score and gap to the next place, and review their answers. A run and result survive a page refresh in the same tab. `/boards` shows seasonal class averages after five players. The Play hub and site header link to these routes. The teacher form offers one-tap Gentle scoring, No timer and Avatars only presets.
+
+**Run locally:** open PowerShell in this checkout and run `npm.cmd run dev:all`. In a second PowerShell window in the same checkout, run `npm.cmd run seed`. Keep the first window open while testing. All challenge data is in the local `demo-lskc-maths` emulators.
+
+**Owner test (Stage G):**
+
+1. Open two browser windows, one signed in as the seeded teacher and one private window as a student, and join room `MATH23`. In the teacher window, go to `http://localhost:3000/login` and choose the **Teacher** local-test button; the student window needs no sign-in.
+2. In the teacher window open `http://localhost:3000/challenges/demoDirectedNumbers01`. Check that the lobby shows `MATH23`, a QR code, five demo avatars, and the new student's avatar after joining.
+3. In the private window open `http://localhost:3000/join`, enter `MATH23`, choose a generated nickname and avatar, and click **Join challenge**. Check the privacy notice and waiting screen; only the teacher should see an optional class number.
+4. Back in the teacher window click **Start**. The student should see **Start my questions**, a 3–2–1 countdown, then five questions. Answer or skip them, and refresh once during the run: it should return to the same question.
+5. Finish the student run. Check the score expression, personal-best stamp, gap to the next place and **Review answers**; wrong answers show a correction and **Show me**. Refresh the result page and confirm it remains visible. The phone should not show how far the student is from first place.
+6. In the teacher window, check the live board shows the student's server-marked score and no ranks below 10th. Click **End now**, then **Reveal next podium place** until all finishers are shown (once if only one student finished). Check the podium, accuracy bars, and a **Show me** link that opens the matching Learn mode.
+7. Open **Teacher details** to see class numbers privately, then open `http://localhost:3000/boards`. A class needs five completed players before it appears; check that classes are sorted by average score, not total score.
+8. Open `http://localhost:3000/challenges/new?app=directed-numbers`, try the **Gentle scoring**, **No timer** and **Avatars only** presets, and create a fresh room. Check the new code and QR code. At 360 px there should be no horizontal page scrolling; at 1920×1080 the lobby, live board and podium should be readable from the back of the classroom. Use Tab and Enter to operate the form and main controls.
+
+**Verification (passed):** Lint, typecheck, 186 unit tests, production build, 24 rules tests, six challenge backend tests, five Playwright browser tests, and `git diff --check`. The new browser test uses separate teacher and anonymous-student contexts; it checks room creation, joining, refresh during a run, refresh after results, and a score on the teacher board. Manual browser checks found no page-wide overflow at 360 px on Join and the teacher form; the lobby QR and avatars rendered at 1920×1080. Production-build Lighthouse mobile scores were `/join`: 51 performance / 100 accessibility / 100 best practices / 100 SEO, and the directed-numbers app: 65 / 100 / 100 / 100. Lighthouse warned that this local device's CPU is slower than its expected calibration; unused JavaScript and main-thread work remain performance opportunities.
+
+**Known limitations:** The school's data-privacy policy has not been provided for comparison with the join-page notice. Real Firebase still needs Anonymous sign-in and seven Firestore TTL policies before students use the boards. The owner should verify actual phones, classroom projector legibility, QR scanning and the school's Google domain if school-only mode is planned. No real Firebase project was changed. Progress and avatar frames remain local to one browser/device.
+
+**Stage boundary:** Stage G completes the seven-stage directed-numbers brief. Stop for owner review; do not deploy or change real Firebase without a separate request.
+
 ## Decision log
 
+- 28/09/2026 — Stage G keeps the student's phone focused on the gap to the next place, following the owner's explicit request; the teacher board shows at most the top 10. Correct-answer review uses the same pure grader as the server, so equivalent answers do not get an unnecessary correction. The class board offers the current and previous five school terms.
+- 28/09/2026 — Challenge result and in-progress question state are held in per-tab `sessionStorage` so a refresh returns to the same point; the server remains authoritative for the run and score. Phase 8 must enable Anonymous Authentication, the seven `expireAt` TTL policies, and App Hosting Node routes with Admin default credentials. App Check remains a later abuse-control option.
 - 28/09/2026 — Stage F challenge scores are re-marked on the server and browser-supplied scores and timings are ignored. A student can still calculate answers outside the app or inspect generated questions in developer tools; this is acceptable for class practice. App Check remains an option if abuse appears. The 60-day privacy promise requires launch-time Firestore TTL policies, and early closing or extending a room updates every existing child document's expiry.
 - 27/09/2026 — Directed numbers Stage B: preserve decimal notation for decimal-only bracket questions, retain exact fractions internally, and give the ordering activity its own projection view so all six chips stay visible. Point exploration stays on integer positions; fractions and decimals are available in Brackets. Native history updates keep mode links and browser Back/Forward in sync without reloading the lesson shell.
 

@@ -2,6 +2,7 @@ import { collection,doc,getDoc,getDocs,onSnapshot,query,updateDoc,where,writeBat
 import { db,auth } from "@/lib/firebase";
 import { type NicknameIndex } from "@/lib/challenges/nicknames";
 import { randomJoinCode } from "@/lib/challenges/codes";
+import { normaliseCode,validJoinCode } from "@/lib/challenges/codes";
 import { expireAfter,seasonFor,validClassTag,validSettings } from "@/lib/challenges/logic";
 import { type ChallengeRoom,type ChallengeEntry,type ClassBoard,type ChallengeKind,type ChallengeSettings } from "@/lib/challenges/types";
 
@@ -57,6 +58,17 @@ export async function extendChallengeRoom(roomId:string,seconds=120):Promise<voi
 export async function getChallengeRoom(roomId:string):Promise<ChallengeRoom|null> {
   const snapshot=await getDoc(room(roomId));return snapshot.exists()?snapshot.data():null;
 }
+export async function findChallengeByCode(rawCode:string):Promise<ChallengeRoom|null> {
+  if(!validJoinCode(rawCode))return null;
+  const code=normaliseCode(rawCode),lookup=await getDoc(doc(db,"roomCodes",code));
+  if(!lookup.exists())return null;
+  const roomId=lookup.data().roomId;
+  return typeof roomId==="string"?getChallengeRoom(roomId):null;
+}
+export async function getChallengeEntry(roomId:string,uid:string):Promise<ChallengeEntry|null> {
+  const snapshot=await getDoc(doc(db,"rooms",roomId,"entries",uid).withConverter(entryConverter));
+  return snapshot.exists()?snapshot.data():null;
+}
 export async function listTeacherChallenges(email:string):Promise<ChallengeRoom[]> {
   const snapshot=await getDocs(query(collection(db,"rooms").withConverter(roomConverter),where("createdBy","==",email.toLowerCase())));
   return snapshot.docs.map((item)=>item.data()).sort((a,b)=>b.createdAt.getTime()-a.createdAt.getTime());
@@ -69,6 +81,14 @@ export function watchChallengeEntries(roomId:string,onChange:(value:ChallengeEnt
 }
 export function watchClassBoard(id:string,onChange:(value:ClassBoard|null)=>void,onError:(error:Error)=>void):Unsubscribe {
   return onSnapshot(doc(db,"classBoards",id).withConverter(boardConverter),(snap)=>onChange(snap.exists()?snap.data():null),onError);
+}
+export type QuestionStat={attempts:number;correct:number};
+export function watchChallengeStats(roomId:string,onChange:(value:QuestionStat[])=>void,onError:(error:Error)=>void):Unsubscribe {
+  return onSnapshot(doc(db,"rooms",roomId,"stats","questions"),(snap)=>onChange((snap.data()?.perQuestion as QuestionStat[]|undefined)??[]),onError);
+}
+export async function getChallengeClassNumbers(roomId:string):Promise<Record<string,number|null>> {
+  const snapshot=await getDocs(collection(db,"rooms",roomId,"private"));
+  return Object.fromEntries(snapshot.docs.map((item)=>[item.id,(item.data().classNumber as number|null)??null]));
 }
 async function callApi<T>(path:string,method:"POST"|"PATCH"|"DELETE",body?:object):Promise<T> {
   const token=await auth.currentUser?.getIdToken();if(!token)throw new Error("Join or sign in first.");

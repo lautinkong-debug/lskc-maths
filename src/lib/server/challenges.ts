@@ -110,7 +110,10 @@ export async function submitChallenge(uid:string,input:SubmitInput):Promise<{sco
     transaction.update(entryRef,{firstScore,bestScore,bestAccuracy,bestElapsedMs,improvement:Math.max(0,bestScore-firstScore),sortKey:key,lastSubmittedAt:at(now)});
     if(run.attemptNo===1){
       const current=(statsDoc.get("perQuestion") as Array<{attempts:number;correct:number}>|undefined)??Array.from({length:questions.length},()=>({attempts:0,correct:0}));
-      const perQuestion=current.map((item,index)=>({attempts:item.attempts+1,correct:item.correct+(marks[index]==="correct"?1:0)}));
+      const perQuestion=current.map((item,index)=>{
+        const runIndex=run.questionOrder.indexOf(index);
+        return {attempts:item.attempts+1,correct:item.correct+(marks[runIndex]==="correct"?1:0)};
+      });
       transaction.set(statsRef,{perQuestion,expireAt:room.expireAt});
     }
     if(room.classTag){

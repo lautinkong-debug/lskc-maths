@@ -37,7 +37,7 @@ Curriculum context: HKDSE Mathematics, levels F1–F6 plus Extended Part Module 
 ## Tech stack
 
 - Next.js 16 (App Router) + TypeScript (strict) + Tailwind CSS v4
-- Firebase: Authentication (Google provider), Firestore, Cloud Storage, App Hosting
+- Firebase: Authentication (Google for teachers, Anonymous for challenge students in public mode), Firestore, Cloud Storage, App Hosting
 - Firebase Web SDK (modular v10+ API) on the client
 - KaTeX (`katex`, rendered via a small `<Math>` component) for all mathematical notation
 - `react-pdf` (pdf.js) for in-page PDF preview — browser-native PDF iframes are unreliable on iOS
@@ -55,6 +55,8 @@ npm run seed           # seed emulators with sample teachers, topics and files
 npm run rules:build    # generate firestore.rules / storage.rules from templates
 npm run test           # unit tests
 npm run test:rules     # security-rules tests (needs emulators)
+npm run test:challenges # challenge API tests (needs emulators)
+npm run test:e2e       # two-browser challenge flow and site smoke tests
 npm run lint
 npm run build
 ```
@@ -79,6 +81,9 @@ src/
     login/page.tsx
     apps/page.tsx                 Web Apps index (filter + search)
     apps/[slug]/page.tsx          Hosts one app from the registry
+    challenges/                  Teacher room list, creation, live board and results
+    join/                        Student challenge join and run
+    boards/page.tsx              Class-versus-class averages
     mistakes-book/page.tsx        Browse by level / topic
     mistakes-book/[id]/page.tsx   Preview / download one book
     manage/                       Teacher-only
@@ -91,6 +96,7 @@ src/
     quadratic-explorer/
     unit-circle/
     inequality-number-line/
+    directed-numbers/            Learn, Play and pure challenge runner
   components/                     Shared UI (AuthGate, Math, PresentationFrame, FileViewer…)
   lib/
     firebase.ts                   Init + emulator wiring
@@ -146,7 +152,16 @@ The UI hiding a button is a convenience, never the protection. Every permission 
 - Register it with one entry in `src/apps/registry.ts`: `slug, title, topic, levels, strand, summary, thumbnail, load: () => import('./<slug>')`.
 - `/apps/[slug]` wraps the app in `<PresentationFrame>`, which provides the Presentation mode button (Fullscreen API + larger type/controls) and exposes `usePresentation()` so apps can enlarge labels.
 - Apps are pure client components, need no Firebase access, and must work with mouse, touch and keyboard.
-- Adding an app must never require touching any file other than its own folder and `registry.ts`.
+- A teaching app without challenges normally needs only its own folder, `registry.ts` and its central copy block.
+- An app may offer class challenges through a Firebase-free `challenge/definition.ts` (pure question generation and grading) and `challenge/Runner.tsx` (client UI). Register these in `src/apps/challenge-definitions.ts` and `src/apps/challenge-runners.ts`; challenge pages, database helpers and server routes stay outside the app. Keep challenge wording in `copy.ts`.
+
+## Challenges and leaderboards (owner decision, 2026-09-27)
+
+- Teachers create live or homework rooms; students join with a six-character code, a generated nickname and avatar. In public mode, joining uses Firebase Anonymous sign-in. In school mode, students use their school Google account. Anonymous users remain visitors in the header.
+- The client can create and control a teacher-owned room under the validated Firestore rules. Every student score is written only by the Node server: Firebase Admin verifies the ID token, regenerates the questions and re-marks the answers. Students have no client score-write path.
+- Public challenge entries use generated nicknames, avatars and scores. Optional class numbers are in a teacher-only collection. The projector shows at most the top 10; a student's phone shows the gap to the next place, and celebrates a personal best. Gentle scoring, no time pressure and avatars-only display are teacher presets. Class boards rank classes with at least five players by average best score.
+- Challenge documents carry `expireAt` 60 days after the room closes. The real Firebase project must enable Firestore TTL on every challenge collection group before students use it. Compare the exact join-page privacy notice in `copy.ts` with the school's policy before launch. Teachers may delete a room sooner.
+- The Admin SDK uses local emulators for development and default credentials on App Hosting. Never import it into a client component. App Check may be added if abuse appears; it is not active now.
 
 ## Design direction
 
@@ -165,6 +180,7 @@ Theme: **the maths exercise book** — graph paper, pencil, and the teacher's re
 - Home hero: a live graph on graph paper (e.g. a parabola the visitor can drag) — this is the one bold element. Keep the rest calm.
 - Mistakes Book uses `crimson` as its identity; Web Apps use `navy`. The crest appears in the header and on the Home hero, never stretched or recoloured.
 - Avoid: all-caps eyebrow labels, identical shadowed cards for everything, gradient washes, entrance animations on every section.
+- Game screens may use teacher-style stamps, confetti, animations and optional sound. They still use the exercise-book palette, keep sound off by default and respect reduced-motion settings. Learn screens stay calm.
 - Quality floor: responsive from 360 px to 1920 px, readable from the back of a classroom in Presentation mode, visible keyboard focus, `prefers-reduced-motion` respected, WCAG AA contrast.
 
 ## Code conventions

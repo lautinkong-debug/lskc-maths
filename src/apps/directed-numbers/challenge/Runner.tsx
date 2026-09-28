@@ -17,6 +17,7 @@ import { type EarnedMetrics } from "../play/progress";
 
 const c=copy.apps.directedNumbers.playLesson;
 export type RunSummary={score:ScoreBreakdown;stars:number;answers:string[];marks:Mark[];elapsedSec:number|null;metrics:EarnedMetrics};
+type SavedRun={version:1;index:number;answer:string;first:string;submitted:boolean;answers:string[];marks:Mark[];times:number[];startedAt:number;questionStartedAt:number};
 export function starsForRun(marks:readonly Mark[],elapsedSec:number|null,relaxed:boolean):number {
   if (!marks.length) return 0;
   const accuracy=marks.filter((mark)=>mark==="correct").length/marks.length;
@@ -33,14 +34,15 @@ function MarkedLine({question}:{question:Question}) {
     <text x={x(value)} y="37" textAnchor="middle" fontSize="24" fontWeight="bold" fill="var(--color-crimson-deep)">A</text>
   </svg>;
 }
-export default function Runner({questions,timeLimitSec,scoring="directed",settings,onFinish,onComplete,onExit,onNextLevel,avatarEmoji="🦊"}:{
+export default function Runner({questions,timeLimitSec,scoring="directed",settings,onFinish,onComplete,onExit,onNextLevel,avatarEmoji="🦊",storageKey,startedAt}:{
   questions:Question[];timeLimitSec:number|null;scoring?:Scoring;settings:GameSettings;
   onFinish?:(answers:string[],clientTimingsMs:number[])=>void;
-  onComplete?:(summary:RunSummary)=>void;onExit?:()=>void;onNextLevel?:()=>void;avatarEmoji?:string;
+  onComplete?:(summary:RunSummary)=>void;onExit?:()=>void;onNextLevel?:()=>void;avatarEmoji?:string;storageKey?:string;startedAt?:number;
 }) {
   const [index,setIndex]=useState(0),[answer,setAnswer]=useState(""),[first,setFirst]=useState("");
   const [submitted,setSubmitted]=useState(false),[answers,setAnswers]=useState<string[]>([]),[marks,setMarks]=useState<Mark[]>([]),[times,setTimes]=useState<number[]>([]);
   const [complete,setComplete]=useState(false),[review,setReview]=useState(false),[remaining,setRemaining]=useState(timeLimitSec ?? 0),[elapsed,setElapsed]=useState<number|null>(null),[keypad,setKeypad]=useState(false);
+  const [restored,setRestored]=useState(!storageKey);
   const started=useRef(0),questionStarted=useRef(0),finished=useRef(false),lastBeep=useRef(-1);
   const question=questions[index];
   const sound=useSound(settings.sound),haptic=useHaptics(settings.vibration);
@@ -51,7 +53,28 @@ export default function Runner({questions,timeLimitSec,scoring="directed",settin
   const correct=question && submitted && gradeQuestion(question,currentResponse);
   const summaryScore=scoreRun(marks,scoring,elapsed);
   const stars=starsForRun(marks,elapsed,settings.relaxed);
-  useEffect(()=>{const now=Date.now();started.current=now;questionStarted.current=now;},[]);
+  useEffect(()=>{
+    const timer=window.setTimeout(()=>{
+      const now=Date.now();started.current=startedAt??now;questionStarted.current=now;
+      if(storageKey){
+        try{
+          const saved=JSON.parse(sessionStorage.getItem(storageKey)??"null") as SavedRun|null;
+          if(saved?.version===1&&Number.isInteger(saved.index)&&saved.index>=0&&saved.index<questions.length&&Array.isArray(saved.answers)&&saved.answers.length<=questions.length){
+            setIndex(saved.index);setAnswer(saved.answer);setFirst(saved.first);setSubmitted(saved.submitted);setAnswers(saved.answers);setMarks(saved.marks);setTimes(saved.times);
+            started.current=saved.startedAt;questionStarted.current=saved.questionStartedAt;
+          }
+        }catch{/* Continue with the current question if session storage is unavailable. */}
+        setRestored(true);
+      }
+      if(timeLimitSec!==null)setRemaining(Math.max(0,timeLimitSec-Math.floor((now-started.current)/1000)));
+    },0);
+    return()=>window.clearTimeout(timer);
+  },[storageKey,startedAt,questions.length,timeLimitSec]);
+  useEffect(()=>{
+    if(!storageKey||!restored||complete)return;
+    const saved:SavedRun={version:1,index,answer,first,submitted,answers,marks,times,startedAt:started.current,questionStartedAt:questionStarted.current};
+    try{sessionStorage.setItem(storageKey,JSON.stringify(saved));}catch{/* The run still works without session storage. */}
+  },[storageKey,restored,complete,index,answer,first,submitted,answers,marks,times]);
   const finish=useCallback((finalAnswers:string[],finalMarks:Mark[],finalTimes:number[])=>{
     if (finished.current) return; finished.current=true;
     const paddedAnswers=[...finalAnswers,...Array(Math.max(0,questions.length-finalAnswers.length)).fill("")];
@@ -64,11 +87,11 @@ export default function Runner({questions,timeLimitSec,scoring="directed",settin
     onFinish?.(paddedAnswers,finalTimes);onComplete?.(result);
   },[questions,timeLimitSec,scoring,settings.relaxed,onFinish,onComplete,sound]);
   useEffect(() => {
-    if (timeLimitSec===null || complete) return;
+    if (timeLimitSec===null || complete || !restored) return;
     const timer=window.setInterval(() => setRemaining(Math.max(0,timeLimitSec-Math.floor((Date.now()-started.current)/1000))),250);
     return () => window.clearInterval(timer);
-  },[timeLimitSec,complete]);
-  useEffect(() => { if (timeLimitSec!==null && remaining===0 && !complete) finish(answers,marks,times); },[remaining,timeLimitSec,complete,answers,marks,times,finish]);
+  },[timeLimitSec,complete,restored]);
+  useEffect(() => { if (timeLimitSec!==null && remaining===0 && !complete && restored) finish(answers,marks,times); },[remaining,timeLimitSec,complete,restored,answers,marks,times,finish]);
   useEffect(()=>{if(timeLimitSec!==null&&!complete&&remaining>0&&remaining<=10&&lastBeep.current!==remaining){lastBeep.current=remaining;sound("countdown");}},[remaining,timeLimitSec,complete,sound]);
   function submit(skip=false) {
     if (submitted || complete || !question) return;
@@ -92,6 +115,7 @@ export default function Runner({questions,timeLimitSec,scoring="directed",settin
     else if (value==="clear") setAnswer("");
     else setAnswer(answer+(value==="a/b"?"/":value==="space"?" ":value));
   }
+  if(!restored)return <p role="status">{copy.challenges.loading}</p>;
   if (!questions.length) return <p>{c.chooseSkill}</p>;
   if (complete) return <section className="relative space-y-5" aria-label={c.complete}>
     <PaperConfetti show={stars===3} reduceMotion={settings.reduceMotion} />

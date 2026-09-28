@@ -11,6 +11,7 @@ import { useEditMode } from "@/lib/editMode";
 const NAV = [
   { href: "/", label: copy.nav.home },
   { href: "/apps", label: copy.nav.apps },
+  { href: "/join", label: copy.nav.joinChallenge },
   { href: "/mistakes-book", label: copy.nav.mistakesBook },
 ] as const;
 
@@ -40,6 +41,15 @@ export function SiteHeader() {
         >
           {copy.nav.editPage}
         </button>
+      )}
+      {isTeacher && (
+        <Link
+          href="/challenges"
+          onClick={() => setOpen(false)}
+          className="text-navy-soft text-sm hover:text-white"
+        >
+          {copy.challenges.myTitle}
+        </Link>
       )}
       {isTeacher && (
         <Link

@@ -1,8 +1,10 @@
 "use client";
+import Link from "next/link";
 import { lazy,Suspense,useState } from "react";
 import { usePresentation } from "@/components/PresentationFrame";
 import { Avatar,Stamp,StarRating } from "@/components/game";
 import { copy } from "@/lib/copy";
+import { useAuth } from "@/lib/auth";
 import { ADJECTIVES,ANIMALS,avatar,nickname } from "@/lib/challenges/nicknames";
 import { button,field,primary } from "../components/ui";
 import { generateQuestions } from "../lib/generate";
@@ -61,6 +63,7 @@ function ChallengeSetup({onStart,onBack}:{onStart:(code:string)=>void;onBack:()=
 }
 export default function PlayHub() {
   const presenting=usePresentation();
+  const {role}=useAuth();
   const [progress,update]=useProgress(),[screen,setScreen]=useState<Screen>("hub"),[run,setRun]=useState<RunPlan|null>(null),[gameLevel,setGameLevel]=useState<WorldLevel>(1),[gameSeed,setGameSeed]=useState(0),[reward,setReward]=useState<"rank"|"best"|null>(null),[earnedStamps,setEarnedStamps]=useState<StampId[]>([]);
   const today=hongKongDate(),recommended=recommendedLevel(progress),rank=rankIndex(progress.xp);
   const emoji=avatar(progress.nickname),name=nickname(progress.nickname);
@@ -108,6 +111,6 @@ export default function PlayHub() {
         <div className="mt-3 flex flex-wrap gap-2">{([1,2,3] as const).map((level)=><button key={level} className={`${button} flex min-w-24 flex-col items-center px-2 ${levelRecommended&&recommended.level===level?"border-navy bg-highlight/30":""}`} onClick={()=>startWorld(worldNo,level)}>{c.level(level)}{level===3&&<small>{c.boss}</small>}<StarRating count={progress.stars[`${worldNo}-${level}`]??0}/></button>)}</div>
       </section>;
     })}</div>
-    <div className="flex flex-wrap gap-2"><button className={primary} onClick={()=>setScreen("challenge")}>{c.challengeRun}</button><button className={button} onClick={()=>setScreen("settings")}>{c.settings}</button><button className={button} onClick={()=>setScreen("stamps")}>{c.stampBook} ({unlockedStamps(progress).length}/15)</button><button className={button} disabled>{c.classJoin}</button></div>
+    <div className="flex flex-wrap gap-2"><button className={primary} onClick={()=>setScreen("challenge")}>{c.challengeRun}</button><button className={button} onClick={()=>setScreen("settings")}>{c.settings}</button><button className={button} onClick={()=>setScreen("stamps")}>{c.stampBook} ({unlockedStamps(progress).length}/15)</button><Link className={button} href="/join">{c.classJoin}</Link><Link className={button} href="/boards">{copy.challenges.boardsTitle}</Link>{(role==="teacher"||role==="admin")&&<Link className={button} href="/challenges/new?app=directed-numbers">{c.classStart}</Link>}</div>
   </section>;
 }
