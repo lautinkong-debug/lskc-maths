@@ -5,6 +5,7 @@ import { config as loadEnv } from "dotenv";
 import { initializeTestEnvironment } from "@firebase/rules-unit-testing";
 import { parseTopicMarkdown } from "./parse-topics";
 import { copy } from "../src/lib/copy";
+import { avatar,nickname,type NicknameIndex } from "../src/lib/challenges/nicknames";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 loadEnv({ path: resolve(root, ".env.local"), quiet: true });
@@ -153,13 +154,28 @@ async function main() {
           updatedAt: now,
         });
       }
+      const demoRoomId="demoDirectedNumbers01",demoCode="MATH23",demoRoom=firestore.doc(`rooms/${demoRoomId}`),demoCodeRef=firestore.doc(`roomCodes/${demoCode}`);
+      if(!(await demoRoom.get()).exists&&!(await demoCodeRef.get()).exists){
+        const closesAt=new Date(now.getTime()+24*60*60*1000),expireAt=new Date(closesAt.getTime()+60*24*60*60*1000);
+        const demoBatch=firestore.batch();
+        demoBatch.set(demoRoom,{code:demoCode,appSlug:"directed-numbers",title:"Directed numbers demo",kind:"live",settings:{skills:["numberLine","addSubtract","mixed"],level:1,questionCount:5,timeLimitSec:300,scoring:"gentle",order:"same",maxAttempts:2,showNames:"top10"},seed:60928,classTag:"1A",season:"2026-27-T1",status:"lobby",opensAt:now,closesAt,createdBy:"t28ltk@lskc.edu.hk",createdAt:now,expireAt,playerCount:5});
+        demoBatch.set(demoCodeRef,{roomId:demoRoomId,expireAt});
+        const players:NicknameIndex[]=[[23,0],[2,1],[1,2],[13,3],[5,4]];
+        players.forEach((choice,index)=>{
+          const uid=`demo-player-${index+1}`;
+          demoBatch.set(firestore.doc(`rooms/${demoRoomId}/entries/${uid}`),{nickname:nickname(choice),avatar:avatar(choice),frame:0,joinedAt:now,attempts:0,firstScore:null,bestScore:null,bestAccuracy:null,bestElapsedMs:null,improvement:0,sortKey:null,lastSubmittedAt:null,lastStartedAt:null,expireAt});
+          demoBatch.set(firestore.doc(`rooms/${demoRoomId}/private/${uid}`),{classNumber:null,expireAt});
+        });
+        await demoBatch.commit();
+      }
     });
   } finally {
     await testEnv.cleanup();
   }
   process.stdout.write(
     `Seeded 3 verified local accounts (admin, teacher, viewer). Test password: ${password}\n` +
-      `Topics: ${sourceTopics.length} total (${created} new, ${updated} updated, ${sourceTopics.length - created - updated} unchanged).\n`,
+      `Topics: ${sourceTopics.length} total (${created} new, ${updated} updated, ${sourceTopics.length - created - updated} unchanged).\n`+
+      "Demo directed-numbers room: MATH23 (five generated players).\n",
   );
 }
 

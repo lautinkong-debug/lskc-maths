@@ -11,6 +11,7 @@ import {
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
+  signInAnonymously,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -29,6 +30,7 @@ interface AuthState {
   error: string | null;
   signIn: () => Promise<void>;
   signInTestAccount: (email: string, password: string) => Promise<void>;
+  joinAnonymously: () => Promise<User>;
   signOutUser: () => Promise<void>;
 }
 
@@ -52,9 +54,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (nextUser) => {
         stopTeacherWatch?.();
         stopTeacherWatch = undefined;
-        setUser(nextUser);
+        setUser(nextUser?.isAnonymous?null:nextUser);
         setError(null);
-        if (!nextUser) {
+        if (!nextUser||nextUser.isAnonymous) {
           setRole("visitor");
           setLoading(false);
           return;
@@ -110,7 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setError(null);
         await signInWithEmailAndPassword(auth, email, password);
       },
-      signOutUser: () => signOut(auth),
+      joinAnonymously: async () => (await signInAnonymously(auth)).user,
+      signOutUser: () => auth.currentUser?.isAnonymous?Promise.resolve():signOut(auth),
     }),
     [user, role, loading, error],
   );

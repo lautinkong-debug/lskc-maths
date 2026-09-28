@@ -94,6 +94,11 @@ function appData(persona: Persona) {
   };
 }
 
+function roomData(code:string,createdBy=TEACHER) {
+  const opensAt=new Date(),closesAt=new Date(opensAt.getTime()+3600000),expireAt=new Date(closesAt.getTime()+60*86400000);
+  return {code,appSlug:"directed-numbers",title:"F1 practice",kind:"live",settings:{skills:["addSubtract"],level:1,questionCount:10,timeLimitSec:300,scoring:"directed",order:"same",maxAttempts:2,showNames:"top10"},seed:12345,classTag:"1A",season:"2026-27-T1",status:"lobby",opensAt,closesAt,createdBy,createdAt:opensAt,expireAt,playerCount:0};
+}
+
 function emulatorToken(
   projectId: string,
   persona: Exclude<Persona, "visitor">,
@@ -583,5 +588,57 @@ for (const mode of ["public", "school"] as const) {
       await assertFails(ref.update({ topicId: "missing" }));
       await assertSucceeds(ref.update({ title: "Updated practice" }));
     });
+
+    it("allows a teacher to create, start, close and delete a validated room", async () => {
+      const db=contexts.teacher.firestore(),id="challengeRoom123456",code="MATH23",data=roomData(code);
+      const batch=db.batch();batch.set(db.doc(`rooms/${id}`),data);batch.set(db.doc(`roomCodes/${code}`),{roomId:id,expireAt:data.expireAt});
+      await assertSucceeds(batch.commit());
+      await assertFails(db.doc(`roomCodes/${code}`).set({roomId:id,expireAt:data.expireAt}));
+      await assertFails(db.doc(`rooms/${id}`).update({playerCount:99}));
+      await assertSucceeds(db.doc(`rooms/${id}`).update({status:"live"}));
+      await assertSucceeds(db.doc(`rooms/${id}`).update({status:"closed",closesAt:new Date(data.closesAt.getTime()-60000),expireAt:new Date(data.expireAt.getTime()-60000)}));
+      await assertFails(db.doc(`rooms/${id}`).update({status:"live"}));
+      await assertSucceeds(db.doc(`roomCodes/${code}`).delete());
+      await assertSucceeds(db.doc(`rooms/${id}`).delete());
+    });
+
+    it("keeps challenge writes server-only and private data teacher-only", async () => {
+      const id="challengeRoom222222",code="QUEST2",data=roomData(code);
+      await env.withSecurityRulesDisabled(async(context)=>{
+        const db=context.firestore();
+        await db.doc(`rooms/${id}`).set(data);
+        await db.doc(`roomCodes/${code}`).set({roomId:id,expireAt:data.expireAt});
+        await db.doc(`rooms/${id}/entries/student`).set({nickname:"Swift Fox",avatar:"🦊",frame:0,score:10});
+        await db.doc(`rooms/${id}/private/student`).set({classNumber:12});
+        await db.doc(`rooms/${id}/runs/run1`).set({uid:"student"});
+        await db.doc(`rooms/${id}/stats/questions`).set({perQuestion:[]});
+        await db.doc(`classBoards/directed-numbers_L1_2026-27-T1`).set({classes:{"1A":{players:1,totalBest:10}}});
+      });
+      const anonymous=env.authenticatedContext("anonymous",{firebase:{sign_in_provider:"anonymous"}});
+      for(const context of [contexts.visitor,anonymous,contexts.viewer]){
+        const db=context.firestore();
+        await assertFails(db.doc(`rooms/${id}`).update({title:"Changed"}));
+        await assertFails(db.doc(`rooms/${id}`).delete());
+        await assertFails(db.doc(`roomCodes/${code}`).delete());
+        await assertFails(db.doc(`rooms/${id}/entries/new`).set({nickname:"Fake"}));
+        await assertFails(db.doc(`rooms/${id}/entries/student`).update({score:999}));
+        await assertFails(db.doc(`rooms/${id}/private/student`).set({classNumber:1}));
+        await assertFails(db.doc(`rooms/${id}/runs/run1`).set({uid:"fake"}));
+        await assertFails(db.doc(`rooms/${id}/stats/questions`).set({perQuestion:[]}));
+        await assertFails(db.doc(`classBoards/directed-numbers_L1_2026-27-T1`).update({classes:{}}));
+        await assertFails(db.collection("roomCodes").get());
+        await assertFails(db.doc(`rooms/${id}/private/student`).get());
+        await assertFails(db.doc(`rooms/${id}/stats/questions`).get());
+        await assertFails(db.doc(`rooms/${id}/runs/run1`).get());
+        const canRead=mode==="public"||context===contexts.viewer;
+        if(canRead){await assertSucceeds(db.doc(`rooms/${id}`).get());await assertSucceeds(db.doc(`roomCodes/${code}`).get());await assertSucceeds(db.collection(`rooms/${id}/entries`).get());}
+        else await assertFails(db.doc(`rooms/${id}`).get());
+      }
+      await assertSucceeds(contexts.teacher.firestore().doc(`rooms/${id}/private/student`).get());
+      await assertSucceeds(contexts.teacher.firestore().doc(`rooms/${id}/stats/questions`).get());
+      await assertFails(contexts.teacher.firestore().doc(`rooms/${id}/runs/run1`).get());
+      await assertFails(contexts.teacher.firestore().collection("roomCodes").get());
+      await assertSucceeds(contexts.teacher.firestore().doc(`rooms/${id}/entries/student`).delete());
+    },60000);
   });
 }

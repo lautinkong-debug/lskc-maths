@@ -368,6 +368,7 @@ export const copy = {
         play: "Practise in Order Castle (later stage)",
       },
       playLesson: {
+        privacyNotice: "We only keep your nickname, avatar and scores for this challenge, and your class number if you add one (only your teacher can see it). Everything is deleted automatically 60 days after the challenge closes.",
         prompts: {
           compare: (a:string,b:string) => `Which sign makes ${a} and ${b} correct?`,
           order: (values:string) => `Put these numbers in ascending order: ${values}`,

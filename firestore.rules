@@ -101,6 +101,60 @@ service cloud.firestore {
         && data.updatedAt is timestamp;
     }
 
+    function validChallengeSettings(settings, kind) {
+      return settings is map
+        && settings.keys().hasAll(['skills','level','questionCount','timeLimitSec','scoring','order','maxAttempts','showNames'])
+        && settings.keys().hasOnly(['skills','level','questionCount','timeLimitSec','scoring','order','maxAttempts','showNames'])
+        && settings.skills is list && settings.skills.size() > 0 && settings.skills.size() <= 7
+        && settings.skills.hasOnly(['numberLine','addSubtract','brackets','signs','mixed','wordProblems','mistakes'])
+        && settings.level in [1,2] && settings.questionCount in [5,10,15,20]
+        && (settings.timeLimitSec == null || (settings.timeLimitSec is int && settings.timeLimitSec >= 60 && settings.timeLimitSec <= 900))
+        && settings.scoring in ['directed','gentle'] && settings.order in ['same','shuffled']
+        && settings.maxAttempts is int && settings.maxAttempts >= 1
+        && settings.maxAttempts <= (kind == 'live' ? 3 : 5)
+        && settings.showNames in ['all','top10','avatars'];
+    }
+
+    function validChallengeRoomCreate(roomId) {
+      let data = request.resource.data;
+      return data.keys().hasAll(['code','appSlug','title','kind','settings','seed','classTag','season','status','opensAt','closesAt','createdBy','createdAt','expireAt','playerCount'])
+        && data.keys().hasOnly(['code','appSlug','title','kind','settings','seed','classTag','season','status','opensAt','closesAt','createdBy','createdAt','expireAt','playerCount'])
+        && data.code is string && data.code.matches('^[A-HJ-KM-NP-Z2-9]{6}$')
+        && data.appSlug == 'directed-numbers' && data.title is string && data.title.size() > 0 && data.title.size() <= 60
+        && data.kind in ['live','homework'] && validChallengeSettings(data.settings,data.kind)
+        && data.seed is int && data.seed >= 0 && data.seed < 16777216
+        && (data.classTag == null || (data.classTag is string && data.classTag.matches('^[1-6][A-F]$')))
+        && data.season is string && data.season.matches('^[0-9]{4}-[0-9]{2}-T[12]$')
+        && data.status == (data.kind == 'live' ? 'lobby' : 'live')
+        && data.opensAt is timestamp && data.closesAt is timestamp && data.closesAt > data.opensAt
+        && data.createdBy == request.auth.token.email && data.createdAt is timestamp
+        && data.expireAt == data.closesAt + duration.value(60,'d')
+        && data.playerCount == 0
+        && getAfter(/databases/$(database)/documents/roomCodes/$(data.code)).data.roomId == roomId;
+    }
+
+    function validChallengeRoomUpdate() {
+      let data = request.resource.data;
+      return data.diff(resource.data).affectedKeys().hasOnly(['title','status','closesAt','expireAt','settings'])
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 60
+        && data.status in ['lobby','live','closed']
+        && (resource.data.status == 'lobby' && data.status in ['lobby','live','closed']
+          || resource.data.status == 'live' && data.status in ['live','closed']
+          || resource.data.status == 'closed' && data.status == 'closed')
+        && data.closesAt is timestamp && data.expireAt == data.closesAt + duration.value(60,'d')
+        && validChallengeSettings(data.settings,data.kind)
+        && data.settings.diff(resource.data.settings).affectedKeys().hasOnly(['showNames']);
+    }
+
+    function validRoomCode(code) {
+      let data = request.resource.data;
+      return data.keys().hasAll(['roomId','expireAt']) && data.keys().hasOnly(['roomId','expireAt'])
+        && data.roomId is string && data.roomId.matches('^[A-Za-z0-9]{10,30}$')
+        && data.expireAt is timestamp
+        && getAfter(/databases/$(database)/documents/rooms/$(data.roomId)).data.code == code
+        && getAfter(/databases/$(database)/documents/rooms/$(data.roomId)).data.expireAt == data.expireAt;
+    }
+
     match /teachers/{email} {
       allow get: if isAdmin() || (isSchoolAccount() && email == request.auth.token.email);
       allow list: if isAdmin();
@@ -140,6 +194,44 @@ service cloud.firestore {
         && request.resource.data.uploadedBy == resource.data.uploadedBy
         && request.resource.data.createdAt == resource.data.createdAt;
       allow delete: if isTeacher();
+    }
+
+    match /rooms/{roomId} {
+      allow get: if canReadContent();
+      allow list: if isTeacher();
+      allow create: if isTeacher() && validChallengeRoomCreate(roomId);
+      allow update: if isTeacher() && validChallengeRoomUpdate();
+      allow delete: if isTeacher();
+
+      match /entries/{uid} {
+        allow get, list: if canReadContent();
+        allow delete: if isTeacher();
+        allow create, update: if false;
+      }
+      match /private/{uid} {
+        allow get, list: if isTeacher();
+        allow write: if false;
+      }
+      match /runs/{runId} {
+        allow read, write: if false;
+      }
+      match /stats/{docId} {
+        allow get, list: if isTeacher();
+        allow write: if false;
+      }
+    }
+
+    match /roomCodes/{code} {
+      allow get: if canReadContent();
+      allow list: if false;
+      allow create: if isTeacher() && validRoomCode(code);
+      allow update: if false;
+      allow delete: if isTeacher();
+    }
+
+    match /classBoards/{boardId} {
+      allow get, list: if canReadContent();
+      allow write: if false;
     }
 
     match /{document=**} {

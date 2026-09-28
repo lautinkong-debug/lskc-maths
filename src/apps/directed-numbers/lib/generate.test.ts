@@ -8,7 +8,7 @@ import { misconceptionForAnswer, misconceptions } from "./misconceptions";
 
 describe("repeatable question sets", () => {
   it("round-trips every setting in an eight-character code", () => {
-    for (const seed of [0,1,123456,2**24-1]) for (const level of [1,2] as const) for (const count of [5,10,20] as const) {
+    for (const seed of [0,1,123456,2**24-1]) for (const level of [1,2] as const) for (const count of [5,10,15,20] as const) {
       const settings = {seed,level,questionCount:count,skills:["numberLine","mixed","wordProblems"] as (typeof SKILLS)[number][]};
       const code = encodeSetCode(settings);
       expect(code).toHaveLength(8);

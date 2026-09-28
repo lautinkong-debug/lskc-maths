@@ -412,8 +412,31 @@ rerunning the seed updates existing source records without duplicating them, and
 
 **Stage boundary:** Stage E stops here for owner review. Stage F needs separate approval.
 
+## Directed numbers — Stage F: challenge backend (28/09/2026)
+
+**Built:** Firebase Admin verifies student ID tokens and re-marks every answer in Node API routes. Join, start and submit use server transactions; the server measures time, limits attempts and starts, keeps optional class numbers in a teacher-only collection, updates question stats and class averages, and returns the student's rank. Teachers can close, extend or delete rooms; closing and extending align existing child records' 60-day expiry dates. Firestore rules keep every score write server-only and prohibit listing join codes. Anonymous Firebase users appear as visitors without an account menu. The local seed adds a lobby room with code `MATH23` and five generated players. The 15-question set-code option keeps old codes compatible. The exact join-page privacy wording is ready in `copy.ts` for Stage G.
+
+**Run locally:** in this checkout run `npm.cmd run dev:all`. In another PowerShell window run `npm.cmd run seed`, then open `http://localhost:3000/apps/directed-numbers#play` and `http://127.0.0.1:4000/firestore`. The local Firebase project must be `demo-lskc-maths`. The challenge join and leaderboard pages arrive in Stage G, so the Stage F owner check uses the emulator and existing Play page.
+
+**Owner test (Stage F):**
+
+1. Open **Play ★**. The six worlds and games should still open. **Join a class challenge** remains disabled until Stage G.
+2. Open the **Firebase Emulator UI → Firestore → rooms → demoDirectedNumbers01**. Check that the code is `MATH23`, status is `lobby`, playerCount is 5 and the setting uses five questions.
+3. Open **entries** under that room. Check that the five players have generated nicknames and avatars, with no student emails or real names.
+4. Open **private** under the same room. Check that class numbers are separate from the public entries. The rules tests verify that students cannot read this collection.
+5. Open **roomCodes → MATH23**. It should point to `demoDirectedNumbers01` and show an expiry date 60 days after the room's scheduled close.
+6. At a 360 px browser width, reopen Play and a game; check for page-wide horizontal scrolling. At 1920×1080, turn on **Projection mode** and use Tab and Enter to open a game and answer a question.
+7. Stop `dev:all`, then run `npm.cmd run test:rules` and `npm.cmd run test:challenges`. Expect 24 rules tests and six challenge tests to pass, including denied score writes, replay rejection, server re-marking and expiry alignment.
+
+**Verification (passed):** 186 unit tests, 24 public/school rules tests, six emulator challenge tests, lint, typecheck, production build and `git diff --check`. A local anonymous Auth token joined `MATH23` through the HTTP API as `Swift Fox 2`; Start correctly refused the lobby room. The Play page had no horizontal overflow at 360 px or 1920×1080. In projection mode, keyboard Enter opened Red Pen Hero, selected the wrong line and chose a reason; the correction appeared. A browser-injected `data-pdffiller-skip` attribute produced one hydration warning in the in-app browser; the warning points to that injected attribute, not an app component.
+
+**Known limitations:** Stage G adds the teacher and student pages, live boards, QR codes and an end-to-end two-window test. Before real students use them, enable Firebase Anonymous sign-in and Firestore TTL policies for `expireAt` on room, code, entry, private, run, stats and class-board collection groups, and compare the join-page notice with the school's data-privacy policy. No real Firebase project was changed. The numeric rank key resolves elapsed time to 10 ms and submission order into one million intervals across the room's open period; very close submissions can share a rank. The classroom projector and student-phone check remain for the owner.
+
+**Stage boundary:** Stage F stops here for owner review. Stage G needs separate approval.
+
 ## Decision log
 
+- 28/09/2026 — Stage F challenge scores are re-marked on the server and browser-supplied scores and timings are ignored. A student can still calculate answers outside the app or inspect generated questions in developer tools; this is acceptable for class practice. App Check remains an option if abuse appears. The 60-day privacy promise requires launch-time Firestore TTL policies, and early closing or extending a room updates every existing child document's expiry.
 - 27/09/2026 — Directed numbers Stage B: preserve decimal notation for decimal-only bracket questions, retain exact fractions internally, and give the ordering activity its own projection view so all six chips stay visible. Point exploration stays on integer positions; fractions and decimals are available in Brackets. Native history updates keep mode links and browser Back/Forward in sync without reloading the lesson shell.
 
 - Hosting: Firebase App Hosting (one platform with Auth/Firestore/Storage). Requires Blaze plan.

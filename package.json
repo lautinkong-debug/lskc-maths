@@ -18,10 +18,12 @@
     "rules:build": "tsx scripts/build-rules.ts",
     "seed": "tsx scripts/seed.ts",
     "test:rules": "firebase emulators:exec --only auth,firestore,storage --project demo-lskc-maths \"vitest run --config vitest.rules.config.ts\"",
+    "test:challenges": "firebase emulators:exec --only auth,firestore --project demo-lskc-maths \"vitest run --config vitest.challenges.config.ts\"",
     "test:e2e": "playwright test"
   },
   "dependencies": {
     "firebase": "^12.19.0",
+    "firebase-admin": "^14.5.0",
     "katex": "^0.18.7",
     "next": "16.3.5",
     "react": "19.2.8",

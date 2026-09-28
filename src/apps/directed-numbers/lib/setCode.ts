@@ -2,9 +2,9 @@ import { CODE_ALPHABET, normaliseCode } from "@/lib/challenges/codes";
 
 export const SKILLS = ["numberLine", "addSubtract", "brackets", "signs", "mixed", "wordProblems", "mistakes"] as const;
 export type Skill = typeof SKILLS[number];
-export type SetSettings = { skills: Skill[]; level: 1 | 2; questionCount: 5 | 10 | 20; seed: number };
+export type SetSettings = { skills: Skill[]; level: 1 | 2; questionCount: 5 | 10 | 15 | 20; seed: number };
 const BASE = CODE_ALPHABET.length;
-const COUNTS = [5, 10, 20] as const;
+const COUNTS = [5, 10, 20, 15] as const;
 const SEED_MAX = 2 ** 24;
 export function encodeSetCode(settings: SetSettings): string {
   if (!Number.isInteger(settings.seed) || settings.seed < 0 || settings.seed >= SEED_MAX || ![1,2].includes(settings.level) || !COUNTS.includes(settings.questionCount) || !settings.skills.length || settings.skills.some((skill) => !SKILLS.includes(skill))) throw new Error("Invalid set settings");
@@ -29,7 +29,7 @@ export function decodeSetCode(input: string): SetSettings | null {
   const level = (Math.floor(packed / 2**31) % 2 + 1) as 1 | 2;
   const count = Math.floor(packed / 2**32) % 4;
   const checksum = Math.floor(packed / 2**34) % 16;
-  if (!mask || count > 2 || checksum !== ((seed ^ mask ^ count ^ level) & 15)) return null;
+  if (!mask || count > 3 || checksum !== ((seed ^ mask ^ count ^ level) & 15)) return null;
   return { seed, level, questionCount: COUNTS[count], skills: SKILLS.filter((_, index) => mask & (1 << index)) };
 }
 export function hashSeed(text: string): number {
