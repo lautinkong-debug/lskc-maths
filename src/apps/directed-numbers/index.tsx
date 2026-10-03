@@ -1,7 +1,9 @@
 "use client";
+import Link from "next/link";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { copy } from "@/lib/copy";
 import { button, field } from "./components/ui";
+import styles from "./DirectedNumbers.module.css";
 const AddSubtractMode = lazy(() => import("./modes/AddSubtractMode"));
 const NumberLineMode = lazy(() => import("./modes/NumberLineMode"));
 const BracketsMode = lazy(() => import("./modes/BracketsMode"));
@@ -61,35 +63,57 @@ export default function DirectedNumbers() {
         }
       }}
     >
-      <nav
-        aria-label={c.mode}
-        className="border-grid hidden flex-wrap gap-1 border-b pb-3 sm:flex"
-      >
-        {modes.map((tab) => (
-          <a
-            key={tab}
-            href={`#${tab}`}
-            aria-current={mode === tab ? "page" : undefined}
-            className={`${button} ${mode === tab ? "border-navy bg-navy-wash" : ""}`}
-          >
-            {c.tabs[tab]}
-          </a>
-        ))}
-      </nav>
-      <label className="block font-semibold sm:hidden">
-        {c.mode}
-        <select
-          value={mode}
-          onChange={(event) => choose(event.target.value as Mode)}
-          className={field}
+      <nav aria-label={c.journeyLabel} className={styles.navigation}>
+        <a
+          href="#add-subtract"
+          aria-current={mode !== "play" ? "page" : undefined}
         >
-          {modes.map((tab) => (
-            <option key={tab} value={tab}>
-              {c.tabs[tab]}
-            </option>
-          ))}
-        </select>
-      </label>
+          <span aria-hidden="true">01</span>
+          {c.learnNav}
+        </a>
+        <a href="#play" aria-current={mode === "play" ? "page" : undefined}>
+          <span aria-hidden="true">02</span>
+          {c.playNav}
+        </a>
+        <Link href="/join">
+          <span aria-hidden="true">03</span>
+          {c.competeNav}
+          <span aria-hidden="true">↗</span>
+        </Link>
+      </nav>
+      {mode !== "play" && (
+        <nav aria-label={c.mode} className={styles.lessons}>
+          {modes
+            .filter((tab) => tab !== "play")
+            .map((tab) => (
+              <a
+                key={tab}
+                href={`#${tab}`}
+                aria-current={mode === tab ? "page" : undefined}
+              >
+                {c.tabs[tab]}
+              </a>
+            ))}
+        </nav>
+      )}
+      {mode !== "play" && (
+        <label className="block font-semibold sm:hidden">
+          {c.mode}
+          <select
+            value={mode}
+            onChange={(event) => choose(event.target.value as Mode)}
+            className={field}
+          >
+            {modes
+              .filter((tab) => tab !== "play")
+              .map((tab) => (
+                <option key={tab} value={tab}>
+                  {c.tabs[tab]}
+                </option>
+              ))}
+          </select>
+        </label>
+      )}
       {mode === "add-subtract" ? (
         <Suspense fallback={<p>{copy.apps.loading}</p>}>
           <AddSubtractMode

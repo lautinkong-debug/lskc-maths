@@ -70,11 +70,11 @@ export function SiteHeader() {
         </Link>
       )}
       {user ? (
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex flex-wrap items-center gap-2 text-sm">
           <Link
             href="/login"
             onClick={() => setOpen(false)}
-            className="text-navy-soft hover:text-white"
+            className="text-navy-soft break-all hover:text-white"
           >
             {user.email ?? copy.auth.account}
           </Link>
@@ -106,7 +106,7 @@ export function SiteHeader() {
       <div className="mx-auto flex w-full max-w-[1400px] items-center gap-4 px-4 py-3 sm:px-6">
         <Link
           href="/"
-          className="flex items-center gap-3"
+          className="flex shrink-0 items-center gap-3"
           onClick={() => setOpen(false)}
         >
           <Image
@@ -129,7 +129,7 @@ export function SiteHeader() {
 
         <nav
           aria-label="Main"
-          className="ml-auto hidden items-center gap-6 md:flex"
+          className="ml-auto hidden items-center gap-4 whitespace-nowrap xl:flex"
         >
           {NAV.map((item) => (
             <Link
@@ -153,7 +153,7 @@ export function SiteHeader() {
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="mobile-nav"
-          className="ml-auto rounded border border-white/35 px-3 py-1.5 text-sm md:hidden"
+          className="ml-auto min-h-11 rounded border border-white/35 px-3 py-1.5 text-sm xl:hidden"
         >
           {open ? copy.nav.closeMenu : copy.nav.menu}
         </button>
@@ -163,7 +163,7 @@ export function SiteHeader() {
         <nav
           id="mobile-nav"
           aria-label="Main"
-          className="border-t border-white/15 px-4 pb-3 md:hidden"
+          className="border-t border-white/15 px-4 pb-3 xl:hidden"
         >
           {NAV.map((item) => (
             <Link

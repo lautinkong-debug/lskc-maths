@@ -68,7 +68,7 @@ export function PresentationFrame({
         className={`bg-paper text-graphite ${fullscreen ? "h-screen overflow-y-auto" : ""} ${presenting ? "text-lg" : ""}`}
       >
         <div
-          className={`mx-auto w-full ${presenting ? "max-w-[1800px] px-4 py-5 sm:px-8" : "max-w-[1400px] px-4 py-10 sm:px-6 lg:py-14"}`}
+          className={`mx-auto w-full ${presenting ? "max-w-[1800px] px-4 py-5 sm:px-8" : "max-w-[1400px] px-4 py-7 sm:px-6 lg:py-9"}`}
         >
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -80,7 +80,7 @@ export function PresentationFrame({
                   ← {copy.apps.backToApps}
                 </Link>
               )}
-              <h1 className="font-display text-hero text-navy mt-3 font-semibold">
+              <h1 className="font-display text-hero text-navy mt-3 font-semibold tracking-tight text-balance">
                 {title}
               </h1>
               <p className="text-pencil mt-1">{topic}</p>
@@ -90,7 +90,7 @@ export function PresentationFrame({
               aria-pressed={presenting}
               disabled={!canPresent}
               onClick={() => void togglePresentation()}
-              className="border-navy text-navy hover:bg-navy-wash rounded border px-4 py-2 font-semibold disabled:opacity-50"
+              className="border-grid-strong text-navy hover:bg-navy-wash min-h-12 rounded-md border px-4 py-2 font-semibold transition-colors disabled:opacity-50"
             >
               {presenting ? copy.apps.exitPresentation : copy.apps.presentation}
             </button>
