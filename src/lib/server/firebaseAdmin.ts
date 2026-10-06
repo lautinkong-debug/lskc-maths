@@ -1,4 +1,4 @@
-import { getApp,getApps,initializeApp } from "firebase-admin/app";
+import { cert,getApp,getApps,initializeApp } from "firebase-admin/app";
 import { getAuth,type DecodedIdToken } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 
@@ -10,7 +10,13 @@ if(emulator){
   process.env.FIRESTORE_EMULATOR_HOST="127.0.0.1:8080";
   process.env.FIREBASE_AUTH_EMULATOR_HOST="127.0.0.1:9099";
 }
-const adminApp=getApps().length?getApp():emulator?initializeApp({projectId:"demo-lskc-maths"}):initializeApp();
+function initializeProductionAdminApp(){
+  const serviceAccountJson=process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+  if(!serviceAccountJson)throw new Error("Missing FIREBASE_SERVICE_ACCOUNT_JSON for Firebase Admin in production.");
+  try{return initializeApp({credential:cert(JSON.parse(serviceAccountJson))});}
+  catch{throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON is not a valid service account.");}
+}
+const adminApp=getApps().length?getApp():emulator?initializeApp({projectId:"demo-lskc-maths"}):initializeProductionAdminApp();
 export const adminDb=getFirestore(adminApp);
 const adminAuth=getAuth(adminApp);
 
