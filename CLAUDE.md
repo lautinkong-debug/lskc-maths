@@ -37,7 +37,7 @@ Curriculum context: HKDSE Mathematics, levels F1–F6 plus Extended Part Module 
 ## Tech stack
 
 - Next.js 16 (App Router) + TypeScript (strict) + Tailwind CSS v4
-- Firebase: Authentication (Google for teachers, Anonymous for challenge students in public mode), Firestore, Cloud Storage, App Hosting
+- Firebase: Authentication (Google for teachers, Anonymous for challenge students in public mode), Firestore, Cloud Storage; Vercel hosts the Next.js website and Node routes.
 - Firebase Web SDK (modular v10+ API) on the client
 - KaTeX (`katex`, rendered via a small `<Math>` component) for all mathematical notation
 - `react-pdf` (pdf.js) for in-page PDF preview — browser-native PDF iframes are unreliable on iOS
@@ -161,7 +161,7 @@ The UI hiding a button is a convenience, never the protection. Every permission 
 - The client can create and control a teacher-owned room under the validated Firestore rules. Every student score is written only by the Node server: Firebase Admin verifies the ID token, regenerates the questions and re-marks the answers. Students have no client score-write path.
 - Public challenge entries use generated nicknames, avatars and scores. Optional class numbers are in a teacher-only collection. The projector shows at most the top 10; a student's phone shows the gap to the next place, and celebrates a personal best. Gentle scoring, no time pressure and avatars-only display are teacher presets. Class boards rank classes with at least five players by average best score.
 - Challenge documents carry `expireAt` 60 days after the room closes. The real Firebase project must enable Firestore TTL on every challenge collection group before students use it. Compare the exact join-page privacy notice in `copy.ts` with the school's policy before launch. Teachers may delete a room sooner.
-- The Admin SDK uses local emulators for development and default credentials on App Hosting. Never import it into a client component. App Check may be added if abuse appears; it is not active now.
+- The Admin SDK uses local emulators for development. On Vercel it reads the server-only `FIREBASE_SERVICE_ACCOUNT_JSON` encrypted Secret; the dedicated service account has only `roles/datastore.user`. Never import it into a client component. App Check may be added if abuse appears; it is not active now.
 
 ## Design direction
 

@@ -1250,7 +1250,7 @@ export const copy = {
     booksTitle: "Books",
     noTopics: "No topics are available for this level yet.",
     loading: "Loading books…",
-    loadFailed: "Could not load books. Check that the emulators are running.",
+    loadFailed: "Could not load books. Check your connection and try again.",
     unavailable: "This book is unavailable or you do not have access to it.",
     studentEdition: "Student edition",
     teacherEdition: "Teacher edition",
@@ -1320,7 +1320,7 @@ export const copy = {
     testAccountsIntro:
       "These accounts work only with the local Firebase emulators.",
     signInFailed:
-      "Sign-in failed. Check that the emulators are running and try again.",
+      "Sign-in failed. Check your connection and try again.",
     account: "Account",
     adminRole: "Admin",
     teacherRole: "Teacher",
@@ -1379,7 +1379,7 @@ export const copy = {
     duplicate: "That chapter code already exists in this level.",
     inUse: "This topic has Mistakes Books and cannot be deleted.",
     failed: "Could not update topics. Check your connection and try again.",
-    loadFailed: "Could not load topics. Check that the emulators are running.",
+    loadFailed: "Could not load topics. Check your connection and try again.",
     confirmDelete: "Delete this topic? This cannot be undone.",
   },
 

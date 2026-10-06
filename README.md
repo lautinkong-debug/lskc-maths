@@ -41,7 +41,44 @@ The rules test command starts and stops its own emulators. Stop `dev:all` first
 if ports 9099, 8080 or 9199 are already in use. The end-to-end command likewise
 starts its own website and emulators.
 
-## Launch on Firebase App Hosting
+## Live Vercel deployment (06/10/2026)
+
+Website: [lskc-maths.vercel.app](https://lskc-maths.vercel.app).
+Firebase project: `lskc-maths-2026` (display name `LSKC Mathematics Dept Website`).
+Firestore is in Hong Kong (`asia-east2`). Google sign-in uses the support email
+`t28ltk@lskc.edu.hk`; Anonymous sign-in is enabled for public-mode challenges.
+Both stable Vercel domains are authorised. The 69 topics from `docs/topics.md`
+and the first admin record have been created; no emulator accounts were copied.
+
+The Vercel project is `lskc-maths` in `lautinkong-4501`. It runs Next.js and
+Node 24 server routes; `package.json` pins Node 24 to match Firebase Admin's
+dependencies. `vercel.json` enables `--experimental-require-module`, which
+Vercel disables by default and Firebase Admin's `jwks-rsa` dependency needs.
+See [Vercel's module-loading guidance](https://vercel.com/docs/functions/runtimes/node-js/advanced-node-configuration).
+Production and Preview have the six public Firebase web settings,
+`NEXT_PUBLIC_USE_EMULATORS=false`, `NEXT_PUBLIC_ACCESS_MODE=public` and
+`NEXT_PUBLIC_ALLOWED_EMAIL_DOMAINS=lskc.edu.hk`.
+`FIREBASE_SERVICE_ACCOUNT_JSON` is a separate encrypted Secret. Its service
+account, `vercel-maths@lskc-maths-2026.iam.gserviceaccount.com`, has only
+`roles/datastore.user`. The credential must never enter git or browser code.
+
+The site was uploaded from this local checkout using `vercel deploy --prod`.
+GitHub automatic deployments have not been connected. Keep `.env.local` on the
+demo emulators; do not replace it with production settings.
+
+Remaining launch work: the owner must enable Blaze billing and create a budget
+alert, then create the Storage bucket, deploy Storage rules, set CORS for
+`https://lskc-maths.vercel.app`, and enable the seven `expireAt` TTL policies
+listed in PLAN.md. PDF uploads and automatic challenge deletion are not ready
+until then. Verify real teacher sign-in, a test upload/download and a complete
+class challenge before inviting students; check the school's privacy policy.
+
+For later school-only access, update the access mode and allowed domains in
+both Vercel Production/Preview and the local rule-build settings, rebuild and
+deploy Firebase rules, then redeploy Vercel. Confirm the students' email domain
+first. `apphosting.yaml` belongs only to the alternative hosting route below.
+
+## Alternative: launch on Firebase App Hosting
 
 These instructions make real Firebase resources and can incur charges. Keep
 the demo emulator setup above for development. Record the **real project ID**,

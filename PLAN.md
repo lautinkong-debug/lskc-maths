@@ -25,7 +25,7 @@ Two things to keep in view rather than decide now:
 ## Architecture
 
 ```
-Browser (Next.js app on Firebase App Hosting)
+Browser (Next.js app on Vercel)
   ├─ Firebase Auth ──── Google sign-in for TEACHERS only (lskc.edu.hk)
   ├─ Firestore ──────── teachers, topics, mistakeBooks, siteContent, appSettings
   └─ Cloud Storage ─── uploaded PDF / DOCX / HTML files
@@ -264,15 +264,30 @@ rerunning the seed updates existing source records without duplicating them, and
 - [x] `firebase.json` rules and indexes deploy config (already present and verified)
 - [ ] Post-launch checklist: open the live site signed out, sign in as teacher, upload one test file, check it appears signed out, delete it
 - [ ] Configure Storage bucket CORS for the site's origin so SDK `getBlob` previews and downloads work in production; verify with the post-launch test file
-- [ ] In the dedicated Mathematics Firebase project, enable **Authentication → Sign-in method → Anonymous** before students use public-mode challenges. Keep Google sign-in for teachers. If switching to school mode, confirm the students' Google-account domain with the owner and include it in the allowed domains before enabling student challenges.
+- [x] Dedicated project `lskc-maths-2026`: Google and Anonymous sign-in enabled; Google support email `t28ltk@lskc.edu.hk`; stable Vercel domains authorised. If switching to school mode, confirm the students' domain first.
 - [ ] In **Firestore Database → Time-to-live**, create an `expireAt` TTL policy for each challenge collection group: `rooms`, `roomCodes`, `entries`, `private`, `runs`, `stats` and `classBoards`. Confirm all seven policies are enabled. TTL deletion is asynchronous, so check the school's privacy policy and the exact join-page notice in `copy.ts` before real students join.
-- [ ] Use **Firebase App Hosting**, with a live Node runtime and default Firebase Admin credentials, for `/api/challenges/join`, `/start`, `/submit` and `/rooms/[roomId]`; confirm these POST/DELETE routes work on the hosted site. A static-only host cannot mark or save challenge scores. Verify a student cannot write a score directly in Firestore.
+- [x] Use **Vercel**, as requested by the owner, for Next.js and Node 24 challenge routes. Firebase Admin reads an encrypted server-only Secret backed by a dedicated `roles/datastore.user` service account.
+- [ ] Complete a real teacher-created challenge through join/start/submit/delete on Vercel, after TTL and the privacy check are complete.
 - [ ] Decide whether to add Firebase App Check if abuse appears; it is not required or enabled for the first classroom trial. Set the Blaze budget alert before opening public reads and challenge traffic.
 - [x] Note in the README how to switch to `school` mode later (one variable, rebuild rules, redeploy)
 
 ---
 
 ## Directed numbers — Stage A (27/09/2026)
+
+**Deployment update (06/10/2026):** `https://lskc-maths.vercel.app` is live.
+Dedicated Firebase project `lskc-maths-2026`, Hong Kong Firestore, deployed rules
+and ready indexes, 69 approved topics and first admin record are configured.
+Google sign-in uses the requested school support email; Anonymous is enabled.
+186 unit tests, lint, typecheck and the Vercel build pass. Live checks confirm
+unsigned API requests fail with 401, anonymous tokens reach the server's
+Firestore lookup, all 69 topics are readable, teacher records are private,
+and direct student score writes are denied. The temporary test Auth user was
+removed. Vercel needs `NODE_OPTIONS=--experimental-require-module` for Firebase
+Admin; this is recorded in `vercel.json` alongside the Node 24 engine pin.
+Storage, its CORS/rules, budget alert, and all seven TTL
+policies remain pending because the project is still on Spark. Do not run a
+real student challenge while the join notice's automatic deletion is pending.
 
 - [x] Exact rational-number engine, safe parser, answer equivalence and movement helpers, with tests covering the supplied arithmetic fixtures and all 3,362 start/operation/move combinations in the lesson range.
 - [x] Registered F1 app, SVG thumbnail, English copy, hash navigation and expression bookmarks. Unfinished modes explicitly show a later-stage panel.

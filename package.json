@@ -2,6 +2,9 @@
   "name": "lskc-maths",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "description": "Mathematics Department website for S.T.F.A. Lee Shau Kee College",
   "scripts": {
     "dev": "next dev",
