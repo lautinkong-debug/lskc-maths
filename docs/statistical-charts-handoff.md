@@ -2,6 +2,9 @@
 
 Prepared 10/10/2026 for continuation from GitHub.
 
+Uploaded branch: [codex/statistical-charts-lab](https://github.com/lautinkong-debug/lskc-maths/tree/codex/statistical-charts-lab).
+Implementation commit: `e2945cd` (followed by the upload-record documentation commit).
+
 ## Intended result
 
 The owner asked to include the completed lab in the mathematics department website, then requested a GitHub upload

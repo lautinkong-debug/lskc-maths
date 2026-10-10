@@ -11,7 +11,7 @@ Owner asked to include the lab in the mathematics department website, then reque
 - [x] Honour the department Projection mode with reduced lab controls and a viewport-sized graph.
 - [x] Exclude local environment files, generated output and test artifacts from Vercel uploads.
 - [x] Prepare `docs/statistical-charts-handoff.md`, including the 21 earlier local commits absent from GitHub main.
-- [ ] Upload branch `codex/statistical-charts-lab` and verify its remote commit.
+- [x] Upload branch `codex/statistical-charts-lab` and verify remote implementation commit `e2945cd`.
 - [ ] Future publication to the existing website. No production deployment or Firebase changes are part of this handoff.
 
 ## Statistical Charts Lab — Phase 4 (10/10/2026)
