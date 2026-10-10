@@ -2,6 +2,87 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Statistical Charts Lab — department integration and GitHub handoff (10/10/2026)
+
+Owner asked to include the lab in the mathematics department website, then requested a GitHub upload for later processing.
+
+- [x] Registered in Web apps under F2 / Data Handling / 2A06, using the existing `/apps/statistical-charts` host.
+- [x] Add production-build integration coverage for listing/search, navigation, projection, shared links and mobile progress restoration.
+- [x] Honour the department Projection mode with reduced lab controls and a viewport-sized graph.
+- [x] Exclude local environment files, generated output and test artifacts from Vercel uploads.
+- [x] Prepare `docs/statistical-charts-handoff.md`, including the 21 earlier local commits absent from GitHub main.
+- [ ] Upload branch `codex/statistical-charts-lab` and verify its remote commit.
+- [ ] Future publication to the existing website. No production deployment or Firebase changes are part of this handoff.
+
+## Statistical Charts Lab — Phase 4 (10/10/2026)
+
+Owner requested the next phase, retaining the responsive design and rendered-output review requirement.
+
+- [x] Percentiles, quartiles and median estimates from the displayed cumulative polygon or curve; plateau intervals and separate raw median.
+- [x] Two frequency distributions with aligned classes, count/percentage scales and distinguishable series; SVG/PNG and both printed tables.
+- [x] Validated local workspace restoration, tutorial/answer/construction progress, fresh-link precedence and explicit progress reset.
+- [x] Local teacher activity library, instructions, starting level, delete/undo, portable links and files without student attempts.
+- [x] 42 new mathematical/storage tests; 336 project unit tests and 42 Chrome browser tests passed; responsive and PDF review.
+- [x] TypeScript, ESLint and Next.js production build passed; final print pagination rechecked.
+- [x] Owner authorised department-site integration and GitHub handoff. Optional cloud syncing remains outside this delivery.
+
+Review at `http://127.0.0.1:3216/`: **Grouped frequencies → 06 · Further Explorations**.
+Open **My activities & progress** to author or reopen an activity. Refresh practice to verify local resumption.
+The app has no student accounts or new backend writes. Full calculation, persistence and test details are in `docs/statistical-charts-lab.md`.
+
+## Statistical Charts Lab — Phase 3 (09/10/2026)
+
+Owner authorised Phase 3 and requested design review against international website-award standards.
+
+- [x] Five comparison layouts with shared numeric scales, linked class selection and an explanatory reading panel.
+- [x] Fixed lesson dataset, answer controls, student reset, new example and classroom presentation view.
+- [x] Self-contained SVG, 2x PNG, printable charts/table and raw/frequency CSV exports.
+- [x] Validated activity links and JSON file fallback; exact configuration restoration without a backend.
+- [x] Responsive hierarchy, spacing, touch targets, reduced motion, print/keyboard behaviour and rendered-output review.
+- [x] 31 new transport tests; 294 project unit tests and 30 browser tests passed; production build and lint checked.
+- [x] Owner authorised progression to Phase 4.
+
+Review at `http://127.0.0.1:3216/`: **Grouped frequencies → Compare Charts → All five charts**.
+Open **Teacher & sharing tools** for presentation, answer control, print, CSV and portable activities.
+See `docs/statistical-charts-lab.md` for the full review route, design refinements and sharing limits.
+No dependencies, backend writes or public deployment were added.
+
+## Statistical Charts Lab — Phase 2 (09/10/2026)
+
+Owner requested the next phase and then confirmed continuation.
+
+- [x] All five construction tutorials, progressive point/bar reveal, animated joins, curve smoothing, hints, answers and restart.
+- [x] Guided calculations, partially completed graphs and independent coordinate/boundary construction.
+- [x] Numerical grading with misconception-specific feedback, worked corrections, model graphs and retries.
+- [x] Mouse, touch and keyboard plotting; exact numeric entry; fixed given items; dataset/level/chart reset behaviour.
+- [x] 35 new unit tests, 263 passing project unit tests, 19 passing browser tests, responsive visual review, lint/typecheck/build.
+- [x] Owner authorised progression to Phase 3 comparison layouts, exports, printing, sharing and dedicated teacher controls.
+
+Review at `http://127.0.0.1:3216/` using `npm.cmd run build:statistics` then `npm.cmd run preview:statistics`.
+Choose **Grouped frequencies**, then **Step-by-Step Learning** or **Practice Mode**. Try the first class mark
+as 10 (midpoint feedback), then 14.5 (correct). In independent frequency-polygon practice include zero endpoints
+(4.5, 0) and (54.5, 0), and choose straight segments. See `docs/statistical-charts-lab.md` for the full review route.
+Curve exercises assess anchor calculations and the smoothing method, not arbitrary freehand curves. No new dependencies,
+backend writes or public deployments were made.
+
+## Statistical Charts Lab — Phase 1 (09/10/2026)
+
+Owner supplied a full F2 Chapter 6 brief with an explicit first delivery of working Phase 1, plus the textbook PDF.
+
+- [x] Check the textbook construction conventions visually (pp. 6.7, 6.11, 6.22, 6.27, 6.35–6.39).
+- [x] Seeded generator with eight contexts, custom ranges, five distribution shapes, precision and sample-size controls.
+- [x] Raw-cell/bulk/CSV input; separate grouped-frequency editor; validation and automatic full/compact frequency tables.
+- [x] All five SVG charts with numeric scales, linked highlighting, safe curves and basic display controls.
+- [x] Register `/apps/statistical-charts`; provide an independent static build and Firebase Hosting instructions.
+- [x] 42 new numerical tests, 228 project unit tests, six browser tests, responsive screenshot review, lint/typecheck/build.
+- [x] Owner authorised progression to Phase 2; classroom/export/sharing tools remain Phase 3.
+
+Local review: `npm.cmd run build:statistics`, then `npm.cmd run preview:statistics`; open
+`http://127.0.0.1:3216/` without an account. Select **Grouped frequencies**: total 20, frequencies
+3/7/5/5; switch charts to inspect the extra zero endpoints and final cumulative total. Edit a value
+and observe all representations update. See `docs/statistical-charts-lab.md` for the complete test route,
+source conventions, implementation details and limitations. No real Firebase data or deployment was changed.
+
 ## Answers from the owner (2026-09-21)
 
 | question | answer |
@@ -491,6 +572,15 @@ The join page explains the three steps before a large code field; loading and di
 **Scope:** Local design and interaction refinement only. No new packages, production data changes or deployment. The temporary populated-board fixtures were confined to the demo emulator. Stage G's launch and privacy checks remain applicable.
 
 ## Decision log
+
+- 2026-10-09: Statistical Charts Phase 3 keeps classroom controls local and unauthenticated. Shared activities use a validated
+  versioned URL fragment (8,000-character limit) or JSON file fallback (250 KB). Only the active data source is exported;
+  practice attempts and personal-name fields are not stored. Comparisons share numeric domains, including print/export.
+  Award-site references inform visual QA while preserving the LSKC exercise-book design. No public deployment is implied.
+
+- 09/10/2026 — Owner requested Statistical Charts Lab Phase 2. Keep all activities tied to the active data; grade mathematical coordinates and histogram extents, reject the wrong join method, and show misconception-specific correction/retry routes. Curve practice constructs and smooths polygon anchors; freehand curve grading and manual axis design are not claimed. Browser tests use a fresh isolated local server on port 3217.
+
+- 09/10/2026 — Statistical Charts Lab follows the owner's supplied brief: deliver tested Phase 1 first. Use a pure shared calculation module and numerical SVG rendering, keep the department palette, and add a backend-free static build. All classes use lower-inclusive/upper-exclusive boundaries for consistent less-than cumulative frequencies; automatic fitting covers the maximum. Later-phase features are explicitly deferred.
 
 - 02/10/2026 — The owner requested an iterative visual-quality review. Retain the exercise-book identity and calm Learn screens, give the six Play worlds distinct illustrated landmarks, and improve navigation and competition readability. Use a collapsed shared menu below 1280 px to accommodate all teacher links without page overflow.
 

@@ -5,6 +5,7 @@ import QuadraticThumbnail from "./quadratic-explorer/Thumbnail";
 import UnitCircleThumbnail from "./unit-circle/Thumbnail";
 import InequalityThumbnail from "./inequality-number-line/Thumbnail";
 import DirectedNumbersThumbnail from "./directed-numbers/Thumbnail";
+import StatisticalChartsThumbnail from "./statistical-charts/Thumbnail";
 
 export interface AppEntry {
   slug: string;
@@ -19,6 +20,16 @@ export interface AppEntry {
 
 /** The index and detail route both use this list. New apps register here. */
 export const appRegistry: readonly AppEntry[] = [
+  {
+    slug: "statistical-charts",
+    title: copy.statisticalCharts.title,
+    topic: copy.statisticalCharts.topic,
+    levels: ["F2"],
+    strand: "data-handling",
+    summary: copy.statisticalCharts.summary,
+    thumbnail: StatisticalChartsThumbnail,
+    load: () => import("./statistical-charts"),
+  },
   {
     slug: "directed-numbers",
     title: copy.apps.directedNumbers.title,

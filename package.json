@@ -9,6 +9,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:statistics": "node scripts/build-statistical-lab.mjs",
+    "preview:statistics": "node scripts/serve-statistical-lab.mjs",
+    "test:statistics:e2e": "npm run build:statistics && playwright test --config playwright.statistics.config.ts",
+    "test:statistics:site": "npm run build && playwright test --config playwright.statistics-site.config.ts",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",

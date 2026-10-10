@@ -65,6 +65,7 @@ export function PresentationFrame({
     <PresentationContext.Provider value={presenting}>
       <section
         ref={frame}
+        data-presentation={presenting ? "true" : undefined}
         className={`bg-paper text-graphite ${fullscreen ? "h-screen overflow-y-auto" : ""} ${presenting ? "text-lg" : ""}`}
       >
         <div

@@ -1,0 +1,152 @@
+import { test, expect } from "@playwright/test";
+test.beforeEach(async ({ page }) => {
+  await page.goto("/");
+});
+test("same grouped dataset drives all five numerical charts", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page
+    .getByRole("button", { name: "Grouped frequencies", exact: true })
+    .click();
+  await expect(page.getByTestId("lab-total")).toHaveText("20");
+  const bars = page.locator("[data-bar]");
+  await expect(bars).toHaveCount(4);
+  expect(
+    await bars.evaluateAll((nodes) =>
+      nodes.map((n) => [
+        n.getAttribute("data-low"),
+        n.getAttribute("data-high"),
+        n.getAttribute("data-frequency"),
+      ]),
+    ),
+  ).toEqual([
+    ["9.5", "19.5", "3"],
+    ["19.5", "29.5", "7"],
+    ["29.5", "39.5", "5"],
+    ["39.5", "49.5", "5"],
+  ]);
+  const select = page.getByLabel("Chart type", { exact: true });
+  await select.selectOption("polygon");
+  await expect(page.locator('[data-point="4.5,0"]')).toHaveCount(1);
+  await expect(page.locator('[data-point="54.5,0"]')).toHaveCount(1);
+  await expect(page.locator("polyline[data-chart-line]")).toHaveCount(1);
+  await select.selectOption("curve");
+  await expect(page.locator('path[data-chart-line="curve"]')).toHaveAttribute(
+    "d",
+    / C /,
+  );
+  for (const type of ["cumulativePolygon", "cumulativeCurve"]) {
+    await select.selectOption(type);
+    await expect(page.locator('[data-point="9.5,0"]')).toHaveCount(1);
+    await expect(page.locator('[data-point="49.5,20"]')).toHaveCount(1);
+  }
+  await page
+    .getByRole("group", { name: "Class interval 2", exact: true })
+    .getByLabel("Frequency", { exact: true })
+    .fill("10");
+  await expect(page.getByTestId("lab-total")).toHaveText("23");
+  await expect(page.locator('[data-point="49.5,23"]')).toHaveCount(1);
+  expect(errors).toEqual([]);
+});
+test("editing, importing, grouping and invalid input", async ({ page }) => {
+  await page
+    .getByLabel("Paste numbers or numeric CSV")
+    .fill("10, 15, 20, 25, 30, 35, 40, 45");
+  await page.getByRole("button", { name: "Use these values" }).click();
+  await page.getByLabel("First lower limit / boundary").fill("10");
+  await page.getByLabel("Class width", { exact: true }).fill("10");
+  await page.getByLabel("Number of classes", { exact: true }).fill("4");
+  await expect(page.getByTestId("lab-total")).toHaveText("8");
+  await page.getByLabel("Observation 1", { exact: true }).fill("45");
+  await expect(page.locator('[data-bar="0"]')).toHaveAttribute(
+    "data-frequency",
+    "1",
+  );
+  await expect(page.locator('[data-bar="3"]')).toHaveAttribute(
+    "data-frequency",
+    "3",
+  );
+  await page.getByLabel("Observation 1", { exact: true }).fill("100");
+  await expect(page.getByRole("alert")).toContainText("outside");
+  await expect(page.locator("[data-bar]")).toHaveCount(0);
+  await page.getByRole("button", { name: "Fit classes to data" }).click();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await page.getByLabel("Import numeric CSV").setInputFiles({
+    name: "scores.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from("10,20\n30,40"),
+  });
+  await page.getByRole("button", { name: "Fit classes to data" }).click();
+  await expect(page.getByTestId("lab-total")).toHaveText("4");
+  await page
+    .getByRole("button", { name: "Grouped frequencies", exact: true })
+    .click();
+  await page
+    .getByRole("group", { name: "Class interval 4", exact: true })
+    .getByLabel("Upper limit", { exact: true })
+    .fill("59");
+  await expect(page.getByRole("alert")).toContainText("unequal widths");
+  await expect(page.locator("[data-bar]")).toHaveCount(0);
+});
+test("seed replay, shape generation and display controls", async ({ page }) => {
+  await page.getByLabel("Reproducible seed").fill("lesson-one");
+  await page.getByRole("button", { name: "Reproduce Seed" }).click();
+  const snapshot = await page
+    .locator('input[aria-label^="Observation "]')
+    .evaluateAll((ns) => ns.map((n) => (n as HTMLInputElement).value));
+  await page.getByRole("button", { name: "Generate New Data" }).click();
+  await page.getByLabel("Reproducible seed").fill("lesson-one");
+  await page.getByRole("button", { name: "Reproduce Seed" }).click();
+  expect(
+    await page
+      .locator('input[aria-label^="Observation "]')
+      .evaluateAll((ns) => ns.map((n) => (n as HTMLInputElement).value)),
+  ).toEqual(snapshot);
+  await page.getByText("Chart display", { exact: true }).click();
+  await page.getByLabel("Frequency labels", { exact: true }).check();
+  await page.getByLabel("Chart type", { exact: true }).selectOption("polygon");
+  await page.getByLabel("Histogram underneath", { exact: true }).check();
+  await expect(page.locator("[data-bar]")).toHaveCount(6);
+  await page
+    .getByRole("button", { name: "Select class 0–16, Frequency", exact: false })
+    .focus();
+  await expect(page.locator('tr[data-selected="true"]')).toHaveCount(1);
+  await page
+    .getByRole("button", { name: "Enlarge chart", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Show workspace", exact: true }),
+  ).toBeVisible();
+});
+for (const [name, width, height] of [
+  ["phone", 360, 800],
+  ["tablet", 820, 1180],
+  ["desktop", 1440, 1000],
+] as const) {
+  test(`${name} layout remains inside the viewport`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page
+      .getByRole("button", { name: "Grouped frequencies", exact: true })
+      .click();
+    await page
+      .getByLabel("Chart type", { exact: true })
+      .selectOption("cumulativeCurve");
+    await page.locator("#lab-chart").scrollIntoViewIfNeeded();
+    await page.screenshot({
+      path: `test-results/statistical-${name}.png`,
+      fullPage: true,
+    });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  });
+}

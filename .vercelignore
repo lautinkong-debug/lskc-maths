@@ -1,0 +1,14 @@
+# The deployed website uses environment values configured on Vercel.
+.env*
+.vercel/
+.git/
+.next/
+node_modules/
+out/
+test-results/
+playwright-report/
+blob-report/
+coverage/
+emulator-data/
+*-debug.log*
+*.tsbuildinfo
