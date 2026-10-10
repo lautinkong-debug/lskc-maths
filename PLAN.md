@@ -12,7 +12,9 @@ Owner asked to include the lab in the mathematics department website, then reque
 - [x] Exclude local environment files, generated output and test artifacts from Vercel uploads.
 - [x] Prepare `docs/statistical-charts-handoff.md`, including the 21 earlier local commits absent from GitHub main.
 - [x] Upload branch `codex/statistical-charts-lab` and verify remote implementation commit `e2945cd`.
-- [ ] Future publication to the existing website. No production deployment or Firebase changes are part of this handoff.
+- [x] Owner renamed the uploaded branch to `LSKC-Mathematics-Department-Website`.
+- [x] Owner authorised updating the existing production website on 10/10/2026 after an old-main deployment restored placeholder routes.
+- [ ] Stage and verify the complete production website, fast-forward GitHub main, and publish to the existing Vercel domain. No Firebase database/rules changes are required.
 
 ## Statistical Charts Lab — Phase 4 (10/10/2026)
 

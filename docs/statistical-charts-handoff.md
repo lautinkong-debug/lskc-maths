@@ -2,14 +2,15 @@
 
 Prepared 10/10/2026 for continuation from GitHub.
 
-Uploaded branch: [codex/statistical-charts-lab](https://github.com/lautinkong-debug/lskc-maths/tree/codex/statistical-charts-lab).
+Uploaded branch: [LSKC-Mathematics-Department-Website](https://github.com/lautinkong-debug/lskc-maths/tree/LSKC-Mathematics-Department-Website)
+(renamed by the owner from `codex/statistical-charts-lab`).
 Implementation commit: `e2945cd` (followed by the upload-record documentation commit).
 
 ## Intended result
 
 The owner asked to include the completed lab in the mathematics department website, then requested a GitHub upload
-for later processing. Continue from branch `codex/statistical-charts-lab`. This is the complete department website,
-not a standalone replacement for it. Production publication is deferred for the next session.
+for later processing. Continue from branch `LSKC-Mathematics-Department-Website`. This is the complete department website,
+not a standalone replacement for it. On 10/10/2026 the owner authorised updating the existing production website.
 
 The application is registered at `/apps/statistical-charts` and appears in **Web apps → F2 → Data Handling**.
 Searching **2A06** finds its card. The existing app host supplies school navigation, title, availability controls,
@@ -63,18 +64,29 @@ For manual review, run `npm.cmd run dev:all` and open `http://localhost:3000/app
 For the separate no-backend preview, run `npm.cmd run build:statistics` then `npm.cmd run preview:statistics`;
 open `http://127.0.0.1:3216/`. These two browser origins have separate local progress.
 
-## Deployment continuation
+## Production release continuation (10/10/2026)
 
 Read-only inspection confirmed the existing Vercel project `lskc-maths`, ID `prj_gDfV3Ghov8KxYuPORUZ6J4DyIEIc`,
 under team `team_uV3gE1tXDyPLZgD0VVTk3BNh`. Production URL: `https://lskc-maths.vercel.app`.
-The production deployment observed on 10/10/2026 was `dpl_8FK2k8WCFF4aDW9beg8UvyqrY3nf`.
+The old-main deployment `dpl_EA7RkLN9E3tMUDGikC8FcUwBo4Tg` built commit `04f27ec` and replaced the
+earlier department deployment `dpl_8FK2k8WCFF4aDW9beg8UvyqrY3nf`. Its Web apps and Mistakes Book routes
+were still placeholders. The renamed complete branch was verified at `70b23cd` before this release documentation update.
 These observations may change; inspect the current target again before any release.
 
-No Vercel deployment or production Firebase mutation was made during this handoff. Preserve the existing Vercel
+No Vercel deployment or production Firebase mutation was made during the original handoff. A subsequent staging
+attempt was blocked before building because the commit author's school email did not match the owner's Vercel account.
+New release commits use the owner's verified account email; existing shared commits retain their original authors.
+Preserve the existing Vercel
 production environment and server-only Firebase Admin secret. Never upload `.env.local` or use emulator build output
 as a production prebuilt artifact. When publication is requested, stage a production-configured deployment, verify
 the app card and actual route on that deployment, then promote the verified build to the existing domain.
 No Firebase Hosting deployment or database/rules change is needed to add this client-side teaching app.
+
+Release procedure: stage with production configuration and `--skip-domain`, verify all five app cards, the
+Statistical Charts route and its mobile progress restoration, and the Mistakes Book topic browser. Fast-forward
+GitHub `main` to the complete website, retain the renamed branch, then promote the verified deployment to
+`https://lskc-maths.vercel.app`. An empty book list means no published books match the selected topic; it does not
+mean the Mistakes Book feature is missing. Signed-in teacher editing needs a separate authenticated check.
 
 ## Known limits
 
