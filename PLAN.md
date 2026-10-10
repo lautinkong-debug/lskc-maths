@@ -14,7 +14,14 @@ Owner asked to include the lab in the mathematics department website, then reque
 - [x] Upload branch `codex/statistical-charts-lab` and verify remote implementation commit `e2945cd`.
 - [x] Owner renamed the uploaded branch to `LSKC-Mathematics-Department-Website`.
 - [x] Owner authorised updating the existing production website on 10/10/2026 after an old-main deployment restored placeholder routes.
-- [ ] Stage and verify the complete production website, fast-forward GitHub main, and publish to the existing Vercel domain. No Firebase database/rules changes are required.
+- [x] Stage and verify the complete production website, fast-forward GitHub main, and publish to the existing Vercel domain. No Firebase database/rules changes were required.
+
+Published at `https://lskc-maths.vercel.app` on 10/10/2026. Verified production-configured build
+`dpl_2PCge2tfjdGYg4qUF1Y6ssqGH2J9` from release commit `0dd44c2`; GitHub main and the renamed branch
+were fast-forwarded to that complete website. Fresh signed-out Chrome checks passed for five app cards,
+F2/Data Handling navigation, percentile calculations, browser progress restoration, mobile overflow, and
+69 Mistakes Book topics across F1-F6. Requests used production Firebase project `lskc-maths-2026`.
+The selected Directed Numbers topic had no published books; signed-in teacher editing was not exercised.
 
 ## Statistical Charts Lab — Phase 4 (10/10/2026)
 

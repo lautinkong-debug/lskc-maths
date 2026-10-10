@@ -82,7 +82,16 @@ as a production prebuilt artifact. When publication is requested, stage a produc
 the app card and actual route on that deployment, then promote the verified build to the existing domain.
 No Firebase Hosting deployment or database/rules change is needed to add this client-side teaching app.
 
-Release procedure: stage with production configuration and `--skip-domain`, verify all five app cards, the
+Published at `https://lskc-maths.vercel.app` on 10/10/2026 by promoting the verified production-configured
+deployment `dpl_2PCge2tfjdGYg4qUF1Y6ssqGH2J9` (`lskc-maths-8npcz7xi4-lautinkong-4501.vercel.app`),
+from release commit `0dd44c2`. Both GitHub `main` and `LSKC-Mathematics-Department-Website` were fast-forwarded
+to this complete website before the release-record commit. Fresh signed-out Chrome checks on the public domain
+passed: five app cards, F2/Data Handling navigation, percentile estimate 29.5, practice-answer reload restoration,
+390 px phone overflow check, and 69 Mistakes Book topics across F1-F6. The browser requested the production
+Firebase project `lskc-maths-2026`; no emulator project was used and no browser runtime errors were observed.
+The selected Directed Numbers topic displayed its correct empty-book message. Desktop and phone screenshots were reviewed.
+
+For future releases: stage with production configuration and `--skip-domain`, verify all five app cards, the
 Statistical Charts route and its mobile progress restoration, and the Mistakes Book topic browser. Fast-forward
 GitHub `main` to the complete website, retain the renamed branch, then promote the verified deployment to
 `https://lskc-maths.vercel.app`. An empty book list means no published books match the selected topic; it does not
