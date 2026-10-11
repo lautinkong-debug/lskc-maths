@@ -17,7 +17,15 @@ import {
 import styles from "./SignMagnitude.module.css";
 const c = copy.apps.directedNumbers.magnitudeLesson;
 const t = copy.apps.directedNumbers.demonstration;
-function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
+function MagnitudeGraph({
+  move,
+  stage,
+  startLabel,
+}: {
+  move: SimpleMove;
+  stage: number;
+  startLabel?: string;
+}) {
   const presenting = usePresentation();
   const marker = useId().replaceAll(":", "");
   const m = magnitudeModel(move);
@@ -84,12 +92,25 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
     stroke: string,
     key: string,
   ) {
+    const direction = Math.sign(to - from);
+    const head = Math.min(12, Math.abs(to - from) * 0.4);
+    const arrow =
+      direction === 0
+        ? ""
+        : ` M${to - direction * head},${y - head / 2} L${to},${y} L${to - direction * head},${y + head / 2}`;
     return (
-      <g key={key} className={styles.reveal} data-testid={`distance-${key}`}>
+      <g
+        key={key}
+        className={styles.reveal}
+        data-testid={`distance-${key}`}
+        data-from={from}
+        data-to={to}
+      >
         <path
-          d={`M${from},${y - 5} v10 M${from},${y} H${to} M${to},${y - 5} v10`}
+          d={`M${from},${y - 5} v10 M${from},${y} H${to}${arrow}`}
           stroke={stroke}
           strokeWidth="4"
+          strokeLinejoin="round"
           fill="none"
         />
         <text
@@ -111,7 +132,7 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
       className={`h-auto w-full ${presenting ? "max-h-[380px]" : ""}`}
       role="img"
       aria-label={c.exactCaption(
-        m.labels.start,
+        startLabel ?? m.labels.start,
         c.motion(m.labels.distance, m.delta),
         complete ? m.labels.end : undefined,
       )}
@@ -216,7 +237,7 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
         fill="#0f4574"
         data-testid="graph-start"
       >
-        {c.startMark}: {m.labels.start}
+        {c.startMark}: {startLabel ?? m.labels.start}
       </text>
       {m.delta !== 0 && (
         <g
@@ -315,8 +336,8 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
       </g>
       {stage >= 1 &&
         distanceBar(
-          start,
           zero,
+          start,
           243,
           t.startDistance(m.labels.a),
           "#0f4574",
@@ -364,11 +385,13 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
 export function SignMagnitude({
   move,
   expression,
+  startLabel,
   staticResult = false,
   wide = false,
 }: {
   move: SimpleMove;
   expression?: string;
+  startLabel?: string;
   staticResult?: boolean;
   wide?: boolean;
 }) {
@@ -475,7 +498,7 @@ export function SignMagnitude({
           )}{" "}
         </div>
         <div className="min-w-0 space-y-3">
-          <MagnitudeGraph move={move} stage={stage} />
+          <MagnitudeGraph move={move} stage={stage} startLabel={startLabel} />
           {stage >= 3 && (
             <div
               data-testid="magnitude-result"

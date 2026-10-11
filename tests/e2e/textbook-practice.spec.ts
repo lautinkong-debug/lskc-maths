@@ -613,11 +613,33 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
   page,
 }, testInfo) => {
   await page.goto("/apps/directed-numbers#sign-magnitude");
-  for (const [a, op, b, calculation, result] of [
-    ["50", "-", "60", "60 − 50 = 10", "= -10"],
-    ["3", "-", "3.1", "3.1 − 3 = 0.1", "= -0.1"],
-    ["1/3", "+", "1/6", "1/3 + 1/6 = 1/2", "= +\\frac{1}{2}"],
-    ["-1 1/2", "+", "0.25", "3/2 − 1/4 = 5/4", "= -\\frac{5}{4}"],
+  for (const [a, op, b, calculation, result, original] of [
+    ["50", "-", "60", "60 − 50 = 10", "= -10", "50 - 60"],
+    [
+      "+50",
+      "-",
+      "+60",
+      "60 − 50 = 10",
+      "= -10",
+      "\\left(+50\\right) - \\left(+60\\right)",
+    ],
+    ["3", "-", "3.1", "3.1 − 3 = 0.1", "= -0.1", "3 - 3.1"],
+    [
+      "1/3",
+      "+",
+      "1/6",
+      "1/3 + 1/6 = 1/2",
+      "= +\\frac{1}{2}",
+      "\\frac{1}{3} + \\frac{1}{6}",
+    ],
+    [
+      "-1 1/2",
+      "+",
+      "0.25",
+      "3/2 − 1/4 = 5/4",
+      "= -\\frac{5}{4}",
+      "\\left(-1 \\frac{1}{2}\\right) + 0.25",
+    ],
   ]) {
     await page.getByLabel("Starting value", { exact: true }).fill(a);
     await page
@@ -638,7 +660,20 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
       "data-stage",
       "0",
     );
-    await next(page, 9);
+    await expect(
+      page.getByTestId("equation-frame").getByRole("math").first(),
+    ).toHaveAttribute("aria-label", original);
+    if (a === "50" || a === "+50") {
+      await expect(page.getByTestId("graph-start")).toHaveText(`Start: ${a}`);
+    }
+    if (a === "50") {
+      await page.screenshot({
+        path: testInfo.outputPath("unsigned-input.png"),
+        fullPage: true,
+      });
+    }
+    const progress = await page.getByText(/^Step \d+ of \d+$/).textContent();
+    await next(page, Number(progress!.match(/of (\d+)/)![1]));
     await expect(page.getByTestId("graph-calculation")).toHaveText(calculation);
     await expect(
       page.getByTestId("final-equation").getByRole("math"),

@@ -19,6 +19,13 @@ const examples: SimpleMove[] = [
   { start: -50, op: "-", b: -60 },
   { start: 50, op: "+", b: -50 },
 ];
+function inputExpression(a: string, op: SimpleMove["op"], b: string) {
+  // Only signed inputs need brackets. Do not invent a unary plus for an
+  // unsigned input; keep the original decimal or fraction notation as well.
+  const operand = (value: string) =>
+    /^[+−–-]/.test(value) ? `(${value})` : value;
+  return `${operand(a)} ${op} ${operand(b)}`;
+}
 export default function SignMagnitudeMode({
   initialExpression,
 }: {
@@ -29,9 +36,16 @@ export default function SignMagnitudeMode({
     ? simpleMove(initialExpression, true)
     : null;
   const initial = initialMove ?? examples[0];
+  const initialA = magnitudeModel(initial).labels.start.replace(/^\+/, "");
+  const initialB = magnitudeModel(initial).labels.b.replace(/^\+/, "");
   const [move, setMove] = useState(initial);
   const [expression, setExpression] = useState(
-    initialMove ? initialExpression : undefined,
+    initialMove
+      ? initialExpression
+      : inputExpression(initialA, initial.op, initialB),
+  );
+  const [startLabel, setStartLabel] = useState<string | undefined>(
+    initialMove ? undefined : initialA,
   );
   const [a, setA] = useState(
       magnitudeModel(initial).labels.start.replace(/^\+/, ""),
@@ -41,10 +55,16 @@ export default function SignMagnitudeMode({
   const [error, setError] = useState(false),
     [version, setVersion] = useState(0);
   function load(value: SimpleMove, entered?: { a: string; b: string }) {
+    const labels = magnitudeModel(value).labels;
+    const nextA = entered?.a ?? labels.start.replace(/^\+/, "");
+    const nextB = entered?.b ?? labels.b.replace(/^\+/, "");
     setMove(value);
-    setExpression(undefined);
-    setA(entered?.a ?? magnitudeModel(value).labels.start.replace(/^\+/, ""));
-    setB(entered?.b ?? magnitudeModel(value).labels.b.replace(/^\+/, ""));
+    setExpression(inputExpression(nextA, value.op, nextB));
+    setStartLabel(
+      nextA.startsWith("+") ? labels.start : labels.start.replace(/^\+/, ""),
+    );
+    setA(nextA);
+    setB(nextB);
     setOp(value.op);
     setError(false);
     setVersion((n) => n + 1);
@@ -52,7 +72,13 @@ export default function SignMagnitudeMode({
   return (
     <section className={`min-w-0 space-y-4 ${presenting ? "text-xl" : ""}`}>
       {!presenting && <p className="text-pencil">{c.intro}</p>}
-      <SignMagnitude key={version} move={move} expression={expression} wide />
+      <SignMagnitude
+        key={version}
+        move={move}
+        expression={expression}
+        startLabel={startLabel}
+        wide
+      />
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="mr-2 font-semibold">{c.examples}</h3>
         {examples.map((value, i) => (
