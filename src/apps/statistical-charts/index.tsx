@@ -12,6 +12,7 @@ import {
 import { AdvancedExplorer } from "./AdvancedExplorer";
 import { ConceptLab } from "./ConceptLab";
 import { AnimatedWalkthroughs } from "./AnimatedWalkthroughs";
+import { ClassVocabulary } from "./ClassVocabulary";
 import { ageExamples, cumulativeExamples } from "./concepts";
 import {
   defaultAdvanced,
@@ -452,7 +453,7 @@ export default function StatisticalChartsLab() {
             </div>
           )}
           <div className={s.screenChrome}>
-            {mode !== "animations" && (
+            {mode !== "animations" && mode !== "vocabulary" && (
               <div className={s.intro}>
                 <div>
                   <p className={s.chapter}>{c.classroom.chapter}</p>
@@ -536,6 +537,12 @@ export default function StatisticalChartsLab() {
               >
                 08 · {c.animation.title}
               </button>
+              <button
+                aria-pressed={mode === "vocabulary"}
+                onClick={() => setMode("vocabulary")}
+              >
+                09 · {c.vocabulary.title}
+              </button>
             </nav>
             <ClassroomTools
               activity={activity}
@@ -599,6 +606,7 @@ export default function StatisticalChartsLab() {
             )}
           </div>
           {mode === "animations" && <AnimatedWalkthroughs key={revision} />}
+          {mode === "vocabulary" && <ClassVocabulary key={revision} />}
           {mode === "concepts" && (
             <ConceptLab
               key={revision}

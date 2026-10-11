@@ -2,6 +2,13 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Statistical Charts four-word memory activity
+
+- [x] Add 09 · Four words, one class with animated highlighting and the teacher's Limits are Listed / Boundaries are Between / Mark is the Middle / Width is the Whole bar mnemonic.
+- [x] Add Hide and recall with targeted feedback, plus six-value calculations and further whole-number, tenths and hundredths examples. Respect the teacher's hidden-answer control.
+- [x] Verify 33 mathematical/activity checks, three focused browser scenarios, scoped ESLint and the complete production build. Review phone and 1920×1080 projector renders; the whole projected activity fits without scrolling.
+- [x] Publish deployment dpl_B5e3cLveCsScaLS2eXvst2cYRDDS to https://lskc-maths.vercel.app/apps/statistical-charts. Preserve the latest published Directed Numbers snapshot. Verify live recall, decimal calculations, mobile layout, projection and textbook availability; no browser errors or Firebase changes.
+
 ## Statistical Charts representation connections (10/10/2026)
 
 - [x] Add an immediately visible class-mark / lower-and-upper-boundary axis selector, retaining saved display settings and cumulative-graph boundary conventions.
@@ -608,6 +615,8 @@ The join page explains the three steps before a large code field; loading and di
 **Scope:** Local design and interaction refinement only. No new packages, production data changes or deployment. The temporary populated-board fixtures were confined to the demo emulator. Stage G's launch and privacy checks remain applicable.
 
 ## Decision log
+
+- Four-word vocabulary uses a separate teaching example so raw lab data is untouched; class width is boundary-to-boundary, and half-step corrections follow the stated recording precision. Release preserves the already-published Directed Numbers snapshot, which is not yet on GitHub main.
 
 - 2026-10-09: Statistical Charts Phase 3 keeps classroom controls local and unauthenticated. Shared activities use a validated
   versioned URL fragment (8,000-character limit) or JSON file fallback (250 KB). Only the active data source is exported;

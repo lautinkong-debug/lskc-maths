@@ -23,7 +23,8 @@ export type LabMode =
   | "compare"
   | "advanced"
   | "concepts"
-  | "animations";
+  | "animations"
+  | "vocabulary";
 export const comparisons: Record<Comparison, ChartType[]> = {
   shape: ["histogram", "polygon"],
   smooth: ["polygon", "curve"],
@@ -108,6 +109,7 @@ export function validateActivity(input: unknown): Activity {
       "advanced",
       "concepts",
       "animations",
+      "vocabulary",
     ].includes(input.mode as string) ||
     !Object.hasOwn(comparisons, input.comparison as string) ||
     typeof input.answers !== "boolean" ||

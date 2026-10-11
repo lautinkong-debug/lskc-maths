@@ -4,6 +4,19 @@
  */
 export const copy = {
   statisticalCharts: {
+    vocabulary: {
+      title: "Four words, one class", eyebrow: "Look · Say · Hide · Recall", example: "Class example", step: "step", oneClass: "One class interval", recordedStep: "Recorded to the nearest", halfStep: "half a step is",
+      names: ["Class limits", "Class boundaries", "Class mark", "Class width"],
+      phrases: ["Limits are Listed", "Boundaries are Between", "Mark is the Middle", "Width is the Whole bar"],
+      meanings: ["Read the two numbers listed in the class interval.", "Find the halfway points between neighbouring recorded classes.", "Find the midpoint of the two limits or the two boundaries.", "Subtract the lower boundary from the upper boundary."],
+      modes: ["Look and say", "Hide and recall", "Calculate and check"], newExample: "Try another interval", diagram: "One class interval showing limits, boundaries, mark and width", recallDiagram: "Name the highlighted feature of the class interval",
+      lowerBoundary: "Lower boundary", upperBoundary: "Upper boundary", halfRule: "Recorded measurements: go HALF A STEP out.", precisionRule: "Nearest 1 → ±0.5; nearest 0.1 → ±0.05; nearest 0.01 → ±0.005. This rule is for rounded measurements, not intervals already given as continuous boundaries.",
+      play: "Play the four words", pause: "Pause the four words", next: "Next word", sayAloud: "Say the phrase, point to the feature, then explain what it measures.",
+      recallProgress: "Recall", recallQuestion: "What is the highlighted feature called?", correct: "Correct.", lookAgain: "Look again.", complete: "All four recalled. Say the four phrases once more, then try another interval.", nextPrompt: "Next prompt",
+      calculateTitle: "Find the six values for this class", calculateIntro: "Two limits, two boundaries, one mark and one width. Use the recorded step shown beside the diagram.",
+      fields: ["Lower class limit", "Upper class limit", "Lower class boundary", "Upper class boundary", "Class mark", "Class width"], check: "Check my values", allCorrect: "All six values are correct. Try another interval without looking at the worked values.",
+      widthHint: "Use the whole bar between boundaries, not upper limit minus lower limit.", boundaryHint: "Move half the recorded step outside each limit.", markHint: "Average the two limits.", limitHint: "Copy the numbers listed in the class interval.",
+    },
     animation: {
       title: "Animated walkthroughs", eyebrow: "Watch · Pause · Explain", lesson: "Teaching sequence",
       lessons: ["Leaves → frequencies → shape", "Cumulative rises → histogram", "Frequency and cumulative tables", "Read a cumulative frequency graph"],

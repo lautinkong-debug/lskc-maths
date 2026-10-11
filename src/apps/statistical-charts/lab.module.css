@@ -296,6 +296,107 @@
   display: grid;
   gap: 18px;
 }
+.vocabulary {
+  display: grid;
+  gap: 18px;
+}
+.vocabularyGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 20px;
+}
+.vocabulary svg {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+}
+.vocabularyHighlight {
+  transition: opacity 250ms;
+}
+.vocabularyHighlight[data-active="true"] {
+  animation: revealCount 400ms ease-out;
+}
+.memoryCards {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+.lab .memoryCard {
+  display: flex;
+  gap: 14px;
+  align-items: start;
+  width: 100%;
+  text-align: left;
+  padding: 14px;
+  white-space: normal;
+}
+.lab .memoryCard[aria-pressed="true"] {
+  background: #e7f0f7;
+  color: var(--color-navy);
+  box-shadow: inset 3px 0 var(--color-crimson);
+}
+.memoryCard strong,
+.memoryCard span span,
+.memoryCard b {
+  display: block;
+}
+.memoryCard span span {
+  font-size: 14px;
+  font-weight: 400;
+  margin: 5px 0;
+}
+.memoryCard b {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.memoryLetter {
+  flex: 0 0 34px;
+  height: 34px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 30px;
+  font-size: 20px;
+}
+.memoryChant {
+  padding: 18px;
+  border: 2px dashed var(--color-navy);
+  text-align: center;
+  font-weight: 700;
+  font-size: 18px;
+}
+:global([data-presentation="true"]) .vocabulary {
+  gap: 12px;
+}
+:global([data-presentation="true"]) .vocabulary .lessonActions {
+  padding: 10px 0;
+}
+:global([data-presentation="true"]) .vocabulary .memoryChant {
+  padding: 12px;
+  margin: 0;
+}
+.memoryChoices,
+.vocabularyAnswers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.memoryChoices {
+  margin: 20px 0;
+}
+@media (max-width: 900px) {
+  .vocabularyGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .vocabulary .lessonActions {
+    justify-content: start;
+  }
+  .vocabularyAnswers {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .animationToolbar {
   display: flex;
   flex-wrap: wrap;
