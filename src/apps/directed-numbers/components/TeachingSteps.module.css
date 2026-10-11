@@ -19,6 +19,8 @@
     transform 650ms ease;
 }
 .magnitudeShown :global(.katex-html) [style*="color"]:not([style*="color"] *) {
+  background: #edf3f9;
+  border-radius: 0.2rem;
   visibility: visible;
   opacity: 1;
   transform: translateX(0);
@@ -48,6 +50,8 @@
   list-style: none;
 }
 .step {
+  scroll-margin-top: 14rem;
+  scroll-margin-bottom: 1.5rem;
   display: grid;
   grid-template-rows: 1fr;
   animation: unfold 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -152,4 +156,24 @@
   .splitOperation :global(.katex-html) [style*="color"] {
     transition: none;
   }
+}
+.controls {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--color-paper, #fff);
+  box-shadow: 0 3px 8px #0f457412;
+}
+.focusNote {
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-navy, #0f4574);
+}
+.optionalBadge {
+  padding: 0.1rem 0.45rem;
+  border: 1px solid #b7cce0;
+  border-radius: 0.25rem;
+  background: #edf3f9;
+  font-size: 0.75rem;
 }

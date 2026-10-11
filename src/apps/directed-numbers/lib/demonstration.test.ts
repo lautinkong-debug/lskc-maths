@@ -93,8 +93,7 @@ describe("teacher demonstration frames", () => {
       const steps = demonstrationSteps(input.value);
       expect(steps.length).toBeGreaterThan(0);
       for (const step of steps) {
-        if (step.signReveal) {
-          const { prefix, sign, magnitude, suffix } = step.signReveal;
+        if (step.signReveal || step.batchReveal) {
           const shown = parse(
             step.tex
               .replace(/\\frac\{(\d+)\}\{(\d+)\}/g, "($1/$2)")
@@ -107,7 +106,8 @@ describe("teacher demonstration frames", () => {
             expect(equals(evaluate(shown.value), answer.value)).toBe(true);
           expect(() =>
             katex.renderToString(
-              `${prefix}${sign}\\textcolor{#13579B}{${magnitude}}${suffix}`,
+              step.batchReveal?.animatedTex ??
+                `${step.signReveal!.prefix}${step.signReveal!.sign}\\textcolor{#13579B}{${step.signReveal!.magnitude}}${step.signReveal!.suffix}`,
               { throwOnError: true, trust: false },
             ),
           ).not.toThrow();
@@ -145,6 +145,13 @@ describe("teacher demonstration frames", () => {
         ).not.toThrow();
         expect(() =>
           katex.renderToString(step.tex, { throwOnError: true }),
+        ).not.toThrow();
+        expect(() =>
+          katex.renderToString(highlightedTex(step, true), {
+            throwOnError: true,
+            trust: false,
+            strict: false,
+          }),
         ).not.toThrow();
       }
       expect(steps.at(-1)?.ast.kind).toBe("number");

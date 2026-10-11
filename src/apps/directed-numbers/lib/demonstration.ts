@@ -1,4 +1,5 @@
 import { type Ast } from "./parse";
+import { groupedSteps } from "./groupedSteps";
 import {
   bracketSteps,
   expressionTex,
@@ -34,18 +35,29 @@ export function demonstrationSteps(ast: Ast): Step[] {
   const numberStyle = demonstrationStyle(ast);
   return additive(ast)
     ? bracketSteps(ast, numberStyle)
-    : workOut(ast, {
-        signWorking: true,
-        numberStyle,
-        reciprocalWorking: false,
-      });
+    : (groupedSteps(ast, numberStyle) ??
+        workOut(ast, {
+          signWorking: true,
+          numberStyle,
+          reciprocalWorking: false,
+        }));
 }
-export function highlightedTex(step: Step): string {
-  const tex = expressionTex(step.before, step.numberStyle),
+export function highlightedTex(step: Step, showSigns = false): string {
+  if (showSigns && step.signArrows?.highlighted)
+    return step.signArrows.highlighted;
+  if (step.highlights && (!showSigns || !step.signArrows)) {
+    return step.highlights.reduceRight(
+      (text, span) =>
+        `${text.slice(0, span.start)}\\colorbox{#fff1ad}{$${text.slice(span.start, span.end)}$}${text.slice(span.end)}`,
+      expressionTex(step.before, step.numberStyle),
+    );
+  }
+  const original = expressionTex(step.before, step.numberStyle);
+  const tex = showSigns ? (signArrowTex(step) ?? original) : original,
     span = step.highlight;
   if (!span) return tex;
   let start = span.start,
-    end = span.end;
+    end = span.end + tex.length - original.length;
   const part = tex.slice(start, end);
   // A highlight must contain complete TeX delimiters, including nested fractions.
   if (

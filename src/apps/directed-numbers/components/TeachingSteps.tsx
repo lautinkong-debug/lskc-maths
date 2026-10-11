@@ -52,8 +52,9 @@ export function TeachingControls({
 }) {
   return (
     <div
-      className="border-grid flex flex-wrap items-center gap-2 border-t pt-3"
+      className={`${styles.controls} border-grid flex flex-wrap items-center gap-2 border-y px-3 py-2`}
       aria-label={t.controls}
+      data-testid="teaching-controls"
     >
       <button className={primary} onClick={timeline.play}>
         {timeline.playing ? t.pause : t.play}
@@ -111,10 +112,20 @@ function EquationLine({
 }) {
   const marked = nextStep ? signArrowTex(nextStep) : null;
   const pair = marked ? (nextStep!.signArrows?.pair ?? nextStep!.ruleId) : null;
+  const arrowGroups = pair
+    ? (nextStep?.signArrows?.groups ?? [
+        { signs: pair, result: pair[0] === pair[1] ? "+" : "−" },
+      ])
+    : [];
+  const focused = latest && Boolean(nextStep);
   const operationArrows = Boolean(nextStep?.signArrows);
   const root = useRef<HTMLDivElement>(null);
   const marker = useId().replaceAll(":", "");
-  const markedTex = marked ? `${original ? "" : "= "}${marked}` : tex;
+  const markedTex = focused
+    ? `${original ? "" : "= "}${highlightedTex(nextStep!, true)}`
+    : marked
+      ? `${original ? "" : "= "}${marked}`
+      : tex;
   useLayoutEffect(() => {
     const node = root.current;
     if (!node || !marked) return;
@@ -124,22 +135,36 @@ function EquationLine({
           `.${styles.plain} .katex-html [style*="color"]`,
         ),
       ].filter((el) => /^[+−-]$/.test(el.textContent ?? ""));
-      if (signs.length !== 2) return;
+      const groups = nextStep?.signArrows?.groups ?? [
+        { signs: pair!, result: "" },
+      ];
+      if (
+        signs.length !== groups.reduce((n, group) => n + group.signs.length, 0)
+      )
+        return;
       const box = node.getBoundingClientRect();
-      const [a, b] = signs.map((el) => {
+      const anchors = signs.map((el) => {
         const r = el.getBoundingClientRect();
         return r.left - box.left + r.width / 2;
       });
-      const middle = (a + b) / 2;
-      node
-        .querySelector('[data-arrow="first"]')
-        ?.setAttribute("d", `M ${a} 2 Q ${a} 15 ${middle - 3} 30`);
-      node
-        .querySelector('[data-arrow="second"]')
-        ?.setAttribute("d", `M ${b} 2 Q ${b} 15 ${middle + 3} 30`);
-      node
-        .querySelector("[data-result-sign]")
-        ?.setAttribute("x", String(middle));
+      let offset = 0;
+      groups.forEach((group, index) => {
+        const values = anchors.slice(offset, offset + group.signs.length);
+        const middle = (values[0] + values.at(-1)!) / 2;
+        const arrows = node.querySelector(`[data-arrow-group="${index}"]`)!;
+        values.forEach((value, i) =>
+          arrows
+            .querySelectorAll("[data-arrow]")
+            [i]?.setAttribute(
+              "d",
+              `M ${value} 2 Q ${value} 15 ${middle + (i - (values.length - 1) / 2) * 6} 30`,
+            ),
+        );
+        arrows
+          .querySelector("[data-result-sign]")
+          ?.setAttribute("x", String(middle));
+        offset += values.length;
+      });
       node.setAttribute("data-arrows-positioned", "true");
     };
     measure();
@@ -150,7 +175,7 @@ function EquationLine({
       observer.disconnect();
       document.fonts.removeEventListener("loadingdone", measure);
     };
-  }, [marked, markedTex]);
+  }, [marked, markedTex, nextStep, pair]);
   return (
     <div
       className={styles.equation}
@@ -163,19 +188,16 @@ function EquationLine({
       }
       data-equation-line="true"
       data-tex={tex}
+      data-next-calculation={focused || undefined}
     >
+      {focused && <p className={styles.focusNote}>{t.calculateNext}</p>}
       <div
         ref={root}
-        className={`${styles.layers} ${highlight && !operationArrows ? styles.highlighted : ""} ${arrowPhase > 0 ? styles.arrowsShown : ""} ${arrowPhase > 1 || (operationArrows && arrowPhase > 0) ? styles.arrowsCombined : ""}`}
+        className={`${styles.layers} ${arrowPhase > 0 ? styles.arrowsShown : ""} ${arrowPhase > 1 || (operationArrows && arrowPhase > 0) ? styles.arrowsCombined : ""}`}
       >
         <Tex className={styles.plain} label={tex}>
           {markedTex}
         </Tex>
-        {nextStep && (
-          <span className={styles.highlight} aria-hidden="true">
-            <Tex>{`${original ? "" : "= "}${highlightedTex(nextStep)}`}</Tex>
-          </span>
-        )}
         {pair && (
           <div className={styles.arrowsRow} aria-hidden={arrowPhase === 0}>
             <div className={styles.arrowContents}>
@@ -184,11 +206,17 @@ function EquationLine({
                 className={styles.arrows}
                 data-testid="sign-combination"
                 role="img"
-                aria-label={t.signPair(
-                  pair[0],
-                  pair[1],
-                  pair[0] === pair[1] ? "+" : "−",
-                )}
+                aria-label={
+                  nextStep?.signArrows?.groups
+                    ? arrowGroups
+                        .map((group) => t.signGroup(group.signs, group.result))
+                        .join("; ")
+                    : t.signPair(
+                        pair[0],
+                        pair[1],
+                        pair[0] === pair[1] ? "+" : "−",
+                      )
+                }
               >
                 <defs>
                   <marker
@@ -203,26 +231,33 @@ function EquationLine({
                     <path d="M0 0 L6 3 L0 6 Z" fill="currentColor" />
                   </marker>
                 </defs>
-                <path
-                  data-arrow="first"
-                  pathLength="1"
-                  className={styles.signArrow}
-                  markerEnd={`url(#${marker})`}
-                />
-                <path
-                  data-arrow="second"
-                  pathLength="1"
-                  className={styles.signArrow}
-                  markerEnd={`url(#${marker})`}
-                />
-                <text
-                  data-result-sign="true"
-                  y="57"
-                  textAnchor="middle"
-                  className={styles.resultSign}
-                >
-                  {pair[0] === pair[1] ? "+" : "−"}
-                </text>
+                {arrowGroups.map((group, index) => (
+                  <g key={index} data-arrow-group={index}>
+                    {[...group.signs].map((_, i) => (
+                      <path
+                        key={i}
+                        data-arrow={
+                          i === 0
+                            ? "first"
+                            : i === 1
+                              ? "second"
+                              : `factor-${i + 1}`
+                        }
+                        pathLength="1"
+                        className={styles.signArrow}
+                        markerEnd={`url(#${marker})`}
+                      />
+                    ))}
+                    <text
+                      data-result-sign="true"
+                      y="57"
+                      textAnchor="middle"
+                      className={styles.resultSign}
+                    >
+                      {group.result}
+                    </text>
+                  </g>
+                ))}
               </svg>
             </div>
           </div>
@@ -242,8 +277,11 @@ function SplitOperationLine({
   applied: boolean;
   latest: boolean;
 }) {
-  const { prefix, sign, magnitude, suffix } = step.signReveal!;
-  const label = `= ${prefix}${sign}${applied ? magnitude : ""}${suffix}`;
+  const reveal = step.signReveal;
+  const label = `= ${step.batchReveal ? (applied ? step.tex : step.batchReveal.signTex) : `${reveal!.prefix}${reveal!.sign}${applied ? reveal!.magnitude : ""}${reveal!.suffix}`}`;
+  const animated =
+    step.batchReveal?.animatedTex ??
+    `${reveal!.prefix}${reveal!.sign}\\textcolor{#13579B}{${reveal!.magnitude}}${reveal!.suffix}`;
   return (
     <div
       className={`${styles.equation} ${styles.splitOperation} ${applied ? styles.magnitudeShown : ""}`}
@@ -255,7 +293,7 @@ function SplitOperationLine({
       <span data-testid={latest ? "after-equation" : undefined}>
         <span role="math" aria-label={label}>
           <span aria-hidden="true">
-            <Tex>{`= ${prefix}${sign}\\textcolor{#13579B}{${magnitude}}${suffix}`}</Tex>
+            <Tex>{`= ${animated}`}</Tex>
           </span>
         </span>
       </span>
@@ -272,6 +310,26 @@ export function EquationFrame({
   steps: Step[];
   position: number;
 }) {
+  const frame = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!position) return;
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const timer = window.setTimeout(
+      () => {
+        const row = frame.current?.querySelector(
+          "[data-testid='working-step']:last-child",
+        );
+        row?.scrollIntoView({
+          block: "nearest",
+          behavior: reducedMotion ? "instant" : "smooth",
+        });
+      },
+      reducedMotion ? 0 : 750,
+    );
+    return () => window.clearTimeout(timer);
+  }, [position]);
   const completed = Math.min(steps.length, Math.floor(position / 2));
   const highlighting = position % 2 === 1 && completed < steps.length;
   const notes: Record<string, string> = {
@@ -280,6 +338,7 @@ export function EquationFrame({
   };
   return (
     <div
+      ref={frame}
       className="min-w-0"
       data-testid="equation-frame"
       data-phase={
@@ -306,14 +365,28 @@ export function EquationFrame({
             >
               <div className={styles.stepContents}>
                 <div className={styles.note}>
-                  <span>{notes[step.noteKey]}</span>
+                  <span>
+                    {step.batchReveal
+                      ? t.independentSigns
+                      : notes[step.noteKey]}
+                  </span>
+                  {(step.signReveal || step.batchReveal) && (
+                    <span
+                      className={styles.optionalBadge}
+                      title={t.optionalHelp}
+                    >
+                      {t.optionalStep}
+                    </span>
+                  )}
                 </div>
                 <div
-                  className={`${styles.result} ${applied || step.signReveal ? styles.expanded : ""}`}
-                  aria-hidden={!applied && !step.signReveal}
+                  className={`${styles.result} ${applied || step.signReveal || step.batchReveal ? styles.expanded : ""}`}
+                  aria-hidden={
+                    !applied && !step.signReveal && !step.batchReveal
+                  }
                 >
                   <div className={styles.resultContents}>
-                    {step.signReveal ? (
+                    {step.signReveal || step.batchReveal ? (
                       <SplitOperationLine
                         step={step}
                         applied={applied}

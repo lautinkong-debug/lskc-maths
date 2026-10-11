@@ -33,11 +33,11 @@ function MagnitudeGraph({
   const fractions = Object.values(m.labels).some((label) =>
     label.includes("/"),
   );
-  const startY = fractions ? 202 : 180;
+  const startY = fractions ? 216 : 195;
   const startBarY = fractions ? 306 : 263;
-  const movementBarY = fractions ? 360 : 306;
-  const resultBarY = fractions ? 414 : 349;
-  const calculationY = fractions ? 490 : 394;
+  const movementBarY = fractions ? 376 : 306;
+  const resultBarY = fractions ? 446 : 349;
+  const calculationY = fractions ? 514 : 394;
   const low = Math.min(0, move.start, m.end),
     high = Math.max(0, move.start, m.end);
   const span = high - low || 1,
@@ -56,9 +56,9 @@ function MagnitudeGraph({
   const calculation = useRef<SVGTextElement>(null);
   const finish = useRef<SVGTextElement>(null);
   const finishAnchor = m.end < 0 ? "end" : "start";
-  const finishX = end + (m.end < 0 ? -26 : 26);
-  // Give Start, Finish/zero and the distance labels separate vertical lanes.
-  const finishY = fractions ? 246 : 210;
+  const finishX = end + (m.end < 0 ? -16 : 16);
+  // Put Finish beside its point; keep Start and zero in separate rows.
+  const finishY = 161;
   const resultCentre = (zero + end) / 2;
   useLayoutEffect(() => {
     const node = finish.current;
@@ -125,7 +125,7 @@ function MagnitudeGraph({
         />
         <GraphNumberText
           x={(from + to) / 2}
-          y={y - 12}
+          y={y - (fractions ? 30 : 12)}
           textAnchor="middle"
           fontSize={17}
           fontWeight={key === "result" ? "700" : undefined}
@@ -138,8 +138,8 @@ function MagnitudeGraph({
   }
   return (
     <svg
-      viewBox={`0 0 640 ${fractions ? 510 : 410}`}
-      className={`h-auto w-full ${presenting ? (fractions ? "max-h-[500px]" : "max-h-[380px]") : ""}`}
+      viewBox={`0 0 640 ${fractions ? 550 : 410}`}
+      className={`h-auto w-full ${presenting ? (fractions ? "max-h-[550px]" : "max-h-[380px]") : ""}`}
       role="img"
       aria-label={c.exactCaption(
         startLabel ?? m.labels.start,
@@ -325,7 +325,7 @@ function MagnitudeGraph({
       <g data-testid="graph-zero-label">
         <rect
           x={zero - 17}
-          y={fractions ? 87 : 189}
+          y={87}
           width="34"
           height="33"
           rx="6"
@@ -335,7 +335,7 @@ function MagnitudeGraph({
         />
         <text
           x={zero}
-          y={fractions ? 112 : 214}
+          y={112}
           textAnchor="middle"
           fontSize="26"
           fontWeight="800"

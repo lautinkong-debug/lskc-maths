@@ -43,7 +43,14 @@ export type RuleId =
   | "reciprocal"
   | "mixed-to-improper";
 export type Step = {
-  signArrows?: { tex: string; pair: string };
+  signArrows?: {
+    tex: string;
+    pair: string;
+    groups?: { signs: string; result: string }[];
+    highlighted?: string;
+  };
+  batchReveal?: { signTex: string; animatedTex: string };
+  highlights?: Span[];
   signReveal?: {
     prefix: string;
     sign: string;
@@ -163,7 +170,7 @@ export function expressionTex(
     .join("");
 }
 /** Map the original source positions onto the immediately preceding TeX line. */
-function texHighlight(
+export function texHighlight(
   ast: Ast,
   source: Span,
   style: NumberStyle = "improper",

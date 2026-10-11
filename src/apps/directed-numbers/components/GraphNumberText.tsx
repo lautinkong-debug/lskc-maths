@@ -1,25 +1,25 @@
 import { useLayoutEffect, useRef, type Ref, type SVGProps } from "react";
 import { Math as Tex } from "@/components/Math";
 
-const fraction = /^\d+\/\d+$/;
+const fraction = /^[+−-]?\d+\/\d+$/;
+const fractionTex = (text: string) =>
+  text.replace(/−/g, "-").replace(/(\d+)\/(\d+)/g, "\\dfrac{$1}{$2}");
 
-/** Keep words and decimals unchanged; stack only fraction literals. */
+/** Use the same mathematical font and fraction spacing as the working. */
 export function StackedNumberText({ children }: { children: string }) {
-  return children
-    .split(/(\d+\/\d+)/g)
-    .map((part, i) =>
-      fraction.test(part) ? (
-        <Tex
-          key={i}
-          label={part}
-        >{`\\dfrac{${part.split("/")[0]}}{${part.split("/")[1]}}`}</Tex>
-      ) : (
-        part
-      ),
-    );
+  if (/^[\d\s/+−=().-]+$/.test(children))
+    return <Tex label={children}>{fractionTex(children)}</Tex>;
+  return children.split(/([+−-]?\d+\/\d+)/g).map((part, i) =>
+    fraction.test(part) ? (
+      <Tex key={i} label={part}>
+        {fractionTex(part)}
+      </Tex>
+    ) : (
+      part
+    ),
+  );
 }
 
-/** Native SVG fractions stay sharp at any projector zoom. */
 export function GraphNumberText({
   children,
   x,
@@ -35,54 +35,36 @@ export function GraphNumberText({
   fontSize?: number;
   textRef?: Ref<SVGTextElement>;
 }) {
-  const group = useRef<SVGGElement>(null);
+  const box = useRef<SVGForeignObjectElement>(null);
+  const content = useRef<HTMLDivElement>(null);
   const stacked = /\d+\/\d+/.test(children);
   useLayoutEffect(() => {
-    const node = group.current;
-    if (!node) return;
+    const node = box.current,
+      label = content.current;
+    if (!node || !label) return;
     const align = () => {
-      const parts = Array.from(node.children) as SVGGraphicsElement[];
-      const widths = parts.map((part) =>
-        part.tagName.toLowerCase() === "text"
-          ? (part as SVGTextElement).getComputedTextLength()
-          : Math.max(
-              ...Array.from(part.querySelectorAll("text"), (text) =>
-                text.getComputedTextLength(),
-              ),
-            ) + 8,
-      );
-      const width = widths.reduce((a, b) => a + b, 0);
-      let left = Math.max(
-        20,
-        Math.min(
-          620 - width,
-          x -
-            (textAnchor === "middle"
-              ? width / 2
-              : textAnchor === "end"
-                ? width
-                : 0),
-        ),
-      );
-      parts.forEach((part, i) => {
-        if (part.tagName.toLowerCase() === "text") {
-          part.setAttribute("x", String(left));
-        } else {
-          part
-            .querySelectorAll("text")
-            .forEach((text) =>
-              text.setAttribute("x", String(left + widths[i] / 2)),
-            );
-          const rule = part.querySelector("line")!;
-          rule.setAttribute("x1", String(left + 2));
-          rule.setAttribute("x2", String(left + widths[i] - 2));
-        }
-        left += widths[i];
-      });
+      const width = label.offsetWidth,
+        height = label.offsetHeight;
+      const left =
+        x -
+        (textAnchor === "middle"
+          ? width / 2
+          : textAnchor === "end"
+            ? width
+            : 0);
+      node.setAttribute("x", String(Math.max(20, Math.min(620 - width, left))));
+      node.setAttribute("y", String(y - height / 2 - fontSize * 0.25));
+      node.setAttribute("width", String(width));
+      node.setAttribute("height", String(height));
     };
     align();
+    const observer = new ResizeObserver(align);
+    observer.observe(label);
     document.fonts.addEventListener("loadingdone", align);
-    return () => document.fonts.removeEventListener("loadingdone", align);
+    return () => {
+      observer.disconnect();
+      document.fonts.removeEventListener("loadingdone", align);
+    };
   }, [children, x, y, fontSize, textAnchor]);
   if (!stacked)
     return (
@@ -99,44 +81,32 @@ export function GraphNumberText({
       </text>
     );
   return (
-    <g
-      {...(props as SVGProps<SVGGElement>)}
-      ref={group}
-      fontSize={fontSize}
+    <foreignObject
+      {...(props as SVGProps<SVGForeignObjectElement>)}
+      ref={box}
+      x={x}
+      y={y - 40}
+      width={600}
+      height={80}
       role="math"
       aria-label={children}
       data-stacked-fractions="true"
     >
-      {children.split(/(\d+\/\d+)/g).map((part, i) =>
-        fraction.test(part) ? (
-          <g key={i}>
-            <text
-              y={y - fontSize * 0.78}
-              textAnchor="middle"
-              fontSize={fontSize * 0.8}
-            >
-              {part.split("/")[0]}
-            </text>
-            <line
-              y1={y - fontSize * 0.48}
-              y2={y - fontSize * 0.48}
-              stroke={props.fill ?? "currentColor"}
-              strokeWidth="1.2"
-            />
-            <text
-              y={y + fontSize * 0.2}
-              textAnchor="middle"
-              fontSize={fontSize * 0.8}
-            >
-              {part.split("/")[1]}
-            </text>
-          </g>
-        ) : (
-          <text key={i} y={y} xmlSpace="preserve">
-            {part}
-          </text>
-        ),
-      )}
-    </g>
+      <div
+        ref={content}
+        style={{
+          width: "max-content",
+          whiteSpace: "nowrap",
+          fontSize,
+          lineHeight: 1.4,
+          color: props.fill,
+          padding: "4px",
+          background: props.stroke === "#fff" ? "#fff" : undefined,
+          borderRadius: "4px",
+        }}
+      >
+        <StackedNumberText>{children}</StackedNumberText>
+      </div>
+    </foreignObject>
   );
 }

@@ -1,4 +1,68 @@
 import { expect, test, type Page } from "@playwright/test";
+test("independent calculations reveal together and controls follow long working", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/apps/directed-numbers#textbook:e=R2-37b");
+  const initial = page.locator('[data-next-calculation="true"]');
+  await expect(initial).toHaveCount(1);
+  await expect(initial.locator('[style*="background-color"]')).toHaveCount(3);
+  await next(page);
+  const groups = page.locator("[data-arrow-group]");
+  await expect(groups).toHaveCount(3);
+  await expect(groups.locator("[data-result-sign]")).toHaveText([
+    "−",
+    "+",
+    "+",
+  ]);
+  await expect(groups.locator("[data-arrow]")).toHaveCount(7);
+  const first = page.getByTestId("operation-sign-magnitude");
+  await expect(first).toHaveAttribute("data-magnitude-shown", "false");
+  await next(page);
+  await expect(first).toHaveAttribute("data-magnitude-shown", "true");
+  await expect(
+    page.getByText("Optional written step", { exact: true }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("grouped-products.png"),
+    fullPage: true,
+  });
+  const last = Number(
+    (await page.getByText(/^Step \d+ of \d+$/).innerText()).match(
+      /of (\d+)/,
+    )![1],
+  );
+  expect(last).toBeLessThan(24);
+  await next(page, last - 2);
+  await expect(
+    page.getByTestId("after-equation").getByRole("math"),
+  ).toHaveAttribute("aria-label", "= -4");
+  await expect
+    .poll(async () => {
+      const control = await page.getByTestId("teaching-controls").boundingBox();
+      const result = await page.getByTestId("after-equation").boundingBox();
+      return Boolean(
+        control &&
+        result &&
+        control.y >= 0 &&
+        control.y + control.height < 720 &&
+        result.y >= control.y + control.height &&
+        result.y + result.height <= 720,
+      );
+    })
+    .toBe(true);
+  await expect(groups).not.toHaveCount(0);
+  await page.screenshot({
+    path: testInfo.outputPath("sticky-controls-result.png"),
+  });
+  await page
+    .getByRole("button", { name: "Previous step", exact: true })
+    .click();
+  await expect(
+    page.getByText(`Step ${last - 1} of ${last}`, { exact: true }),
+  ).toBeVisible();
+});
 async function next(page: Page, times = 1) {
   for (let i = 0; i < times; i++)
     await page.getByRole("button", { name: "Next step", exact: true }).click();
@@ -725,6 +789,7 @@ for (const expression of [
   "(-50)-(+60)",
   "3.1-4.9",
   "(-4/3)+1/6",
+  "(-5/6)-1/4",
   "-50+60",
   "-50-30",
   "50+(-50)",
@@ -793,16 +858,21 @@ for (const expression of [
           ),
       );
       return {
-        belowAxis: finish.y > 155,
+        nearPoint: Math.abs(finish.y + finish.height / 2 - 155) < 15,
         inside: finish.x >= 19 && finish.x + finish.width <= 621,
         overlap,
       };
     });
-    expect(labels).toEqual({ belowAxis: true, inside: true, overlap: false });
+    expect(labels).toEqual({ nearPoint: true, inside: true, overlap: false });
     if (
-      ["-50+30", "-50-30", "(-50)-(+60)", "(-4/3)+1/6", "0+0"].includes(
-        expression,
-      )
+      [
+        "-50+30",
+        "-50-30",
+        "(-50)-(+60)",
+        "(-4/3)+1/6",
+        "(-5/6)-1/4",
+        "0+0",
+      ].includes(expression)
     ) {
       await page.setViewportSize({ width: 1920, height: 1080 });
       await page
@@ -844,12 +914,34 @@ for (const expression of [
     expect(geometry.y + geometry.height).toBe(155);
     expect(geometry.height).toBeLessThanOrEqual(36);
     if (expression.includes("/")) {
+      const clearOfBars = await page
+        .getByTestId("magnitude-line")
+        .evaluate((svg) => {
+          const bars = ["start", "movement", "result"].map((key) => {
+            const group = svg.querySelector(`[data-testid="distance-${key}"]`)!;
+            const label = (
+              group.querySelector(
+                "[data-stacked-fractions]",
+              ) as SVGGraphicsElement
+            ).getBBox();
+            const path = (
+              group.querySelector("path") as SVGGraphicsElement
+            ).getBBox();
+            return { label, barY: path.y + path.height / 2 };
+          });
+          return bars.every(
+            ({ label, barY }, i) =>
+              label.y + label.height < barY - 5 &&
+              (i === 0 || label.y > bars[i - 1].barY + 5),
+          );
+        });
+      expect(clearOfBars).toBe(true);
       await expect(page.getByTestId("graph-calculation")).toHaveAttribute(
         "data-stacked-fractions",
         "true",
       );
       await expect(
-        page.getByTestId("graph-calculation").locator("line"),
+        page.getByTestId("graph-calculation").locator(".mfrac"),
       ).toHaveCount(3);
       await expect(
         page.getByTestId("result-magnitude").locator(".mfrac"),
@@ -970,11 +1062,8 @@ for (const [id, answer] of [
     ).toHaveAttribute("aria-label", `= ${answer}`);
     const arrows = page.getByTestId("sign-combination");
     expect(await arrows.count()).toBeGreaterThan(0);
-    for (const arrow of await arrows.all())
-      await expect(arrow.locator("[data-result-sign]")).toHaveCSS(
-        "opacity",
-        "1",
-      );
+    for (const sign of await arrows.locator("[data-result-sign]").all())
+      await expect(sign).toHaveCSS("opacity", "1");
     if (id === "R2-32b") {
       const working = await page
         .locator("[data-equation-line]")

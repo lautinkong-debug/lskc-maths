@@ -946,6 +946,12 @@ export const copy = {
       mode: "Choose a mode",
       demonstration: {
         controls: "Teacher demonstration controls",
+        calculateNext: "Work on the highlighted part next.",
+        independentSigns:
+          "Find the signs of these independent products and quotients together.",
+        optionalStep: "Optional written step",
+        optionalHelp:
+          "You may omit this intermediate line in written work once you can apply the sign rule mentally.",
         play: "Play demonstration",
         pause: "Pause demonstration",
         previous: "Previous step",
@@ -959,6 +965,8 @@ export const copy = {
           "Read the expression. Follow the highlighted signs and brackets, one step at a time.",
         signPair: (a: string, b: string, result: string) =>
           `${a} (${b}) becomes ${result}`,
+        signGroup: (signs: string, result: string) =>
+          `Signs ${[...signs].join(", ")} give ${result}`,
         bracketStage: "1 · Remove brackets",
         startStage: "2 · Measure the starting distance",
         moveStage: "3 · Show the movement",
