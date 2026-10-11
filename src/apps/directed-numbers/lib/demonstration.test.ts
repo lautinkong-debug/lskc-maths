@@ -3,7 +3,11 @@ import katex from "katex";
 import { evaluate, parse, parseAnswer } from "./parse";
 import { equals } from "./rational";
 import { textbookQuestions } from "./textbook";
-import { demonstrationSteps, highlightedTex } from "./demonstration";
+import {
+  demonstrationSteps,
+  highlightedTex,
+  signArrowTex,
+} from "./demonstration";
 
 describe("teacher demonstration frames", () => {
   for (const q of textbookQuestions)
@@ -14,6 +18,14 @@ describe("teacher demonstration frames", () => {
       const steps = demonstrationSteps(input.value);
       expect(steps.length).toBeGreaterThan(0);
       for (const step of steps) {
+        if (["++", "+-", "-+", "--"].includes(step.ruleId)) {
+          const arrows = signArrowTex(step);
+          expect(arrows).not.toBeNull();
+          expect(arrows!.match(/textcolor/g)).toHaveLength(2);
+          expect(() =>
+            katex.renderToString(arrows!, { throwOnError: true, trust: false }),
+          ).not.toThrow();
+        }
         expect(equals(evaluate(step.ast), answer.value)).toBe(true);
         expect(() =>
           katex.renderToString(highlightedTex(step), {

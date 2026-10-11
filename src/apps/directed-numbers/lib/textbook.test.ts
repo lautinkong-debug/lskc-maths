@@ -63,3 +63,55 @@ describe("final sign and magnitude", () => {
       expect(simpleMove(expression)).toBeNull();
   });
 });
+
+import { magnitudeExpression, readMagnitudeMove } from "./textbook";
+import { readNumber } from "./rational";
+
+describe("exact fraction and decimal number lines", () => {
+  it("reads fraction and decimal lesson links without changing the operands", () => {
+    for (const expression of ["(-1/3)+(+1/6)", "(+3)-(+3.1)"]) {
+      const move = simpleMove(expression, true)!;
+      const parsed = parse(expression);
+      expect(move).not.toBeNull();
+      if (parsed.ok)
+        expect(
+          equals(magnitudeModel(move).exact.result, evaluate(parsed.value)),
+        ).toBe(true);
+    }
+  });
+  it.each([
+    ["3", "-", "3.1", "-0.1", "3.1 − 3 = 0.1"],
+    ["0.1", "+", "0.2", "0.3", "0.1 + 0.2 = 0.3"],
+    ["1/3", "+", "1/6", "1/2", "1/3 + 1/6 = 1/2"],
+    ["-1/2", "-", "-3/4", "1/4", "3/4 − 1/2 = 1/4"],
+    ["-1 1/2", "+", "0.25", "-5/4", "3/2 − 1/4 = 5/4"],
+    ["1/3", "-", "1/3", "0", "1/3 − 1/3 = 0"],
+    ["0", "-", "-1/7", "1/7", "0 + 1/7 = 1/7"],
+    ["-0.01", "+", "0", "-0.01", "0.01 + 0 = 0.01"],
+    ["0.0001", "+", "0.0002", "0.0003", "0.0001 + 0.0002 = 0.0003"],
+  ] as const)("%s %s %s", (a, op, b, result, calculation) => {
+    const move = readMagnitudeMove(a, op, b)!;
+    expect(move).not.toBeNull();
+    const model = magnitudeModel(move);
+    expect(equals(model.exact.result, readNumber(result))).toBe(true);
+    expect(model.calculation).toBe(calculation);
+    const expression = parse(magnitudeExpression(move));
+    expect(expression.ok).toBe(true);
+    if (expression.ok)
+      expect(equals(evaluate(expression.value), readNumber(result))).toBe(true);
+  });
+  it.each([
+    "",
+    "1/0",
+    "2+3",
+    "NaN",
+    "Infinity",
+    "101",
+    "-100.1",
+    "9007199254740992",
+    "1/99999999999999999",
+  ])("rejects invalid operand %s", (raw) => {
+    expect(readMagnitudeMove(raw, "+", "1")).toBeNull();
+    expect(readMagnitudeMove("1", "-", raw)).toBeNull();
+  });
+});

@@ -964,10 +964,10 @@ export const copy = {
         moveStage: "3 · Show the movement",
         magnitudeStage: "4 · Calculate the magnitude",
         answerStage: "5 · Attach the sign",
-        startDistance: (n: number) => `Starting distance: ${n}`,
-        moveDistance: (n: number) => `Movement distance: ${n}`,
-        remaining: (n: number) => `Remaining distance: ${n}`,
-        total: (n: number) => `Total distance: ${n}`,
+        startDistance: (n: number | string) => `Starting distance: ${n}`,
+        moveDistance: (n: number | string) => `Movement distance: ${n}`,
+        remaining: (n: number | string) => `Remaining distance: ${n}`,
+        total: (n: number | string) => `Total distance: ${n}`,
         zero: "The two distances cancel: 0",
         graphReady: "Brackets first; the graph follows.",
         startHint: "Measure from the starting point to zero.",
@@ -990,7 +990,12 @@ export const copy = {
         operand: "Second number",
         operation: "Operation",
         apply: "Draw my number line",
-        range: "Enter whole numbers from −100 to +100.",
+        range:
+          "Enter valid numbers from −100 to +100. A fraction must have a non-zero denominator.",
+        inputHelp:
+          "Use an integer, decimal (3.1), fraction (1/2) or mixed number (−1 1/2). Values must be between −100 and +100.",
+        exactCaption: (start: string, movement: string, end?: string) =>
+          `Number line: start at ${start}; ${movement}${end === undefined ? "." : `; finish at ${end}.`}`,
         examples: "Try these cases",
         sourceCases: "Examples from the textbook diagram",
         extraCases: "Explore negative subtraction and zero",
@@ -1008,8 +1013,8 @@ export const copy = {
         zeroMark: "Zero",
         startMark: "Start",
         endMark: "Finish",
-        distance: (n: number) => `${n} units from 0`,
-        motion: (n: number, delta: number) =>
+        distance: (n: number | string) => `${n} units from 0`,
+        motion: (n: number | string, delta: number) =>
           delta === 0
             ? "No movement (0 units)"
             : `${n} units ${delta > 0 ? "right" : "left"}`,

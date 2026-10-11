@@ -4,7 +4,12 @@ import { Math as Tex } from "@/components/Math";
 import { usePresentation } from "@/components/PresentationFrame";
 import { SignMagnitude } from "../components/SignMagnitude";
 import { button, field, primary } from "../components/ui";
-import { simpleMove, type SimpleMove } from "../lib/textbook";
+import {
+  simpleMove,
+  readMagnitudeMove,
+  magnitudeModel,
+  type SimpleMove,
+} from "../lib/textbook";
 const c = copy.apps.directedNumbers.magnitudeLesson;
 const examples: SimpleMove[] = [
   { start: 50, op: "-", b: 60 },
@@ -20,21 +25,24 @@ export default function SignMagnitudeMode({
   initialExpression?: string;
 }) {
   const presenting = usePresentation();
-  const initial = initialExpression
-    ? (simpleMove(initialExpression) ?? examples[0])
-    : examples[0];
+  const initialMove = initialExpression
+    ? simpleMove(initialExpression, true)
+    : null;
+  const initial = initialMove ?? examples[0];
   const [move, setMove] = useState(initial);
-  const [expression, setExpression] = useState(initialExpression);
-  const [a, setA] = useState(String(initial.start)),
-    [b, setB] = useState(String(initial.b)),
+  const [expression, setExpression] = useState(
+    initialMove ? initialExpression : undefined,
+  );
+  const [a, setA] = useState(magnitudeModel(initial).labels.start),
+    [b, setB] = useState(magnitudeModel(initial).labels.b),
     [op, setOp] = useState(initial.op);
   const [error, setError] = useState(false),
     [version, setVersion] = useState(0);
   function load(value: SimpleMove) {
     setMove(value);
     setExpression(undefined);
-    setA(String(value.start));
-    setB(String(value.b));
+    setA(magnitudeModel(value).labels.start);
+    setB(magnitudeModel(value).labels.b);
     setOp(value.op);
     setError(false);
     setVersion((n) => n + 1);
@@ -55,26 +63,22 @@ export default function SignMagnitudeMode({
         className="border-grid grid items-end gap-3 border-t pt-4 sm:grid-cols-4"
         onSubmit={(e) => {
           e.preventDefault();
-          if (
-            ![a, b].every(
-              (value) =>
-                /^[+-]?\d+$/.test(value) && Math.abs(Number(value)) <= 100,
-            )
-          ) {
+          const value = readMagnitudeMove(a, op, b);
+          if (!value) {
             setError(true);
             return;
           }
-          load({ start: Number(a), op, b: Number(b) });
+          load(value);
         }}
       >
         <label>
           {c.start}
           <input
             className={field}
-            type="number"
-            min="-100"
-            max="100"
-            step="1"
+            type="text"
+            maxLength={80}
+            aria-describedby="number-line-input-help"
+            autoComplete="off"
             value={a}
             onChange={(e) => setA(e.target.value)}
           />
@@ -94,15 +98,21 @@ export default function SignMagnitudeMode({
           {c.operand}
           <input
             className={field}
-            type="number"
-            min="-100"
-            max="100"
-            step="1"
+            type="text"
+            maxLength={80}
+            aria-describedby="number-line-input-help"
+            autoComplete="off"
             value={b}
             onChange={(e) => setB(e.target.value)}
           />
         </label>
         <button className={primary}>{c.apply}</button>
+        <p
+          id="number-line-input-help"
+          className="text-pencil text-sm sm:col-span-4"
+        >
+          {c.inputHelp}
+        </p>
         {error && (
           <p className="sm:col-span-4" role="alert">
             {c.range}

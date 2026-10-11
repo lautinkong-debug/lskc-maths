@@ -54,8 +54,17 @@ Every additive bracket change remains separate; nested brackets and mixed
 operations retain the correct operation order. Every completed equation and its
 explanation remain visible in a growing worked solution; no dropdown is needed.
 Sign & magnitude keeps the bracket working visible through the graph stages.
-New rows expand gently and the sign elements blend in place without being
-recreated. Highlighted equations reserve their space to avoid shifting the text.
+New rows expand gently. Two arrows run from the operation sign and the sign
+inside the bracket to the resulting sign immediately below the equation.
+The original signs and arrows stay visible with the completed working.
+Highlighted equations reserve their space to avoid shifting the text.
+
+Custom Sign & magnitude inputs accept integers, decimals, fractions such as
+`1/3`, and mixed numbers such as `-1 1/2`, between -100 and +100. Arithmetic,
+sign decisions and labels use exact rational values; decimal-only inputs retain
+decimal results, while fraction inputs retain fractions. Coordinates alone use
+numeric values. The graph rescales for small fractional distances. Invalid
+inputs, including zero denominators, leave the current demonstration intact.
 
 ## Local review
 

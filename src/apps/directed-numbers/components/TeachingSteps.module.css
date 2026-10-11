@@ -58,63 +58,55 @@
   grid-template-rows: 1fr;
   opacity: 1;
 }
-.signs {
-  display: inline-block;
-  position: relative;
-  width: 6rem;
-  height: 2rem;
-  flex-shrink: 0;
-  font-size: 1.4rem;
-  line-height: 2rem;
+.layers > .arrowsRow {
+  grid-area: 2 / 1;
 }
-.signs > * {
-  position: absolute;
-  top: 0;
-  text-align: center;
+.arrowsRow {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
   transition:
-    transform 800ms cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 800ms ease;
+    grid-template-rows 600ms ease,
+    opacity 600ms ease;
 }
-.first,
-.second {
-  background: #fff1ad;
-  border-radius: 0.25rem;
-  width: 1.6rem;
+.arrowContents {
+  min-height: 0;
+  overflow: hidden;
 }
-.first {
-  left: 0;
+.arrows {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  color: var(--color-crimson, #da2127);
 }
-.second {
-  left: 3rem;
+.signArrow {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 800ms ease;
 }
-.bracketLeft {
-  left: 2rem;
-}
-.bracketRight {
-  left: 5rem;
-}
-.combined {
-  left: 1.5rem;
-  width: 1.6rem;
+.resultSign {
+  fill: currentColor;
+  font-size: 26px;
+  font-weight: 700;
   opacity: 0;
-  transform: scale(0.8);
+  transition: opacity 600ms ease 200ms;
 }
-.combine .first {
-  transform: translateX(1.5rem);
-  opacity: 0;
-}
-.combine .second {
-  transform: translateX(-1.5rem);
-  opacity: 0;
-}
-.combine .bracketLeft,
-.combine .bracketRight {
-  opacity: 0;
-}
-.combine .combined {
+.arrowsShown .arrowsRow {
+  grid-template-rows: 1fr;
   opacity: 1;
-  transform: scale(1);
-  transition-delay: 250ms;
+}
+.arrowsShown .signArrow {
+  stroke-dashoffset: 0;
+}
+.arrowsCombined .resultSign {
+  opacity: 1;
+}
+.layers:not(.arrowsShown) .plain [style*="color"] {
+  color: inherit !important;
 }
 @keyframes unfold {
   from {
@@ -132,7 +124,9 @@
   }
   .result,
   .layers > *,
-  .signs > * {
+  .arrowsRow,
+  .signArrow,
+  .resultSign {
     transition: none;
   }
 }

@@ -4,6 +4,7 @@ Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for 
 
 ## Directed Numbers teacher demonstrations (11/10/2026)
 
+- [x] Accept decimal, fraction and mixed-number operands in Sign & magnitude with exact arithmetic and labels. Rescale small distances. Show two animated arrows from the original signs to their combined sign under the equation; retain all previous working. Verify input validation, all four sign pairs and phone/projector layouts.
 - [x] Follow-up: keep the original expression and every completed line visible, including during number-line stages. Remove the collapsed history and use stable sign elements, crossfading highlights and smoothly expanding rows. All 11 focused browser scenarios passed across final local runs, including retained equations, intermediate animation opacity, reset, fractions, phone and projector layouts; TypeScript and scoped lint passed.
 - [x] Remove prediction from Sign & magnitude and replace textbook answer-entry/marking with teacher-controlled demonstrations.
 - [x] Animate each bracket separately: highlight the adjacent signs, combine them, and reveal the rewritten expression before moving on the number line.

@@ -33,3 +33,18 @@ export function highlightedTex(step: Step): string {
   }
   return `${tex.slice(0, start)}\\colorbox{#fff1ad}{$${tex.slice(start, end)}$}${tex.slice(end)}`;
 }
+
+/** Mark the actual operation sign and operand sign for the two-arrow diagram. */
+export function signArrowTex(step: Step): string | null {
+  if (!["++", "+-", "-+", "--"].includes(step.ruleId) || !step.highlight)
+    return null;
+  const tex = expressionTex(step.before);
+  const { start, end } = step.highlight;
+  let count = 0;
+  const marked = tex
+    .slice(start, end)
+    .replace(/[+-]/g, (sign) =>
+      count++ < 2 ? `\\textcolor{#DA2127}{${sign}}` : sign,
+    );
+  return count >= 2 ? tex.slice(0, start) + marked + tex.slice(end) : null;
+}

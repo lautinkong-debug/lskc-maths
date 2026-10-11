@@ -2,7 +2,11 @@ import { useId } from "react";
 import { Math as Tex } from "@/components/Math";
 import { usePresentation } from "@/components/PresentationFrame";
 import { copy } from "@/lib/copy";
-import { magnitudeModel, type SimpleMove } from "../lib/textbook";
+import {
+  magnitudeModel,
+  magnitudeExpression,
+  type SimpleMove,
+} from "../lib/textbook";
 import { parse } from "../lib/parse";
 import { demonstrationSteps } from "../lib/demonstration";
 import {
@@ -13,24 +17,13 @@ import {
 import styles from "./SignMagnitude.module.css";
 const c = copy.apps.directedNumbers.magnitudeLesson;
 const t = copy.apps.directedNumbers.demonstration;
-const signed = (n: number) => (n > 0 ? `+${n}` : String(n));
-export function magnitudeCalculation(move: SimpleMove) {
-  const m = magnitudeModel(move);
-  return m.kind === "same"
-    ? `${m.a} + ${m.distance} = ${m.magnitude}`
-    : m.kind === "opposite" || m.kind === "cancel"
-      ? `${Math.max(m.a, m.distance)} − ${Math.min(m.a, m.distance)} = ${m.magnitude}`
-      : m.kind === "noMove"
-        ? `${m.a} + 0 = ${m.magnitude}`
-        : `0 + ${m.distance} = ${m.magnitude}`;
-}
 function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
   const presenting = usePresentation();
   const marker = useId().replaceAll(":", "");
   const m = magnitudeModel(move);
   const low = Math.min(0, move.start, m.end),
     high = Math.max(0, move.start, m.end);
-  const span = Math.max(10, high - low),
+  const span = high - low || 1,
     margin = span * 0.2;
   const x = (n: number) =>
     60 + ((n - low + margin) / (span + margin * 2)) * 520;
@@ -74,7 +67,11 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
       viewBox="0 0 640 390"
       className={`h-auto w-full ${presenting ? "max-h-[380px]" : ""}`}
       role="img"
-      aria-label={c.caption(move.start, m.delta, complete ? m.end : undefined)}
+      aria-label={c.exactCaption(
+        m.labels.start,
+        c.motion(m.labels.distance, m.delta),
+        complete ? m.labels.end : undefined,
+      )}
       data-testid="magnitude-line"
       data-stage={stage}
     >
@@ -125,7 +122,7 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
       />
       <circle cx={start} cy="155" r="5" fill="#0f4574" />
       <text x={start} y="185" textAnchor="middle" fontSize="18" fill="#0f4574">
-        {c.startMark}: {signed(move.start)}
+        {c.startMark}: {m.labels.start}
       </text>
       {m.delta !== 0 && (
         <g
@@ -155,7 +152,7 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
         fill={colour}
       >
         {moving
-          ? c.motion(m.distance, m.delta)
+          ? c.motion(m.labels.distance, m.delta)
           : stage === 0
             ? t.graphReady
             : t.startHint}
@@ -185,17 +182,24 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
           fontWeight="600"
           fill={colour}
         >
-          {c.endMark}: {signed(m.end)}
+          {c.endMark}: {m.labels.end}
         </text>
       )}
       {stage >= 1 &&
-        distanceBar(start, zero, 243, t.startDistance(m.a), "#0f4574", "start")}
+        distanceBar(
+          start,
+          zero,
+          243,
+          t.startDistance(m.labels.a),
+          "#0f4574",
+          "start",
+        )}
       {moving &&
         distanceBar(
           start,
           end,
           286,
-          t.moveDistance(m.distance),
+          t.moveDistance(m.labels.distance),
           "#b51b25",
           "movement",
         )}
@@ -204,7 +208,9 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
           zero,
           end,
           329,
-          m.kind === "same" ? t.total(m.magnitude) : t.remaining(m.magnitude),
+          m.kind === "same"
+            ? t.total(m.labels.magnitude)
+            : t.remaining(m.labels.magnitude),
           "#0f4574",
           "result",
         )}
@@ -220,7 +226,7 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
           fill="#0f4574"
           data-testid="graph-calculation"
         >
-          {magnitudeCalculation(move)}
+          {m.calculation}
         </text>
       )}
     </svg>
@@ -238,10 +244,8 @@ export function SignMagnitude({
   wide?: boolean;
 }) {
   const presenting = usePresentation();
-  const parsed = parse(
-    expression ?? `(${signed(move.start)})${move.op}(${signed(move.b)})`,
-  );
-  if (!parsed.ok) throw new Error("Invalid integer demonstration");
+  const parsed = parse(expression ?? magnitudeExpression(move));
+  if (!parsed.ok) throw new Error("Invalid number-line demonstration");
   const steps = demonstrationSteps(parsed.value).filter(
     (step) => step.kind === "bracket",
   );
@@ -305,7 +309,7 @@ export function SignMagnitude({
                     className="mt-2 overflow-x-auto text-2xl"
                     data-testid="final-equation"
                   >
-                    <Tex>{`= ${m.end}`}</Tex>
+                    <Tex>{`= ${m.resultTex}`}</Tex>
                   </div>
                 </li>
               )}
@@ -328,7 +332,7 @@ export function SignMagnitude({
                 <div className="bg-navy-wash rounded p-3">
                   <dt className="text-sm">{c.magnitude}</dt>
                   <dd className="text-navy font-semibold">
-                    {c.distance(m.magnitude)}
+                    {c.distance(m.labels.magnitude)}
                   </dd>
                 </div>
                 {stage === 4 && (

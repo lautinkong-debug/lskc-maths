@@ -1,11 +1,79 @@
 import { parse, type Ast } from "./parse";
-import { add, neg, readNumber } from "./rational";
+import {
+  abs,
+  add,
+  compare,
+  neg,
+  rational,
+  readNumber,
+  toText,
+  toTex,
+  type Rational,
+} from "./rational";
 
-export type SimpleMove = { start: number; op: "+" | "-"; b: number };
-export function simpleMove(expression: string): SimpleMove | null {
+export type SimpleMove = {
+  start: number;
+  op: "+" | "-";
+  b: number;
+  exact?: { start: Rational; b: Rational; style: "decimal" | "improper" };
+};
+/** Read each operand as one number; fractions never pass through floating point. */
+export function readMagnitudeMove(
+  a: string,
+  op: SimpleMove["op"],
+  b: string,
+): SimpleMove | null {
+  try {
+    const start = readNumber(a),
+      operand = readNumber(b);
+    if ([start, operand].some((v) => compare(abs(v), rational(100)) > 0))
+      return null;
+    // Check that the exact result is representable before accepting the inputs.
+    add(start, op === "+" ? operand : neg(operand));
+    return {
+      start: start.n / start.d,
+      op,
+      b: operand.n / operand.d,
+      exact: {
+        start,
+        b: operand,
+        style: a.includes("/") || b.includes("/") ? "improper" : "decimal",
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+export function magnitudeExpression(move: SimpleMove) {
+  const m = magnitudeModel(move);
+  return `(${m.labels.start})${move.op}(${m.labels.b})`;
+}
+export function simpleMove(
+  expression: string,
+  allowFractions = false,
+): SimpleMove | null {
   const parsed = parse(expression);
   if (!parsed.ok) return null;
   const ast = parsed.value;
+  if (
+    allowFractions &&
+    ast.kind === "binary" &&
+    (ast.op === "+" || ast.op === "-")
+  ) {
+    const literal = (node: Ast): string | null =>
+      node.kind === "group"
+        ? literal(node.child)
+        : node.kind === "number"
+          ? toText(node.value, {
+              style: expression.includes("/") ? "improper" : "decimal",
+            })
+          : null;
+    const left = literal(ast.left),
+      right = literal(ast.right);
+    return left !== null && right !== null
+      ? readMagnitudeMove(left, ast.op, right)
+      : null;
+  }
   function value(node: Ast): number | null {
     if (node.kind === "group") return value(node.child);
     if (node.kind !== "number") return null;
@@ -22,33 +90,63 @@ export function simpleMove(expression: string): SimpleMove | null {
     : { start, op: ast.op, b };
 }
 
-export function magnitudeModel({ start, op, b }: SimpleMove) {
-  const delta = op === "+" ? b : -b;
-  const operand = readNumber(String(b));
-  const result = add(
-    readNumber(String(start)),
-    op === "+" ? operand : neg(operand),
-  );
-  const end = result.n / result.d;
-  const a = Math.abs(start),
-    distance = Math.abs(b),
-    magnitude = Math.abs(end);
+export function magnitudeModel(move: SimpleMove) {
+  const start = move.exact?.start ?? readNumber(String(move.start));
+  const operand = move.exact?.b ?? readNumber(String(move.b));
+  const delta = move.op === "+" ? operand : neg(operand);
+  const result = add(start, delta);
+  const a = abs(start),
+    distance = abs(operand),
+    magnitude = abs(result);
   const same =
-    start !== 0 && delta !== 0 && Math.sign(start) === Math.sign(delta);
+    start.n !== 0 && delta.n !== 0 && Math.sign(start.n) === Math.sign(delta.n);
   const kind =
-    distance === 0
+    distance.n === 0
       ? "noMove"
-      : start === 0
+      : start.n === 0
         ? "fromZero"
         : same
           ? "same"
-          : end === 0
+          : result.n === 0
             ? "cancel"
             : "opposite";
-  const sign = end > 0 ? "positive" : end < 0 ? "negative" : "zero";
-  return { delta, end, a, distance, magnitude, kind, sign } as const;
+  const sign = result.n > 0 ? "positive" : result.n < 0 ? "negative" : "zero";
+  const style = move.exact?.style ?? "decimal";
+  const text = (v: Rational, signed = false) => toText(v, { style, signed });
+  const labels = {
+    start: text(start, true),
+    b: text(operand, true),
+    delta: text(delta, true),
+    end: text(result, true),
+    a: text(a),
+    distance: text(distance),
+    magnitude: text(magnitude),
+  };
+  const larger = compare(a, distance) >= 0 ? a : distance;
+  const smaller = compare(a, distance) >= 0 ? distance : a;
+  const calculation =
+    kind === "same"
+      ? `${text(a)} + ${text(distance)} = ${text(magnitude)}`
+      : kind === "opposite" || kind === "cancel"
+        ? `${text(larger)} − ${text(smaller)} = ${text(magnitude)}`
+        : kind === "noMove"
+          ? `${text(a)} + 0 = ${text(magnitude)}`
+          : `0 + ${text(distance)} = ${text(magnitude)}`;
+  const value = (v: Rational) => v.n / v.d;
+  return {
+    delta: value(delta),
+    end: value(result),
+    a: value(a),
+    distance: value(distance),
+    magnitude: value(magnitude),
+    kind,
+    sign,
+    labels,
+    calculation,
+    resultTex: toTex(result, { style }),
+    exact: { start, operand, delta, result, a, distance, magnitude },
+  } as const;
 }
-
 export type TextbookQuestion = {
   id: string;
   exercise: "2B" | "2C";

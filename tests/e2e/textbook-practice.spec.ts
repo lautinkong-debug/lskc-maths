@@ -256,7 +256,7 @@ test("all worked lines stay visible as each new step unfolds", async ({
   await expect(lines).toHaveCount(1);
 });
 
-test("signs blend smoothly without replacing the previous equations or sign elements", async ({
+test("two arrows reveal the resulting sign without replacing earlier equations", async ({
   page,
 }) => {
   await page.goto("/apps/directed-numbers#sign-magnitude:e=(-50)-(-60)");
@@ -266,7 +266,7 @@ test("signs blend smoothly without replacing the previous equations or sign elem
   await next(page);
   await expect(pair).toHaveAttribute("data-retained", "yes");
   const blend = await pair.evaluate((node) => {
-    const first = node.children[0] as HTMLElement;
+    const first = node.querySelector("[data-result-sign]") as SVGTextElement;
     const animation = first
       .getAnimations()
       .find(
@@ -295,3 +295,113 @@ test("signs blend smoothly without replacing the previous equations or sign elem
   ).toEqual(before);
   await expect(page.getByTestId("final-equation")).toHaveText(/10/);
 });
+
+test("custom number line accepts exact decimals, fractions and mixed numbers", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/apps/directed-numbers#sign-magnitude");
+  for (const [a, op, b, calculation, result] of [
+    ["3", "-", "3.1", "3.1 − 3 = 0.1", "= -0.1"],
+    ["1/3", "+", "1/6", "1/3 + 1/6 = 1/2", "= \\frac{1}{2}"],
+    ["-1 1/2", "+", "0.25", "3/2 − 1/4 = 5/4", "= -\\frac{5}{4}"],
+  ]) {
+    await page.getByLabel("Starting value", { exact: true }).fill(a);
+    await page
+      .getByRole("combobox", { name: "Operation", exact: true })
+      .selectOption(op);
+    await page.getByLabel("Second number", { exact: true }).fill(b);
+    await page.getByRole("button", { name: "Draw my number line" }).click();
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Enter valid numbers" }),
+    ).toHaveCount(0);
+    await expect(page.getByTestId("magnitude-line")).toHaveAttribute(
+      "data-stage",
+      "0",
+    );
+    await next(page, 8);
+    await expect(page.getByTestId("graph-calculation")).toHaveText(calculation);
+    await expect(
+      page.getByTestId("final-equation").getByRole("math"),
+    ).toHaveAttribute("aria-label", result);
+    if (a === "1/3") {
+      expect(
+        (await page
+          .getByTestId("distance-movement")
+          .locator("path")
+          .boundingBox())!.width,
+      ).toBeGreaterThan(80);
+      await page.screenshot({
+        path: testInfo.outputPath("fraction-number-line.png"),
+        fullPage: true,
+      });
+    }
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("mixed-number-phone.png"),
+    fullPage: true,
+  });
+  for (const invalid of ["1/0", "", "101"]) {
+    await page.getByLabel("Second number", { exact: true }).fill(invalid);
+    await page.getByRole("button", { name: "Draw my number line" }).click();
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Enter valid numbers" }),
+    ).toBeVisible();
+    await expect(page.getByTestId("graph-calculation")).toHaveText(
+      "3/2 − 1/4 = 5/4",
+    );
+  }
+});
+
+for (const [expression, sign] of [
+  ["(+4)-(+2)", "−"],
+  ["(+4)-(-2)", "+"],
+  ["(+4)+(-2)", "−"],
+  ["(+4)+(+2)", "+"],
+]) {
+  test(`two arrows point from the signs in ${expression} to ${sign}`, async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(
+      `/apps/directed-numbers#sign-magnitude:e=${encodeURIComponent(expression)}`,
+    );
+    await next(page, 4);
+    const arrows = page.getByTestId("sign-combination");
+    await expect(arrows.locator("[data-arrow]")).toHaveCount(2);
+    await expect(arrows.locator("[data-result-sign]")).toHaveText(sign);
+    const geometry = await arrows.evaluate((svg) => {
+      const box = svg.getBoundingClientRect();
+      const root = svg.closest("[data-arrows-positioned]")!;
+      const signs = [
+        ...root.querySelectorAll(
+          '[role="math"] > .katex > .katex-html [style*="color"]',
+        ),
+      ].filter((el) => /^[+−-]$/.test(el.textContent ?? ""));
+      return [...svg.querySelectorAll("[data-arrow]")].map((path, i) => {
+        const start = (path as SVGPathElement).getPointAtLength(0);
+        const r = signs[i].getBoundingClientRect();
+        return Math.abs(box.left + start.x - r.left - r.width / 2);
+      });
+    });
+    expect(geometry.every((offset) => offset < 2)).toBe(true);
+    if (expression === "(+4)-(+2)") {
+      await page.screenshot({
+        path: testInfo.outputPath("two-sign-arrows.png"),
+        fullPage: true,
+      });
+      await page.setViewportSize({ width: 390, height: 844 });
+      await expect(arrows.locator("[data-result-sign]")).toBeVisible();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+    }
+  });
+}
