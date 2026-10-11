@@ -1,5 +1,45 @@
 import { expect, test } from "@playwright/test";
 
+test("department projection keeps the frequency table and chart together", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto("/apps/statistical-charts");
+  await expect(page.getByTestId("lab-settings")).toBeVisible();
+  await page
+    .getByTestId("lab-settings")
+    .screenshot({ path: "test-results/statistical-settings-horizontal.png" });
+  await page
+    .getByTestId("lab-data")
+    .screenshot({ path: "test-results/statistical-data-trash-buttons.png" });
+  await page
+    .getByRole("button", { name: "Projection mode", exact: true })
+    .click();
+  const table = page.getByRole("table", {
+    name: "Frequency distribution",
+    exact: true,
+  });
+  const graph = page.locator("#lab-chart svg[role=group]");
+  await expect(table).toBeVisible();
+  await expect(graph).toBeVisible();
+  await expect(page.getByTestId("lab-settings")).toBeHidden();
+  await expect(page.getByTestId("lab-data")).toBeHidden();
+  await expect
+    .poll(async () => {
+      const a = (await table.boundingBox())!,
+        b = (await graph.boundingBox())!;
+      return Math.max(a.y + a.height, b.y + b.height);
+    })
+    .toBeLessThanOrEqual(720);
+  await page.screenshot({
+    path: "test-results/statistical-department-table-chart.png",
+  });
+  await page
+    .getByRole("button", { name: "Leave projection mode", exact: true })
+    .click();
+  await expect(page.getByTestId("lab-settings")).toBeVisible();
+});
+
 test("textbook filter includes every chapter and resets when the level changes", async ({
   page,
 }) => {

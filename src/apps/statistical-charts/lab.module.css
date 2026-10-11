@@ -123,11 +123,11 @@
 }
 .workspace {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   align-items: start;
 }
-.sidebar {
+.settingsPanel {
   border: 1px solid var(--color-grid);
   background: var(--color-paper);
   border-radius: 10px;
@@ -139,10 +139,60 @@
   font-weight: 600;
   padding: 8px 0;
 }
-.sidebar details + details {
-  margin-top: 18px;
+.settingsLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+  gap: 24px;
+}
+.settingsLayout > details + details {
+  border-left: 1px solid var(--color-grid);
+  padding-left: 24px;
+}
+.generatorGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 4px 16px;
+}
+.generatorGrid .pair {
+  align-self: start;
+}
+.generatorActions {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+}
+.lab .generatorActions .primary {
+  margin: 0;
+}
+.datasetMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
   border-top: 1px solid var(--color-grid);
-  padding-top: 14px;
+  margin-top: 12px;
+}
+.results {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.85fr) minmax(0, 1.65fr);
+  gap: 20px;
+  align-items: start;
+  scroll-margin-top: 16px;
+}
+.results > * {
+  min-width: 0;
+}
+.results .graph {
+  max-height: max(280px, calc(100dvh - 200px));
+}
+.enlarged .results {
+  grid-template-columns: minmax(0, 1fr);
+}
+.chartActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 8px;
 }
 .field {
   display: grid;
@@ -367,7 +417,7 @@
   font-weight: 700;
 }
 .dataPanel {
-  margin-top: 24px;
+  margin-top: 0;
 }
 .sourceTabs,
 .toolbar {
@@ -393,7 +443,7 @@
 .dataGrid > div {
   display: flex;
   align-items: end;
-  gap: 3px;
+  gap: 8px;
 }
 .dataGrid label {
   min-width: 0;
@@ -403,8 +453,17 @@
   font-size: 12px;
   color: var(--color-pencil);
 }
-.dataGrid button {
-  padding: 7px;
+.lab .deleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  padding: 8px;
+  color: var(--color-pencil);
+}
+.lab .deleteButton:hover {
+  color: var(--color-crimson);
+  background: var(--color-crimson-wash);
 }
 .file {
   position: relative;
@@ -721,11 +780,6 @@
     font-size: 14px;
   }
 }
-@media (min-width: 1700px) {
-  .workspace {
-    grid-template-columns: 300px minmax(0, 1fr);
-  }
-}
 @media (max-width: 800px) {
   .workspace {
     grid-template-columns: 1fr;
@@ -987,6 +1041,8 @@
 .presentation .screenChrome,
 .presentation .exportBar,
 .presentation .controls,
+.presentation .settingsPanel,
+.presentation .dataPanel,
 .presentation .comparison .tablePanel {
   display: none;
 }
@@ -1070,9 +1126,6 @@
   }
 }
 @media (max-width: 800px) {
-  .workspace .main {
-    order: -1;
-  }
   .sidebar {
     display: block;
   }
@@ -1453,9 +1506,8 @@
 :global([data-presentation="true"]) .lab .screenChrome,
 :global([data-presentation="true"]) .lab .exportBar,
 :global([data-presentation="true"]) .lab .controls,
-:global([data-presentation="true"]) .lab .sidebar,
+:global([data-presentation="true"]) .lab .settingsPanel,
 :global([data-presentation="true"]) .lab .dataPanel,
-:global([data-presentation="true"]) .lab .workspace .tablePanel,
 :global([data-presentation="true"]) .lab .comparisonHeading > div:first-child {
   display: none;
 }
@@ -1495,5 +1547,64 @@
   }
   .presentation .advancedLayout {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Keep the linked table and graph in one teaching view. */
+.presentation .results .graph {
+  max-height: max(250px, calc(100dvh - 260px));
+}
+.presentation .results .tableScroll {
+  max-height: calc(100dvh - 210px);
+  overflow-y: auto;
+}
+.presentation .results .chartNote {
+  padding: 8px 14px;
+  font-size: 14px;
+}
+.presentation .selection {
+  min-height: 0;
+  padding: 8px 0;
+}
+.results:has(.tableScroll table th:nth-child(5)) {
+  grid-template-columns: minmax(400px, 1.2fr) minmax(0, 1.3fr);
+}
+@media (max-width: 1050px) {
+  .settingsLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .settingsLayout > details + details {
+    border-left: 0;
+    padding-left: 0;
+    border-top: 1px solid var(--color-grid);
+    padding-top: 12px;
+  }
+}
+@media (max-width: 800px) {
+  .results,
+  .results:has(.tableScroll table th:nth-child(5)) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .generatorGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .presentation {
+    padding: 12px 16px;
+  }
+  .presentationBar {
+    font-size: 16px;
+  }
+}
+@media (max-width: 520px) {
+  .generatorGrid,
+  .datasetMeta {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .chartHeader {
+    flex-wrap: wrap;
+  }
+  .chartActions {
+    justify-content: start;
+    padding-bottom: 8px;
   }
 }

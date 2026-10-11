@@ -118,6 +118,15 @@ export default function StatisticalChartsLab() {
   const [ready, setReady] = useState(false);
   const [storageStatus, setStorageStatus] = useState("");
   const root = useRef<HTMLDivElement>(null);
+  const presentationTrigger = useRef<HTMLElement | null>(null);
+  function present() {
+    presentationTrigger.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    setPresentation(true);
+    setEnlarged(false);
+  }
   const applyActivity = useCallback(
     (a: Activity) => {
       progress.replace();
@@ -201,6 +210,7 @@ export default function StatisticalChartsLab() {
     return () => {
       document.body.style.overflow = previous;
       window.removeEventListener("keydown", close);
+      presentationTrigger.current?.focus();
     };
   }, [presentation]);
   const result: Result = useMemo(() => {
@@ -374,6 +384,9 @@ export default function StatisticalChartsLab() {
         <div
           className={`${s.lab} ${mode === "compare" || mode === "advanced" ? s.compareActive : ""} ${presentation ? s.presentation : ""}`}
           ref={root}
+          role={presentation ? "dialog" : undefined}
+          aria-modal={presentation ? true : undefined}
+          aria-label={presentation ? c.title : undefined}
           onKeyDown={(e) => {
             if (!presentation || e.key !== "Tab") return;
             const controls = Array.from(
@@ -503,10 +516,7 @@ export default function StatisticalChartsLab() {
                 setNotice(c.classroom.resetDone);
               }}
               onGenerate={() => onGenerate(true)}
-              onPresent={() => {
-                setPresentation(true);
-                if (mode === "lab") setEnlarged(true);
-              }}
+              onPresent={present}
               onPrint={() => setPrinting(true)}
             />
             <LocalLessons
@@ -645,8 +655,15 @@ export default function StatisticalChartsLab() {
           <div hidden={mode !== "lab"}>
             <div className={enlarged ? s.enlarged : s.workspace}>
               {!enlarged && (
-                <aside className={s.sidebar}>
-                  <fieldset disabled={fixed} className={s.settingsFieldset}>
+                <section
+                  className={s.settingsPanel}
+                  aria-label={c.settings}
+                  data-testid="lab-settings"
+                >
+                  <fieldset
+                    disabled={fixed}
+                    className={`${s.settingsFieldset} ${s.settingsLayout}`}
+                  >
                     <details open>
                       <summary>{c.settings}</summary>
                       <DatasetGenerator
@@ -655,28 +672,30 @@ export default function StatisticalChartsLab() {
                         onContext={onContext}
                         onGenerate={onGenerate}
                       />
-                      <Field label={c.titleLabel}>
-                        <input
-                          maxLength={100}
-                          value={title}
-                          onChange={(e) => setTitle(e.target.value)}
-                        />
-                      </Field>
-                      <div className={s.pair}>
-                        <Field label={c.variable}>
+                      <div className={s.datasetMeta}>
+                        <Field label={c.titleLabel}>
                           <input
-                            maxLength={40}
-                            value={variable}
-                            onChange={(e) => setVariable(e.target.value)}
+                            maxLength={100}
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
                           />
                         </Field>
-                        <Field label={c.unit}>
-                          <input
-                            maxLength={15}
-                            value={unit}
-                            onChange={(e) => setUnit(e.target.value)}
-                          />
-                        </Field>
+                        <div className={s.pair}>
+                          <Field label={c.variable}>
+                            <input
+                              maxLength={40}
+                              value={variable}
+                              onChange={(e) => setVariable(e.target.value)}
+                            />
+                          </Field>
+                          <Field label={c.unit}>
+                            <input
+                              maxLength={15}
+                              value={unit}
+                              onChange={(e) => setUnit(e.target.value)}
+                            />
+                          </Field>
+                        </div>
                       </div>
                     </details>
                     <details open>
@@ -731,8 +750,55 @@ export default function StatisticalChartsLab() {
                       </p>
                     </details>
                   </fieldset>
-                </aside>
+                </section>
               )}
+
+              {!enlarged && (
+                <section
+                  id="lab-data"
+                  data-testid="lab-data"
+                  className={s.dataPanel}
+                >
+                  <fieldset disabled={fixed} className={s.settingsFieldset}>
+                    <div className={s.sectionHeader}>
+                      <h3>{c.explorer}</h3>
+                      <span className={s.small}>{c.live}</span>
+                    </div>
+                    <div className={s.sourceTabs}>
+                      {(["raw", "grouped"] as const).map((mode) => (
+                        <button
+                          key={mode}
+                          aria-pressed={source === mode}
+                          onClick={() => {
+                            setSource(mode);
+                            setSelected(null);
+                            setError("");
+                          }}
+                        >
+                          {c[mode]}
+                        </button>
+                      ))}
+                    </div>
+                    {source === "raw" ? (
+                      <RawDataEditor
+                        values={values}
+                        onChange={(v) => {
+                          setValues(v);
+                          setError("");
+                        }}
+                        onError={setError}
+                      />
+                    ) : (
+                      <GroupedFrequencyEditor
+                        groups={groups}
+                        precision={grouping.precision}
+                        onChange={setGroups}
+                      />
+                    )}
+                  </fieldset>
+                </section>
+              )}
+
               <main className={s.main}>
                 {error && (
                   <p className={s.error} role="alert">
@@ -744,50 +810,82 @@ export default function StatisticalChartsLab() {
                     {errorText(result.error)}
                   </p>
                 )}
-                <section id="lab-chart" className={s.chartPanel}>
-                  <div className={s.chartHeader}>
-                    <Field label={c.chart}>
-                      <select
-                        value={type}
-                        onChange={(e) => setType(e.target.value as ChartType)}
-                      >
-                        {chartTypes.map((t, i) => (
-                          <option key={t} value={t}>
-                            {c.chartNames[i]}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                    <button
-                      aria-pressed={enlarged}
-                      onClick={() => setEnlarged(!enlarged)}
-                    >
-                      {enlarged ? c.shrink : c.enlarge}
-                    </button>
-                  </div>
-                  {result.rows.length ? (
-                    <Chart
-                      rows={result.rows}
-                      type={type}
-                      title={title}
-                      axisLabel={`${variable}${unit ? ` (${unit})` : ""}`}
-                      display={display}
-                      selected={selected}
-                      onSelect={setSelected}
-                    />
-                  ) : (
-                    <div className={s.empty}>{c.invalidChart}</div>
+                <div
+                  id="lab-chart"
+                  className={s.results}
+                  data-testid="lab-results"
+                >
+                  {!enlarged && (
+                    <section className={s.tablePanel}>
+                      <div className={s.sectionHeader}>
+                        <h3>{c.table}</h3>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={full}
+                            onChange={(e) => setFull(e.target.checked)}
+                          />{" "}
+                          {c.fullTable}
+                        </label>
+                      </div>
+                      <FrequencyTable
+                        rows={result.rows}
+                        full={full}
+                        continuous={grouping.precision === 0}
+                        selected={selected}
+                        onSelect={setSelected}
+                      />
+                    </section>
                   )}
-                  <div className={s.chartNote}>
-                    {c.chartNotes[chartTypes.indexOf(type)]}
-                  </div>
-                  <ChartControls
-                    value={display}
-                    onChange={setDisplay}
-                    type={type}
-                  />
-                  {!!result.rows.length && <ChartExport type={type} />}
-                </section>
+
+                  <section className={s.chartPanel}>
+                    <div className={s.chartHeader}>
+                      <Field label={c.chart}>
+                        <select
+                          value={type}
+                          onChange={(e) => setType(e.target.value as ChartType)}
+                        >
+                          {chartTypes.map((t, i) => (
+                            <option key={t} value={t}>
+                              {c.chartNames[i]}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+                      <div className={s.chartActions}>
+                        <button onClick={present}>{c.tableChartView}</button>
+                        <button
+                          aria-pressed={enlarged}
+                          onClick={() => setEnlarged(!enlarged)}
+                        >
+                          {enlarged ? c.shrink : c.enlarge}
+                        </button>
+                      </div>
+                    </div>
+                    {result.rows.length ? (
+                      <Chart
+                        rows={result.rows}
+                        type={type}
+                        title={title}
+                        axisLabel={`${variable}${unit ? ` (${unit})` : ""}`}
+                        display={display}
+                        selected={selected}
+                        onSelect={setSelected}
+                      />
+                    ) : (
+                      <div className={s.empty}>{c.invalidChart}</div>
+                    )}
+                    <div className={s.chartNote}>
+                      {c.chartNotes[chartTypes.indexOf(type)]}
+                    </div>
+                    <ChartControls
+                      value={display}
+                      onChange={setDisplay}
+                      type={type}
+                    />
+                    {!!result.rows.length && <ChartExport type={type} />}
+                  </section>
+                </div>
                 <div className={s.selection} aria-live="polite">
                   {active ? (
                     <>
@@ -806,71 +904,8 @@ export default function StatisticalChartsLab() {
                     c.none
                   )}
                 </div>
-                {!enlarged && (
-                  <section className={s.tablePanel}>
-                    <div className={s.sectionHeader}>
-                      <h3>{c.table}</h3>
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={full}
-                          onChange={(e) => setFull(e.target.checked)}
-                        />{" "}
-                        {c.fullTable}
-                      </label>
-                    </div>
-                    <FrequencyTable
-                      rows={result.rows}
-                      full={full}
-                      continuous={grouping.precision === 0}
-                      selected={selected}
-                      onSelect={setSelected}
-                    />
-                  </section>
-                )}
               </main>
             </div>
-            {!enlarged && (
-              <section id="lab-data" className={s.dataPanel}>
-                <fieldset disabled={fixed} className={s.settingsFieldset}>
-                  <div className={s.sectionHeader}>
-                    <h3>{c.explorer}</h3>
-                    <span className={s.small}>{c.live}</span>
-                  </div>
-                  <div className={s.sourceTabs}>
-                    {(["raw", "grouped"] as const).map((mode) => (
-                      <button
-                        key={mode}
-                        aria-pressed={source === mode}
-                        onClick={() => {
-                          setSource(mode);
-                          setSelected(null);
-                          setError("");
-                        }}
-                      >
-                        {c[mode]}
-                      </button>
-                    ))}
-                  </div>
-                  {source === "raw" ? (
-                    <RawDataEditor
-                      values={values}
-                      onChange={(v) => {
-                        setValues(v);
-                        setError("");
-                      }}
-                      onError={setError}
-                    />
-                  ) : (
-                    <GroupedFrequencyEditor
-                      groups={groups}
-                      precision={grouping.precision}
-                      onChange={setGroups}
-                    />
-                  )}
-                </fieldset>
-              </section>
-            )}
           </div>
           {printing && activity && (
             <PrintView

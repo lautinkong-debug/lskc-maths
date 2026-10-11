@@ -2,6 +2,75 @@ import { test, expect } from "@playwright/test";
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
+test("dataset settings precede data, and deletion uses a bin icon", async ({
+  page,
+}) => {
+  const remove = page.getByRole("button", {
+    name: "Remove Observation 1",
+    exact: true,
+  });
+  await expect(remove.locator("svg")).toHaveCount(1);
+  await expect(remove).not.toHaveText("×");
+  await remove.click();
+  await expect(page.getByTestId("lab-total")).toHaveText("29");
+  const settings = await page.getByTestId("lab-settings").boundingBox();
+  const data = await page.getByTestId("lab-data").boundingBox();
+  const results = await page.getByTestId("lab-results").boundingBox();
+  expect(settings!.y + settings!.height).toBeLessThanOrEqual(data!.y);
+  expect(data!.y + data!.height).toBeLessThanOrEqual(results!.y);
+  await page
+    .getByRole("button", { name: "Grouped frequencies", exact: true })
+    .click();
+  const removeClass = page.getByRole("button", {
+    name: "Remove Class interval 4",
+    exact: true,
+  });
+  await expect(removeClass.locator("svg")).toHaveCount(1);
+  await removeClass.click();
+  await expect(page.getByTestId("lab-total")).toHaveText("15");
+});
+
+for (const [width, height] of [
+  [1280, 720],
+  [1920, 1080],
+]) {
+  test(`table and chart are both visible at ${width} by ${height}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height });
+    const enter = page.getByRole("button", {
+      name: "Table & chart view",
+      exact: true,
+    });
+    await enter.click();
+    const table = page.getByRole("table", {
+      name: "Frequency distribution",
+      exact: true,
+    });
+    const graph = page.locator("#lab-chart svg[role=group]");
+    await expect(table).toBeVisible();
+    await expect(graph).toBeVisible();
+    await expect
+      .poll(async () => {
+        const a = (await table.boundingBox())!,
+          b = (await graph.boundingBox())!;
+        return Math.max(a.y + a.height, b.y + b.height);
+      })
+      .toBeLessThanOrEqual(height);
+    const a = (await table.boundingBox())!,
+      b = (await graph.boundingBox())!;
+    expect(a.x + a.width).toBeLessThanOrEqual(b.x);
+    await table.getByRole("button", { name: "34–50", exact: true }).click();
+    await expect(page.locator('tr[data-selected="true"]')).toHaveCount(1);
+    await page.screenshot({
+      path: `test-results/statistical-table-chart-${width}.png`,
+      fullPage: true,
+    });
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(enter).toBeFocused();
+  });
+}
 test("same grouped dataset drives all five numerical charts", async ({
   page,
 }) => {

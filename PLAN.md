@@ -2,6 +2,15 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Statistical Charts classroom layout (10/10/2026)
+
+- [x] Replace multiplication-like removal symbols with labelled bin icons for observations and grouped classes.
+- [x] Arrange the workspace in reading order: horizontal Dataset settings, Data Explorer, then Frequency distribution beside Chart type and graph.
+- [x] Add a direct Table & chart view, preserve both panels in department Projection mode, and restore keyboard focus on exit.
+- [x] All 45 standalone browser scenarios passed, including both panels within 1280x720 and 1920x1080, linked selection, keyboard exit and existing chart/lesson/export functions.
+- [x] Next.js production build, TypeScript, ESLint and four emulator-backed department browser tests passed. Reviewed settings, bin controls and department projection screenshots.
+- [ ] Publish the reviewed layout and verify the public website on desktop and phone.
+
 ## Web Apps textbook topic filter (10/10/2026)
 
 - [x] Replace Strand filtering with all textbook topics from the same live catalogue as Mistakes Book, grouped by F1-F6 and ordered identically.

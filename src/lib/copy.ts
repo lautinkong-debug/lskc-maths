@@ -270,6 +270,7 @@ export const copy = {
     guides: "Construction guides",
     reset: "Reset chart display",
     enlarge: "Enlarge chart",
+    tableChartView: "Table & chart view",
     shrink: "Show workspace",
     empty: "Add observations or frequencies to begin.",
     invalidChart: "Correct the data settings to draw an accurate chart.",

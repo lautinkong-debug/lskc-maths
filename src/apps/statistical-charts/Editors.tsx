@@ -10,6 +10,24 @@ import {
 } from "./statistics";
 import s from "./lab.module.css";
 const c = copy.statisticalCharts;
+function DeleteIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 10v7M14 10v7" />
+    </svg>
+  );
+}
 export function Field({
   label,
   children,
@@ -77,7 +95,7 @@ export function DatasetGenerator({
   onGenerate: (fresh: boolean) => void;
 }) {
   return (
-    <>
+    <div className={s.generatorGrid}>
       <Field label={c.context}>
         <select
           value={value.context}
@@ -103,22 +121,24 @@ export function DatasetGenerator({
           onChange={(max) => onChange({ ...value, max })}
         />
       </div>
-      <NumberField
-        label={c.size}
-        step="1"
-        value={value.size}
-        onChange={(size) => onChange({ ...value, size })}
-      />
-      <div className={s.presets}>
-        {[20, 30, 40, 50, 100].map((size) => (
-          <button
-            key={size}
-            aria-pressed={value.size === size}
-            onClick={() => onChange({ ...value, size })}
-          >
-            {size}
-          </button>
-        ))}
+      <div>
+        <NumberField
+          label={c.size}
+          step="1"
+          value={value.size}
+          onChange={(size) => onChange({ ...value, size })}
+        />
+        <div className={s.presets}>
+          {[20, 30, 40, 50, 100].map((size) => (
+            <button
+              key={size}
+              aria-pressed={value.size === size}
+              onClick={() => onChange({ ...value, size })}
+            >
+              {size}
+            </button>
+          ))}
+        </div>
       </div>
       <Field label={c.shape}>
         <select
@@ -141,11 +161,13 @@ export function DatasetGenerator({
           onChange={(e) => onChange({ ...value, seed: e.target.value })}
         />
       </Field>
-      <button className={s.primary} onClick={() => onGenerate(true)}>
-        {c.generate}
-      </button>
-      <button onClick={() => onGenerate(false)}>{c.reproduce}</button>
-    </>
+      <div className={s.generatorActions}>
+        <button className={s.primary} onClick={() => onGenerate(true)}>
+          {c.generate}
+        </button>
+        <button onClick={() => onGenerate(false)}>{c.reproduce}</button>
+      </div>
+    </div>
   );
 }
 export function RawDataEditor({
@@ -211,9 +233,11 @@ export function RawDataEditor({
             </label>
             <button
               aria-label={`${c.remove} ${c.observation} ${i + 1}`}
+              title={`${c.remove} ${c.observation} ${i + 1}`}
+              className={s.deleteButton}
               onClick={() => onChange(values.filter((_, j) => i !== j))}
             >
-              ×
+              <DeleteIcon />
             </button>
           </div>
         ))}
@@ -303,9 +327,11 @@ export function GroupedFrequencyEditor({
               ))}
               <button
                 aria-label={`${c.remove} ${c.interval} ${i + 1}`}
+                title={`${c.remove} ${c.interval} ${i + 1}`}
+                className={s.deleteButton}
                 onClick={() => onChange(groups.filter((_, j) => i !== j))}
               >
-                ×
+                <DeleteIcon />
               </button>
             </div>
           </fieldset>
