@@ -10,6 +10,8 @@ const BracketsMode = lazy(() => import("./modes/BracketsMode"));
 const MultiplyDivideMode = lazy(() => import("./modes/MultiplyDivideMode"));
 const MixedMode = lazy(() => import("./modes/MixedMode"));
 const PlayHub = lazy(() => import("./play/PlayHub"));
+const SignMagnitudeMode = lazy(() => import("./modes/SignMagnitudeMode"));
+const TextbookMode = lazy(() => import("./modes/TextbookMode"));
 const c = copy.apps.directedNumbers;
 type Mode = keyof typeof c.tabs;
 const modes = Object.keys(c.tabs) as Mode[];
@@ -144,6 +146,20 @@ export default function DirectedNumbers() {
           <MixedMode
             key={expression ?? "default"}
             initialExpression={expression}
+          />
+        </Suspense>
+      ) : mode === "sign-magnitude" ? (
+        <Suspense fallback={<p>{copy.apps.loading}</p>}>
+          <SignMagnitudeMode
+            key={expression ?? "default"}
+            initialExpression={expression}
+          />
+        </Suspense>
+      ) : mode === "textbook" ? (
+        <Suspense fallback={<p>{copy.apps.loading}</p>}>
+          <TextbookMode
+            key={expression ?? "default"}
+            initialQuestion={expression}
           />
         </Suspense>
       ) : mode === "play" ? (

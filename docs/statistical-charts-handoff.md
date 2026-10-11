@@ -1,15 +1,16 @@
 # Statistical Charts Lab: department website handoff
 
-Prepared 10/10/2026 for continuation from GitHub.
+Updated 11/10/2026 for continuation from GitHub. Use `main` and read
+[`dot-handoff.md`](dot-handoff.md) for the complete current website.
 
-Uploaded branch: [LSKC-Mathematics-Department-Website](https://github.com/lautinkong-debug/lskc-maths/tree/LSKC-Mathematics-Department-Website)
-(renamed by the owner from `codex/statistical-charts-lab`).
-Implementation commit: `e2945cd` (followed by the upload-record documentation commit).
+Canonical branch: [main](https://github.com/lautinkong-debug/lskc-maths/tree/main).
+The older department and vocabulary branches are superseded. The release history
+below records earlier milestones, not branch-selection instructions.
 
 ## Intended result
 
 The owner asked to include the completed lab in the mathematics department website, then requested a GitHub upload
-for later processing. Continue from branch `LSKC-Mathematics-Department-Website`. This is the complete department website,
+for later processing. Continue from branch `main`. This is the complete department website,
 not a standalone replacement for it. On 10/10/2026 the owner authorised updating the existing production website.
 
 The application is registered at `/apps/statistical-charts` and appears in **Web apps → F2 → Data Handling**.
@@ -28,7 +29,7 @@ Read `CLAUDE.md`, `PLAN.md`, `docs/topics.md`, and the relevant installed Next.j
 `docs/statistical-charts-lab.md` contains mathematical conventions, manual review steps and storage limitations.
 The textbook is reference material only and is not uploaded.
 
-## Repository base
+## Historical repository base at the original handoff
 
 At handoff, GitHub `main` was `04f27ecaae26e368dedf8db5ac23033da834bb94`.
 The local website base was `be32393` with 21 existing commits beyond that `main`, including the department features,
@@ -36,6 +37,7 @@ directed-numbers app and Vercel runtime configuration. This branch retains those
 depends on the completed app host. Its difference from `main` therefore includes earlier website work too.
 Review the final Statistical Charts commit separately to isolate this addition. Do not replace the site with an old
 checkout of `main`, or cherry-pick only the statistical files into that incomplete base without their dependencies.
+These commit comparisons describe the original handoff; current `main` now contains the complete source.
 
 ## Run and verify
 
@@ -93,7 +95,7 @@ The selected Directed Numbers topic displayed its correct empty-book message. De
 
 For future releases: stage with production configuration and `--skip-domain`, verify all five app cards, the
 Statistical Charts route and its mobile progress restoration, and the Mistakes Book topic browser. Fast-forward
-GitHub `main` to the complete website, retain the renamed branch, then promote the verified deployment to
+GitHub `main` to the complete website, then promote the verified deployment to
 `https://lskc-maths.vercel.app`. An empty book list means no published books match the selected topic; it does not
 mean the Mistakes Book feature is missing. Signed-in teacher editing needs a separate authenticated check.
 

@@ -74,6 +74,31 @@ describe("bird number-line method", () => {
     expect(hops(-2, "-", -4).at(-1)?.to).toBe(2);
     expect(hops(3, "-", -5).at(-1)?.to).toBe(8);
   });
+  it("walks one unit at a time for every allowed magnitude and sign combination", () => {
+    for (const op of ["+", "-"] as const) {
+      for (let b = -20; b <= 20; b++) {
+        const frames = hops(-2, op, b, true);
+        expect(frames).toHaveLength(Math.max(1, Math.abs(b)));
+        expect(frames.at(-1)?.to).toBe(-2 + (op === "+" ? b : -b));
+        for (const frame of frames) {
+          expect(Math.abs(frame.to - frame.from)).toBe(b === 0 ? 0 : 1);
+        }
+      }
+    }
+    const chain = journeyHops(
+      {
+        start: 3,
+        moves: [
+          { op: "+", b: -14 },
+          { op: "-", b: -20 },
+        ],
+      },
+      true,
+    );
+    expect(chain).toHaveLength(34);
+    expect(chain[14].from).toBe(-11);
+    expect(chain.at(-1)?.to).toBe(9);
+  });
 });
 describe("exact directed numbers", () => {
   it("normalises fractions and negative zero", () => {

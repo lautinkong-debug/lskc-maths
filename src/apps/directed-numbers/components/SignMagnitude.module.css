@@ -1,0 +1,8 @@
+.motion {
+  transition: transform 1.2s ease-in-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .motion {
+    transition: none;
+  }
+}

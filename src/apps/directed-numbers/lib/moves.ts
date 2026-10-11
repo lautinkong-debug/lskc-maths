@@ -40,9 +40,14 @@ export interface Hop {
   step: number;
   total: number;
 }
-export function hops(a: number, op: Operation, b: number): Hop[] {
+export function hops(
+  a: number,
+  op: Operation,
+  b: number,
+  unitSteps = false,
+): Hop[] {
   const { distance, direction } = moveFor(op, b);
-  const count = distance === 0 || distance > 10 ? 1 : distance;
+  const count = distance === 0 || (!unitSteps && distance > 10) ? 1 : distance;
   const delta = direction === "left" ? -distance : distance;
   return Array.from({ length: count }, (_, i) => ({
     from: a + (delta * i) / count,
@@ -52,10 +57,10 @@ export function hops(a: number, op: Operation, b: number): Hop[] {
     total: count,
   }));
 }
-export function journeyHops(journey: Journey): Hop[] {
+export function journeyHops(journey: Journey, unitSteps = false): Hop[] {
   let a = journey.start;
   return journey.moves.flatMap((move, moveIndex) => {
-    const frames = hops(a, move.op, move.b).map((frame) => ({
+    const frames = hops(a, move.op, move.b, unitSteps).map((frame) => ({
       ...frame,
       moveIndex,
     }));

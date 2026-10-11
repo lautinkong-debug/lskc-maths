@@ -11,8 +11,63 @@
   animation: appear 220ms ease-out;
 }
 
+.birdPosition {
+  transition: transform 650ms linear;
+}
+
+.birdTurn {
+  transition: transform 650ms ease-in-out;
+}
+
+@keyframes walk {
+  0%,
+  50%,
+  100% {
+    transform: translateY(0);
+  }
+  25%,
+  75% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes stride {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(24deg);
+  }
+  75% {
+    transform: rotate(-24deg);
+  }
+}
+
+.birdWalk {
+  animation: walk 650ms linear;
+}
+
+.birdWalk .legOne,
+.birdWalk .legTwo {
+  transform-box: fill-box;
+  transform-origin: top center;
+  animation: stride 650ms linear;
+}
+
+.birdWalk .legTwo {
+  animation-direction: reverse;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .hop {
+  .hop,
+  .birdWalk,
+  .birdWalk .legOne,
+  .birdWalk .legTwo {
     animation: none;
+  }
+  .birdPosition,
+  .birdTurn {
+    transition: none;
   }
 }

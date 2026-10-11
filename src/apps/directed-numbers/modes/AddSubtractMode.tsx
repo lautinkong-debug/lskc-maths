@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from "react";
+import { useEffect, useEffectEvent, useState, type KeyboardEvent } from "react";
 import { Math as Tex } from "@/components/Math";
 import { usePresentation } from "@/components/PresentationFrame";
 import { copy } from "@/lib/copy";
@@ -8,6 +8,7 @@ import { RuleCard } from "../components/RuleCard";
 import { ExpressionInput } from "../components/ExpressionInput";
 import { StepControls } from "../components/StepControls";
 import { BirdGuide } from "../components/BirdGuide";
+import { SignMagnitude } from "../components/SignMagnitude";
 import { usePrediction } from "../components/usePrediction";
 import { button, primary, field } from "../components/ui";
 import {
@@ -63,6 +64,8 @@ export default function AddSubtractMode({
     [b, setB] = useState(String(journey.moves[0].b)),
     [op, setOp] = useState<Operation>(journey.moves[0].op);
   const [builderError, setBuilderError] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [animationKey, setAnimationKey] = useState(0);
   const [direction, setDirection] = useState<Direction | null>(null),
     [firstGuess, setFirstGuess] = useState<"left" | "right" | null>(null),
     [secondGuess, setSecondGuess] = useState<"left" | "right" | null>(null),
@@ -78,16 +81,30 @@ export default function AddSubtractMode({
       (value, item) => value + (item.op === "+" ? item.b : -item.b),
       journey.start,
     );
-  const frames = hops(start, move.op, move.b),
-    total = journeyHops(journey).length;
+  const frames = hops(start, move.op, move.b, true),
+    total = journeyHops(journey, true).length;
   const earlierFrames = journey.moves
     .slice(0, moveIndex)
-    .reduce((count, item) => count + hops(0, item.op, item.b).length, 0);
+    .reduce((count, item) => count + hops(0, item.op, item.b, true).length, 0);
   const position = earlierFrames + step,
     hidden = predict && !revealed;
   const rule = moveFor(move.op, move.b),
     end = frames.at(-1)!.to;
   const complete = step === frames.length;
+  const finished = complete && moveIndex === journey.moves.length - 1;
+  const advanceAnimation = useEffectEvent(() => {
+    if (finished) setPlaying(false);
+    else next(false);
+  });
+  useEffect(() => {
+    if (!playing) return;
+    // Keep each sign visible before walking; each unit then takes the same time.
+    const timer = window.setTimeout(
+      advanceAnimation,
+      turnStage < 2 ? 1200 : step === 0 ? 1200 : 750,
+    );
+    return () => window.clearTimeout(timer);
+  }, [playing, turnStage, step, moveIndex, finished]);
   const current = step ? frames[step - 1].to : start;
   const horizontalHint =
     move.b === 0
@@ -163,6 +180,8 @@ export default function AddSubtractMode({
     setLandingCorrect(false);
   }
   function load(next: Journey, old: string | null = null) {
+    setPlaying(false);
+    setAnimationKey((key) => key + 1);
     setJourney(next);
     setInput(journeyText(next));
     setMoveIndex(0);
@@ -176,7 +195,8 @@ export default function AddSubtractMode({
     setB(String(next.moves[0].b));
     setBuilderError(false);
   }
-  function next() {
+  function next(manual = true) {
+    if (manual) setPlaying(false);
     if (showBird && skin === "plain" && turnStage < 2) {
       setTurnStage(turnStage + 1);
       return;
@@ -198,13 +218,14 @@ export default function AddSubtractMode({
     }
   }
   function back() {
+    setPlaying(false);
     if (step > 0) setStep(step - 1);
     else if (showBird && skin === "plain" && turnStage > 0)
       setTurnStage(turnStage - 1);
     else if (moveIndex > 0) {
       const previous = journey.moves[moveIndex - 1];
       setMoveIndex(moveIndex - 1);
-      setStep(hops(0, previous.op, previous.b).length);
+      setStep(hops(0, previous.op, previous.b, true).length);
       setTurnStage(2);
       setRevealed(true);
       clearAnswers();
@@ -216,6 +237,8 @@ export default function AddSubtractMode({
     load(examples[index]);
   }
   function togglePrediction() {
+    setPlaying(false);
+    setAnimationKey((key) => key + 1);
     const nextValue = !predict;
     setPreference(nextValue);
     setRevealed(false);
@@ -283,8 +306,23 @@ export default function AddSubtractMode({
     setLandingNote(fullSentence);
   }
   function revealBird() {
+    setPlaying(false);
     setTurnStage(2);
     setRevealed(true);
+  }
+  function playBird() {
+    if (playing) {
+      setPlaying(false);
+      return;
+    }
+    if (finished) load(journey);
+    setRevealed(true);
+    setPlaying(true);
+  }
+  function replayBird() {
+    load(journey);
+    setRevealed(true);
+    setPlaying(true);
   }
   function similar() {
     const bounded = Math.max(-20, Math.min(20, start));
@@ -315,6 +353,7 @@ export default function AddSubtractMode({
             className={field}
             value={skin}
             onChange={(event) => {
+              setPlaying(false);
               setSkin(event.target.value as Skin);
               if (event.target.value === "plain" && step > 0) setTurnStage(2);
             }}
@@ -330,6 +369,7 @@ export default function AddSubtractMode({
             checked={showBird}
             disabled={skin !== "plain"}
             onChange={(event) => {
+              setPlaying(false);
               setShowBird(event.target.checked);
               if (event.target.checked && step > 0) setTurnStage(2);
             }}
@@ -346,6 +386,7 @@ export default function AddSubtractMode({
       <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="min-w-0 space-y-4">
           <NumberLine
+            key={animationKey}
             journey={journey}
             position={position}
             active={moveIndex}
@@ -353,6 +394,7 @@ export default function AddSubtractMode({
             sentence={sentence}
             presenting={presenting}
             bird={showBird && skin === "plain"}
+            unitSteps
             birdFacing={
               turnStage === 0
                 ? "right"
@@ -370,20 +412,27 @@ export default function AddSubtractMode({
               hidden={hidden}
               complete={complete}
               presenting={presenting}
+              walked={move.b === 0 ? 0 : step}
+              playing={playing}
+              finished={finished}
+              onPlay={playBird}
+              onReplay={replayBird}
               firstGuess={firstGuess}
               secondGuess={secondGuess}
               onFirstGuess={(answer) => {
+                setPlaying(false);
                 setFirstGuess(answer === bird.afterOperation ? null : answer);
                 if (answer === bird.afterOperation) setTurnStage(1);
               }}
               onSecondGuess={(answer) => {
+                setPlaying(false);
                 setSecondGuess(answer === bird.facing ? null : answer);
                 if (answer === bird.facing) {
                   setTurnStage(2);
                   setRevealed(true);
                 }
               }}
-              onAdvanceTurn={() => setTurnStage(Math.min(2, turnStage + 1))}
+              onAdvanceTurn={() => next()}
               onReveal={revealBird}
               onExample={(index) =>
                 load(
@@ -546,6 +595,7 @@ export default function AddSubtractMode({
                     <button
                       className={button}
                       onClick={() => {
+                        setPlaying(false);
                         setStep(0);
                         setLanding("");
                         setLandingNote("");
@@ -575,6 +625,13 @@ export default function AddSubtractMode({
             vertical={skin !== "plain"}
             presenting={presenting}
           />
+          {complete && !hidden && (
+            <SignMagnitude
+              key={`${start}:${move.op}:${move.b}`}
+              move={{ start, ...move }}
+              staticResult
+            />
+          )}
           <label className="flex min-h-12 items-center gap-3">
             <input
               type="checkbox"
@@ -644,7 +701,7 @@ export default function AddSubtractMode({
               : undefined
           }
           backEnabled={showBird && skin === "plain" && turnStage > 0}
-          onNext={next}
+          onNext={() => next()}
           onBack={back}
           onReset={() => load(journey)}
           onNew={newExample}

@@ -1,6 +1,7 @@
 import { copy } from "@/lib/copy";
 import { birdFor, signed, type Move } from "../lib/moves";
 import { button } from "./ui";
+import { Math as Tex } from "@/components/Math";
 
 const c = copy.apps.directedNumbers.bird;
 type Facing = "left" | "right";
@@ -20,6 +21,11 @@ export function BirdGuide({
   onAdvanceTurn,
   onReveal,
   onExample,
+  walked,
+  playing,
+  finished,
+  onPlay,
+  onReplay,
 }: {
   start: number;
   end: number;
@@ -35,11 +41,30 @@ export function BirdGuide({
   onAdvanceTurn: () => void;
   onReveal: () => void;
   onExample: (index: number) => void;
+  walked: number;
+  playing: boolean;
+  finished: boolean;
+  onPlay: () => void;
+  onReplay: () => void;
 }) {
   const bird = birdFor(move.op, move.b);
   const operation = move.op === "+" ? "+" : "−";
   const number = signed(move.b);
   const wrongGuess = turnStage === 0 ? firstGuess : secondGuess;
+  const activeToken =
+    turnStage === 0
+      ? 0
+      : turnStage === 1
+        ? 1
+        : walked === 0 && !complete
+          ? 2
+          : 3;
+  const tokens = [
+    { tex: `(${start})`, label: c.startLabel },
+    { tex: move.op, label: c.operationLabel },
+    { tex: move.b < 0 ? "-" : "+", label: c.signLabel },
+    { tex: String(bird.distance), label: c.magnitudeLabel },
+  ];
   return (
     <section
       className="border-grid bg-paper min-w-0 rounded border p-4"
@@ -48,10 +73,44 @@ export function BirdGuide({
       <h3 className="font-display text-navy text-xl font-semibold">
         {c.title}
       </h3>
+      <div
+        className="mt-3 grid grid-cols-4 gap-1 sm:gap-2"
+        aria-label={c.signSequence}
+      >
+        {tokens.map((token, index) => (
+          <div
+            key={token.label}
+            data-active={activeToken === index}
+            className={`min-w-0 rounded border p-2 text-center ${activeToken === index ? "border-navy bg-highlight/40" : "border-grid"}`}
+          >
+            <Tex className={presenting ? "text-3xl" : "text-2xl"}>
+              {token.tex}
+            </Tex>
+            <p className="mt-1 text-xs sm:text-sm">{token.label}</p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <button className={button} onClick={onPlay} aria-pressed={playing}>
+          {playing
+            ? c.pauseAnimation
+            : finished
+              ? c.replayAnimation
+              : c.playAnimation}
+        </button>
+        {!finished && (
+          <button className={button} onClick={onReplay}>
+            {c.replayAnimation}
+          </button>
+        )}
+        <span className="text-navy font-semibold tabular-nums" role="status">
+          {c.walked(walked, bird.distance)}
+        </span>
+      </div>
       <p className={presenting ? "sr-only" : "text-pencil mt-2"}>
         {c.startNote}
       </p>
-      <ol className={`mt-2 space-y-2 ${presenting ? "text-xl" : "text-base"}`}>
+      <ol className={presenting ? "sr-only" : "mt-2 space-y-2 text-base"}>
         <li>{c.start(signed(start))}</li>
         <li>
           {turnStage >= 1
@@ -118,9 +177,6 @@ export function BirdGuide({
                 ? c.land(bird.travel, signed(end))
                 : c.travelHint(bird.turns, bird.facing, bird.travel)}
       </p>
-      {turnStage === 2 && bird.distance > 10 && (
-        <p className="text-pencil mt-2 text-sm">{c.longHop(bird.distance)}</p>
-      )}
       {turnStage < 2 && !hidden && !presenting && (
         <button className={`${button} mt-3`} onClick={onAdvanceTurn}>
           {turnStage === 0 ? c.readOperation : c.readNumber}

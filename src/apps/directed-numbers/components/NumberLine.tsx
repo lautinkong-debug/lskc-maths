@@ -19,6 +19,7 @@ export function NumberLine({
   presenting,
   bird = false,
   birdFacing = "right",
+  unitSteps = false,
 }: {
   journey: Journey;
   position: number;
@@ -28,9 +29,10 @@ export function NumberLine({
   presenting: boolean;
   bird?: boolean;
   birdFacing?: "left" | "right";
+  unitSteps?: boolean;
 }) {
   const id = useId().replaceAll(":", "");
-  const frames = journeyHops(journey),
+  const frames = journeyHops(journey, unitSteps),
     visible = frames.slice(0, position);
   const range = autoRange([journey.start, ...frames.map((frame) => frame.to)]);
   const current = visible.at(-1)?.to ?? journey.start;
@@ -44,15 +46,31 @@ export function NumberLine({
       if (!element) return;
       const width =
         element.querySelector("svg")?.getBoundingClientRect().width ?? 0;
-      element.scrollLeft = vertical
-        ? 0
-        : (currentX / 760) * width - element.clientWidth / 2;
+      const point = (currentX / 760) * width;
+      if (bird && !vertical) {
+        // Follow only when near an edge, so scrolling does not cancel the
+        // visible unit-by-unit walking motion on a narrow screen.
+        if (
+          point < element.scrollLeft + 45 ||
+          point > element.scrollLeft + element.clientWidth - 45
+        ) {
+          element.scrollTo({
+            left: point - element.clientWidth / 2,
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+              .matches
+              ? "instant"
+              : "smooth",
+          });
+        }
+      } else {
+        element.scrollLeft = vertical ? 0 : point - element.clientWidth / 2;
+      }
     }
     keepPointVisible();
     const observer = new ResizeObserver(keepPointVisible);
     observer.observe(element);
     return () => observer.disconnect();
-  }, [currentX, vertical]);
+  }, [currentX, vertical, bird]);
   const ticks: number[] = [];
   for (let n = range.min; n <= range.max; n += range.step) ticks.push(n);
   const x = (n: number) =>
@@ -303,27 +321,59 @@ export function NumberLine({
               )}
               {bird && (
                 <g
-                  transform={`translate(${x(current)} 184) scale(${birdFacing === "left" ? -1 : 1} 1)`}
-                  className="stroke-navy"
-                  strokeWidth="2.5"
-                  strokeLinejoin="round"
+                  data-testid="walking-bird"
+                  data-position={current}
+                  data-facing={birdFacing}
+                  style={{ transform: `translate(${x(current)}px, 184px)` }}
+                  className={styles.birdPosition}
                 >
-                  <ellipse
-                    cx="-3"
-                    cy="-2"
-                    rx="17"
-                    ry="11"
-                    className="fill-paper"
-                  />
-                  <circle cx="12" cy="-11" r="8" className="fill-paper" />
-                  <path d="M18 -12L28 -8L18 -4Z" className="fill-highlight" />
-                  <circle
-                    cx="14"
-                    cy="-13"
-                    r="2"
-                    className="fill-navy stroke-none"
-                  />
-                  <path d="M-10 7l-4 11m13-9l-1 9M-19-4l-9-6" fill="none" />
+                  <g
+                    style={{
+                      transform: `scaleX(${birdFacing === "left" ? -1 : 1})`,
+                    }}
+                    className={`${styles.birdTurn} stroke-navy`}
+                    strokeWidth="2.5"
+                    strokeLinejoin="round"
+                  >
+                    <g
+                      key={position}
+                      className={
+                        visible.at(-1)?.from !== current && position > 0
+                          ? styles.birdWalk
+                          : undefined
+                      }
+                    >
+                      <ellipse
+                        cx="-3"
+                        cy="-2"
+                        rx="17"
+                        ry="11"
+                        className="fill-paper"
+                      />
+                      <circle cx="12" cy="-11" r="8" className="fill-paper" />
+                      <path
+                        d="M18 -12L28 -8L18 -4Z"
+                        className="fill-highlight"
+                      />
+                      <circle
+                        cx="14"
+                        cy="-13"
+                        r="2"
+                        className="fill-navy stroke-none"
+                      />
+                      <path d="M-19-4l-9-6" fill="none" />
+                      <path
+                        d="M-10 7l-4 11"
+                        fill="none"
+                        className={styles.legOne}
+                      />
+                      <path
+                        d="M-1 9l-1 9"
+                        fill="none"
+                        className={styles.legTwo}
+                      />
+                    </g>
+                  </g>
                 </g>
               )}
             </>

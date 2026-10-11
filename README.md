@@ -3,6 +3,18 @@
 The Mathematics Department website for S.T.F.A. Lee Shau Kee College. It has
 interactive Web Apps and a Mistakes Book for PDF, DOCX and HTML correction notes.
 
+## Latest official source — 11/10/2026
+
+Use **`main`** for the complete current website:
+[GitHub source](https://github.com/lautinkong-debug/lskc-maths/tree/main) ·
+[Official website](https://lskc-maths.vercel.app).
+
+This includes the Statistical Charts vocabulary and animated teaching activities,
+editable frequency tables, textbook-topic filtering, and Directed Numbers textbook
+practice, bird animation and sign/magnitude lessons. Read
+[the Dot handoff](docs/dot-handoff.md) before continuing development.
+Earlier feature branches are superseded; their commits remain in Git history.
+
 ## Run and test on this computer
 
 Node.js and Java are already installed on the owner's computer. In **Windows

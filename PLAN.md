@@ -2,6 +2,22 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Canonical GitHub source for Dot (11/10/2026)
+
+- [x] Consolidate the latest published Directed Numbers source with the vocabulary activity, retaining all previous department features.
+- [x] Compare the full application against the combined production snapshot and rerun 337 focused maths/activity checks successfully.
+- [x] Update README and the handoff documents to identify `main` as the canonical source; retain commit history for recovery.
+- Repository policy requested by the owner: `main` is the only GitHub branch and the default branch. Superseded department/vocabulary branches are removed after their commits are preserved in `main`.
+
+## Directed Numbers textbook practice and magnitude diagrams (10/10/2026)
+
+- [x] Read the supplied scan and transcribe all 122 numerical calculation parts from Exercise 2B Q1–15/Q21–28 and Exercise 2C Q1–16/Q20–33, preserving references and checking the printed answer key.
+- [x] Add Textbook practice with exercise/difficulty/question selection, exact equivalent-answer marking, sign feedback, worked solutions and valid links to the bird and magnitude lessons. State the included coverage explicitly.
+- [x] Add the teacher's four number-line cases, negative subtraction and zero: proportional movement arrows, predictions, sign from endpoint position and magnitude from distance to zero. Show this explanation after the bird completes a move.
+- [x] All 217 focused maths tests, scoped ESLint, TypeScript and the local production build passed.
+- [x] All 17 focused browser scenarios passed across the final targeted runs (eight bird regressions, six sign/magnitude cases, and three textbook/prediction flows). Reviewed textbook and magnitude screenshots on 390px phones and 1920×1080 projection. Adjusted projection layout so the full diagram and explanation are simultaneously visible, then rechecked it and TypeScript.
+- [x] Published to `https://lskc-maths.vercel.app` with owner approval: production deployment `dpl_B4cpxr5ZKXgdjHRpKxSBLggMHUf4`, built from `d83356e` plus the tested Directed Numbers changes. All 17 live Chrome scenarios passed, including textbook marking, sign/magnitude cases, bird playback, phone and projection. Home, Directed Numbers and Statistical Charts returned HTTP 200; unsigned challenge joining returned 401. No Firebase data or rules changes. Release manifest: `out/textbook-release.json`; coverage: `docs/directed-numbers-textbook.md`.
+
 ## Statistical Charts four-word memory activity
 
 - [x] Add 09 · Four words, one class with animated highlighting and the teacher's Limits are Listed / Boundaries are Between / Mark is the Middle / Width is the Whole bar mnemonic.
@@ -616,7 +632,19 @@ The join page explains the three steps before a large code field; loading and di
 
 ## Decision log
 
+- 2026-10-11: The owner requested one latest GitHub version for Dot. Consolidate the production source into `main`, make it the default, and remove superseded remote branches only after verifying their commits are ancestors of `main`. Preserve Git history and all local checkouts.
+
 - Four-word vocabulary uses a separate teaching example so raw lab data is untouched; class width is boundary-to-boundary, and half-step corrections follow the stated recording precision. Release preserves the already-published Directed Numbers snapshot, which is not yet on GitHub main.
+
+- 10/10/2026 — Directed numbers: animate the bird reading the operation sign and the second number's sign separately. Each minus turns it around; the starting number only sets its position. Play/Pause/Replay follow the same steps as manual controls. Walking covers one number-line unit per step for all supported integer magnitudes (0–20), including magnitudes above 10. Show the active sign and distance counter, retain reduced-motion support, and keep the projector explanation compact. Published to the official website on the owner's explicit request; release details below.
+
+  Owner test: run `npm.cmd run dev:all`, then open `/apps/directed-numbers#add-subtract`. Select `−2 − (−4)` and press **Play animation**: start at −2 facing right, turn left, turn right, then walk four units to +2. Try Pause, Replay, Restart, the ± controls, zero and a magnitude above 10. Check the phone layout and Projection mode.
+
+  Verification: 82 directed-number maths tests and eight browser tests passed, covering all four sign combinations, pause/replay/restart, zero, 14 unit steps, reduced motion, keyboard use, 360 px phone and 1920 px projection layouts, and intermediate CSS transforms during turns and walking. Production build and TypeScript passed; phone and projector screenshots were inspected.
+
+  Production release (10/10/2026): Vercel project `prj_gDfV3Ghov8KxYuPORUZ6J4DyIEIc`, team `team_uV3gE1tXDyPLZgD0VVTk3BNh`; deployment `dpl_GHsz5exfFmk9Zb6RRQ1Zw62Y1VEm` is READY and promoted to `https://lskc-maths.vercel.app`. Source snapshot: base `00e888a5c00730447aeb1a656b5d1e471016d9b2` plus the directed-number animation files and the bird copy block; unrelated statistical-chart drafts were excluded. The local manifest is `out/bird-release.json`. Vercel built with the existing production settings; local emulator configuration and Firebase rules/data were not changed. Home, Directed Numbers and Statistical Charts returned HTTP 200; an unsigned POST to `/api/challenges/join` returned 401. No error logs were returned for this deployment during the release check. Previous production deployment: `dpl_DcHqpQK36nnNZx1cbrCCV522QARa`.
+
+  Live browser verification: all eight animation checks passed on the official domain. Three passed initially; five timed out at the initial app-loading screen with the local 5-second expectation and passed when rerun with a 20-second production loading allowance. No animation code or assertions were changed for the rerun. Production test configuration and screenshots are in `out/bird-live.config.ts` and `out/bird-live-results/`.
 
 - 2026-10-09: Statistical Charts Phase 3 keeps classroom controls local and unauthenticated. Shared activities use a validated
   versioned URL fragment (8,000-character limit) or JSON file fallback (250 KB). Only the active data source is exported;
