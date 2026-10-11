@@ -98,6 +98,10 @@ or total distance and calculation share purple; the starting distance stays navy
 and movement distance red. The calculation is centred beneath its distance bar,
 with edge clamping for longer labels. Zero receives a line at zero, not a band
 suggesting a non-zero distance. Replay clears the highlight with the working.
+Zero uses a solid navy reference line and a larger white-backed badge. The purple
+Finish label sits below the axis on the outer side of the shaded result interval;
+nearby start/finish labels use separate rows, and long finish labels stay inside
+the graph edges.
 
 ## Local review
 

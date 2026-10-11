@@ -37,7 +37,29 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
   const resultColour = "#6d28d9";
   const magnitudePattern = `${marker}-magnitude`;
   const calculation = useRef<SVGTextElement>(null);
+  const finish = useRef<SVGTextElement>(null);
+  const finishAnchor = m.end < 0 ? "end" : "start";
+  const finishX = end + (m.end < 0 ? -14 : 22);
+  const finishY = Math.abs(end - start) < 130 ? 210 : 185;
   const resultCentre = (zero + end) / 2;
+  useLayoutEffect(() => {
+    const node = finish.current;
+    if (!node) return;
+    const align = () => {
+      const width = node.getComputedTextLength();
+      node.setAttribute(
+        "x",
+        String(
+          finishAnchor === "end"
+            ? Math.max(20 + width, finishX)
+            : Math.min(620 - width, finishX),
+        ),
+      );
+    };
+    align();
+    document.fonts.addEventListener("loadingdone", align);
+    return () => document.fonts.removeEventListener("loadingdone", align);
+  }, [complete, m.labels.end, finishX, finishAnchor]);
   useLayoutEffect(() => {
     const node = calculation.current;
     if (!node) return;
@@ -171,14 +193,12 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
       <line
         x1={zero}
         x2={zero}
-        y1="100"
-        y2="333"
-        stroke="#7990a3"
-        strokeDasharray="4 4"
+        y1="60"
+        y2="340"
+        stroke="#0f4574"
+        strokeWidth="3"
+        data-testid="graph-zero-line"
       />
-      <text x={zero} y="208" textAnchor="middle" fontSize="18" fill="#0f4574">
-        0
-      </text>
       <line
         x1={start}
         x2={start}
@@ -188,7 +208,14 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
         strokeDasharray="4 4"
       />
       <circle cx={start} cy="155" r="5" fill="#0f4574" />
-      <text x={start} y="185" textAnchor="middle" fontSize="18" fill="#0f4574">
+      <text
+        x={start}
+        y="185"
+        textAnchor="middle"
+        fontSize="18"
+        fill="#0f4574"
+        data-testid="graph-start"
+      >
         {c.startMark}: {m.labels.start}
       </text>
       {m.delta !== 0 && (
@@ -248,17 +275,44 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
       )}
       {complete && (
         <text
-          x={end}
-          y="123"
-          textAnchor="middle"
+          ref={finish}
+          x={finishX}
+          y={finishY}
+          textAnchor={finishAnchor}
           fontSize="18"
-          fontWeight="600"
+          fontWeight="700"
           fill={resultColour}
+          stroke="#fff"
+          strokeWidth="5"
+          paintOrder="stroke"
+          strokeLinejoin="round"
           data-testid="graph-finish"
         >
           {c.endMark}: {m.labels.end}
         </text>
       )}
+      <g data-testid="graph-zero-label">
+        <rect
+          x={zero - 17}
+          y="189"
+          width="34"
+          height="33"
+          rx="6"
+          fill="#fff"
+          stroke="#0f4574"
+          strokeWidth="1.5"
+        />
+        <text
+          x={zero}
+          y="214"
+          textAnchor="middle"
+          fontSize="26"
+          fontWeight="800"
+          fill="#0f4574"
+        >
+          0
+        </text>
+      </g>
       {stage >= 1 &&
         distanceBar(
           start,

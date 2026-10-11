@@ -678,7 +678,15 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
   }
 });
 
-for (const expression of ["50-60", "-50+60", "-50-30", "50+(-50)"]) {
+for (const expression of [
+  "50-60",
+  "-50+60",
+  "-50-30",
+  "50+(-50)",
+  "-50+30",
+  "-50+1",
+  "0+0",
+]) {
   test(`magnitude highlight measures zero to endpoint: ${expression}`, async ({
     page,
   }, testInfo) => {
@@ -694,6 +702,45 @@ for (const expression of ["50-60", "-50+60", "-50-30", "50+(-50)"]) {
     await expect(band).toHaveCount(0);
     await next(page);
     await expect(band).toHaveCount(1);
+    await expect(page.getByTestId("graph-zero-line")).toHaveAttribute(
+      "stroke-width",
+      "3",
+    );
+    await expect(
+      page.getByTestId("graph-zero-label").locator("text"),
+    ).toHaveAttribute("font-size", "26");
+    await next(page);
+    await expect(page.getByTestId("graph-finish")).toBeVisible();
+    const labels = await page.getByTestId("magnitude-line").evaluate((svg) => {
+      const box = (id: string) =>
+        (
+          svg.querySelector(`[data-testid="${id}"]`) as SVGGraphicsElement
+        ).getBBox();
+      const finish = box("graph-finish"),
+        start = box("graph-start"),
+        zero = box("graph-zero-label");
+      const overlaps = (b: DOMRect) =>
+        finish.x < b.x + b.width &&
+        finish.x + finish.width > b.x &&
+        finish.y < b.y + b.height &&
+        finish.y + finish.height > b.y;
+      return {
+        belowAxis: finish.y > 155,
+        inside: finish.x >= 19 && finish.x + finish.width <= 621,
+        overlap: overlaps(start) || overlaps(zero),
+      };
+    });
+    expect(labels).toEqual({ belowAxis: true, inside: true, overlap: false });
+    if (["-50+30", "-50-30", "0+0"].includes(expression)) {
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await page
+        .getByRole("button", { name: "Projection mode", exact: true })
+        .click();
+      await page.screenshot({
+        path: testInfo.outputPath("zero-finish-projector.png"),
+        fullPage: true,
+      });
+    }
     const geometry = await page
       .getByTestId("magnitude-line")
       .evaluate((svg) => {
@@ -721,9 +768,9 @@ for (const expression of ["50-60", "-50+60", "-50-30", "50+(-50)"]) {
       geometry.barX + geometry.barWidth / 2,
       2,
     );
-    if (expression === "50+(-50)") expect(geometry.width).toBe(0);
+    if (["50+(-50)", "0+0"].includes(expression))
+      expect(geometry.width).toBe(0);
     else expect(geometry.width).toBeGreaterThan(0);
-    await next(page);
     await expect(band).toHaveCount(1);
     if (expression === "50-60") {
       await expect(page.getByTestId("graph-finish")).toHaveAttribute(
