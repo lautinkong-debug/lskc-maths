@@ -43,6 +43,7 @@ export type RuleId =
   | "reciprocal"
   | "mixed-to-improper";
 export type Step = {
+  signArrows?: { tex: string; pair: string };
   signReveal?: {
     prefix: string;
     sign: string;
@@ -131,8 +132,21 @@ function texPieces(
           },
         ]
       : texPieces(ast.right, false, style);
+  // A reduced negative factor must stay grouped, including to the right of
+  // subtraction in a larger expression (2 - (-4) × (-2), never 2 - -4 × (-2)).
+  const left =
+    (ast.op === "*" || ast.op === "/") &&
+    ast.left.kind === "number" &&
+    ast.left.value.n < 0
+      ? [
+          {
+            text: `\\left(${toTex(ast.left.value, { style: ast.left.sourceForm === "decimal" ? "decimal" : ast.left.sourceForm === "mixed" ? "mixed" : style })}\\right)`,
+            span: ast.left.span,
+          },
+        ]
+      : texPieces(ast.left, false, style);
   return [
-    ...texPieces(ast.left, false, style),
+    ...left,
     {
       text: ` ${ast.op === "*" ? "\\times" : ast.op === "/" ? "\\div" : ast.op} `,
       span: { start: ast.left.span.end, end: ast.right.span.start },
@@ -580,6 +594,27 @@ function generalWorkOut(
       const same = Math.sign(a.n) === Math.sign(b.n);
       const ruleId: RuleId = `${same ? "same" : "diff"}-sign-${op === "*" ? "product" : "quotient"}`;
       const previous = expressionTex(ast, style);
+      const signs = [a, b].map((value) => (value.n < 0 ? "-" : "+"));
+      const operands = previous
+        .slice(highlight.start, highlight.end)
+        .split(/\\times|\\div/);
+      const markedOperands = operands.map((operand, index) => {
+        const mark = `\\textcolor{#DA2127}{${signs[index]}}`;
+        const existing = operand.match(/[+-]/g) ?? [];
+        if (existing.length === 1 && existing[0] === signs[index])
+          return operand.replace(/[+-]/, mark);
+        // Make an implicit positive sign explicit so both arrows have an anchor.
+        if (existing.length === 0 && operand.trimStart().startsWith("\\left"))
+          return operand.replace(/^(\s*(?:\\left[([])*)/, `$1${mark}`);
+        return `\\left(${mark}${toTex(abs(index === 0 ? a : b), { style })}\\right)`;
+      });
+      const signArrows = {
+        pair: signs.join(""),
+        tex:
+          previous.slice(0, highlight.start) +
+          markedOperands.join(op === "*" ? "\\times" : "\\div") +
+          previous.slice(highlight.end),
+      };
       // Keep a signed subexpression grouped when it sits inside a larger sum/product.
       const nested = highlight.start > 0 || highlight.end < previous.length;
       const signReveal = {
@@ -595,6 +630,7 @@ function generalWorkOut(
           signReveal.magnitude +
           signReveal.suffix,
         signReveal,
+        signArrows,
         numberStyle: style,
         highlight,
         sourceHighlight: change.sourceHighlight,

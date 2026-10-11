@@ -50,7 +50,9 @@ export default function TextbookMode({
   const initial =
     textbookQuestions.find((q) => q.id === initialQuestion) ??
     textbookQuestions[0];
-  const [exercise, setExercise] = useState<"2B" | "2C">(initial.exercise);
+  const [exercise, setExercise] = useState<TextbookQuestion["exercise"]>(
+    initial.exercise,
+  );
   const [level, setLevel] = useState("all"),
     [index, setIndex] = useState(
       textbookQuestions
@@ -86,7 +88,7 @@ export default function TextbookMode({
             className={field}
             value={exercise}
             onChange={(e) => {
-              setExercise(e.target.value as "2B" | "2C");
+              setExercise(e.target.value as TextbookQuestion["exercise"]);
               setIndex(0);
               remember(
                 textbookQuestions.find(
@@ -97,7 +99,7 @@ export default function TextbookMode({
               );
             }}
           >
-            {["2B", "2C"].map((name) => (
+            {["2B", "2C", "R2"].map((name) => (
               <option key={name} value={name}>
                 {c.exerciseName(name)}
               </option>

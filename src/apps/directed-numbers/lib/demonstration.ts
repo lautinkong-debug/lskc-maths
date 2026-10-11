@@ -60,6 +60,7 @@ export function highlightedTex(step: Step): string {
 
 /** Mark the actual operation sign and operand sign for the two-arrow diagram. */
 export function signArrowTex(step: Step): string | null {
+  if (step.signArrows) return step.signArrows.tex;
   if (!["++", "+-", "-+", "--"].includes(step.ruleId) || !step.highlight)
     return null;
   const tex = expressionTex(step.before, step.numberStyle);

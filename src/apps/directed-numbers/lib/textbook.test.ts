@@ -5,11 +5,14 @@ import { workOut } from "./steps";
 import { magnitudeModel, simpleMove, textbookQuestions } from "./textbook";
 
 describe("textbook transcription and printed answer key", () => {
-  it("contains 122 unique referenced questions", () => {
-    expect(textbookQuestions).toHaveLength(122);
-    expect(new Set(textbookQuestions.map((q) => q.id)).size).toBe(122);
+  it("contains 180 unique referenced questions", () => {
+    expect(textbookQuestions).toHaveLength(180);
+    expect(new Set(textbookQuestions.map((q) => q.id)).size).toBe(180);
     expect(textbookQuestions.filter((q) => q.exercise === "2B")).toHaveLength(
       62,
+    );
+    expect(textbookQuestions.filter((q) => q.exercise === "R2")).toHaveLength(
+      58,
     );
   });
   for (const question of textbookQuestions) {

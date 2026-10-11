@@ -114,10 +114,23 @@ describe("teacher demonstration frames", () => {
         }
         if (q.expression.includes(".") && !q.expression.includes("/"))
           expect(step.tex).not.toContain("\\frac");
-        if (["++", "+-", "-+", "--"].includes(step.ruleId)) {
+        if (step.signReveal || ["++", "+-", "-+", "--"].includes(step.ruleId)) {
           const arrows = signArrowTex(step);
           expect(arrows).not.toBeNull();
           expect(arrows!.match(/textcolor/g)).toHaveLength(2);
+          if (step.signReveal) {
+            const shown = parse(
+              arrows!
+                .replace(/\\textcolor\{#DA2127\}\{([+-])\}/g, "$1")
+                .replace(/\\frac\{(\d+)\}\{(\d+)\}/g, "($1/$2)")
+                .replace(/\\left|\\right/g, "")
+                .replace(/\\times/g, "×")
+                .replace(/\\div/g, "÷"),
+            );
+            expect(shown.ok, arrows!).toBe(true);
+            if (shown.ok)
+              expect(equals(evaluate(shown.value), answer.value)).toBe(true);
+          }
           expect(() =>
             katex.renderToString(arrows!, { throwOnError: true, trust: false }),
           ).not.toThrow();

@@ -671,6 +671,162 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
   }
 });
 
+test("revision exercise selection keeps textbook references and restores the question", async ({
+  page,
+}) => {
+  await page.goto("/apps/directed-numbers#textbook");
+  await page
+    .getByRole("combobox", { name: "Exercise", exact: true })
+    .selectOption("R2");
+  await expect(
+    page.getByRole("heading", { name: "Revision Exercise 2 · Q7(a)" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Question 1 of 58", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("combobox", { name: "Difficulty", exact: true })
+    .selectOption("2");
+  await expect(
+    page.getByRole("heading", { name: "Revision Exercise 2 · Q25(a)" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Question 1 of 28", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("combobox", { name: "Question", exact: true })
+    .selectOption({ label: "Q38(b)" });
+  await expect(page).toHaveURL(/#textbook:e=R2-38b$/);
+  await page.reload();
+  await expect(
+    page.getByRole("combobox", { name: "Exercise", exact: true }),
+  ).toHaveValue("R2");
+  await expect(
+    page.getByRole("heading", { name: "Revision Exercise 2 · Q38(b)" }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Textbook p. 2.58 · Level 2", { exact: true }),
+  ).toBeVisible();
+});
+
+for (const [id, answer] of [
+  ["R2-32b", "0.05"],
+  ["R2-37b", "-4"],
+  ["R2-38b", "-29"],
+]) {
+  test(`revision animated working completes: ${id}`, async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(`/apps/directed-numbers#textbook:e=${id}`);
+    await expect(
+      page.getByRole("button", { name: "Play demonstration", exact: true }),
+    ).toBeVisible();
+    await page.clock.install();
+    await page
+      .getByRole("button", { name: "Play demonstration", exact: true })
+      .click();
+    await advanceAutoplay(page);
+    await expect(
+      page.getByTestId("after-equation").getByRole("math"),
+    ).toHaveAttribute("aria-label", `= ${answer}`);
+    const arrows = page.getByTestId("sign-combination");
+    expect(await arrows.count()).toBeGreaterThan(0);
+    for (const arrow of await arrows.all())
+      await expect(arrow.locator("[data-result-sign]")).toHaveCSS(
+        "opacity",
+        "1",
+      );
+    if (id === "R2-32b") {
+      const working = await page
+        .locator("[data-equation-line]")
+        .evaluateAll((nodes) =>
+          nodes.map((n) => n.getAttribute("data-tex")).join(" "),
+        );
+      expect(working).not.toContain("\\frac");
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("revision-complete.png"),
+      fullPage: true,
+    });
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  });
+}
+
+for (const [id, phase, pair, sign] of [
+  ["2C-33b", 5, "−+", "−"],
+  ["2C-23a", 5, "+−", "−"],
+  ["2C-1b", 1, "−−", "+"],
+  ["2C-8a", 1, "−−", "+"],
+] as const) {
+  test(`exercise arrows connect operand signs: ${id}`, async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(`/apps/directed-numbers#textbook:e=${id}`);
+    await next(page, phase);
+    const arrows = page.getByTestId("sign-combination").last();
+    await expect(arrows.locator("[data-result-sign]")).toHaveText(sign);
+    await expect(arrows.locator("[data-result-sign]")).toHaveCSS(
+      "opacity",
+      "1",
+    );
+    const geometry = await arrows.evaluate((svg) => {
+      const root = svg.closest("[data-arrows-positioned]")!;
+      const box = svg.getBoundingClientRect();
+      const signs = [
+        ...root.querySelectorAll(
+          '[role="math"] > .katex > .katex-html [style*="color"]',
+        ),
+      ].filter((el) => /^[+−-]$/.test(el.textContent ?? ""));
+      return {
+        signs: signs.map((el) => el.textContent).join(""),
+        visible: signs.every(
+          (el) =>
+            getComputedStyle(el.closest('[role="math"]')!).opacity === "1",
+        ),
+        offsets: [...svg.querySelectorAll("[data-arrow]")].map((path, i) => {
+          const start = (path as SVGPathElement).getPointAtLength(0);
+          const r = signs[i].getBoundingClientRect();
+          return Math.abs(box.left + start.x - r.left - r.width / 2);
+        }),
+      };
+    });
+    expect(geometry.signs).toBe(pair);
+    expect(geometry.visible).toBe(true);
+    expect(geometry.offsets).toHaveLength(2);
+    expect(geometry.offsets.every((offset) => offset < 2)).toBe(true);
+    const magnitude = page
+      .getByTestId("operation-sign-magnitude")
+      .last()
+      .locator('.katex-html [style*="color"]')
+      .first();
+    await expect(magnitude).toBeHidden();
+    await arrows.evaluate((node) => node.setAttribute("data-retained", "yes"));
+    await next(page);
+    await expect(magnitude).toBeVisible();
+    await expect(arrows).toHaveAttribute("data-retained", "yes");
+    await page.screenshot({
+      path: testInfo.outputPath("exercise-arrows.png"),
+      fullPage: true,
+    });
+    await next(page, 2);
+    await expect(arrows).toHaveAttribute("data-retained", "yes");
+    await expect(arrows.locator("[data-result-sign]")).toBeVisible();
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  });
+}
+
 for (const [expression, sign] of [
   ["(+4)-(+2)", "−"],
   ["(+4)-(-2)", "+"],

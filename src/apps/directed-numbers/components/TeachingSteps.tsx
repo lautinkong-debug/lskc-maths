@@ -110,7 +110,8 @@ function EquationLine({
   arrowPhase?: number;
 }) {
   const marked = nextStep ? signArrowTex(nextStep) : null;
-  const pair = marked ? nextStep!.ruleId : null;
+  const pair = marked ? (nextStep!.signArrows?.pair ?? nextStep!.ruleId) : null;
+  const operationArrows = Boolean(nextStep?.signArrows);
   const root = useRef<HTMLDivElement>(null);
   const marker = useId().replaceAll(":", "");
   const markedTex = marked ? `${original ? "" : "= "}${marked}` : tex;
@@ -165,7 +166,7 @@ function EquationLine({
     >
       <div
         ref={root}
-        className={`${styles.layers} ${highlight ? styles.highlighted : ""} ${arrowPhase > 0 ? styles.arrowsShown : ""} ${arrowPhase > 1 ? styles.arrowsCombined : ""}`}
+        className={`${styles.layers} ${highlight && !operationArrows ? styles.highlighted : ""} ${arrowPhase > 0 ? styles.arrowsShown : ""} ${arrowPhase > 1 || (operationArrows && arrowPhase > 0) ? styles.arrowsCombined : ""}`}
       >
         <Tex className={styles.plain} label={tex}>
           {markedTex}

@@ -9,15 +9,16 @@ The PDF is scanned; questions and answers were read from rendered pages.
 | --- | --- | ---: | --- | --- |
 | Exercise 2B | 1–15, 21–28 | 62 | 2.32–2.34 | 2.68 |
 | Exercise 2C | 1–16, 20–33 | 60 | 2.46–2.48 | 2.68–2.69 |
+| Revision Exercise 2 | 7–21, 25–38 | 58 | 2.56–2.58 | 2.69 |
 
-All 122 parts retain their question/part references and difficulty. Operands,
+All 180 parts retain their question/part references and difficulty. Operands,
 brackets and operation order are preserved. Printed division bars are rendered
 as equivalent division expressions with grouped numerators/denominators where
 needed. Expected answers are transcribed from the printed answer key, separate
 from the evaluator. Exact rational arithmetic keeps integer, decimal, fraction
 and mixed-number working correct throughout each animation.
 
-Word problems, Exercise 2A, Quick Practice, Revision Exercise 2 and multiple-choice
+Word problems, Exercise 2A, Quick Practice and multiple-choice
 questions are not in this bank. The interface states the exact coverage.
 
 ## Teaching sequence
@@ -76,6 +77,12 @@ Decimal working keeps decimals, fraction working keeps fractions, and zero has
 no invented positive or negative sign. Previous, Replay and autoplay follow the
 same sequence.
 
+Textbook product/quotient steps also draw two converging arrows from the operand
+signs to the resulting sign on the first click. The next click adds the magnitude;
+the arrows and earlier equations remain visible. Implicit positive factors receive
+an explicit plus sign for the arrow anchor. Reduced negative factors stay grouped
+inside compound expressions, preventing ambiguous adjacent subtraction signs.
+
 Custom Sign & magnitude inputs accept integers, decimals, fractions such as
 `1/3`, and mixed numbers such as `-1 1/2`, between -100 and +100. Arithmetic,
 sign decisions and labels use exact rational values; decimal-only inputs retain
@@ -92,12 +99,14 @@ Use the normal emulator seed if the local database is empty.
 
 - `/apps/directed-numbers#textbook` — textbook selection and teacher demonstration.
 - `/apps/directed-numbers#textbook:e=2B-4c` — a specific textbook question.
+- `/apps/directed-numbers#textbook:e=R2-7a` — Revision Exercise 2, first calculation.
+- `/apps/directed-numbers#textbook:e=R2-38b` — nested fraction revision calculation.
 - `/apps/directed-numbers#sign-magnitude` — the four illustrated cases.
 - `/apps/directed-numbers#sign-magnitude:e=-50-(-60)` — subtract a negative.
 
 Checks: `lib/textbook.test.ts` validates every question and every working step
 against the printed key, plus sign/magnitude and visual eligibility cases.
-`lib/demonstration.test.ts` checks all 122 question animations against the printed
+`lib/demonstration.test.ts` checks all 180 question animations against the printed
 key and verifies every highlighted TeX frame renders. The browser suite checks
 bracket-first timing, magnitude calculations, playback, reset, filters, fractions,
 lesson links, question restoration, mobile and projection views.
