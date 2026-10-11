@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useLayoutEffect, useRef } from "react";
 import { Math as Tex } from "@/components/Math";
 import { usePresentation } from "@/components/PresentationFrame";
 import { copy } from "@/lib/copy";
@@ -34,6 +34,26 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
     calculate = stage >= 4,
     complete = stage >= 5;
   const colour = m.delta < 0 ? "#b51b25" : "#0f4574";
+  const resultColour = "#6d28d9";
+  const magnitudePattern = `${marker}-magnitude`;
+  const calculation = useRef<SVGTextElement>(null);
+  const resultCentre = (zero + end) / 2;
+  useLayoutEffect(() => {
+    const node = calculation.current;
+    if (!node) return;
+    const align = () => {
+      const half = node.getComputedTextLength() / 2;
+      // Centre below the measured distance, keeping long fraction/decimal
+      // calculations inside the graph's edges.
+      node.setAttribute(
+        "x",
+        String(Math.max(20 + half, Math.min(620 - half, resultCentre))),
+      );
+    };
+    align();
+    document.fonts.addEventListener("loadingdone", align);
+    return () => document.fonts.removeEventListener("loadingdone", align);
+  }, [calculate, m.calculation, resultCentre]);
   function distanceBar(
     from: number,
     to: number,
@@ -55,6 +75,7 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
           y={y - 12}
           textAnchor="middle"
           fontSize="17"
+          fontWeight={key === "result" ? "700" : undefined}
           fill={stroke}
         >
           {label}
@@ -76,6 +97,19 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
       data-stage={stage}
     >
       <defs>
+        <pattern
+          id={magnitudePattern}
+          width="12"
+          height="12"
+          patternUnits="userSpaceOnUse"
+        >
+          <path
+            d="M-3 3 L3 -3 M0 12 L12 0 M9 15 L15 9"
+            stroke={resultColour}
+            strokeOpacity="0.22"
+            strokeWidth="1.5"
+          />
+        </pattern>
         <marker
           id={marker}
           markerWidth="7"
@@ -87,6 +121,39 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
           <path d="M0,0 L7,3.5 L0,7 Z" fill={colour} />
         </marker>
       </defs>
+      {calculate && (
+        <g
+          className={styles.reveal}
+          data-testid="magnitude-highlight"
+          aria-hidden="true"
+        >
+          <rect
+            x={Math.min(zero, end)}
+            y="87"
+            width={Math.abs(end - zero)}
+            height="249"
+            fill="#ede9fe"
+            fillOpacity="0.7"
+          />
+          <rect
+            x={Math.min(zero, end)}
+            y="87"
+            width={Math.abs(end - zero)}
+            height="249"
+            fill={`url(#${magnitudePattern})`}
+          />
+          {m.end === 0 && (
+            <line
+              x1={zero}
+              x2={zero}
+              y1="87"
+              y2="336"
+              stroke={resultColour}
+              strokeWidth="3"
+            />
+          )}
+        </g>
+      )}
       <line
         x1="25"
         x2="615"
@@ -161,7 +228,13 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
         className={styles.motion}
         style={{ transform: `translateX(${moving ? end : start}px)` }}
       >
-        <circle cy="155" r="8" fill={colour} stroke="#fff" strokeWidth="2" />
+        <circle
+          cy="155"
+          r="8"
+          fill={stage >= 3 ? resultColour : colour}
+          stroke="#fff"
+          strokeWidth="2"
+        />
       </g>
       {calculate && (
         <line
@@ -169,7 +242,7 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
           x2={end}
           y1="92"
           y2="335"
-          stroke={colour}
+          stroke={resultColour}
           strokeDasharray="4 4"
         />
       )}
@@ -180,7 +253,8 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
           textAnchor="middle"
           fontSize="18"
           fontWeight="600"
-          fill={colour}
+          fill={resultColour}
+          data-testid="graph-finish"
         >
           {c.endMark}: {m.labels.end}
         </text>
@@ -211,19 +285,20 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
           m.kind === "same"
             ? t.total(m.labels.magnitude)
             : t.remaining(m.labels.magnitude),
-          "#0f4574",
+          resultColour,
           "result",
         )}
       {calculate && (
         <text
           key="calculation"
-          x="320"
+          ref={calculation}
+          x={resultCentre}
           y="374"
           textAnchor="middle"
           className={styles.reveal}
           fontSize="25"
           fontWeight="700"
-          fill="#0f4574"
+          fill={resultColour}
           data-testid="graph-calculation"
         >
           {m.calculation}

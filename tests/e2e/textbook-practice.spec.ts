@@ -614,6 +614,7 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
 }, testInfo) => {
   await page.goto("/apps/directed-numbers#sign-magnitude");
   for (const [a, op, b, calculation, result] of [
+    ["50", "-", "60", "60 − 50 = 10", "= -10"],
     ["3", "-", "3.1", "3.1 − 3 = 0.1", "= -0.1"],
     ["1/3", "+", "1/6", "1/3 + 1/6 = 1/2", "= +\\frac{1}{2}"],
     ["-1 1/2", "+", "0.25", "3/2 − 1/4 = 5/4", "= -\\frac{5}{4}"],
@@ -624,6 +625,12 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
       .selectOption(op);
     await page.getByLabel("Second number", { exact: true }).fill(b);
     await page.getByRole("button", { name: "Draw my number line" }).click();
+    await expect(
+      page.getByLabel("Starting value", { exact: true }),
+    ).toHaveValue(a);
+    await expect(page.getByLabel("Second number", { exact: true })).toHaveValue(
+      b,
+    );
     await expect(
       page.getByRole("alert").filter({ hasText: "Enter valid numbers" }),
     ).toHaveCount(0);
@@ -670,6 +677,87 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
     );
   }
 });
+
+for (const expression of ["50-60", "-50+60", "-50-30", "50+(-50)"]) {
+  test(`magnitude highlight measures zero to endpoint: ${expression}`, async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(
+      `/apps/directed-numbers#sign-magnitude:e=${encodeURIComponent(expression)}`,
+    );
+    const progress = page.getByText(/^Step \d+ of \d+$/);
+    await expect(progress).toBeVisible();
+    const last = Number((await progress.innerText()).match(/\d+/g)![1]);
+    await next(page, last - 2);
+    const band = page.getByTestId("magnitude-highlight");
+    await expect(band).toHaveCount(0);
+    await next(page);
+    await expect(band).toHaveCount(1);
+    const geometry = await page
+      .getByTestId("magnitude-line")
+      .evaluate((svg) => {
+        const rect = svg.querySelector(
+          '[data-testid="magnitude-highlight"] rect',
+        ) as SVGRectElement;
+        const bar = svg.querySelector(
+          '[data-testid="distance-result"] path',
+        ) as SVGPathElement;
+        const box = bar.getBBox();
+        const calculation = svg.querySelector(
+          '[data-testid="graph-calculation"]',
+        ) as SVGTextElement;
+        return {
+          x: rect.x.baseVal.value,
+          width: rect.width.baseVal.value,
+          barX: box.x,
+          barWidth: box.width,
+          calculationX: calculation.x.baseVal.getItem(0).value,
+        };
+      });
+    expect(geometry.x).toBeCloseTo(geometry.barX, 2);
+    expect(geometry.width).toBeCloseTo(geometry.barWidth, 2);
+    expect(geometry.calculationX).toBeCloseTo(
+      geometry.barX + geometry.barWidth / 2,
+      2,
+    );
+    if (expression === "50+(-50)") expect(geometry.width).toBe(0);
+    else expect(geometry.width).toBeGreaterThan(0);
+    await next(page);
+    await expect(band).toHaveCount(1);
+    if (expression === "50-60") {
+      await expect(page.getByTestId("graph-finish")).toHaveAttribute(
+        "fill",
+        "#6d28d9",
+      );
+      await expect(page.getByTestId("graph-calculation")).toHaveAttribute(
+        "fill",
+        "#6d28d9",
+      );
+      await expect(
+        page.getByTestId("distance-result").locator("path"),
+      ).toHaveAttribute("stroke", "#6d28d9");
+      await page.setViewportSize({ width: 1920, height: 1080 });
+      await page
+        .getByRole("button", { name: "Projection mode", exact: true })
+        .click();
+      await page.screenshot({
+        path: testInfo.outputPath("highlight-projector.png"),
+        fullPage: true,
+      });
+      await page.setViewportSize({ width: 390, height: 844 });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+    }
+    await page
+      .getByRole("button", { name: "Replay from start", exact: true })
+      .click();
+    await expect(band).toHaveCount(0);
+  });
+}
 
 test("revision exercise selection keeps textbook references and restores the question", async ({
   page,

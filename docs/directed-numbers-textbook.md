@@ -91,6 +91,13 @@ Fraction inputs retain fractions. The same formatting policy applies to textbook
 demonstrations, including mixed operations. Coordinates alone use
 numeric values. The graph rescales for small fractional distances. Invalid
 inputs, including zero denominators, leave the current demonstration intact.
+Unsigned positive entries stay as typed after submitting the custom form; an
+explicit plus sign is optional. At the magnitude step, a pale purple hatched band
+marks the exact interval from the endpoint to zero. The finish marker, remaining
+or total distance and calculation share purple; the starting distance stays navy
+and movement distance red. The calculation is centred beneath its distance bar,
+with edge clamping for longer labels. Zero receives a line at zero, not a band
+suggesting a non-zero distance. Replay clears the highlight with the working.
 
 ## Local review
 

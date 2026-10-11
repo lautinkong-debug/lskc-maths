@@ -996,7 +996,7 @@ export const copy = {
         range:
           "Enter valid numbers from −100 to +100. A fraction must have a non-zero denominator.",
         inputHelp:
-          "Use an integer, decimal (3.1), fraction (1/2) or mixed number (−1 1/2). Values must be between −100 and +100.",
+          "Use an integer, decimal (3.1), fraction (1/2) or mixed number (−1 1/2). A number without a sign is positive. Values must be between −100 and +100.",
         exactCaption: (start: string, movement: string, end?: string) =>
           `Number line: start at ${start}; ${movement}${end === undefined ? "." : `; finish at ${end}.`}`,
         examples: "Try these cases",

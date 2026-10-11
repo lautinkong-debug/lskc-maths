@@ -33,16 +33,18 @@ export default function SignMagnitudeMode({
   const [expression, setExpression] = useState(
     initialMove ? initialExpression : undefined,
   );
-  const [a, setA] = useState(magnitudeModel(initial).labels.start),
-    [b, setB] = useState(magnitudeModel(initial).labels.b),
+  const [a, setA] = useState(
+      magnitudeModel(initial).labels.start.replace(/^\+/, ""),
+    ),
+    [b, setB] = useState(magnitudeModel(initial).labels.b.replace(/^\+/, "")),
     [op, setOp] = useState(initial.op);
   const [error, setError] = useState(false),
     [version, setVersion] = useState(0);
-  function load(value: SimpleMove) {
+  function load(value: SimpleMove, entered?: { a: string; b: string }) {
     setMove(value);
     setExpression(undefined);
-    setA(magnitudeModel(value).labels.start);
-    setB(magnitudeModel(value).labels.b);
+    setA(entered?.a ?? magnitudeModel(value).labels.start.replace(/^\+/, ""));
+    setB(entered?.b ?? magnitudeModel(value).labels.b.replace(/^\+/, ""));
     setOp(value.op);
     setError(false);
     setVersion((n) => n + 1);
@@ -68,7 +70,7 @@ export default function SignMagnitudeMode({
             setError(true);
             return;
           }
-          load(value);
+          load(value, { a: a.trim(), b: b.trim() });
         }}
       >
         <label>
