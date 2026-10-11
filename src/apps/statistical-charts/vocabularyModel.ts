@@ -37,3 +37,32 @@ export function matchesVocabularyAnswer(text: string, expected: number) {
     Math.abs(Number(text) - expected) < 1e-8
   );
 }
+
+// These positive recorded-measurement examples use round-half-up and [low, high).
+export function boundaryMembership(
+  value: number,
+  lower: number,
+  upper: number,
+  precision: number,
+) {
+  const v = classVocabulary(lower, upper, precision);
+  const index = value < v.low ? -1 : value >= v.high ? 1 : 0;
+  return {
+    index,
+    recorded: tidy(Math.floor(tidy(value / precision + 0.5)) * precision),
+    lower: tidy(lower + index * v.width),
+    upper: tidy(upper + index * v.width),
+  };
+}
+
+export function boundarySteps(lower: number, upper: number, precision: number) {
+  const v = classVocabulary(lower, upper, precision);
+  return [
+    v.low - precision / 10,
+    v.low - precision / 10,
+    v.low,
+    v.low + precision / 10,
+    v.high - precision / 10,
+    v.high,
+  ].map(tidy);
+}

@@ -1,0 +1,159 @@
+.lesson {
+  display: grid;
+  gap: 16px;
+  color: #0f4574;
+}
+.heading h4 {
+  font-size: 23px;
+  margin: 0 0 6px;
+}
+.heading p {
+  margin: 0;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.controls span {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 20px;
+}
+.plot,
+.assignment {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid #d0dfeb;
+  border-radius: 8px;
+  background: white;
+}
+.caption {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.range {
+  transition:
+    x 800ms ease-in-out,
+    width 800ms ease-in-out,
+    fill 350ms;
+}
+.measurement {
+  transition: transform 850ms ease-in-out;
+}
+.narration {
+  background: #eaf1f7;
+  border-left: 3px solid #0f4574;
+  padding: 14px;
+  min-height: 132px;
+}
+.narration strong {
+  font-size: 19px;
+}
+.narration p {
+  margin: 8px 0;
+}
+.assignment h4 {
+  margin: 0 0 14px;
+  font-size: 21px;
+}
+.assignment dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin: 0;
+  gap: 12px;
+}
+.assignment dt {
+  font-size: 14px;
+}
+.assignment dd {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+}
+.rounding {
+  font-size: 14px;
+  margin: 6px 0 16px;
+}
+.classes {
+  display: grid;
+  gap: 8px;
+}
+.classRow {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #d0dfeb;
+  border-radius: 6px;
+  padding: 10px 14px;
+  transition:
+    background 350ms,
+    border-color 350ms;
+}
+.classRow[data-active="true"] {
+  background: #fff3b0;
+  border-color: #0f4574;
+  box-shadow: inset 3px 0 #da2127;
+}
+.classRow span {
+  font-size: 14px;
+}
+.classRow b {
+  margin-left: 8px;
+}
+.result {
+  border-left: 3px solid #da2127;
+  background: #eaf1f7;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+.convention {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.slider {
+  display: block;
+  font-size: 14px;
+}
+.slider input {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  accent-color: #0f4574;
+}
+:global([data-presentation="true"]) .lesson {
+  gap: 12px;
+}
+:global([data-presentation="true"]) .plot,
+:global([data-presentation="true"]) .assignment {
+  padding: 16px;
+}
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .plot,
+  .assignment {
+    padding: 14px;
+  }
+  .controls {
+    gap: 8px;
+  }
+  .narration {
+    min-height: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .range,
+  .measurement,
+  .classRow {
+    transition: none;
+  }
+}

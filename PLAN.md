@@ -2,6 +2,15 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Statistical Charts intervals and boundary animation (11/10/2026)
+
+- [x] Introduce a class interval and distinguish its lower and upper class limits as the recorded values allowed at either end.
+- [x] Show both class-mark formulas, averaging limits or boundaries, with worked calculations for every whole-number/decimal example.
+- [x] Add Why boundaries? with gap-closing animation, shared boundaries, 35.4/35.5/35.6 and 40.4/40.5 assignment, manual measurement movement, Play/Pause, Previous/Next and Replay.
+- [x] State round-half-up for these positive recorded measurements and the half-open membership rule: include the lower boundary, exclude the upper. Respect hidden answers and reduced motion.
+- [x] Pass 35 focused maths/activity checks, seven browser scenarios across the final focused runs, scoped lint and production build. Review phone and projector layouts, including intermediate motion and exact decimal endpoints.
+
+
 ## Directed Numbers teacher demonstrations (11/10/2026)
 
 - [x] Apply click-only calculation highlighting to every textbook demonstration: the original expression and each newly revealed line stay unhighlighted until Next step. Preserve simultaneous product reveals, optional written steps and all previous working. Add operation/operand sign-combination arrows when addition or subtraction follows multiplication, division or grouped calculations, including all four sign pairs. Stop automatic scrolling on Next so the teacher's viewport and sticky controls stay steady. The exact-arithmetic checks cover all 180 question parts; focused browser checks verify all exercise collections, retained arrows, replay and late-step scroll positions.
@@ -659,6 +668,8 @@ The join page explains the three steps before a large code field; loading and di
 **Scope:** Local design and interaction refinement only. No new packages, production data changes or deployment. The temporary populated-board fixtures were confined to the demo emulator. Stage G's launch and privacy checks remain applicable.
 
 ## Decision log
+
+- 2026-10-11: Boundary teaching distinguishes recorded limits from continuous measurements before rounding. Its positive examples use round-half-up and lower-inclusive/upper-exclusive classes, so 35.5 enters 36–40 and 40.5 enters 41–45 exactly once. The exploration uses separate examples and does not alter the main dataset.
 
 - 2026-10-11: The owner requested one latest GitHub version for Dot. Consolidate the production source into `main`, make it the default, and remove superseded remote branches only after verifying their commits are ancestors of `main`. Preserve Git history and all local checkouts.
 

@@ -310,6 +310,26 @@
   width: 100%;
   max-height: 360px;
 }
+.intervalIntro {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.intervalIntro p {
+  margin: 3px 0;
+}
+.intervalIntro strong {
+  color: var(--color-navy);
+}
+.memoryCard .markFormula {
+  font-size: 12px;
+  line-height: 1.4;
+}
+:global([data-presentation="true"]) .vocabulary .memoryCard {
+  padding: 10px 14px;
+}
+:global([data-presentation="true"]) .vocabulary svg {
+  max-height: 320px;
+}
 .vocabularyHighlight {
   transition: opacity 250ms;
 }

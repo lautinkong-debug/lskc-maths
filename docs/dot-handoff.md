@@ -13,6 +13,9 @@ The complete mathematics department website includes Web Apps and Mistakes Book
 with the 69 textbook topics. Statistical Charts includes direct frequency editing,
 boundary/class-mark axis labels, side-by-side table/chart teaching views,
 representation connections, animated walkthroughs, and **09 · Four words, one class**.
+The vocabulary activity defines intervals and both class limits, shows both midpoint
+formulas, and includes **Why boundaries?**: animated gap closing, exact shared-endpoint
+assignment and a movable measurement, with explicit rounding and membership rules.
 Directed Numbers includes the bird method, sign/magnitude lessons and 122 numerical
 textbook calculation parts. Preserve all these features when making changes.
 
