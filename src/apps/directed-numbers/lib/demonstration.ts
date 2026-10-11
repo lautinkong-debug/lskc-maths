@@ -1,5 +1,11 @@
 import { type Ast } from "./parse";
-import { bracketSteps, expressionTex, workOut, type Step } from "./steps";
+import {
+  bracketSteps,
+  expressionTex,
+  workOut,
+  type Step,
+  type NumberStyle,
+} from "./steps";
 
 function additive(ast: Ast): boolean {
   if (ast.kind === "number") return true;
@@ -10,14 +16,28 @@ function additive(ast: Ast): boolean {
     additive(ast.right)
   );
 }
+/** Keep the source number format throughout each generated line. */
+export function demonstrationStyle(ast: Ast): NumberStyle {
+  function hasForm(node: Ast, forms: string[]): boolean {
+    return node.kind === "number"
+      ? forms.includes(node.sourceForm ?? "")
+      : node.kind === "binary"
+        ? hasForm(node.left, forms) || hasForm(node.right, forms)
+        : hasForm(node.child, forms);
+  }
+  return !hasForm(ast, ["fraction", "mixed"]) && hasForm(ast, ["decimal"])
+    ? "decimal"
+    : "improper";
+}
 /** Keep every bracket change separate for a teacher-controlled demonstration. */
 export function demonstrationSteps(ast: Ast): Step[] {
+  const numberStyle = demonstrationStyle(ast);
   return additive(ast)
-    ? bracketSteps(ast)
-    : workOut(ast, { signWorking: true });
+    ? bracketSteps(ast, numberStyle)
+    : workOut(ast, { signWorking: true, numberStyle });
 }
 export function highlightedTex(step: Step): string {
-  const tex = expressionTex(step.before),
+  const tex = expressionTex(step.before, step.numberStyle),
     span = step.highlight;
   if (!span) return tex;
   let start = span.start,
@@ -38,7 +58,7 @@ export function highlightedTex(step: Step): string {
 export function signArrowTex(step: Step): string | null {
   if (!["++", "+-", "-+", "--"].includes(step.ruleId) || !step.highlight)
     return null;
-  const tex = expressionTex(step.before);
+  const tex = expressionTex(step.before, step.numberStyle);
   const { start, end } = step.highlight;
   let count = 0;
   const marked = tex

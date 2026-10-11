@@ -124,6 +124,12 @@ export function magnitudeModel(move: SimpleMove) {
   };
   const larger = compare(a, distance) >= 0 ? a : distance;
   const smaller = compare(a, distance) >= 0 ? distance : a;
+  const magnitudeTerms =
+    kind === "opposite" || kind === "cancel"
+      ? { left: larger, op: "-", right: smaller }
+      : { left: a, op: "+", right: distance };
+  const magnitudeTex = `${toTex(magnitudeTerms.left, { style })} ${magnitudeTerms.op} ${toTex(magnitudeTerms.right, { style })}`;
+  const signedMagnitudeTex = `${result.n > 0 ? "+" : result.n < 0 ? "-" : ""}\\left(${magnitudeTex}\\right)`;
   const calculation =
     kind === "same"
       ? `${text(a)} + ${text(distance)} = ${text(magnitude)}`
@@ -143,6 +149,8 @@ export function magnitudeModel(move: SimpleMove) {
     sign,
     labels,
     calculation,
+    signedMagnitudeTex,
+    signedResultTex: toTex(result, { style, signed: true }),
     resultTex: toTex(result, { style }),
     exact: { start, operand, delta, result, a, distance, magnitude },
   } as const;

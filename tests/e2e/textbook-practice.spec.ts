@@ -12,6 +12,72 @@ async function advanceAutoplay(page: Page, count?: number) {
     await expect(progress).toHaveText(`Step ${i} of ${numbers[1]}`);
   }
 }
+for (const [route, working, result] of [
+  ["sign-magnitude:e=(+3.1)-(+4.9)", "-\\left(4.9 - 3.1\\right)", "-1.8"],
+  ["textbook:e=2B-15a", "+\\left(43 - 21\\right)", "+22"],
+  [
+    "sign-magnitude:e=(+1/2)-(+3/4)",
+    "-\\left(\\frac{3}{4} - \\frac{1}{2}\\right)",
+    "-\\frac{1}{4}",
+  ],
+]) {
+  test(`sign precedes magnitude and retains number format: ${route}`, async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(`/apps/directed-numbers#${route}`);
+    await next(page, 7);
+    const line = page.getByTestId("signed-magnitude-equation");
+    await expect(line.getByRole("math")).toHaveAttribute(
+      "aria-label",
+      `= ${working}`,
+    );
+    await expect(page.getByTestId("result-sign")).toBeVisible();
+    await expect(page.getByTestId("graph-calculation")).toHaveCount(0);
+    await expect(page.getByTestId("final-equation")).toHaveCount(0);
+    const previous = await page
+      .locator("[data-equation-line]")
+      .evaluateAll((nodes) => nodes.map((n) => n.getAttribute("data-tex")));
+    if (route.includes("3.1")) {
+      expect(previous).toEqual([
+        "\\left(+3.1\\right) - \\left(+4.9\\right)",
+        "= 3.1 - \\left(+4.9\\right)",
+        "= 3.1 - 4.9",
+      ]);
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("sign-before-magnitude.png"),
+      fullPage: true,
+    });
+    await next(page);
+    await expect(line).toBeVisible();
+    await expect(page.getByTestId("graph-calculation")).toBeVisible();
+    await expect(page.getByTestId("final-equation")).toHaveCount(0);
+    await next(page);
+    await expect(
+      page.getByTestId("final-equation").getByRole("math"),
+    ).toHaveAttribute("aria-label", `= ${result}`);
+    expect(
+      await page
+        .locator("[data-equation-line]")
+        .evaluateAll((nodes) => nodes.map((n) => n.getAttribute("data-tex"))),
+    ).toEqual(previous);
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page
+      .getByRole("button", { name: "Projection mode", exact: true })
+      .click();
+    await expect(page.getByTestId("final-equation")).toBeInViewport({
+      ratio: 1,
+    });
+    await expect(page.getByTestId("magnitude-result")).toBeInViewport({
+      ratio: 1,
+    });
+    await page.screenshot({
+      path: testInfo.outputPath("sign-magnitude-complete.png"),
+      fullPage: true,
+    });
+  });
+}
 for (const [expression, sign, calculation] of [
   ["(+50)-(+60)", "Negative: left of 0", "60 − 50 = 10"],
   ["(-50)+(+30)", "Negative: left of 0", "50 − 30 = 20"],
@@ -49,6 +115,12 @@ for (const [expression, sign, calculation] of [
     await expect(page.getByTestId("distance-movement")).toHaveCount(0);
     await next(page);
     await expect(page.getByTestId("distance-movement")).toBeVisible();
+    await next(page);
+    await expect(page.getByTestId("result-sign")).toContainText(sign);
+    await expect(page.getByTestId("signed-magnitude-equation")).toBeVisible();
+    await expect(page.getByTestId("graph-calculation")).toHaveCount(0);
+    await expect(page.getByTestId("result-magnitude")).toHaveCount(0);
+    await expect(page.getByTestId("final-equation")).toHaveCount(0);
     await next(page);
     await expect(page.getByTestId("graph-calculation")).toHaveText(calculation);
     await expect(page.getByTestId("distance-result")).toBeVisible();
@@ -121,17 +193,12 @@ test("fractions and mixed operations animate complete exact working", async ({
   page,
 }) => {
   await page.goto("/apps/directed-numbers#textbook:e=2B-24d");
-  await expect(
-    page.getByRole("region", { name: "Animated working" }),
-  ).toBeVisible();
+  await expect(page.getByTestId("magnitude-line")).toBeVisible();
   await page.clock.install();
   await page.getByRole("button", { name: "Play demonstration" }).click();
   await advanceAutoplay(page);
   await expect(
-    page.getByText("Demonstration complete", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByTestId("after-equation").getByRole("math"),
+    page.getByTestId("final-equation").getByRole("math"),
   ).toHaveAttribute("aria-label", "= -\\frac{7}{6}");
   await page
     .getByRole("combobox", { name: "Exercise", exact: true })
@@ -167,7 +234,7 @@ test("teacher controls and calculation fit phone and projector; reduced motion i
     path: testInfo.outputPath("brackets-phone.png"),
     fullPage: true,
   });
-  await next(page, 5);
+  await next(page, 6);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -286,7 +353,7 @@ test("two arrows reveal the resulting sign without replacing earlier equations",
   const before = await lines.evaluateAll((nodes) =>
     nodes.map((n) => n.getAttribute("data-tex")),
   );
-  await next(page, 4);
+  await next(page, 5);
   await expect(lines).toHaveCount(3);
   expect(
     await lines.evaluateAll((nodes) =>
@@ -302,7 +369,7 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
   await page.goto("/apps/directed-numbers#sign-magnitude");
   for (const [a, op, b, calculation, result] of [
     ["3", "-", "3.1", "3.1 − 3 = 0.1", "= -0.1"],
-    ["1/3", "+", "1/6", "1/3 + 1/6 = 1/2", "= \\frac{1}{2}"],
+    ["1/3", "+", "1/6", "1/3 + 1/6 = 1/2", "= +\\frac{1}{2}"],
     ["-1 1/2", "+", "0.25", "3/2 − 1/4 = 5/4", "= -\\frac{5}{4}"],
   ]) {
     await page.getByLabel("Starting value", { exact: true }).fill(a);
@@ -318,7 +385,7 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
       "data-stage",
       "0",
     );
-    await next(page, 8);
+    await next(page, 9);
     await expect(page.getByTestId("graph-calculation")).toHaveText(calculation);
     await expect(
       page.getByTestId("final-equation").getByRole("math"),

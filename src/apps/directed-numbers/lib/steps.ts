@@ -43,6 +43,7 @@ export type RuleId =
   | "reciprocal"
   | "mixed-to-improper";
 export type Step = {
+  numberStyle?: NumberStyle;
   tex: string;
   highlight?: Span;
   sourceHighlight: Span;
@@ -142,11 +143,15 @@ export function expressionTex(
     .join("");
 }
 /** Map the original source positions onto the immediately preceding TeX line. */
-function texHighlight(ast: Ast, source: Span): Span {
+function texHighlight(
+  ast: Ast,
+  source: Span,
+  style: NumberStyle = "improper",
+): Span {
   let offset = 0,
     start = Infinity,
     end = 0;
-  for (const piece of texPieces(ast)) {
+  for (const piece of texPieces(ast, false, style)) {
     if (piece.span.end > source.start && piece.span.start < source.end) {
       start = Math.min(start, offset);
       end = offset + piece.text.length;
@@ -311,7 +316,10 @@ function removeNext(ast: Ast): Change | null {
   return inner ? { ...inner, ast: { ...ast, child: inner.ast } } : null;
 }
 /** Fine-grained demonstration; square-bracket contents are evaluated before the outer sign. */
-export function bracketSteps(input: Ast): AdditiveStep[] {
+export function bracketSteps(
+  input: Ast,
+  style: NumberStyle = "improper",
+): AdditiveStep[] {
   const steps: AdditiveStep[] = [];
   let ast = input;
   for (let guard = 0; guard < 80; guard++) {
@@ -319,19 +327,20 @@ export function bracketSteps(input: Ast): AdditiveStep[] {
     if (!change) break;
     steps.push({
       ...change,
+      numberStyle: style,
       sourceHighlight: change.highlight,
-      highlight: texHighlight(ast, change.highlight),
+      highlight: texHighlight(ast, change.highlight, style),
       before: ast,
       noteKey: change.ruleId,
-      tex: expressionTex(change.ast),
+      tex: expressionTex(change.ast, style),
     });
     ast = change.ast;
   }
   return steps;
 }
 /** Textbook additive working: adjacent bracket removals share one line. */
-function additiveWorkOut(ast: Ast): AdditiveStep[] {
-  const detailed = bracketSteps(ast),
+function additiveWorkOut(ast: Ast, style: NumberStyle): AdditiveStep[] {
+  const detailed = bracketSteps(ast, style),
     steps: AdditiveStep[] = [];
   for (const step of detailed) {
     const previous = steps.at(-1);
@@ -348,13 +357,20 @@ function additiveWorkOut(ast: Ast): AdditiveStep[] {
           ),
           end: Math.max(previous.sourceHighlight.end, step.sourceHighlight.end),
         },
-        highlight: texHighlight(previous.before, {
-          start: Math.min(
-            previous.sourceHighlight.start,
-            step.sourceHighlight.start,
-          ),
-          end: Math.max(previous.sourceHighlight.end, step.sourceHighlight.end),
-        }),
+        highlight: texHighlight(
+          previous.before,
+          {
+            start: Math.min(
+              previous.sourceHighlight.start,
+              step.sourceHighlight.start,
+            ),
+            end: Math.max(
+              previous.sourceHighlight.end,
+              step.sourceHighlight.end,
+            ),
+          },
+          style,
+        ),
       };
     } else steps.push(step);
   }
@@ -498,7 +514,11 @@ function reduceInsideGroup(ast: Ast): GeneralChange | null {
   const right = reduceInsideGroup(ast.right);
   return right ? { ...right, ast: { ...ast, right: right.ast } } : null;
 }
-function generalWorkOut(input: Ast, signWorking: boolean): Step[] {
+function generalWorkOut(
+  input: Ast,
+  signWorking: boolean,
+  style: NumberStyle,
+): Step[] {
   const steps: Step[] = [];
   let ast = input;
   for (
@@ -519,7 +539,7 @@ function generalWorkOut(input: Ast, signWorking: boolean): Step[] {
           }
         : null);
     if (!change) throw new Error("Could not finish the working");
-    const highlight = texHighlight(ast, change.sourceHighlight);
+    const highlight = texHighlight(ast, change.sourceHighlight, style);
     if (
       signWorking &&
       change.operation &&
@@ -529,13 +549,14 @@ function generalWorkOut(input: Ast, signWorking: boolean): Step[] {
       const { a, b, op } = change.operation;
       const same = Math.sign(a.n) === Math.sign(b.n);
       const ruleId: RuleId = `${same ? "same" : "diff"}-sign-${op === "*" ? "product" : "quotient"}`;
-      const previous = expressionTex(ast);
-      const replacement = `${same ? "+" : "-"}\\left(${toTex(abs(a))} ${op === "*" ? "\\times" : "\\div"} ${toTex(abs(b))}\\right)`;
+      const previous = expressionTex(ast, style);
+      const replacement = `${same ? "+" : "-"}\\left(${toTex(abs(a), { style })} ${op === "*" ? "\\times" : "\\div"} ${toTex(abs(b), { style })}\\right)`;
       steps.push({
         tex:
           previous.slice(0, highlight.start) +
           replacement +
           previous.slice(highlight.end),
+        numberStyle: style,
         highlight,
         sourceHighlight: change.sourceHighlight,
         ruleId,
@@ -546,7 +567,8 @@ function generalWorkOut(input: Ast, signWorking: boolean): Step[] {
       });
     }
     steps.push({
-      tex: expressionTex(change.ast),
+      numberStyle: style,
+      tex: expressionTex(change.ast, style),
       highlight,
       sourceHighlight: change.sourceHighlight,
       ruleId: change.ruleId,
@@ -562,11 +584,14 @@ function generalWorkOut(input: Ast, signWorking: boolean): Step[] {
 /** Full arithmetic working; additive-only examples keep the compact bracket lesson. */
 export function workOut(
   ast: Ast,
-  { signWorking = false }: { signWorking?: boolean } = {},
+  {
+    signWorking = false,
+    numberStyle = "improper",
+  }: { signWorking?: boolean; numberStyle?: NumberStyle } = {},
 ): Step[] {
   return contains(ast, "*/") || hasMixedNumber(ast)
-    ? generalWorkOut(ast, signWorking)
-    : additiveWorkOut(ast);
+    ? generalWorkOut(ast, signWorking, numberStyle)
+    : additiveWorkOut(ast, numberStyle);
 }
 export function totals(terms: Rational[]) {
   return terms.reduce(

@@ -4,6 +4,8 @@ Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for 
 
 ## Directed Numbers teacher demonstrations (11/10/2026)
 
+- [x] Preserve decimals through every intermediate bracket/sign/calculation line, and preserve fraction working. Add the sign-first expression, e.g. `-21 + 43 = +(43 - 21)`, before calculating the magnitude and revealing the signed answer. Route simple decimal/fraction textbook questions through the same number-line demonstration; keep zero unsigned.
+- [x] Formatting/sign-first verification: 376 maths/rendering checks, TypeScript, scoped ESLint and production build passed. All 19 focused browser scenarios passed across final local runs, including the corrected integer-only fractional quotient. Reviewed decimal/fraction projector views, sign-before-magnitude timing and phone layout.
 - [x] Accept decimal, fraction and mixed-number operands in Sign & magnitude with exact arithmetic and labels. Rescale small distances. Show two animated arrows from the original signs to their combined sign under the equation; retain all previous working. Verify input validation, all four sign pairs and phone/projector layouts.
 - [x] Follow-up: keep the original expression and every completed line visible, including during number-line stages. Remove the collapsed history and use stable sign elements, crossfading highlights and smoothly expanding rows. All 11 focused browser scenarios passed across final local runs, including retained equations, intermediate animation opacity, reset, fractions, phone and projector layouts; TypeScript and scoped lint passed.
 - [x] Remove prediction from Sign & magnitude and replace textbook answer-entry/marking with teacher-controlled demonstrations.

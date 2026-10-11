@@ -24,16 +24,20 @@ questions are not in this bank. The interface states the exact coverage.
 
 The Sign & magnitude lesson uses the four cases supplied in the teacher's image:
 50 − 60; −50 + 30; −50 + 60; −50 − 30. Additional examples cover subtracting a
-negative number and cancellation to zero. Custom operands are integers from
+negative number and cancellation to zero. Custom operands are numbers from
 −100 to +100, with a number line scaled to include the start, finish and zero.
 
 1. Highlight the adjacent signs and animate one bracket removal at a time.
 2. Measure the starting point's distance from zero.
 3. Animate movement using the operation after bracket removal.
-4. Draw the starting, movement and remaining/total distance bars on the same
+4. Determine the sign from the endpoint's side of zero. Write that sign outside
+   the unevaluated magnitude, for example `-21 + 43 = +(43 - 21)` or
+   `3.1 - 4.9 = -(4.9 - 3.1)`. Show the sign card before the magnitude card.
+5. Draw the starting, movement and remaining/total distance bars on the same
    number-line scale. Show the magnitude calculation inside the graph, such as
    `50 - 30 = 20`, `60 - 50 = 10`, or `50 + 30 = 80`.
-5. Read the final side of zero and attach the sign to the magnitude.
+6. Write the signed answer. Keep the sign-first expression visible above it.
+   Zero receives no positive or negative sign.
 
 This is a teacher demonstration. Sign & magnitude has no prediction controls;
 Textbook practice has no answer-entry form, marking or score counter. Both use
@@ -48,8 +52,9 @@ nor negative. Do not confuse the movement distance with the result's magnitude.
 
 The bird lesson shows the final diagram after each completed move. Textbook
 questions link to the bird only when the existing integer journey parser accepts
-them; a single integer addition/subtraction can also open Sign & magnitude.
-Fractions and compound expressions use animated, highlighted algebra working.
+them. Single additions/subtractions, including decimal and fraction textbook
+questions, use Sign & magnitude. Compound expressions use animated, highlighted
+algebra working.
 Every additive bracket change remains separate; nested brackets and mixed
 operations retain the correct operation order. Every completed equation and its
 explanation remain visible in a growing worked solution; no dropdown is needed.
@@ -62,7 +67,9 @@ Highlighted equations reserve their space to avoid shifting the text.
 Custom Sign & magnitude inputs accept integers, decimals, fractions such as
 `1/3`, and mixed numbers such as `-1 1/2`, between -100 and +100. Arithmetic,
 sign decisions and labels use exact rational values; decimal-only inputs retain
-decimal results, while fraction inputs retain fractions. Coordinates alone use
+decimals in every bracket-removal line, sign diagram, calculation and result.
+Fraction inputs retain fractions. The same formatting policy applies to textbook
+demonstrations, including mixed operations. Coordinates alone use
 numeric values. The graph rescales for small fractional distances. Invalid
 inputs, including zero denominators, leave the current demonstration intact.
 

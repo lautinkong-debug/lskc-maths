@@ -68,6 +68,30 @@ import { magnitudeExpression, readMagnitudeMove } from "./textbook";
 import { readNumber } from "./rational";
 
 describe("exact fraction and decimal number lines", () => {
+  it.each([
+    ["-21", "-", "-43", "+\\left(43 - 21\\right)", "+22"],
+    ["-23", "+", "43", "+\\left(43 - 23\\right)", "+20"],
+    ["3.1", "-", "4.9", "-\\left(4.9 - 3.1\\right)", "-1.8"],
+    ["-50", "-", "30", "-\\left(50 + 30\\right)", "-80"],
+    ["50", "+", "30", "+\\left(50 + 30\\right)", "+80"],
+    [
+      "1/2",
+      "-",
+      "3/4",
+      "-\\left(\\frac{3}{4} - \\frac{1}{2}\\right)",
+      "-\\frac{1}{4}",
+    ],
+    ["50", "+", "-50", "\\left(50 - 50\\right)", "0"],
+    ["0", "-", "-30", "+\\left(0 + 30\\right)", "+30"],
+    ["-0.01", "+", "0", "-\\left(0.01 + 0\\right)", "-0.01"],
+  ] as const)(
+    "%s %s %s shows the sign outside the unevaluated magnitude",
+    (a, op, b, working, result) => {
+      const model = magnitudeModel(readMagnitudeMove(a, op, b)!);
+      expect(model.signedMagnitudeTex).toBe(working);
+      expect(model.signedResultTex).toBe(result);
+    },
+  );
   it("reads fraction and decimal lesson links without changing the operands", () => {
     for (const expression of ["(-1/3)+(+1/6)", "(+3)-(+3.1)"]) {
       const move = simpleMove(expression, true)!;

@@ -13,7 +13,7 @@ import {
 const c = copy.apps.directedNumbers.textbookLesson;
 const t = copy.apps.directedNumbers.demonstration;
 function DemonstrationQuestion({ question }: { question: TextbookQuestion }) {
-  const move = simpleMove(question.expression);
+  const move = simpleMove(question.expression, true);
   return (
     <div className="min-w-0 space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">

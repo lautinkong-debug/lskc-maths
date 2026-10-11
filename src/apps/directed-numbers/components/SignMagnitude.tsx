@@ -31,8 +31,8 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
     start = x(move.start),
     end = x(m.end);
   const moving = stage >= 2,
-    calculate = stage >= 3,
-    complete = stage >= 4;
+    calculate = stage >= 4,
+    complete = stage >= 5;
   const colour = m.delta < 0 ? "#b51b25" : "#0f4574";
   function distanceBar(
     from: number,
@@ -251,8 +251,8 @@ export function SignMagnitude({
   );
   const bracketEnd = steps.length * 2;
   const timeline = useDemonstration(
-    bracketEnd + 4,
-    staticResult ? bracketEnd + 4 : 0,
+    bracketEnd + 5,
+    staticResult ? bracketEnd + 5 : 0,
   );
   const stage = Math.max(0, timeline.position - bracketEnd);
   const m = magnitudeModel(move);
@@ -264,8 +264,10 @@ export function SignMagnitude({
         : stage === 2
           ? t.moveStage
           : stage === 3
-            ? t.magnitudeStage
-            : t.answerStage;
+            ? t.signStage
+            : stage === 4
+              ? t.magnitudeStage
+              : t.answerStage;
   return (
     <section
       className={`border-grid bg-paper min-w-0 rounded border p-4 ${presenting ? "space-y-2" : "space-y-4"}`}
@@ -293,28 +295,41 @@ export function SignMagnitude({
           ) : (
             <>
               <div className="overflow-x-auto text-2xl">
-                <Tex>{`${move.start} ${m.delta < 0 ? "-" : "+"} ${m.distance}${stage === 4 ? ` = ${m.end}` : ""}`}</Tex>
+                <Tex>{`${move.start} ${m.delta < 0 ? "-" : "+"} ${m.distance}${stage === 5 ? ` = ${m.end}` : ""}`}</Tex>
               </div>
             </>
           )}
-          {!staticResult && stage >= 1 && (
-            <ol className="space-y-2 text-sm" aria-label={t.graphSteps}>
-              <li className={styles.reveal}>{t.startHint}</li>
-              {stage >= 2 && <li className={styles.reveal}>{t.moveHint}</li>}
-              {stage >= 3 && <li className={styles.reveal}>{c[m.kind]}</li>}
-              {stage === 4 && (
+          {!staticResult && stage >= 3 && (
+            <ol className="space-y-3 text-sm" aria-label={t.graphSteps}>
+              <li className={styles.reveal}>
+                <p className="font-semibold">
+                  {t.signFirst} {c[m.sign]}
+                </p>
+                <div
+                  className="mt-2 overflow-x-auto text-2xl"
+                  data-testid="signed-magnitude-equation"
+                >
+                  <Tex>{`= ${m.signedMagnitudeTex}`}</Tex>
+                </div>
+              </li>
+              {stage >= 4 && (
                 <li className={styles.reveal}>
-                  <p>{t.resultHint}</p>
+                  <p className="font-semibold">{t.magnitudeNext}</p>
+                  <p>{c[m.kind]}</p>
+                </li>
+              )}
+              {stage === 5 && (
+                <li className={styles.reveal}>
                   <div
-                    className="mt-2 overflow-x-auto text-2xl"
+                    className="overflow-x-auto text-2xl"
                     data-testid="final-equation"
                   >
-                    <Tex>{`= ${m.resultTex}`}</Tex>
+                    <Tex>{`= ${m.signedResultTex}`}</Tex>
                   </div>
                 </li>
               )}
             </ol>
-          )}
+          )}{" "}
         </div>
         <div className="min-w-0 space-y-3">
           <MagnitudeGraph move={move} stage={stage} />
@@ -329,16 +344,22 @@ export function SignMagnitude({
               )}
               {m.kind === "cancel" && <p>{t.zero}</p>}
               <dl className="grid gap-3 sm:grid-cols-2">
-                <div className="bg-navy-wash rounded p-3">
-                  <dt className="text-sm">{c.magnitude}</dt>
-                  <dd className="text-navy font-semibold">
-                    {c.distance(m.labels.magnitude)}
-                  </dd>
+                <div
+                  className="bg-navy-wash rounded p-3"
+                  data-testid="result-sign"
+                >
+                  <dt className="text-sm">{c.sign}</dt>
+                  <dd className="text-navy font-semibold">{c[m.sign]}</dd>
                 </div>
-                {stage === 4 && (
-                  <div className="bg-navy-wash rounded p-3">
-                    <dt className="text-sm">{c.sign}</dt>
-                    <dd className="text-navy font-semibold">{c[m.sign]}</dd>
+                {stage >= 4 && (
+                  <div
+                    className="bg-navy-wash rounded p-3"
+                    data-testid="result-magnitude"
+                  >
+                    <dt className="text-sm">{c.magnitude}</dt>
+                    <dd className="text-navy font-semibold">
+                      {c.distance(m.labels.magnitude)}
+                    </dd>
                   </div>
                 )}
               </dl>

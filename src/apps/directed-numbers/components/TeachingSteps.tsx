@@ -255,7 +255,7 @@ export function EquationFrame({
       }
     >
       <EquationLine
-        tex={expressionTex(ast)}
+        tex={expressionTex(ast, steps[0]?.numberStyle)}
         nextStep={steps[0]}
         highlight={highlighting && completed === 0}
         latest={completed === 0}
