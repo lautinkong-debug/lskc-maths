@@ -12,6 +12,69 @@ async function advanceAutoplay(page: Page, count?: number) {
     await expect(progress).toHaveText(`Step ${i} of ${numbers[1]}`);
   }
 }
+test("separate clicks animate the magnitude beside a stationary sign", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/apps/directed-numbers#sign-magnitude:e=(+50)-(+60)");
+  await next(page, 7);
+  const prefix = page.getByTestId("result-sign-prefix");
+  const term = page.getByTestId("result-magnitude-term");
+  const formula = page
+    .getByTestId("signed-magnitude-equation")
+    .getByRole("math");
+  await expect(formula).toHaveAttribute("aria-label", "= -");
+  await expect(term).toBeHidden();
+  await page.screenshot({
+    path: testInfo.outputPath("first-click-sign.png"),
+    fullPage: true,
+    animations: "disabled",
+  });
+  await prefix.evaluate((node) => node.setAttribute("data-retained", "yes"));
+  const before = await prefix.boundingBox();
+  await next(page);
+  await expect(formula).toHaveAttribute(
+    "aria-label",
+    "= -\\left(60 - 50\\right)",
+  );
+  await expect(prefix).toHaveAttribute("data-retained", "yes");
+  const opacity = await term.evaluate((node) => {
+    const animation = node
+      .getAnimations()
+      .find(
+        (a) => a instanceof CSSTransition && a.transitionProperty === "opacity",
+      );
+    if (!animation) return null;
+    animation.pause();
+    animation.currentTime = 325;
+    const value = Number(getComputedStyle(node).opacity);
+    animation.finish();
+    return value;
+  });
+  expect(opacity).not.toBeNull();
+  expect(opacity!).toBeGreaterThan(0);
+  expect(opacity!).toBeLessThan(1);
+  expect((await prefix.boundingBox())!.x).toBeCloseTo(before!.x, 1);
+  await page.screenshot({
+    path: testInfo.outputPath("second-click-magnitude.png"),
+    fullPage: true,
+    animations: "disabled",
+  });
+  await page
+    .getByRole("button", { name: "Previous step", exact: true })
+    .click();
+  await expect(term).toBeHidden();
+  await expect(formula).toHaveAttribute("aria-label", "= -");
+  await page.clock.install();
+  await page
+    .getByRole("button", { name: "Play demonstration", exact: true })
+    .click();
+  await advanceAutoplay(page, 1);
+  await expect(term).toBeVisible();
+  await page
+    .getByRole("button", { name: "Replay from start", exact: true })
+    .click();
+  await expect(page.getByTestId("signed-magnitude-equation")).toHaveCount(0);
+});
 for (const [route, working, result] of [
   ["sign-magnitude:e=(+3.1)-(+4.9)", "-\\left(4.9 - 3.1\\right)", "-1.8"],
   ["textbook:e=2B-15a", "+\\left(43 - 21\\right)", "+22"],
@@ -30,8 +93,9 @@ for (const [route, working, result] of [
     const line = page.getByTestId("signed-magnitude-equation");
     await expect(line.getByRole("math")).toHaveAttribute(
       "aria-label",
-      `= ${working}`,
+      `= ${working[0]}`,
     );
+    await expect(page.getByTestId("result-magnitude-term")).toBeHidden();
     await expect(page.getByTestId("result-sign")).toBeVisible();
     await expect(page.getByTestId("graph-calculation")).toHaveCount(0);
     await expect(page.getByTestId("final-equation")).toHaveCount(0);
@@ -51,6 +115,22 @@ for (const [route, working, result] of [
     });
     await next(page);
     await expect(line).toBeVisible();
+    await expect(line.getByRole("math")).toHaveAttribute(
+      "aria-label",
+      `= ${working}`,
+    );
+    await expect(page.getByTestId("result-magnitude-term")).toBeVisible();
+    expect(
+      await page
+        .getByTestId("result-magnitude-term")
+        .evaluate((node) =>
+          Math.max(
+            ...getComputedStyle(node)
+              .transitionDuration.split(",")
+              .map(Number.parseFloat),
+          ),
+        ),
+    ).toBeLessThanOrEqual(0.001);
     await expect(page.getByTestId("graph-calculation")).toBeVisible();
     await expect(page.getByTestId("final-equation")).toHaveCount(0);
     await next(page);
@@ -117,11 +197,17 @@ for (const [expression, sign, calculation] of [
     await expect(page.getByTestId("distance-movement")).toBeVisible();
     await next(page);
     await expect(page.getByTestId("result-sign")).toContainText(sign);
-    await expect(page.getByTestId("signed-magnitude-equation")).toBeVisible();
+    if (sign.startsWith("Zero")) {
+      await expect(page.getByTestId("signed-magnitude-equation")).toBeHidden();
+    } else {
+      await expect(page.getByTestId("signed-magnitude-equation")).toBeVisible();
+    }
+    await expect(page.getByTestId("result-magnitude-term")).toBeHidden();
     await expect(page.getByTestId("graph-calculation")).toHaveCount(0);
     await expect(page.getByTestId("result-magnitude")).toHaveCount(0);
     await expect(page.getByTestId("final-equation")).toHaveCount(0);
     await next(page);
+    await expect(page.getByTestId("result-magnitude-term")).toBeVisible();
     await expect(page.getByTestId("graph-calculation")).toHaveText(calculation);
     await expect(page.getByTestId("distance-result")).toBeVisible();
     await next(page);

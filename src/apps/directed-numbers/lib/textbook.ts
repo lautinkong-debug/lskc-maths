@@ -129,7 +129,9 @@ export function magnitudeModel(move: SimpleMove) {
       ? { left: larger, op: "-", right: smaller }
       : { left: a, op: "+", right: distance };
   const magnitudeTex = `${toTex(magnitudeTerms.left, { style })} ${magnitudeTerms.op} ${toTex(magnitudeTerms.right, { style })}`;
-  const signedMagnitudeTex = `${result.n > 0 ? "+" : result.n < 0 ? "-" : ""}\\left(${magnitudeTex}\\right)`;
+  const signTex = result.n > 0 ? "+" : result.n < 0 ? "-" : "";
+  const magnitudeExpressionTex = `\\left(${magnitudeTex}\\right)`;
+  const signedMagnitudeTex = `${signTex}${magnitudeExpressionTex}`;
   const calculation =
     kind === "same"
       ? `${text(a)} + ${text(distance)} = ${text(magnitude)}`
@@ -149,6 +151,8 @@ export function magnitudeModel(move: SimpleMove) {
     sign,
     labels,
     calculation,
+    signTex,
+    magnitudeExpressionTex,
     signedMagnitudeTex,
     signedResultTex: toTex(result, { style, signed: true }),
     resultTex: toTex(result, { style }),

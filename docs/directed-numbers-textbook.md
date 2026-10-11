@@ -30,10 +30,12 @@ negative number and cancellation to zero. Custom operands are numbers from
 1. Highlight the adjacent signs and animate one bracket removal at a time.
 2. Measure the starting point's distance from zero.
 3. Animate movement using the operation after bracket removal.
-4. Determine the sign from the endpoint's side of zero. Write that sign outside
-   the unevaluated magnitude, for example `-21 + 43 = +(43 - 21)` or
-   `3.1 - 4.9 = -(4.9 - 3.1)`. Show the sign card before the magnitude card.
-5. Draw the starting, movement and remaining/total distance bars on the same
+4. Determine the sign from the endpoint's side of zero. One Next step click
+   reveals only `= +` or `= -` and the sign card. The magnitude expression is
+   still hidden visually and from screen readers. Zero has no sign prefix.
+5. The next click fades and slides the bracketed magnitude beside the stationary
+   sign, for example `= +(43 - 21)` or `= -(4.9 - 3.1)`. Reveal the magnitude
+   card and draw the starting, movement and remaining/total distance bars on the same
    number-line scale. Show the magnitude calculation inside the graph, such as
    `50 - 30 = 20`, `60 - 50 = 10`, or `50 + 30 = 80`.
 6. Write the signed answer. Keep the sign-first expression visible above it.

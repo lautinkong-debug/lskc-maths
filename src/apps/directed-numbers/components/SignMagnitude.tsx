@@ -306,10 +306,24 @@ export function SignMagnitude({
                   {t.signFirst} {c[m.sign]}
                 </p>
                 <div
-                  className="mt-2 overflow-x-auto text-2xl"
+                  className={`mt-2 overflow-x-auto text-2xl whitespace-nowrap ${m.sign === "zero" && stage === 3 ? "invisible" : ""}`}
                   data-testid="signed-magnitude-equation"
                 >
-                  <Tex>{`= ${m.signedMagnitudeTex}`}</Tex>
+                  <span
+                    role="math"
+                    aria-label={`= ${stage >= 4 ? m.signedMagnitudeTex : m.signTex}`}
+                  >
+                    <span aria-hidden="true" data-testid="result-sign-prefix">
+                      <Tex>{`= ${m.signTex}`}</Tex>
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      data-testid="result-magnitude-term"
+                      className={`${styles.magnitudeTerm} ${stage >= 4 ? styles.magnitudeTermShown : ""}`}
+                    >
+                      <Tex>{m.magnitudeExpressionTex}</Tex>
+                    </span>
+                  </span>
                 </div>
               </li>
               {stage >= 4 && (

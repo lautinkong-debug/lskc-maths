@@ -4,6 +4,20 @@
 .reveal {
   animation: reveal 900ms ease both;
 }
+.magnitudeTerm {
+  display: inline-block;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition:
+    opacity 650ms ease,
+    transform 650ms ease;
+}
+.magnitudeTermShown {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(0);
+}
 @keyframes reveal {
   from {
     opacity: 0;
@@ -20,5 +34,8 @@
   }
   .reveal {
     animation: none;
+  }
+  .magnitudeTerm {
+    transition: none;
   }
 }
