@@ -51,7 +51,11 @@ questions link to the bird only when the existing integer journey parser accepts
 them; a single integer addition/subtraction can also open Sign & magnitude.
 Fractions and compound expressions use animated, highlighted algebra working.
 Every additive bracket change remains separate; nested brackets and mixed
-operations retain the correct operation order. Completed steps can be expanded.
+operations retain the correct operation order. Every completed equation and its
+explanation remain visible in a growing worked solution; no dropdown is needed.
+Sign & magnitude keeps the bracket working visible through the graph stages.
+New rows expand gently and the sign elements blend in place without being
+recreated. Highlighted equations reserve their space to avoid shifting the text.
 
 ## Local review
 

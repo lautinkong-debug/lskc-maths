@@ -4,6 +4,7 @@ Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for 
 
 ## Directed Numbers teacher demonstrations (11/10/2026)
 
+- [x] Follow-up: keep the original expression and every completed line visible, including during number-line stages. Remove the collapsed history and use stable sign elements, crossfading highlights and smoothly expanding rows. All 11 focused browser scenarios passed across final local runs, including retained equations, intermediate animation opacity, reset, fractions, phone and projector layouts; TypeScript and scoped lint passed.
 - [x] Remove prediction from Sign & magnitude and replace textbook answer-entry/marking with teacher-controlled demonstrations.
 - [x] Animate each bracket separately: highlight the adjacent signs, combine them, and reveal the rewritten expression before moving on the number line.
 - [x] Draw starting, movement and remaining/total distance bars with an explicit magnitude calculation in the graph. Retain zero, equal-sign and opposite-sign cases.

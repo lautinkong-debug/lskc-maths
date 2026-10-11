@@ -93,6 +93,47 @@ export function TeachingControls({
   );
 }
 
+/** Stable equation layers prevent highlighted KaTeX from shifting the line. */
+function EquationLine({
+  tex,
+  nextStep,
+  highlight,
+  latest,
+  original = false,
+}: {
+  tex: string;
+  nextStep?: Step;
+  highlight: boolean;
+  latest: boolean;
+  original?: boolean;
+}) {
+  return (
+    <div
+      className={styles.equation}
+      data-testid={
+        highlight
+          ? "before-equation"
+          : latest && !original
+            ? "after-equation"
+            : undefined
+      }
+      data-equation-line="true"
+      data-tex={tex}
+    >
+      <div
+        className={`${styles.layers} ${highlight ? styles.highlighted : ""}`}
+      >
+        <Tex className={styles.plain}>{tex}</Tex>
+        {nextStep && (
+          <span className={styles.highlight} aria-hidden="true">
+            <Tex>{`${original ? "" : "= "}${highlightedTex(nextStep)}`}</Tex>
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function EquationFrame({
   ast,
   steps,
@@ -102,70 +143,91 @@ export function EquationFrame({
   steps: Step[];
   position: number;
 }) {
-  const index = Math.min(
-    steps.length - 1,
-    Math.floor(Math.max(0, position - 1) / 2),
-  );
-  const step = position > 0 ? steps[index] : undefined;
-  const applied = position > 0 && position % 2 === 0;
-  const pair =
-    step && ["++", "+-", "-+", "--"].includes(step.ruleId) ? step.ruleId : null;
+  const completed = Math.min(steps.length, Math.floor(position / 2));
+  const highlighting = position % 2 === 1 && completed < steps.length;
   const notes: Record<string, string> = {
     ...c.bracketLesson.notes,
     ...c.arithmetic.notes,
   };
   return (
     <div
-      className="min-w-0 space-y-3"
+      className="min-w-0"
       data-testid="equation-frame"
-      data-phase={step ? (applied ? "applied" : "highlight") : "start"}
+      data-phase={
+        position === 0 ? "start" : highlighting ? "highlight" : "applied"
+      }
     >
-      <p className="text-navy font-semibold" aria-live="polite">
-        {step ? notes[step.noteKey] : t.start}
-      </p>
-      <div
-        className="overflow-x-auto py-2 text-2xl"
-        data-testid="before-equation"
-      >
-        <Tex className={applied ? "text-pencil" : ""}>
-          {step
-            ? applied
-              ? expressionTex(step.before)
-              : highlightedTex(step)
-            : expressionTex(ast)}
-        </Tex>
-      </div>
-      {pair && (
-        <div
-          key={`${index}:${applied}`}
-          className={`${styles.signs} ${applied ? styles.combine : ""}`}
-          aria-label={t.signPair(
-            pair[0],
-            pair[1],
-            pair[0] === pair[1] ? "+" : "−",
-          )}
-        >
-          <span className={styles.first}>{pair[0] === "-" ? "−" : "+"}</span>
-          <span className={styles.bracket}>(</span>
-          <span className={styles.second}>{pair[1] === "-" ? "−" : "+"}</span>
-          <span className={styles.bracket}>)</span>
-          <span aria-hidden="true">→</span>
-          {applied && (
-            <strong className={styles.arrive}>
-              {pair[0] === pair[1] ? "+" : "−"}
-            </strong>
-          )}
-        </div>
-      )}
-      {applied && step && (
-        <div
-          key={position}
-          className={`${styles.arrive} overflow-x-auto border-l-4 border-[#0f4574] py-2 pl-3 text-2xl`}
-          data-testid="after-equation"
-        >
-          <Tex>{`= ${step.tex}`}</Tex>
-        </div>
-      )}
+      <EquationLine
+        tex={expressionTex(ast)}
+        nextStep={steps[0]}
+        highlight={highlighting && completed === 0}
+        latest={completed === 0}
+        original
+      />
+      <ol className={styles.working} aria-label={t.allSteps}>
+        {steps.slice(0, Math.ceil(position / 2)).map((step, index) => {
+          const applied = index < completed;
+          const pair = ["++", "+-", "-+", "--"].includes(step.ruleId)
+            ? step.ruleId
+            : null;
+          return (
+            <li
+              key={index}
+              className={styles.step}
+              data-testid="working-step"
+              data-completed={applied}
+            >
+              <div className={styles.stepContents}>
+                <div className={styles.note}>
+                  {pair && (
+                    <span
+                      className={`${styles.signs} ${applied ? styles.combine : ""}`}
+                      data-testid="sign-combination"
+                      aria-label={t.signPair(
+                        pair[0],
+                        pair[1],
+                        pair[0] === pair[1] ? "+" : "−",
+                      )}
+                    >
+                      <span aria-hidden="true" className={styles.first}>
+                        {pair[0] === "-" ? "−" : "+"}
+                      </span>
+                      <span aria-hidden="true" className={styles.bracketLeft}>
+                        (
+                      </span>
+                      <span aria-hidden="true" className={styles.second}>
+                        {pair[1] === "-" ? "−" : "+"}
+                      </span>
+                      <span aria-hidden="true" className={styles.bracketRight}>
+                        )
+                      </span>
+                      <strong aria-hidden="true" className={styles.combined}>
+                        {pair[0] === pair[1] ? "+" : "−"}
+                      </strong>
+                    </span>
+                  )}
+                  <span>{notes[step.noteKey]}</span>
+                </div>
+                <div
+                  className={`${styles.result} ${applied ? styles.expanded : ""}`}
+                  aria-hidden={!applied}
+                >
+                  <div className={styles.resultContents}>
+                    {applied && (
+                      <EquationLine
+                        tex={`= ${step.tex}`}
+                        nextStep={steps[index + 1]}
+                        highlight={highlighting && index + 1 === completed}
+                        latest={index + 1 === completed}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }

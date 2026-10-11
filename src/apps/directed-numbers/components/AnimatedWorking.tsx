@@ -1,4 +1,3 @@
-import { Math as Tex } from "@/components/Math";
 import { copy } from "@/lib/copy";
 import { parse } from "../lib/parse";
 import { demonstrationSteps } from "../lib/demonstration";
@@ -31,20 +30,6 @@ export function AnimatedWorking({ expression }: { expression: string }) {
         <p role="status" className="font-semibold">
           {t.complete}
         </p>
-      )}
-      {timeline.position >= 2 && (
-        <details className="border-grid border-t pt-3">
-          <summary className="text-navy cursor-pointer">{t.allSteps}</summary>
-          <ol className="mt-3 space-y-3">
-            {steps
-              .slice(0, Math.floor(timeline.position / 2))
-              .map((step, index) => (
-                <li className="overflow-x-auto text-xl" key={index}>
-                  <Tex>{`= ${step.tex}`}</Tex>
-                </li>
-              ))}
-          </ol>
-        </details>
       )}
     </section>
   );

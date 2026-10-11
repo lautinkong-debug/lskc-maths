@@ -72,7 +72,7 @@ function MagnitudeGraph({ move, stage }: { move: SimpleMove; stage: number }) {
   return (
     <svg
       viewBox="0 0 640 390"
-      className={`h-auto w-full ${presenting ? "max-h-[420px]" : ""}`}
+      className={`h-auto w-full ${presenting ? "max-h-[380px]" : ""}`}
       role="img"
       aria-label={c.caption(move.start, m.delta, complete ? m.end : undefined)}
       data-testid="magnitude-line"
@@ -237,6 +237,7 @@ export function SignMagnitude({
   staticResult?: boolean;
   wide?: boolean;
 }) {
+  const presenting = usePresentation();
   const parsed = parse(
     expression ?? `(${signed(move.start)})${move.op}(${signed(move.b)})`,
   );
@@ -263,7 +264,7 @@ export function SignMagnitude({
             : t.answerStage;
   return (
     <section
-      className="border-grid bg-paper min-w-0 space-y-4 rounded border p-4"
+      className={`border-grid bg-paper min-w-0 rounded border p-4 ${presenting ? "space-y-2" : "space-y-4"}`}
       aria-label={c.title}
     >
       <h3
@@ -279,32 +280,44 @@ export function SignMagnitude({
         }
       >
         <div className="min-w-0 space-y-4">
-          {stage === 0 && !staticResult ? (
+          {!staticResult ? (
             <EquationFrame
               ast={parsed.value}
               steps={steps}
-              position={timeline.position}
+              position={Math.min(timeline.position, bracketEnd)}
             />
           ) : (
             <>
               <div className="overflow-x-auto text-2xl">
                 <Tex>{`${move.start} ${m.delta < 0 ? "-" : "+"} ${m.distance}${stage === 4 ? ` = ${m.end}` : ""}`}</Tex>
               </div>
-              <p className="font-medium">
-                {stage === 1
-                  ? t.startHint
-                  : stage === 2
-                    ? t.moveHint
-                    : stage === 3
-                      ? c[m.kind]
-                      : t.resultHint}
-              </p>
             </>
           )}
+          {!staticResult && stage >= 1 && (
+            <ol className="space-y-2 text-sm" aria-label={t.graphSteps}>
+              <li className={styles.reveal}>{t.startHint}</li>
+              {stage >= 2 && <li className={styles.reveal}>{t.moveHint}</li>}
+              {stage >= 3 && <li className={styles.reveal}>{c[m.kind]}</li>}
+              {stage === 4 && (
+                <li className={styles.reveal}>
+                  <p>{t.resultHint}</p>
+                  <div
+                    className="mt-2 overflow-x-auto text-2xl"
+                    data-testid="final-equation"
+                  >
+                    <Tex>{`= ${m.end}`}</Tex>
+                  </div>
+                </li>
+              )}
+            </ol>
+          )}
+        </div>
+        <div className="min-w-0 space-y-3">
+          <MagnitudeGraph move={move} stage={stage} />
           {stage >= 3 && (
             <div
               data-testid="magnitude-result"
-              className="space-y-3"
+              className="space-y-3 text-sm"
               aria-live="polite"
             >
               {m.kind === "opposite" && (
@@ -328,7 +341,6 @@ export function SignMagnitude({
             </div>
           )}
         </div>
-        <MagnitudeGraph move={move} stage={stage} />
       </div>
     </section>
   );

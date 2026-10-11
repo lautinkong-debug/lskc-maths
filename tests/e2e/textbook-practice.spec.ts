@@ -202,3 +202,96 @@ test("teacher controls and calculation fit phone and projector; reduced motion i
     fullPage: true,
   });
 });
+
+test("all worked lines stay visible as each new step unfolds", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/apps/directed-numbers#textbook:e=2C-33a");
+  const lines = page.locator("[data-equation-line]");
+  let previous = await lines.evaluateAll((nodes) =>
+    nodes.map((n) => n.getAttribute("data-tex")),
+  );
+  const first = await lines
+    .first()
+    .evaluate((node) => node.getBoundingClientRect().top + window.scrollY);
+  for (let phase = 1; phase <= 8; phase++) {
+    await next(page);
+    await expect(lines).toHaveCount(1 + Math.floor(phase / 2));
+    const current = await lines.evaluateAll((nodes) =>
+      nodes.map((n) => n.getAttribute("data-tex")),
+    );
+    expect(current.slice(0, previous.length)).toEqual(previous);
+    for (const line of await lines.all()) await expect(line).toBeVisible();
+    expect(
+      await lines
+        .first()
+        .evaluate((node) => node.getBoundingClientRect().top + window.scrollY),
+    ).toBeCloseTo(first, 0);
+    previous = current;
+  }
+  await expect(page.locator("details")).toHaveCount(0);
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page
+    .getByRole("button", { name: "Projection mode", exact: true })
+    .click();
+  await expect(lines.last()).toBeInViewport({ ratio: 1 });
+  await page.screenshot({
+    path: testInfo.outputPath("all-working-projector.png"),
+    fullPage: true,
+  });
+  await page
+    .getByRole("button", { name: "Leave projection mode", exact: true })
+    .click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({
+    path: testInfo.outputPath("all-working-phone.png"),
+    fullPage: true,
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.getByRole("button", { name: "Replay from start" }).click();
+  await expect(lines).toHaveCount(1);
+});
+
+test("signs blend smoothly without replacing the previous equations or sign elements", async ({
+  page,
+}) => {
+  await page.goto("/apps/directed-numbers#sign-magnitude:e=(-50)-(-60)");
+  await next(page, 3);
+  const pair = page.getByTestId("sign-combination");
+  await pair.evaluate((node) => node.setAttribute("data-retained", "yes"));
+  await next(page);
+  await expect(pair).toHaveAttribute("data-retained", "yes");
+  const blend = await pair.evaluate((node) => {
+    const first = node.children[0] as HTMLElement;
+    const animation = first
+      .getAnimations()
+      .find(
+        (a) => a instanceof CSSTransition && a.transitionProperty === "opacity",
+      );
+    if (!animation) return null;
+    animation.pause();
+    animation.currentTime = 400;
+    const opacity = Number(getComputedStyle(first).opacity);
+    animation.finish();
+    return opacity;
+  });
+  expect(blend).not.toBeNull();
+  expect(blend!).toBeGreaterThan(0);
+  expect(blend!).toBeLessThan(1);
+  const lines = page.locator("[data-equation-line]");
+  const before = await lines.evaluateAll((nodes) =>
+    nodes.map((n) => n.getAttribute("data-tex")),
+  );
+  await next(page, 4);
+  await expect(lines).toHaveCount(3);
+  expect(
+    await lines.evaluateAll((nodes) =>
+      nodes.map((n) => n.getAttribute("data-tex")),
+    ),
+  ).toEqual(before);
+  await expect(page.getByTestId("final-equation")).toHaveText(/10/);
+});
