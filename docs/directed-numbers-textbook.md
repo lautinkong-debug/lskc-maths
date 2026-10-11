@@ -81,3 +81,20 @@ against the official domain. Home, Directed Numbers and Statistical Charts retur
 HTTP 200; an unsigned challenge-join request returned 401. No Firebase data or
 rules were changed. The source hashes and previous deployment are recorded in
 `out/textbook-release.json`.
+
+## Teacher demonstration release — 11/10/2026
+
+Published from canonical `main` commit `b06071d` as deployment
+`dpl_CsAGM7HzGsPGG33GrT1h9VmtAtLm` at the official domain.
+The previous deployment was `dpl_B66NVH5WCVBurzWR5r5v1WnrQomq`.
+
+All 17 live Chrome scenarios passed: bracket removal precedes graph movement;
+the graph displays the magnitude calculation; textbook playback supports pause,
+previous/next, replay and question changes; fractions and mixed operations retain
+exact working; bird movement, phone and projector layouts continue to work.
+Local verification also passed 343 mathematical/rendering checks, TypeScript,
+scoped lint and a production build. Vercel's production build passed.
+
+Home, Directed Numbers and Statistical Charts returned HTTP 200. An unsigned
+challenge-join request returned 401. These checks do not include a signed-in
+classroom challenge. No Firebase data or rules were changed.

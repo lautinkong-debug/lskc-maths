@@ -9,7 +9,7 @@ Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for 
 - [x] Draw starting, movement and remaining/total distance bars with an explicit magnitude calculation in the graph. Retain zero, equal-sign and opposite-sign cases.
 - [x] Add Play/Pause, Previous/Next step, Replay, Normal/Slow speed and reduced-motion support; cancel playback on question changes. Preserve exact fractions and operation order for all 122 textbook questions.
 - [x] 343 mathematical/rendering checks, TypeScript, scoped lint and production build passed. All 17 browser scenarios passed across focused runs; reviewed phone and 1920×1080 projector screenshots and ensured the full magnitude graph is visible.
-- [ ] Publish the revised teacher demonstration and verify it on the official website.
+- [x] Published from canonical `main` commit `b06071d` as production deployment `dpl_CsAGM7HzGsPGG33GrT1h9VmtAtLm`. All 17 Chrome scenarios passed on the official domain, including bracket-first timing, in-graph magnitude calculations, textbook playback, bird regressions and phone/projector layouts. Home, Directed Numbers and Statistical Charts returned HTTP 200; unsigned challenge joining returned 401. No Firebase data or rules changes.
 
 ## Canonical GitHub source for Dot (11/10/2026)
 
