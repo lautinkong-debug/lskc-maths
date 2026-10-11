@@ -452,25 +452,27 @@ export default function StatisticalChartsLab() {
             </div>
           )}
           <div className={s.screenChrome}>
-            <div className={s.intro}>
-              <div>
-                <p className={s.chapter}>{c.classroom.chapter}</p>
-                <h2>{c.intro}</h2>
-                <p>{c.subtitle}</p>
-              </div>
-              <div className={s.stats}>
+            {mode !== "animations" && (
+              <div className={s.intro}>
                 <div>
-                  <strong data-testid="lab-total">
-                    {result.error ? "—" : result.total}
-                  </strong>
-                  <span>{c.total}</span>
+                  <p className={s.chapter}>{c.classroom.chapter}</p>
+                  <h2>{c.intro}</h2>
+                  <p>{c.subtitle}</p>
                 </div>
-                <div>
-                  <strong>{result.rows.length}</strong>
-                  <span>{c.classes}</span>
+                <div className={s.stats}>
+                  <div>
+                    <strong data-testid="lab-total">
+                      {result.error ? "—" : result.total}
+                    </strong>
+                    <span>{c.total}</span>
+                  </div>
+                  <div>
+                    <strong>{result.rows.length}</strong>
+                    <span>{c.classes}</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
             <nav className={s.nav} aria-label={c.title}>
               <a
                 href="#lab-data"

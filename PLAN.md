@@ -10,7 +10,7 @@ Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for 
 - [x] Add cumulative-polygon to histogram prediction, linked frequency differences, flat sections, equal-width/equal-rise explanation, editable frequencies and further examples. Respect hidden-answer and fixed-lesson settings.
 - [x] Add four animated walkthroughs with Play/Pause, Previous/Next, Replay, speed and reduced-motion support: leaf counting, cumulative rises, the supplied weight tables, and median/percentile/complement readings on an explicitly reconstructed electricity-bill graph.
 - [x] Standalone browser scenarios, mathematical checks, production build, TypeScript and scoped lint passed. Four department integration tests passed on isolated port 3019 after the default local server conflicted. Final animation checks and release verification follow below.
-- [ ] Complete rendered review and publish the verified changes to the existing website.
+- [x] Reviewed desktop and phone renders and settled animation frames. Across the focused suites, 52 standalone browser scenarios, 35 mathematical/activity checks, four department integration tests, production build and lint passed. Published implementation `9b5ce47` to GitHub main and the department branch; production deployment `dpl_DsRB7YwzKJBkGxPwPhgwBQX2QNTG` is READY. Fresh signed-out Chrome checks on the public domain passed for boundaries, direct editing, both concept lessons, animation playback, weight-table answers, bill complements, projection and phone layouts, with no browser errors. Walkthroughs hide the main lab's unrelated dataset count. No production Firebase data or rules were changed.
 
 ## Statistical Charts classroom layout (10/10/2026)
 
