@@ -9,7 +9,7 @@ Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for 
 - [x] Add a direct Table & chart view, preserve both panels in department Projection mode, and restore keyboard focus on exit.
 - [x] All 45 standalone browser scenarios passed, including both panels within 1280x720 and 1920x1080, linked selection, keyboard exit and existing chart/lesson/export functions.
 - [x] Next.js production build, TypeScript, ESLint and four emulator-backed department browser tests passed. Reviewed settings, bin controls and department projection screenshots.
-- [ ] Publish the reviewed layout and verify the public website on desktop and phone.
+- [x] Published implementation `3a2f90c` to both GitHub branches and production deployment `dpl_28s8JKwz9PNxtZo5U24Dwkts4whw`. Fresh signed-out Chrome checks on `https://lskc-maths.vercel.app/apps/statistical-charts` passed: vertical section order, bin deletion, linked selection, histogram/cumulative graph fit, Escape focus return, department projection and 390px phone layout. Reviewed live screenshots; no browser errors. No production Firebase data or rules changed.
 
 ## Web Apps textbook topic filter (10/10/2026)
 

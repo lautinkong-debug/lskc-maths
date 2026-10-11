@@ -10,6 +10,14 @@ Department-site integration and GitHub continuation are documented in [the hando
 The lab is listed under F2 / Data Handling / 2A06 and uses the existing website route and availability controls.
 Its projection layout responds to the department's **Projection mode** as well as its standalone presentation control.
 
+Classroom layout update (10/10/2026): Dataset settings now spans the top of the workspace,
+followed by Data Explorer, then the frequency table beside Chart type and the graph.
+Observation and class deletion uses labelled bin icons. **Table & chart view** keeps the
+table and graph together and hides editing controls; Escape returns focus to its button.
+The department's **Projection mode** also retains both panels. The default six-class table
+and full graph fit at 1280x720 and 1920x1080. Longer tables scroll within the focused view;
+phones stack the panels to keep text readable.
+
 ## Open it locally
 
 The standalone lab needs no login, Firebase emulator, database, API key or network service.
@@ -42,7 +50,8 @@ Do not switch `.env.local` to a real project for this test.
    the chart. Restore 49 to recover the graph.
 8. Select a bar, point or table interval using a pointer, touch or keyboard. The same class is highlighted.
 9. Open **Chart display** to see labels, grids, construction guides, histogram overlays and curve/polygon comparisons.
-10. Use **Enlarge chart** or the department site's existing **Presentation mode**.
+10. Use **Table & chart view** to teach from the table and graph together, **Enlarge chart**
+    for the graph alone, or the department site's **Projection mode**.
 
 ### Phase 2 local review
 
