@@ -16,7 +16,14 @@ import {
 } from "./statistics";
 
 export type Comparison = "shape" | "smooth" | "cumulative" | "totals" | "all";
-export type LabMode = "lab" | "learn" | "practice" | "compare" | "advanced";
+export type LabMode =
+  | "lab"
+  | "learn"
+  | "practice"
+  | "compare"
+  | "advanced"
+  | "concepts"
+  | "animations";
 export const comparisons: Record<Comparison, ChartType[]> = {
   shape: ["histogram", "polygon"],
   smooth: ["polygon", "curve"],
@@ -93,9 +100,15 @@ export function validateActivity(input: unknown): Activity {
   } as Grouping;
   if (
     !chartNames.includes(input.type as ChartType) ||
-    !["lab", "learn", "practice", "compare", "advanced"].includes(
-      input.mode as string,
-    ) ||
+    ![
+      "lab",
+      "learn",
+      "practice",
+      "compare",
+      "advanced",
+      "concepts",
+      "animations",
+    ].includes(input.mode as string) ||
     !Object.hasOwn(comparisons, input.comparison as string) ||
     typeof input.answers !== "boolean" ||
     typeof input.fixed !== "boolean"

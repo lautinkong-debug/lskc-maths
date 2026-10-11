@@ -2,6 +2,16 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Statistical Charts representation connections (10/10/2026)
+
+- [x] Add an immediately visible class-mark / lower-and-upper-boundary axis selector, retaining saved display settings and cumulative-graph boundary conventions.
+- [x] Edit frequency cells beside the graph, converting raw counts to an independent grouped table without changing the current raw observations. Validate whole, non-negative frequencies and retain automatic cumulative totals.
+- [x] Add stem-and-leaf shape prediction with the supplied 15 ages, repeated leaves, four schematic shapes, editable ages, explanations and further examples.
+- [x] Add cumulative-polygon to histogram prediction, linked frequency differences, flat sections, equal-width/equal-rise explanation, editable frequencies and further examples. Respect hidden-answer and fixed-lesson settings.
+- [x] Add four animated walkthroughs with Play/Pause, Previous/Next, Replay, speed and reduced-motion support: leaf counting, cumulative rises, the supplied weight tables, and median/percentile/complement readings on an explicitly reconstructed electricity-bill graph.
+- [x] Standalone browser scenarios, mathematical checks, production build, TypeScript and scoped lint passed. Four department integration tests passed on isolated port 3019 after the default local server conflicted. Final animation checks and release verification follow below.
+- [ ] Complete rendered review and publish the verified changes to the existing website.
+
 ## Statistical Charts classroom layout (10/10/2026)
 
 - [x] Replace multiplication-like removal symbols with labelled bin icons for observations and grouped classes.

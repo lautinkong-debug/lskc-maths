@@ -10,6 +10,9 @@ import {
   useSyncExternalStore,
 } from "react";
 import { AdvancedExplorer } from "./AdvancedExplorer";
+import { ConceptLab } from "./ConceptLab";
+import { AnimatedWalkthroughs } from "./AnimatedWalkthroughs";
+import { ageExamples, cumulativeExamples } from "./concepts";
 import {
   defaultAdvanced,
   defaultTask,
@@ -95,6 +98,7 @@ export default function StatisticalChartsLab() {
   const [unit, setUnit] = useState<string>(c.contexts[0].unit);
   const [selected, setSelected] = useState<number | null>(null);
   const [full, setFull] = useState(false);
+  const [editingFrequencies, setEditingFrequencies] = useState(false);
   const [enlarged, setEnlarged] = useState(false);
   const [error, setError] = useState("");
   const [mode, setMode] = useState<LabMode>("lab");
@@ -119,6 +123,31 @@ export default function StatisticalChartsLab() {
   const [storageStatus, setStorageStatus] = useState("");
   const root = useRef<HTMLDivElement>(null);
   const presentationTrigger = useRef<HTMLElement | null>(null);
+  function loadConcept(kind: "raw" | "grouped", example: number) {
+    if (fixed) return;
+    setSource(kind);
+    setMode("concepts");
+    setSelected(null);
+    setError("");
+    setTitle(kind === "raw" ? c.concepts.ages : c.concepts.cumulativeTab);
+    setVariable(kind === "raw" ? c.concepts.age : c.concepts.value);
+    setUnit("");
+    setGrouping({
+      start: kind === "raw" ? 20 : 0,
+      width: 10,
+      count: kind === "raw" ? 4 : 6,
+      precision: kind === "raw" ? 1 : 0,
+    });
+    if (kind === "raw") setValues(ageExamples[example].map(String));
+    else
+      setGroups(
+        cumulativeExamples[example].map((frequency, i) => ({
+          lower: i * 10,
+          upper: (i + 1) * 10,
+          frequency,
+        })),
+      );
+  }
   function present() {
     presentationTrigger.current =
       document.activeElement instanceof HTMLElement
@@ -147,6 +176,7 @@ export default function StatisticalChartsLab() {
       setTask(a.task ?? defaultTask);
       setLesson(a.fixed ? a : null);
       setSelected(null);
+      setEditingFrequencies(false);
       setError("");
       setShareError("");
       setNotice("");
@@ -491,6 +521,19 @@ export default function StatisticalChartsLab() {
               >
                 06 · {c.advanced.title}
               </button>
+              <button
+                disabled={fixed}
+                aria-pressed={mode === "concepts"}
+                onClick={() => loadConcept("raw", 0)}
+              >
+                07 · {c.concepts.title}
+              </button>
+              <button
+                aria-pressed={mode === "animations"}
+                onClick={() => setMode("animations")}
+              >
+                08 · {c.animation.title}
+              </button>
             </nav>
             <ClassroomTools
               activity={activity}
@@ -553,6 +596,25 @@ export default function StatisticalChartsLab() {
               <p className={s.scaleNote}>{c.classroom.answersHidden}</p>
             )}
           </div>
+          {mode === "animations" && <AnimatedWalkthroughs key={revision} />}
+          {mode === "concepts" && (
+            <ConceptLab
+              key={revision}
+              kind={source}
+              rows={result.rows}
+              raw={values.map(Number)}
+              fixed={fixed}
+              onLesson={loadConcept}
+              onRaw={(v) => setValues(v.map(String))}
+              onFrequency={(index, frequency) =>
+                setGroups((current) =>
+                  current.map((g, i) =>
+                    i === index ? { ...g, frequency } : g,
+                  ),
+                )
+              }
+            />
+          )}
           {mode === "advanced" &&
             (result.rows.length ? (
               <AdvancedExplorer
@@ -819,6 +881,35 @@ export default function StatisticalChartsLab() {
                     <section className={s.tablePanel}>
                       <div className={s.sectionHeader}>
                         <h3>{c.table}</h3>
+                        <button
+                          disabled={fixed || !result.rows.length}
+                          aria-pressed={
+                            editingFrequencies && source === "grouped"
+                          }
+                          onClick={() => {
+                            if (editingFrequencies && source === "grouped") {
+                              setEditingFrequencies(false);
+                              return;
+                            }
+                            if (source === "raw") {
+                              setGroups(
+                                result.rows.map(
+                                  ({ lower, upper, frequency }) => ({
+                                    lower,
+                                    upper,
+                                    frequency,
+                                  }),
+                                ),
+                              );
+                              setSource("grouped");
+                            }
+                            setEditingFrequencies(true);
+                          }}
+                        >
+                          {editingFrequencies && source === "grouped"
+                            ? c.doneFrequencies
+                            : c.editFrequencies}
+                        </button>
                         <label>
                           <input
                             type="checkbox"
@@ -834,24 +925,74 @@ export default function StatisticalChartsLab() {
                         continuous={grouping.precision === 0}
                         selected={selected}
                         onSelect={setSelected}
+                        onFrequencyChange={
+                          editingFrequencies && source === "grouped" && !fixed
+                            ? (index, frequency) =>
+                                setGroups((current) =>
+                                  current.map((group, i) =>
+                                    i === index
+                                      ? { ...group, frequency }
+                                      : group,
+                                  ),
+                                )
+                            : undefined
+                        }
                       />
                     </section>
                   )}
 
                   <section className={s.chartPanel}>
                     <div className={s.chartHeader}>
-                      <Field label={c.chart}>
-                        <select
-                          value={type}
-                          onChange={(e) => setType(e.target.value as ChartType)}
-                        >
-                          {chartTypes.map((t, i) => (
-                            <option key={t} value={t}>
-                              {c.chartNames[i]}
+                      <div className={s.chartSelectors}>
+                        <Field label={c.chart}>
+                          <select
+                            value={type}
+                            onChange={(e) =>
+                              setType(e.target.value as ChartType)
+                            }
+                          >
+                            {chartTypes.map((t, i) => (
+                              <option key={t} value={t}>
+                                {c.chartNames[i]}
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
+                        <Field label={c.horizontalLabels}>
+                          <select
+                            value={
+                              type.startsWith("cumulative")
+                                ? "boundaries"
+                                : display.boundaries
+                                  ? display.marks
+                                    ? "both"
+                                    : "boundaries"
+                                  : display.marks
+                                    ? "marks"
+                                    : "none"
+                            }
+                            disabled={type.startsWith("cumulative")}
+                            onChange={(e) =>
+                              setDisplay({
+                                ...display,
+                                boundaries:
+                                  e.target.value === "boundaries" ||
+                                  e.target.value === "both",
+                                marks:
+                                  e.target.value === "marks" ||
+                                  e.target.value === "both",
+                              })
+                            }
+                          >
+                            <option value="marks">{c.axisMarks}</option>
+                            <option value="boundaries">
+                              {c.axisBoundaries}
                             </option>
-                          ))}
-                        </select>
-                      </Field>
+                            <option value="both">{c.axisBoth}</option>
+                            <option value="none">{c.axisNone}</option>
+                          </select>
+                        </Field>
+                      </div>
                       <div className={s.chartActions}>
                         <button onClick={present}>{c.tableChartView}</button>
                         <button

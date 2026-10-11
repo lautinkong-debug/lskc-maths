@@ -1,20 +1,66 @@
 import { copy } from "@/lib/copy";
+import { useState } from "react";
 import { format, type Row } from "./statistics";
 import { interval } from "./Chart";
 import s from "./lab.module.css";
 const c = copy.statisticalCharts;
+function FrequencyInput({
+  value,
+  maximum,
+  label,
+  onChange,
+  onSelect,
+}: {
+  value: number;
+  maximum: number;
+  label: string;
+  onChange: (value: number) => void;
+  onSelect: () => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const valid = (text: string) => /^\d+$/.test(text) && Number(text) <= maximum;
+  const invalid = draft !== null && !valid(draft);
+  return (
+    <>
+      <input
+        className={s.frequencyInput}
+        type="number"
+        min={0}
+        max={maximum}
+        step={1}
+        aria-label={label}
+        aria-invalid={invalid}
+        value={draft ?? value}
+        onFocus={onSelect}
+        onChange={(e) => {
+          const text = e.target.value;
+          setDraft(text);
+          if (valid(text)) onChange(Number(text));
+        }}
+        onBlur={() => setDraft(null)}
+      />
+      {invalid && (
+        <span className={s.frequencyError} role="status">
+          {c.frequencyInputHelp}
+        </span>
+      )}
+    </>
+  );
+}
 export function FrequencyTable({
   rows,
   full,
   continuous,
   selected,
   onSelect,
+  onFrequencyChange,
 }: {
   rows: Row[];
   full: boolean;
   continuous: boolean;
   selected: number | null;
   onSelect: (i: number) => void;
+  onFrequencyChange?: (i: number, frequency: number) => void;
 }) {
   return (
     <div className={s.tableScroll}>
@@ -62,7 +108,19 @@ export function FrequencyTable({
                   )}
                 </>
               )}
-              <td>{r.frequency}</td>
+              <td>
+                {onFrequencyChange ? (
+                  <FrequencyInput
+                    value={r.frequency}
+                    maximum={1e6 - (rows.at(-1)!.cumulative - r.frequency)}
+                    label={`${c.frequency}: ${interval(r, continuous)}`}
+                    onChange={(frequency) => onFrequencyChange(i, frequency)}
+                    onSelect={() => onSelect(i)}
+                  />
+                ) : (
+                  r.frequency
+                )}
+              </td>
               <td>{r.cumulative}</td>
             </tr>
           ))}

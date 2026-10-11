@@ -193,6 +193,225 @@
   flex-wrap: wrap;
   justify-content: end;
   gap: 8px;
+  max-width: 145px;
+}
+.table .frequencyInput {
+  width: 76px;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 5px 7px;
+  text-align: right;
+}
+.table:has(.frequencyInput) td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+.frequencyError {
+  display: block;
+  max-width: 150px;
+  color: var(--color-crimson, #da2127);
+  font-size: 12px;
+}
+.concepts {
+  display: grid;
+  gap: 20px;
+}
+.concepts h3 {
+  margin: 4px 0;
+}
+.concepts h4 {
+  margin: 0 0 16px;
+  font-size: 20px;
+}
+.conceptGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+.conceptCard {
+  min-width: 0;
+  background: white;
+  border: 1px solid var(--color-grid);
+  border-radius: 8px;
+  padding: 22px;
+}
+.conceptOptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.conceptOptions button {
+  text-align: left;
+  min-width: 0;
+}
+.conceptOptions svg {
+  display: block;
+  width: 100%;
+}
+.lab .conceptOptions button[aria-pressed="true"] {
+  background: #e7f0f7;
+  color: var(--color-navy);
+  box-shadow: inset 0 0 0 2px var(--color-navy);
+}
+.conceptOptions span {
+  display: block;
+  font-size: 13px;
+  text-align: center;
+}
+.stemTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 24px 0;
+}
+.stemTable caption {
+  caption-side: bottom;
+  text-align: left;
+  padding-top: 20px;
+  font-size: 14px;
+}
+.stemTable th,
+.stemTable td {
+  padding: 16px;
+  text-align: left;
+}
+.stemTable td {
+  font-variant-numeric: tabular-nums;
+  white-space: pre-wrap;
+}
+.stemTable th:first-child {
+  border-right: 2px solid var(--color-navy);
+  width: 100px;
+}
+.stemTable tr[data-selected="true"] {
+  background: var(--color-sunshine, #f4dd45);
+}
+.conceptEquation {
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-navy);
+}
+.walkthrough {
+  display: grid;
+  gap: 18px;
+}
+.animationToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.animationToolbar label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.animationToolbar output {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.animationNarration {
+  min-height: 78px;
+  padding: 18px 22px;
+  margin: 0;
+  border-left: 4px solid var(--color-navy);
+  background: #e7f0f7;
+  font-size: 20px;
+}
+.animationPlot {
+  min-width: 0;
+  border: 1px solid var(--color-grid);
+  border-radius: 8px;
+  background: white;
+  padding: 18px;
+}
+.animationPlot h4 {
+  margin: 0 0 10px;
+}
+.animationPlot svg {
+  width: 100%;
+  max-height: 470px;
+  display: block;
+}
+.animatedBar {
+  transition:
+    y 650ms ease,
+    height 650ms ease,
+    fill 250ms ease;
+}
+.animatedGuide {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: traceReading 1000ms ease-out both;
+}
+.animatedLeaf {
+  display: inline-block;
+  min-width: 28px;
+  padding: 4px;
+  margin: 2px;
+  text-align: center;
+  border-radius: 4px;
+  transition:
+    background-color 300ms,
+    transform 300ms;
+}
+.countedLeaf {
+  background: #e7f0f7;
+}
+.animatedLeaf[data-current="true"] {
+  background: #f4dd45;
+  transform: translateY(-4px);
+  font-weight: 700;
+}
+.revealValue {
+  display: inline-block;
+  animation: revealCount 500ms ease-out;
+}
+@keyframes traceReading {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes revealCount {
+  from {
+    opacity: 0.25;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 600px) {
+  .animationNarration {
+    font-size: 17px;
+  }
+  .animationPlot {
+    padding: 10px;
+  }
+}
+@media (max-width: 800px) {
+  .conceptGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .conceptCard {
+    padding: 16px;
+  }
+}
+.chartSelectors {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.chartSelectors .field {
+  min-width: 0;
 }
 .field {
   display: grid;
@@ -1606,5 +1825,13 @@
   .chartActions {
     justify-content: start;
     padding-bottom: 8px;
+    max-width: none;
+  }
+}
+@media (max-width: 520px) {
+  .chartSelectors {
+    flex-basis: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
   }
 }

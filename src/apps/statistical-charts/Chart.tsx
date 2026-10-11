@@ -339,7 +339,7 @@ export function Chart({
         ))}
         {(display.boundaries || cumulative) &&
           boundaryTicks.map((t, i) => (
-            <g key={`b${i}`}>
+            <g key={`b${i}`} data-axis-boundary={t}>
               <line
                 x1={x(t)}
                 x2={x(t)}
@@ -367,7 +367,7 @@ export function Chart({
         {display.marks &&
           !cumulative &&
           markTicks.map((t, i) => (
-            <g key={`m${i}`}>
+            <g key={`m${i}`} data-axis-mark={t}>
               <line
                 x1={x(t)}
                 x2={x(t)}

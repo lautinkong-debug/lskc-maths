@@ -38,6 +38,32 @@ Do not switch `.env.local` to a real project for this test.
 
 ## What to try
 
+New classroom controls: **Horizontal axis labels** switches between class marks and lower/upper
+class boundaries without changing the data or bar positions. Cumulative charts always label
+boundaries. **Edit frequencies** in the frequency table turns the displayed raw-data counts into
+a grouped-frequency copy; the original observations remain available in the current session.
+Valid frequency edits immediately update the graph and cumulative totals. Invalid drafts leave
+the last valid chart intact and revert on leaving the cell. Fixed lessons disable editing.
+
+**08 · Animated walkthroughs** adds four paced teaching sequences. Use Play/Pause, Previous/Next,
+Replay and the speed selector. Leaves add one observation at a time; cumulative rises transfer to
+bars, including zero rises; the supplied weight tables reveal `a=5, x=17, b=11, y=33, z=36`.
+The electricity-bill sequence traces percentile targets across and down, then reverses direction
+for the voucher threshold. Its explicit teaching coordinates are disclosed in the UI; it is not an
+exact digitisation of the photographed chart. This reconstruction gives median 560.5, P85 750.5,
+and 55 households with bills at least 500.5. These graph readings are grouped-data estimates.
+Reduced motion removes interpolation while retaining every step. Hidden model answers disable
+playback and reset the displayed scene to the starting question. Playback steps themselves are
+not saved; reopening starts the sequence afresh.
+
+**07 · Connect the representations** includes the supplied staff-age stem-and-leaf example and
+cumulative-frequency-to-histogram concepts. Predict A–D, then **Check and explain**. Count all
+leaves, including repeated values, and identify skew by the tail direction. For cumulative graphs,
+subtract consecutive boundary totals; a flat section gives zero frequency. All histogram options
+use the same vertical scale. Edit ages or revealed table frequencies, or choose **Next example**.
+The concept dataset and mode use the existing workspace/share storage; answer selections reset
+when reopening. These are schematic shape comparisons, not unique fitted probability curves.
+
 1. Change the context, range, sample size and shape; click **Generate New Data**.
 2. Copy the seed and use **Reproduce Seed** with the same range, size, shape and precision.
 3. Select each of the five chart types. The active dataset stays the same.

@@ -2,6 +2,111 @@ import { test, expect } from "@playwright/test";
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
 });
+test("edit table frequencies beside the chart without changing raw observations", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  const table = page.getByRole("table", {
+    name: "Frequency distribution",
+    exact: true,
+  });
+  await page
+    .getByRole("button", { name: "Table & chart view", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Edit frequencies", exact: true })
+    .click();
+  const input = table.getByLabel("Frequency: 34–50", { exact: true });
+  await expect(input).toHaveValue("17");
+  await input.fill("8");
+  await expect(page.locator('[data-bar="2"]')).toHaveAttribute(
+    "data-frequency",
+    "8",
+  );
+  await expect(table.locator("tfoot td").first()).toHaveText("21");
+  await expect(
+    table.locator("tbody tr").nth(2).locator("td").last(),
+  ).toHaveText("8");
+  await input.fill("-1");
+  await expect(input).toHaveAttribute("aria-invalid", "true");
+  await expect(table.locator("tfoot td").first()).toHaveText("21");
+  await input.fill("1.5");
+  await expect(input).toHaveAttribute("aria-invalid", "true");
+  await input.fill("0");
+  await expect(table.locator("tfoot td").first()).toHaveText("13");
+  const a = (await table.boundingBox())!,
+    b = (await page.locator("#lab-chart svg[role=group]").boundingBox())!;
+  expect(Math.max(a.y + a.height, b.y + b.height)).toBeLessThanOrEqual(720);
+  await page.screenshot({
+    path: "test-results/statistical-edit-frequencies.png",
+  });
+  await page.getByRole("button", { name: "Done editing", exact: true }).click();
+  await expect(input).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page
+    .getByRole("button", { name: "Raw observations", exact: true })
+    .click();
+  await expect(page.getByTestId("lab-total")).toHaveText("30");
+  await page
+    .getByRole("button", { name: "Grouped frequencies", exact: true })
+    .click();
+  await expect(page.getByTestId("lab-total")).toHaveText("13");
+  await page.reload();
+  await expect(page.getByTestId("lab-total")).toHaveText("13");
+});
+test("boundary axis labels preserve the histogram and restore with the workspace", async ({
+  page,
+}) => {
+  const labels = page.getByLabel("Horizontal axis labels", { exact: true });
+  const bars = page.locator("[data-bar]");
+  await expect(bars).toHaveCount(6);
+  const geometry = () =>
+    bars.evaluateAll((nodes) =>
+      nodes.map((n) => ["x", "width", "height"].map((k) => n.getAttribute(k))),
+    );
+  const before = await geometry();
+  await labels.selectOption("boundaries");
+  await expect(page.locator("[data-axis-mark]")).toHaveCount(0);
+  expect(
+    await page
+      .locator("[data-axis-boundary]")
+      .evaluateAll((nodes) =>
+        nodes.map((n) => Number(n.getAttribute("data-axis-boundary"))),
+      ),
+  ).toEqual([-0.5, 16.5, 33.5, 50.5, 67.5, 84.5, 101.5]);
+  expect(await geometry()).toEqual(before);
+  await expect(page.getByTestId("lab-total")).toHaveText("30");
+  await page.reload();
+  await expect(labels).toHaveValue("boundaries");
+  await page
+    .getByRole("button", { name: "Table & chart view", exact: true })
+    .click();
+  await expect(labels).toBeVisible();
+  await labels.selectOption("marks");
+  await expect(page.locator("[data-axis-boundary]")).toHaveCount(0);
+  await expect(page.locator("[data-axis-mark]")).toHaveCount(6);
+  await page
+    .getByLabel("Chart type", { exact: true })
+    .selectOption("cumulativePolygon");
+  await expect(labels).toHaveValue("boundaries");
+  await expect(labels).toBeDisabled();
+  await expect(page.locator("[data-axis-boundary]")).toHaveCount(7);
+  await page
+    .getByLabel("Chart type", { exact: true })
+    .selectOption("histogram");
+  await expect(labels).toHaveValue("marks");
+  await labels.selectOption("boundaries");
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.screenshot({ path: "test-results/statistical-boundary-axis.png" });
+  await page.keyboard.press("Escape");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(labels).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});
 test("dataset settings precede data, and deletion uses a bin icon", async ({
   page,
 }) => {
