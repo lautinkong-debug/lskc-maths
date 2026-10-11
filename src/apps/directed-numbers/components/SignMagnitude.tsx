@@ -15,6 +15,7 @@ import {
   useDemonstration,
 } from "./TeachingSteps";
 import styles from "./SignMagnitude.module.css";
+import { GraphNumberText, StackedNumberText } from "./GraphNumberText";
 const c = copy.apps.directedNumbers.magnitudeLesson;
 const t = copy.apps.directedNumbers.demonstration;
 function MagnitudeGraph({
@@ -29,6 +30,14 @@ function MagnitudeGraph({
   const presenting = usePresentation();
   const marker = useId().replaceAll(":", "");
   const m = magnitudeModel(move);
+  const fractions = Object.values(m.labels).some((label) =>
+    label.includes("/"),
+  );
+  const startY = fractions ? 202 : 180;
+  const startBarY = fractions ? 306 : 263;
+  const movementBarY = fractions ? 360 : 306;
+  const resultBarY = fractions ? 414 : 349;
+  const calculationY = fractions ? 490 : 394;
   const low = Math.min(0, move.start, m.end),
     high = Math.max(0, move.start, m.end);
   const span = high - low || 1,
@@ -47,8 +56,9 @@ function MagnitudeGraph({
   const calculation = useRef<SVGTextElement>(null);
   const finish = useRef<SVGTextElement>(null);
   const finishAnchor = m.end < 0 ? "end" : "start";
-  const finishX = end + (m.end < 0 ? -14 : 22);
-  const finishY = Math.abs(end - start) < 130 ? 210 : 185;
+  const finishX = end + (m.end < 0 ? -26 : 26);
+  // Give Start, Finish/zero and the distance labels separate vertical lanes.
+  const finishY = fractions ? 246 : 210;
   const resultCentre = (zero + end) / 2;
   useLayoutEffect(() => {
     const node = finish.current;
@@ -113,23 +123,23 @@ function MagnitudeGraph({
           strokeLinejoin="round"
           fill="none"
         />
-        <text
+        <GraphNumberText
           x={(from + to) / 2}
           y={y - 12}
           textAnchor="middle"
-          fontSize="17"
+          fontSize={17}
           fontWeight={key === "result" ? "700" : undefined}
           fill={stroke}
         >
           {label}
-        </text>
+        </GraphNumberText>
       </g>
     );
   }
   return (
     <svg
-      viewBox="0 0 640 390"
-      className={`h-auto w-full ${presenting ? "max-h-[380px]" : ""}`}
+      viewBox={`0 0 640 ${fractions ? 510 : 410}`}
+      className={`h-auto w-full ${presenting ? (fractions ? "max-h-[500px]" : "max-h-[380px]") : ""}`}
       role="img"
       aria-label={c.exactCaption(
         startLabel ?? m.labels.start,
@@ -172,25 +182,25 @@ function MagnitudeGraph({
         >
           <rect
             x={Math.min(zero, end)}
-            y="87"
+            y="123"
             width={Math.abs(end - zero)}
-            height="249"
+            height="32"
             fill="#ede9fe"
             fillOpacity="0.7"
           />
           <rect
             x={Math.min(zero, end)}
-            y="87"
+            y="123"
             width={Math.abs(end - zero)}
-            height="249"
+            height="32"
             fill={`url(#${magnitudePattern})`}
           />
           {m.end === 0 && (
             <line
               x1={zero}
               x2={zero}
-              y1="87"
-              y2="336"
+              y1="123"
+              y2="155"
               stroke={resultColour}
               strokeWidth="3"
             />
@@ -215,7 +225,7 @@ function MagnitudeGraph({
         x1={zero}
         x2={zero}
         y1="60"
-        y2="340"
+        y2={resultBarY + 11}
         stroke="#0f4574"
         strokeWidth="3"
         data-testid="graph-zero-line"
@@ -224,21 +234,21 @@ function MagnitudeGraph({
         x1={start}
         x2={start}
         y1="75"
-        y2="243"
+        y2={startBarY}
         stroke="#7990a3"
         strokeDasharray="4 4"
       />
       <circle cx={start} cy="155" r="5" fill="#0f4574" />
-      <text
+      <GraphNumberText
         x={start}
-        y="185"
+        y={startY}
         textAnchor="middle"
-        fontSize="18"
+        fontSize={18}
         fill="#0f4574"
         data-testid="graph-start"
       >
-        {c.startMark}: {startLabel ?? m.labels.start}
-      </text>
+        {`${c.startMark}: ${startLabel ?? m.labels.start}`}
+      </GraphNumberText>
       {m.delta !== 0 && (
         <g
           className={styles.motion}
@@ -258,11 +268,11 @@ function MagnitudeGraph({
           />
         </g>
       )}
-      <text
-        x="320"
-        y="33"
+      <GraphNumberText
+        x={320}
+        y={33}
         textAnchor="middle"
-        fontSize="19"
+        fontSize={19}
         fontWeight="600"
         fill={colour}
       >
@@ -271,7 +281,7 @@ function MagnitudeGraph({
           : stage === 0
             ? t.graphReady
             : t.startHint}
-      </text>
+      </GraphNumberText>
       <g
         className={styles.motion}
         style={{ transform: `translateX(${moving ? end : start}px)` }}
@@ -288,19 +298,19 @@ function MagnitudeGraph({
         <line
           x1={end}
           x2={end}
-          y1="92"
-          y2="335"
+          y1="123"
+          y2={resultBarY + 6}
           stroke={resultColour}
           strokeDasharray="4 4"
         />
       )}
       {complete && (
-        <text
-          ref={finish}
+        <GraphNumberText
+          textRef={finish}
           x={finishX}
           y={finishY}
           textAnchor={finishAnchor}
-          fontSize="18"
+          fontSize={18}
           fontWeight="700"
           fill={resultColour}
           stroke="#fff"
@@ -309,13 +319,13 @@ function MagnitudeGraph({
           strokeLinejoin="round"
           data-testid="graph-finish"
         >
-          {c.endMark}: {m.labels.end}
-        </text>
+          {`${c.endMark}: ${m.labels.end}`}
+        </GraphNumberText>
       )}
       <g data-testid="graph-zero-label">
         <rect
           x={zero - 17}
-          y="189"
+          y={fractions ? 87 : 189}
           width="34"
           height="33"
           rx="6"
@@ -325,7 +335,7 @@ function MagnitudeGraph({
         />
         <text
           x={zero}
-          y="214"
+          y={fractions ? 112 : 214}
           textAnchor="middle"
           fontSize="26"
           fontWeight="800"
@@ -338,7 +348,7 @@ function MagnitudeGraph({
         distanceBar(
           zero,
           start,
-          243,
+          startBarY,
           t.startDistance(m.labels.a),
           "#0f4574",
           "start",
@@ -347,7 +357,7 @@ function MagnitudeGraph({
         distanceBar(
           start,
           end,
-          286,
+          movementBarY,
           t.moveDistance(m.labels.distance),
           "#b51b25",
           "movement",
@@ -356,7 +366,7 @@ function MagnitudeGraph({
         distanceBar(
           zero,
           end,
-          329,
+          resultBarY,
           m.kind === "same"
             ? t.total(m.labels.magnitude)
             : t.remaining(m.labels.magnitude),
@@ -364,20 +374,20 @@ function MagnitudeGraph({
           "result",
         )}
       {calculate && (
-        <text
+        <GraphNumberText
           key="calculation"
-          ref={calculation}
+          textRef={calculation}
           x={resultCentre}
-          y="374"
+          y={calculationY}
           textAnchor="middle"
           className={styles.reveal}
-          fontSize="25"
+          fontSize={25}
           fontWeight="700"
           fill={resultColour}
           data-testid="graph-calculation"
         >
           {m.calculation}
-        </text>
+        </GraphNumberText>
       )}
     </svg>
   );
@@ -524,7 +534,9 @@ export function SignMagnitude({
                   >
                     <dt className="text-sm">{c.magnitude}</dt>
                     <dd className="text-navy font-semibold">
-                      {c.distance(m.labels.magnitude)}
+                      <StackedNumberText>
+                        {c.distance(m.labels.magnitude)}
+                      </StackedNumberText>
                     </dd>
                   </div>
                 )}

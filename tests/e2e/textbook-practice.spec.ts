@@ -363,7 +363,10 @@ for (const [expression, sign, calculation] of [
     await expect(page.getByTestId("final-equation")).toHaveCount(0);
     await next(page);
     await expect(page.getByTestId("result-magnitude-term")).toBeVisible();
-    await expect(page.getByTestId("graph-calculation")).toHaveText(calculation);
+    await expect(page.getByTestId("graph-calculation")).toHaveAttribute(
+      "aria-label",
+      calculation,
+    );
     await expect(page.getByTestId("distance-result")).toBeVisible();
     await next(page);
     await expect(page.getByTestId("magnitude-result")).toContainText(sign);
@@ -674,7 +677,10 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
     }
     const progress = await page.getByText(/^Step \d+ of \d+$/).textContent();
     await next(page, Number(progress!.match(/of (\d+)/)![1]));
-    await expect(page.getByTestId("graph-calculation")).toHaveText(calculation);
+    await expect(page.getByTestId("graph-calculation")).toHaveAttribute(
+      "aria-label",
+      calculation,
+    );
     await expect(
       page.getByTestId("final-equation").getByRole("math"),
     ).toHaveAttribute("aria-label", result);
@@ -707,7 +713,8 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
     await expect(
       page.getByRole("alert").filter({ hasText: "Enter valid numbers" }),
     ).toBeVisible();
-    await expect(page.getByTestId("graph-calculation")).toHaveText(
+    await expect(page.getByTestId("graph-calculation")).toHaveAttribute(
+      "aria-label",
       "3/2 − 1/4 = 5/4",
     );
   }
@@ -715,6 +722,9 @@ test("custom number line accepts exact decimals, fractions and mixed numbers", a
 
 for (const expression of [
   "50-60",
+  "(-50)-(+60)",
+  "3.1-4.9",
+  "(-4/3)+1/6",
   "-50+60",
   "-50-30",
   "50+(-50)",
@@ -754,19 +764,46 @@ for (const expression of [
       const finish = box("graph-finish"),
         start = box("graph-start"),
         zero = box("graph-zero-label");
-      const overlaps = (b: DOMRect) =>
-        finish.x < b.x + b.width &&
-        finish.x + finish.width > b.x &&
-        finish.y < b.y + b.height &&
-        finish.y + finish.height > b.y;
+      const distanceLabels = ["start", "movement", "result"].map((key) =>
+        (
+          (svg.querySelector(
+            `[data-testid="distance-${key}"] [data-stacked-fractions]`,
+          ) ??
+            svg.querySelector(
+              `[data-testid="distance-${key}"] text`,
+            )) as SVGGraphicsElement
+        ).getBBox(),
+      );
+      const boxes = [
+        finish,
+        start,
+        zero,
+        ...distanceLabels,
+        box("graph-calculation"),
+      ];
+      const overlap = boxes.some((a, i) =>
+        boxes
+          .slice(i + 1)
+          .some(
+            (b) =>
+              a.x < b.x + b.width &&
+              a.x + a.width > b.x &&
+              a.y < b.y + b.height &&
+              a.y + a.height > b.y,
+          ),
+      );
       return {
         belowAxis: finish.y > 155,
         inside: finish.x >= 19 && finish.x + finish.width <= 621,
-        overlap: overlaps(start) || overlaps(zero),
+        overlap,
       };
     });
     expect(labels).toEqual({ belowAxis: true, inside: true, overlap: false });
-    if (["-50+30", "-50-30", "0+0"].includes(expression)) {
+    if (
+      ["-50+30", "-50-30", "(-50)-(+60)", "(-4/3)+1/6", "0+0"].includes(
+        expression,
+      )
+    ) {
       await page.setViewportSize({ width: 1920, height: 1080 });
       await page
         .getByRole("button", { name: "Projection mode", exact: true })
@@ -792,13 +829,32 @@ for (const expression of [
         return {
           x: rect.x.baseVal.value,
           width: rect.width.baseVal.value,
+          y: rect.y.baseVal.value,
+          height: rect.height.baseVal.value,
           barX: box.x,
           barWidth: box.width,
-          calculationX: calculation.x.baseVal.getItem(0).value,
+          calculationX:
+            calculation.tagName.toLowerCase() === "text"
+              ? calculation.x.baseVal.getItem(0).value
+              : calculation.getBBox().x + calculation.getBBox().width / 2,
         };
       });
     expect(geometry.x).toBeCloseTo(geometry.barX, 2);
     expect(geometry.width).toBeCloseTo(geometry.barWidth, 2);
+    expect(geometry.y + geometry.height).toBe(155);
+    expect(geometry.height).toBeLessThanOrEqual(36);
+    if (expression.includes("/")) {
+      await expect(page.getByTestId("graph-calculation")).toHaveAttribute(
+        "data-stacked-fractions",
+        "true",
+      );
+      await expect(
+        page.getByTestId("graph-calculation").locator("line"),
+      ).toHaveCount(3);
+      await expect(
+        page.getByTestId("result-magnitude").locator(".mfrac"),
+      ).toHaveCount(1);
+    }
     expect(geometry.calculationX).toBeCloseTo(
       geometry.barX + geometry.barWidth / 2,
       2,
@@ -807,6 +863,18 @@ for (const expression of [
       expect(geometry.width).toBe(0);
     else expect(geometry.width).toBeGreaterThan(0);
     await expect(band).toHaveCount(1);
+    if (["(-50)-(+60)", "(-4/3)+1/6"].includes(expression)) {
+      await page.setViewportSize({ width: 390, height: 844 });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.getByTestId("magnitude-line").scrollIntoViewIfNeeded();
+      await page.getByTestId("magnitude-line").screenshot({
+        path: testInfo.outputPath("narrow-highlight-phone.png"),
+      });
+    }
     if (expression === "50-60") {
       await expect(page.getByTestId("graph-finish")).toHaveAttribute(
         "fill",
