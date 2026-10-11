@@ -112,6 +112,17 @@ bracket-first timing, magnitude calculations, playback, reset, filters, fraction
 lesson links, question restoration, mobile and projection views.
 The existing bird animation suite covers regression of sign turns and unit steps.
 
+## Revision bank and exercise arrows — 11/10/2026
+
+Application source commit `77dc2b5` was published as
+`dpl_BxDrUZZdjJkcBwy2GQ6oWPQZmFMB` on the official domain. All nine focused live
+scenarios passed across final runs, covering revision selection/reload, decimal
+and nested fraction completion, split animation, and exercise-arrow alignment
+and retention. The fraction-arrow test waits for KaTeX fonts and layout before
+measuring; its first production attempt measured during font loading. No
+application change was needed for the passing recheck. Local verification passed
+534 maths/rendering checks, 15 browser scenarios, TypeScript, scoped lint and build.
+
 ## Initial production release
 
 Published with the owner's approval at `https://lskc-maths.vercel.app/apps/directed-numbers`.

@@ -776,6 +776,14 @@ for (const [id, phase, pair, sign] of [
       "opacity",
       "1",
     );
+    // Fraction glyphs can load a separate KaTeX font on production. Let the
+    // font/ResizeObserver positioning pass finish before reading coordinates.
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve()),
+      );
+    });
     const geometry = await arrows.evaluate((svg) => {
       const root = svg.closest("[data-arrows-positioned]")!;
       const box = svg.getBoundingClientRect();
@@ -800,7 +808,10 @@ for (const [id, phase, pair, sign] of [
     expect(geometry.signs).toBe(pair);
     expect(geometry.visible).toBe(true);
     expect(geometry.offsets).toHaveLength(2);
-    expect(geometry.offsets.every((offset) => offset < 2)).toBe(true);
+    expect(
+      geometry.offsets.every((offset) => offset < 2),
+      JSON.stringify(geometry),
+    ).toBe(true);
     const magnitude = page
       .getByTestId("operation-sign-magnitude")
       .last()
