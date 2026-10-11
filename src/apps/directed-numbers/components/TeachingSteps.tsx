@@ -325,31 +325,71 @@ export function EquationFrame({
   // Choose the break from the complete question, never the revealed row count.
   // This keeps earlier working in the same column on Next, Previous and Replay.
   const columns = spread && steps.length >= 4;
-  const equationWeight = (tex: string, next?: Step) =>
-    1 +
-    (tex.includes("\\frac") ? 0.5 : 0) +
-    (next && signArrowTex(next) ? 1.5 : 0);
   const originalTex = expressionTex(ast, steps[0]?.numberStyle);
-  const weights = steps.map(
-    (step, index) =>
-      equationWeight(step.tex, steps[index + 1]) +
-      0.8 +
-      (step.signReveal || step.batchReveal ? 0.4 : 0),
-  );
-  let split = steps.length;
-  if (columns) {
-    let left = equationWeight(originalTex, steps[0]);
-    let right = weights.reduce((sum, weight) => sum + weight, 0);
-    let best = Infinity;
-    weights.slice(0, -1).forEach((weight, index) => {
-      left += weight;
-      right -= weight;
-      if (Math.max(left, right) < best) {
-        best = Math.max(left, right);
-        split = index + 1;
+  const board = useRef<HTMLDivElement>(null);
+  const probe = useRef<HTMLDivElement>(null);
+  const [columnBreak, setColumnBreak] = useState(steps.length);
+  const split = columns ? columnBreak : steps.length;
+  useLayoutEffect(() => {
+    const node = board.current,
+      measure = probe.current;
+    if (!columns || !node || !measure) return;
+    const arrange = () => {
+      if (node.clientWidth < 960) return;
+      // Measure the finished question at the desired classroom size. Future
+      // rows live only in this invisible, inaccessible sizing area.
+      const widest = Math.max(
+        ...Array.from(
+          measure.querySelectorAll<HTMLElement>("[data-measure-math]"),
+          (el) => el.scrollWidth,
+        ),
+      );
+      const size =
+        Math.floor(
+          Math.min(32, (32 * (measure.clientWidth - 16)) / widest) * 100,
+        ) / 100;
+      node.style.setProperty("--board-font", `${size}px`);
+      const toolbar = node.parentElement?.querySelector<HTMLElement>(
+        '[data-testid="teaching-controls"]',
+      );
+      const available = Math.max(
+        360,
+        window.innerHeight - (toolbar?.offsetHeight ?? 80) - 100,
+      );
+      node.style.setProperty("--board-height", `${available}px`);
+      const rows = Array.from(measure.children) as HTMLElement[];
+      const rowHeight = (row: HTMLElement, index: number) => {
+        const equation = row.querySelector<HTMLElement>(`.${styles.equation}`)!;
+        const arrow = steps[index] && signArrowTex(steps[index]) ? 60 : 0;
+        // The probe has a fixed 32px font: scale only its equation area,
+        // keeping the explanation, padding and sign arrows at their own sizes.
+        return (
+          row.offsetHeight -
+          (equation.offsetHeight - 16 - arrow) * (1 - size / 32) +
+          2
+        );
+      };
+      let height = rowHeight(rows[0], 0) + 36;
+      let count = 0;
+      for (const row of rows.slice(1)) {
+        const required = rowHeight(row, count + 1);
+        if (count > 0 && height + required > available) break;
+        height += required;
+        count++;
       }
-    });
-  }
+      setColumnBreak((value) => (value === count ? value : count));
+    };
+    arrange();
+    const observer = new ResizeObserver(arrange);
+    observer.observe(node);
+    window.addEventListener("resize", arrange);
+    document.fonts.addEventListener("loadingdone", arrange);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", arrange);
+      document.fonts.removeEventListener("loadingdone", arrange);
+    };
+  }, [columns, steps]);
   const visible = Math.ceil(position / 2);
   const renderSteps = (start: number, end: number) => (
     <ol className={styles.working} aria-label={t.allSteps} start={start + 1}>
@@ -407,6 +447,7 @@ export function EquationFrame({
   );
   return (
     <div
+      ref={board}
       className={`min-w-0 ${columns ? styles.board : ""}`}
       style={{ overflowAnchor: "none" }}
       data-testid="equation-frame"
@@ -414,6 +455,43 @@ export function EquationFrame({
         position === 0 ? "start" : highlighting ? "highlight" : "applied"
       }
     >
+      {columns && (
+        <div ref={probe} className={styles.measure} aria-hidden="true" inert>
+          {[null, ...steps].map((step, index) => {
+            const next = steps[index];
+            const tex = next
+              ? (signArrowTex(next) ?? step?.tex ?? originalTex)
+              : step!.tex;
+            return (
+              <div key={index}>
+                {step && (
+                  <div className={styles.note}>
+                    <span
+                      data-measure-note={
+                        step.batchReveal
+                          ? t.independentSigns
+                          : notes[step.noteKey]
+                      }
+                    />
+                    {(step.signReveal || step.batchReveal) && (
+                      <span
+                        className={styles.optionalBadge}
+                        data-measure-note={t.optionalStep}
+                      />
+                    )}
+                  </div>
+                )}
+                <div className={styles.equation}>
+                  <span data-measure-math className={styles.measureMath}>
+                    <Tex>{`${step ? "= " : ""}${tex}`}</Tex>
+                  </span>
+                  {next && signArrowTex(next) && <div style={{ height: 60 }} />}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
       <div className={styles.columns}>
         <div className={styles.column} data-working-column="first">
           {columns && <p className={styles.columnHeading}>{t.firstColumn}</p>}
@@ -428,7 +506,10 @@ export function EquationFrame({
           {renderSteps(0, split)}
         </div>
         {columns && (
-          <div className={styles.column} data-working-column="continued">
+          <div
+            className={`${styles.column} ${visible <= split ? styles.waitingColumn : ""}`}
+            data-working-column="continued"
+          >
             <p className={styles.columnHeading}>{t.nextColumn}</p>
             {renderSteps(split, steps.length)}
           </div>

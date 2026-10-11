@@ -20,6 +20,7 @@ for (const id of ["2B-28b", "2C-33b", "R2-33b", "R2-37a", "R2-37b", "R2-38b"]) {
     const buttonY = (await nextButton.boundingBox())!.y;
     const left = frame.locator('[data-working-column="first"]');
     const right = frame.locator('[data-working-column="continued"]');
+    await expect(right).toBeHidden();
     expect((await right.boundingBox())!.x).toBeGreaterThan(
       (await left.boundingBox())!.x + 500,
     );
@@ -29,9 +30,14 @@ for (const id of ["2B-28b", "2C-33b", "R2-33b", "R2-37a", "R2-37b", "R2-38b"]) {
     const original = frame.locator("[data-equation-line]").first();
     const originalY = (await original.boundingBox())!.y;
     let clicks = 0;
+    let continued = false;
     while (await nextButton.isEnabled()) {
       await nextButton.click();
       clicks++;
+      if (!continued && (await right.isVisible())) {
+        continued = true;
+        await expect(left.locator('[data-completed="false"]')).toHaveCount(0);
+      }
       expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(scroll, 0);
       expect((await nextButton.boundingBox())!.y).toBeCloseTo(buttonY, 0);
       expect((await original.boundingBox())!.y).toBeCloseTo(originalY, 0);
@@ -41,7 +47,7 @@ for (const id of ["2B-28b", "2C-33b", "R2-33b", "R2-37a", "R2-37b", "R2-38b"]) {
         ).toHaveCount(0);
     }
     await expect(frame.getByTestId("working-step")).toHaveCount(clicks / 2);
-    await expect(right.getByTestId("after-equation")).toBeInViewport({
+    await expect(frame.getByTestId("after-equation")).toBeInViewport({
       ratio: 1,
     });
     for (const line of await frame.locator("[data-equation-line]").all()) {
@@ -49,6 +55,19 @@ for (const id of ["2B-28b", "2C-33b", "R2-33b", "R2-37a", "R2-37b", "R2-38b"]) {
       expect(
         await line.evaluate((n) => n.scrollWidth - n.clientWidth),
       ).toBeLessThanOrEqual(1);
+    }
+    if (id === "R2-38b") {
+      expect(
+        await original.evaluate((node) =>
+          parseFloat(getComputedStyle(node).fontSize),
+        ),
+      ).toBeGreaterThanOrEqual(30);
+      expect(
+        await left
+          .locator("ol > li > div > div")
+          .first()
+          .evaluate((node) => parseFloat(getComputedStyle(node).fontSize)),
+      ).toBeGreaterThanOrEqual(16);
     }
     await page.screenshot({
       path: testInfo.outputPath("complete-columns.png"),

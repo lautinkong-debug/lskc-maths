@@ -1,4 +1,5 @@
 import { copy } from "@/lib/copy";
+import { useMemo } from "react";
 import { parse } from "../lib/parse";
 import { demonstrationSteps } from "../lib/demonstration";
 import {
@@ -8,9 +9,12 @@ import {
 } from "./TeachingSteps";
 const t = copy.apps.directedNumbers.demonstration;
 export function AnimatedWorking({ expression }: { expression: string }) {
-  const parsed = parse(expression);
+  const parsed = useMemo(() => parse(expression), [expression]);
+  const steps = useMemo(
+    () => (parsed.ok ? demonstrationSteps(parsed.value) : []),
+    [parsed],
+  );
   if (!parsed.ok) throw new Error("Invalid textbook expression");
-  const steps = demonstrationSteps(parsed.value);
   const timeline = useDemonstration(steps.length * 2);
   return (
     <section
@@ -27,11 +31,9 @@ export function AnimatedWorking({ expression }: { expression: string }) {
         position={timeline.position}
         spread
       />
-      {timeline.position === timeline.last && (
-        <p role="status" className="font-semibold">
-          {t.complete}
-        </p>
-      )}
+      <p role="status" className="min-h-[1lh] font-semibold">
+        {timeline.position === timeline.last ? t.complete : ""}
+      </p>
     </section>
   );
 }
