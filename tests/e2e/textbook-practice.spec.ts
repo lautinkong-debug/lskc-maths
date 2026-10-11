@@ -117,6 +117,21 @@ test("practice columns adapt to a laptop and phone", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   const left = page.locator('[data-working-column="first"]');
   const right = page.locator('[data-working-column="continued"]');
+  // Resize delivery can lag setViewportSize on a remote page. Read both
+  // columns in the same browser frame and wait for the phone layout.
+  await expect
+    .poll(() =>
+      page.getByTestId("equation-frame").evaluate((node) => {
+        const a = node
+          .querySelector('[data-working-column="first"]')!
+          .getBoundingClientRect();
+        const b = node
+          .querySelector('[data-working-column="continued"]')!
+          .getBoundingClientRect();
+        return Math.abs(a.x - b.x) < 1 && b.y >= a.bottom - 1;
+      }),
+    )
+    .toBe(true);
   const a = (await left.boundingBox())!,
     b = (await right.boundingBox())!;
   expect(b.x).toBeCloseTo(a.x, 0);
