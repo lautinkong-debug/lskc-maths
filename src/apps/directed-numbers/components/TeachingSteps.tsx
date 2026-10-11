@@ -309,10 +309,12 @@ export function EquationFrame({
   ast,
   steps,
   position,
+  spread = false,
 }: {
   ast: Ast;
   steps: Step[];
   position: number;
+  spread?: boolean;
 }) {
   const completed = Math.min(steps.length, Math.floor(position / 2));
   const highlighting = position % 2 === 1 && completed < steps.length;
@@ -320,81 +322,118 @@ export function EquationFrame({
     ...c.bracketLesson.notes,
     ...c.arithmetic.notes,
   };
+  // Choose the break from the complete question, never the revealed row count.
+  // This keeps earlier working in the same column on Next, Previous and Replay.
+  const columns = spread && steps.length >= 4;
+  const equationWeight = (tex: string, next?: Step) =>
+    1 +
+    (tex.includes("\\frac") ? 0.5 : 0) +
+    (next && signArrowTex(next) ? 1.5 : 0);
+  const originalTex = expressionTex(ast, steps[0]?.numberStyle);
+  const weights = steps.map(
+    (step, index) =>
+      equationWeight(step.tex, steps[index + 1]) +
+      0.8 +
+      (step.signReveal || step.batchReveal ? 0.4 : 0),
+  );
+  let split = steps.length;
+  if (columns) {
+    let left = equationWeight(originalTex, steps[0]);
+    let right = weights.reduce((sum, weight) => sum + weight, 0);
+    let best = Infinity;
+    weights.slice(0, -1).forEach((weight, index) => {
+      left += weight;
+      right -= weight;
+      if (Math.max(left, right) < best) {
+        best = Math.max(left, right);
+        split = index + 1;
+      }
+    });
+  }
+  const visible = Math.ceil(position / 2);
+  const renderSteps = (start: number, end: number) => (
+    <ol className={styles.working} aria-label={t.allSteps} start={start + 1}>
+      {steps.slice(start, Math.min(end, visible)).map((step, offset) => {
+        const index = start + offset;
+        const applied = index < completed;
+        return (
+          <li
+            key={index}
+            className={styles.step}
+            data-testid="working-step"
+            data-completed={applied}
+          >
+            <div className={styles.stepContents}>
+              <div className={styles.note}>
+                <span>
+                  {step.batchReveal ? t.independentSigns : notes[step.noteKey]}
+                </span>
+                {(step.signReveal || step.batchReveal) && (
+                  <span className={styles.optionalBadge} title={t.optionalHelp}>
+                    {t.optionalStep}
+                  </span>
+                )}
+              </div>
+              <div
+                className={`${styles.result} ${applied || step.signReveal || step.batchReveal ? styles.expanded : ""}`}
+                aria-hidden={!applied && !step.signReveal && !step.batchReveal}
+              >
+                <div className={styles.resultContents}>
+                  {step.signReveal || step.batchReveal ? (
+                    <SplitOperationLine
+                      step={step}
+                      applied={applied}
+                      latest={index + 1 === completed}
+                      highlight={highlighting && index + 1 === completed}
+                    />
+                  ) : (
+                    applied && (
+                      <EquationLine
+                        tex={`= ${step.tex}`}
+                        nextStep={steps[index + 1]}
+                        arrowPhase={Math.max(0, position - (index + 1) * 2)}
+                        highlight={highlighting && index + 1 === completed}
+                        latest={index + 1 === completed}
+                      />
+                    )
+                  )}
+                </div>
+              </div>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
   return (
     <div
-      className="min-w-0"
+      className={`min-w-0 ${columns ? styles.board : ""}`}
       style={{ overflowAnchor: "none" }}
       data-testid="equation-frame"
       data-phase={
         position === 0 ? "start" : highlighting ? "highlight" : "applied"
       }
     >
-      <EquationLine
-        tex={expressionTex(ast, steps[0]?.numberStyle)}
-        nextStep={steps[0]}
-        highlight={highlighting && completed === 0}
-        latest={completed === 0}
-        original
-        arrowPhase={position}
-      />
-      <ol className={styles.working} aria-label={t.allSteps}>
-        {steps.slice(0, Math.ceil(position / 2)).map((step, index) => {
-          const applied = index < completed;
-          return (
-            <li
-              key={index}
-              className={styles.step}
-              data-testid="working-step"
-              data-completed={applied}
-            >
-              <div className={styles.stepContents}>
-                <div className={styles.note}>
-                  <span>
-                    {step.batchReveal
-                      ? t.independentSigns
-                      : notes[step.noteKey]}
-                  </span>
-                  {(step.signReveal || step.batchReveal) && (
-                    <span
-                      className={styles.optionalBadge}
-                      title={t.optionalHelp}
-                    >
-                      {t.optionalStep}
-                    </span>
-                  )}
-                </div>
-                <div
-                  className={`${styles.result} ${applied || step.signReveal || step.batchReveal ? styles.expanded : ""}`}
-                  aria-hidden={
-                    !applied && !step.signReveal && !step.batchReveal
-                  }
-                >
-                  <div className={styles.resultContents}>
-                    {step.signReveal || step.batchReveal ? (
-                      <SplitOperationLine
-                        step={step}
-                        applied={applied}
-                        latest={index + 1 === completed}
-                        highlight={highlighting && index + 1 === completed}
-                      />
-                    ) : (
-                      applied && (
-                        <EquationLine
-                          tex={`= ${step.tex}`}
-                          nextStep={steps[index + 1]}
-                          arrowPhase={Math.max(0, position - (index + 1) * 2)}
-                          highlight={highlighting && index + 1 === completed}
-                          latest={index + 1 === completed}
-                        />
-                      )
-                    )}
-                  </div>
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+      <div className={styles.columns}>
+        <div className={styles.column} data-working-column="first">
+          {columns && <p className={styles.columnHeading}>{t.firstColumn}</p>}
+          <EquationLine
+            tex={originalTex}
+            nextStep={steps[0]}
+            highlight={highlighting && completed === 0}
+            latest={completed === 0}
+            original
+            arrowPhase={position}
+          />
+          {renderSteps(0, split)}
+        </div>
+        {columns && (
+          <div className={styles.column} data-working-column="continued">
+            <p className={styles.columnHeading}>{t.nextColumn}</p>
+            {renderSteps(split, steps.length)}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

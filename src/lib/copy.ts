@@ -1050,6 +1050,8 @@ export const copy = {
         selected: (n: number, count: number) => `Question ${n} of ${count}`,
         working: "Animated working",
         allSteps: "All completed steps",
+        firstColumn: "1 · Read down",
+        nextColumn: "2 · Continue here",
         graphSteps: "Number-line working",
       },
       magnitudeLesson: {

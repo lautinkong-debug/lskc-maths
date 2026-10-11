@@ -1,4 +1,133 @@
 import { expect, test, type Page } from "@playwright/test";
+for (const id of ["2B-28b", "2C-33b", "R2-33b", "R2-37a", "R2-37b", "R2-38b"]) {
+  test(`long practice continues on the right without scrolling: ${id}`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(`/apps/directed-numbers#textbook:e=${id}`);
+    const controls = page.getByTestId("teaching-controls");
+    const frame = page.getByTestId("equation-frame");
+    await expect(controls).toBeVisible();
+    // Teachers may position the board once before starting. Further clicks
+    // must leave both the controls and the previously revealed rows in place.
+    await controls.evaluate((node) => node.scrollIntoView({ block: "start" }));
+    const scroll = await page.evaluate(() => window.scrollY);
+    const nextButton = page.getByRole("button", {
+      name: "Next step",
+      exact: true,
+    });
+    const buttonY = (await nextButton.boundingBox())!.y;
+    const left = frame.locator('[data-working-column="first"]');
+    const right = frame.locator('[data-working-column="continued"]');
+    expect((await right.boundingBox())!.x).toBeGreaterThan(
+      (await left.boundingBox())!.x + 500,
+    );
+    await expect(frame.locator('[data-next-calculation="true"]')).toHaveCount(
+      0,
+    );
+    const original = frame.locator("[data-equation-line]").first();
+    const originalY = (await original.boundingBox())!.y;
+    let clicks = 0;
+    while (await nextButton.isEnabled()) {
+      await nextButton.click();
+      clicks++;
+      expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(scroll, 0);
+      expect((await nextButton.boundingBox())!.y).toBeCloseTo(buttonY, 0);
+      expect((await original.boundingBox())!.y).toBeCloseTo(originalY, 0);
+      if (clicks % 2 === 0)
+        await expect(
+          frame.locator('[data-next-calculation="true"]'),
+        ).toHaveCount(0);
+    }
+    await expect(frame.getByTestId("working-step")).toHaveCount(clicks / 2);
+    await expect(right.getByTestId("after-equation")).toBeInViewport({
+      ratio: 1,
+    });
+    for (const line of await frame.locator("[data-equation-line]").all()) {
+      await expect(line).toBeInViewport({ ratio: 1 });
+      expect(
+        await line.evaluate((n) => n.scrollWidth - n.clientWidth),
+      ).toBeLessThanOrEqual(1);
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("complete-columns.png"),
+    });
+    const leftBox = await left.boundingBox();
+    await page
+      .getByRole("button", { name: "Previous step", exact: true })
+      .click();
+    expect((await left.boundingBox())!.x).toEqual(leftBox!.x);
+    await page
+      .getByRole("button", { name: "Replay from start", exact: true })
+      .click();
+    await expect(frame.getByTestId("working-step")).toHaveCount(0);
+    await expect(frame.locator('[data-next-calculation="true"]')).toHaveCount(
+      0,
+    );
+  });
+}
+test("practice columns keep the longest working together in projection mode", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/apps/directed-numbers#textbook:e=R2-37a");
+  await page
+    .getByRole("button", { name: "Projection mode", exact: true })
+    .click();
+  const controls = page.getByTestId("teaching-controls");
+  await controls.evaluate((n) => n.scrollIntoView({ block: "start" }));
+  const nextButton = page.getByRole("button", {
+    name: "Next step",
+    exact: true,
+  });
+  while (await nextButton.isEnabled()) await nextButton.click();
+  await expect(controls).toBeInViewport({ ratio: 1 });
+  for (const line of await page.locator("[data-equation-line]").all()) {
+    await expect(line).toBeInViewport({ ratio: 1 });
+    expect(
+      await line.evaluate((n) => n.scrollWidth - n.clientWidth),
+    ).toBeLessThanOrEqual(1);
+  }
+  await page.screenshot({ path: testInfo.outputPath("projector-columns.png") });
+});
+test("practice columns adapt to a laptop and phone", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/apps/directed-numbers#textbook:e=R2-37b");
+  const controls = page.getByTestId("teaching-controls");
+  await expect(controls).toBeVisible();
+  await controls.evaluate((n) => n.scrollIntoView({ block: "start" }));
+  const nextButton = page.getByRole("button", {
+    name: "Next step",
+    exact: true,
+  });
+  while (await nextButton.isEnabled()) await nextButton.click();
+  const lines = page.locator("[data-equation-line]");
+  for (const line of await lines.all()) {
+    await expect(line).toBeInViewport({ ratio: 1 });
+    expect(
+      await line.evaluate((n) => n.scrollWidth - n.clientWidth),
+    ).toBeLessThanOrEqual(1);
+  }
+  await page.screenshot({ path: testInfo.outputPath("laptop-columns.png") });
+  await page.setViewportSize({ width: 390, height: 844 });
+  const left = page.locator('[data-working-column="first"]');
+  const right = page.locator('[data-working-column="continued"]');
+  const a = (await left.boundingBox())!,
+    b = (await right.boundingBox())!;
+  expect(b.x).toBeCloseTo(a.x, 0);
+  expect(b.y).toBeGreaterThanOrEqual(a.y + a.height - 1);
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth),
+  ).toBeLessThanOrEqual(390);
+  await page.getByTestId("after-equation").scrollIntoViewIfNeeded();
+  await expect(controls).toBeInViewport({ ratio: 1 });
+  await page.screenshot({ path: testInfo.outputPath("phone-working.png") });
+});
 test("independent calculations highlight on request and retain long working", async ({
   page,
 }, testInfo) => {

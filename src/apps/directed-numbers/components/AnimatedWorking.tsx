@@ -25,6 +25,7 @@ export function AnimatedWorking({ expression }: { expression: string }) {
         ast={parsed.value}
         steps={steps}
         position={timeline.position}
+        spread
       />
       {timeline.position === timeline.last && (
         <p role="status" className="font-semibold">
