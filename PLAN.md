@@ -2,6 +2,14 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Web Apps textbook topic filter (10/10/2026)
+
+- [x] Replace Strand filtering with all textbook topics from the same live catalogue as Mistakes Book, grouped by F1-F6 and ordered identically.
+- [x] Narrow chapters by level, clear stale chapter selections when switching levels, and retain chapters without apps with an explicit empty state.
+- [x] Associate apps with chapter codes, including both junior and compound inequalities; allow chapter-code searches.
+- [x] Production build, TypeScript and ESLint passed. Three emulator-backed browser tests passed, including all 69 chapters, level changes, multiple chapter mappings and mobile long-title layout. Desktop/phone screenshots reviewed.
+- [ ] Publish and verify the same textbook list on the live website.
+
 ## Statistical Charts Lab — department integration and GitHub handoff (10/10/2026)
 
 Owner asked to include the lab in the mathematics department website, then requested a GitHub upload for later processing.

@@ -1,5 +1,88 @@
 import { expect, test } from "@playwright/test";
 
+test("textbook filter includes every chapter and resets when the level changes", async ({
+  page,
+}) => {
+  await page.goto("/apps");
+  const level = page.getByRole("combobox", { name: "Level", exact: true });
+  const topic = page.getByRole("combobox", {
+    name: "Textbook topic",
+    exact: true,
+  });
+  await expect(topic).toBeEnabled();
+  await expect(topic.locator("optgroup")).toHaveCount(6);
+  await expect(topic.locator("option")).toHaveCount(70);
+
+  for (const [form, count] of [
+    ["F1", 13],
+    ["F2", 12],
+    ["F3", 12],
+    ["F4", 13],
+    ["F5", 13],
+    ["F6", 6],
+  ] as const) {
+    await level.selectOption(form);
+    await expect(topic.locator("option")).toHaveCount(count + 1);
+  }
+  await level.selectOption("F1");
+  await topic.selectOption({
+    label: "1A02 · Directed Numbers and the Number Line",
+  });
+  await expect(
+    page.getByRole("link", { name: /Directed number operations/ }),
+  ).toHaveCount(1);
+  await level.selectOption("F2");
+  await expect(topic).toHaveValue("all");
+  await topic.selectOption({ label: "2A01 · Errors in Measurement" });
+  await expect(
+    page.getByText("No web apps for this textbook topic yet.", { exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('main a[href^="/apps/"]')).toHaveCount(0);
+
+  await level.selectOption("F5");
+  await topic.selectOption({
+    label: "Ch13 · Compound Linear Inequalities in One Unknown",
+  });
+  await expect(
+    page.getByRole("link", { name: /Inequality number line/ }),
+  ).toHaveCount(1);
+  await level.selectOption("all");
+  await page.getByLabel("Search apps", { exact: true }).fill("Ch4");
+  await expect(
+    page.getByRole("link", { name: /Quadratic explorer/ }),
+  ).toHaveCount(1);
+  await expect(page.locator('main a[href^="/apps/"]')).toHaveCount(1);
+  await page.getByLabel("Search apps", { exact: true }).clear();
+  await page.screenshot({
+    path: "test-results/apps-textbook-desktop.png",
+    fullPage: true,
+  });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await level.selectOption("F4");
+  await topic.selectOption({
+    label:
+      "Ch7 · More about Quadratic Functions, Quadratic Equations and Complex Numbers",
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await expect(
+    page
+      .getByText(
+        "Ch7 · More about Quadratic Functions, Quadratic Equations and Complex Numbers",
+        { exact: true },
+      )
+      .last(),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "test-results/apps-textbook-phone.png",
+    fullPage: true,
+  });
+});
+
 test("department listing filters lead to the complete statistical charts lab", async ({
   page,
 }) => {
@@ -10,8 +93,8 @@ test("department listing filters lead to the complete statistical charts lab", a
     .getByRole("combobox", { name: "Level", exact: true })
     .selectOption("F2");
   await page
-    .getByRole("combobox", { name: "Strand", exact: true })
-    .selectOption("data-handling");
+    .getByRole("combobox", { name: "Textbook topic", exact: true })
+    .selectOption({ label: "2A06 · More about Statistical Charts" });
   await page.getByLabel("Search apps", { exact: true }).fill("2A06");
   const entry = page.getByRole("link", { name: /Statistical Charts Lab/ });
   await expect(entry).toHaveCount(1);

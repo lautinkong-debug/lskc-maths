@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { appRegistry } from "@/apps/registry";
 import { AppListingEditor } from "@/components/apps/AppListingEditor";
 import { useAuth } from "@/lib/auth";
-import { ACTIVE_LEVELS, COMPULSORY_STRANDS, STRANDS } from "@/lib/constants";
+import { ACTIVE_LEVELS, STRANDS } from "@/lib/constants";
 import { copy } from "@/lib/copy";
 import {
   defaultAppSettings,
@@ -15,13 +15,17 @@ import {
   type AppSettings,
 } from "@/lib/db/appSettings";
 import { useEditMode } from "@/lib/editMode";
+import { sortTopicsForLevel, watchTopics, type Topic } from "@/lib/db/topics";
 
 export default function AppsPage() {
   const { user, role } = useAuth();
   const { editing } = useEditMode();
   const isTeacher = role === "teacher" || role === "admin";
   const [level, setLevel] = useState("all");
-  const [strand, setStrand] = useState("all");
+  const [topicId, setTopicId] = useState("all");
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [topicsLoaded, setTopicsLoaded] = useState(false);
+  const [topicsError, setTopicsError] = useState("");
   const [search, setSearch] = useState("");
   const [settings, setSettings] = useState<AppSettings[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -30,6 +34,22 @@ export default function AppsPage() {
   const [draggingSlug, setDraggingSlug] = useState<string | null>(null);
   const [savingOrder, setSavingOrder] = useState(false);
   const [status, setStatus] = useState("");
+
+  useEffect(
+    () =>
+      watchTopics(
+        (rows) => {
+          setTopics(rows);
+          setTopicsLoaded(true);
+          setTopicsError("");
+        },
+        () => {
+          setTopicsLoaded(true);
+          setTopicsError(copy.topics.loadFailed);
+        },
+      ),
+    [],
+  );
 
   useEffect(
     () =>
@@ -57,18 +77,26 @@ export default function AppsPage() {
         a.title.localeCompare(b.title),
     );
   const query = search.trim().toLowerCase();
+  const topicGroups = ACTIVE_LEVELS.filter(
+    (item) => level === "all" || item === level,
+  ).map((item) => ({ level: item, topics: sortTopicsForLevel(topics, item) }));
+  const selectedTopic = topicsError
+    ? undefined
+    : topicGroups
+        .flatMap((group) => group.topics)
+        .find((topic) => topic.id === topicId);
   const filtered = ordered.filter(
     (app) =>
       (isTeacher || app.visible) &&
       (level === "all" || app.levels.some((item) => item === level)) &&
-      (strand === "all" || app.strand === strand) &&
+      (!selectedTopic || app.topicCodes.includes(selectedTopic.code)) &&
       (!query ||
-        `${app.title} ${app.topic} ${app.summary} ${app.levels.join(" ")}`
+        `${app.title} ${app.topic} ${app.topicCodes.join(" ")} ${app.summary} ${app.levels.join(" ")}`
           .toLowerCase()
           .includes(query)),
   );
   const canReorder =
-    editing && level === "all" && strand === "all" && query === "";
+    editing && level === "all" && !selectedTopic && query === "";
 
   async function reorder(sourceSlug: string, targetSlug: string) {
     if (!canReorder || !user?.email || savingOrder || sourceSlug === targetSlug)
@@ -124,12 +152,15 @@ export default function AppsPage() {
         {copy.apps.title}
       </h1>
       <p className="mt-2 max-w-prose">{copy.apps.intro}</p>
-      <div className="border-grid mt-8 grid gap-4 border bg-white p-4 sm:grid-cols-3 sm:p-6">
-        <label className="text-sm font-semibold">
+      <div className="border-grid mt-8 grid gap-4 border bg-white p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)] sm:p-6">
+        <label className="min-w-0 text-sm font-semibold">
           {copy.apps.filterLevel}
           <select
             value={level}
-            onChange={(event) => setLevel(event.target.value)}
+            onChange={(event) => {
+              setLevel(event.target.value);
+              setTopicId("all");
+            }}
             className="border-grid-strong mt-1 block w-full rounded border px-3 py-2 font-normal"
           >
             <option value="all">{copy.apps.allLevels}</option>
@@ -140,22 +171,31 @@ export default function AppsPage() {
             ))}
           </select>
         </label>
-        <label className="text-sm font-semibold">
-          {copy.apps.filterStrand}
+        <label className="min-w-0 text-sm font-semibold">
+          {copy.apps.filterTopic}
           <select
-            value={strand}
-            onChange={(event) => setStrand(event.target.value)}
+            value={selectedTopic?.id ?? "all"}
+            onChange={(event) => setTopicId(event.target.value)}
+            disabled={!topicsLoaded || !!topicsError}
             className="border-grid-strong mt-1 block w-full rounded border px-3 py-2 font-normal"
           >
-            <option value="all">{copy.apps.allStrands}</option>
-            {COMPULSORY_STRANDS.map((item) => (
-              <option key={item} value={item}>
-                {STRANDS[item]}
-              </option>
-            ))}
+            <option value="all">
+              {topicsLoaded ? copy.apps.allTopics : copy.topics.loading}
+            </option>
+            {topicGroups
+              .filter((group) => group.topics.length > 0)
+              .map((group) => (
+                <optgroup key={group.level} label={group.level}>
+                  {group.topics.map((topic) => (
+                    <option key={topic.id} value={topic.id}>
+                      {topic.code} · {topic.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
           </select>
         </label>
-        <label className="text-sm font-semibold">
+        <label className="min-w-0 text-sm font-semibold">
           {copy.apps.search}
           <input
             type="search"
@@ -165,6 +205,16 @@ export default function AppsPage() {
           />
         </label>
       </div>
+      {topicsError && (
+        <p role="alert" className="text-crimson mt-3">
+          {topicsError}
+        </p>
+      )}
+      {selectedTopic && (
+        <p className="text-navy mt-4 font-semibold">
+          {selectedTopic.code} · {selectedTopic.name}
+        </p>
+      )}
       {editing && (
         <p className="text-pencil mt-4 text-sm">
           {canReorder
@@ -192,7 +242,7 @@ export default function AppsPage() {
           </p>
           {filtered.length === 0 ? (
             <p className="border-grid mt-4 border bg-white p-6">
-              {copy.apps.empty}
+              {selectedTopic && !query ? copy.apps.emptyTopic : copy.apps.empty}
             </p>
           ) : (
             <ul className="mt-4 grid gap-5 md:grid-cols-2 xl:grid-cols-3">

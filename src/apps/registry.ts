@@ -11,6 +11,8 @@ export interface AppEntry {
   slug: string;
   title: string;
   topic: string;
+  /** Chapter codes from the shared Mistakes Book textbook catalogue. */
+  topicCodes: readonly string[];
   levels: readonly Level[];
   strand: Strand;
   summary: string;
@@ -22,6 +24,7 @@ export interface AppEntry {
 export const appRegistry: readonly AppEntry[] = [
   {
     slug: "statistical-charts",
+    topicCodes: ["2A06"],
     title: copy.statisticalCharts.title,
     topic: copy.statisticalCharts.topic,
     levels: ["F2"],
@@ -32,6 +35,7 @@ export const appRegistry: readonly AppEntry[] = [
   },
   {
     slug: "directed-numbers",
+    topicCodes: ["1A02"],
     title: copy.apps.directedNumbers.title,
     topic: copy.apps.directedNumbers.topic,
     levels: ["F1"],
@@ -42,6 +46,7 @@ export const appRegistry: readonly AppEntry[] = [
   },
   {
     slug: "quadratic-explorer",
+    topicCodes: ["Ch4"],
     title: copy.apps.quadratic.title,
     topic: copy.apps.quadratic.topic,
     levels: ["F4", "F5", "F6"],
@@ -52,6 +57,7 @@ export const appRegistry: readonly AppEntry[] = [
   },
   {
     slug: "unit-circle",
+    topicCodes: ["Ch6"],
     title: copy.apps.unitCircle.title,
     topic: copy.apps.unitCircle.topic,
     levels: ["F4", "F5", "F6"],
@@ -62,6 +68,7 @@ export const appRegistry: readonly AppEntry[] = [
   },
   {
     slug: "inequality-number-line",
+    topicCodes: ["3A03", "Ch13"],
     title: copy.apps.inequality.title,
     topic: copy.apps.inequality.topic,
     levels: ["F3", "F4", "F5", "F6"],
