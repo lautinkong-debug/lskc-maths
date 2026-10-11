@@ -8,7 +8,7 @@ Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for 
 - [x] Narrow chapters by level, clear stale chapter selections when switching levels, and retain chapters without apps with an explicit empty state.
 - [x] Associate apps with chapter codes, including both junior and compound inequalities; allow chapter-code searches.
 - [x] Production build, TypeScript and ESLint passed. Three emulator-backed browser tests passed, including all 69 chapters, level changes, multiple chapter mappings and mobile long-title layout. Desktop/phone screenshots reviewed.
-- [ ] Publish and verify the same textbook list on the live website.
+- [x] Published implementation `39157ff` through GitHub main to `https://lskc-maths.vercel.app/apps` (deployment `dpl_691PqReKUb1VhUY83DMXWEk4ru5N`). Live Chrome checks confirmed all 69 chapter names and their order match Mistakes Book exactly, chapter mappings work, level changes reset the selection, and long titles fit the phone layout. Both GitHub branches are synchronised; no production Firebase data or rules were changed.
 
 ## Statistical Charts Lab — department integration and GitHub handoff (10/10/2026)
 
