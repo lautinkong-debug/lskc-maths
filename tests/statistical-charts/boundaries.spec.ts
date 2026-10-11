@@ -5,31 +5,38 @@ test.beforeEach(async ({ page }) => {
     .getByRole("button", { name: "09 · Four words, one class", exact: true })
     .click();
 });
-test("introduces intervals and both limits and shows both midpoint calculations", async ({
+test("labels limits directly, keeps definitions optional and shows both midpoint calculations", async ({
   page,
 }) => {
   const lab = page.getByRole("region", {
     name: "Four words, one class",
     exact: true,
   });
+  await expect(lab.getByTestId("diagram-lower-limit")).toHaveText("36");
+  await expect(lab.getByTestId("diagram-upper-limit")).toHaveText("40");
+  await expect(
+    lab.getByText(
+      "A class interval is one group of values in a frequency table.",
+    ),
+  ).toBeHidden();
+  await lab
+    .locator("summary")
+    .filter({ hasText: "Definitions & rounding" })
+    .click();
   await expect(
     lab.getByText(
       "A class interval is one group of values in a frequency table.",
     ),
   ).toBeVisible();
-  await expect(lab.getByText(/Lower class limit: smallest/)).toContainText(
-    "36",
-  );
-  await expect(lab.getByText(/Upper class limit: largest/)).toContainText("40");
   const mark = lab.getByRole("button", { name: /M Mark is the Middle/ });
-  await expect(mark).toContainText(
+  for (const name of [
     "Class mark = (lower class limit + upper class limit) ÷ 2",
-  );
-  await expect(mark).toContainText("(36 + 40) ÷ 2 = 38");
-  await expect(mark).toContainText(
+    "(36 + 40) ÷ 2 = 38",
     "Class mark = (lower class boundary + upper class boundary) ÷ 2",
-  );
-  await expect(mark).toContainText("(35.5 + 40.5) ÷ 2 = 38");
+    "(35.5 + 40.5) ÷ 2 = 38",
+  ])
+    await expect(mark.getByRole("math", { name, exact: true })).toBeVisible();
+  await expect(mark.locator(".mfrac")).toHaveCount(4);
 });
 test("closes the gap and assigns exact boundaries once to the class on the right", async ({
   page,
@@ -53,9 +60,12 @@ test("closes the gap and assigns exact boundaries once to the class on the right
     "35.4 → Belongs to class 31–35",
   );
   await expect(bar).not.toHaveAttribute("width", oldWidth!);
-  await expect(lab.getByTestId("boundary-narration")).toContainText(
-    "(35 + 36) ÷ 2 = 35.5",
-  );
+  await expect(
+    lab.getByTestId("boundary-narration").getByRole("math", {
+      name: "(35 + 36) ÷ 2 = 35.5",
+      exact: true,
+    }),
+  ).toBeVisible();
   for (const [value, group, index] of [
     ["35.5", "36–40", 1],
     ["35.6", "36–40", 1],

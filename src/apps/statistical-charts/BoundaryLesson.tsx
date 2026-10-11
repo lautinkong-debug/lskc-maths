@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { copy } from "@/lib/copy";
+import { Math as MathText } from "@/components/Math";
 import { useAnswers } from "./answers";
 import { format, tidy } from "./statistics";
 import {
@@ -218,9 +219,9 @@ export function BoundaryLesson({ example }: { example: Example }) {
                 <strong>{manual === null ? c.stages[stage] : c.drag}</strong>
                 <p>{manual === null ? c.explanations[stage] : c.endpoint}</p>
                 {stage === 1 && manual === null && (
-                  <b>
-                    ({format(lower - precision)} + {lower}) ÷ 2 = {v.low}
-                  </b>
+                  <MathText
+                    label={`(${format(lower - precision)} + ${lower}) ÷ 2 = ${v.low}`}
+                  >{`\\dfrac{${format(lower - precision)}+${lower}}{2}=${v.low}`}</MathText>
                 )}
               </div>
             </div>

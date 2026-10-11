@@ -10,6 +10,7 @@ export const copy = {
       example: "Class example",
       step: "step",
       oneClass: "One class interval",
+      definitions: "Definitions & rounding",
       recordedStep: "Recorded to the nearest",
       halfStep: "half a step is",
       names: ["Class limits", "Class boundaries", "Class mark", "Class width"],
@@ -38,6 +39,11 @@ export const copy = {
       upperLimitMeaning:
         "Upper class limit: largest value allowed in the recorded class.",
       markLimits: "Class mark = (lower class limit + upper class limit) ÷ 2",
+      markEquals: "Class mark =",
+      markLimitsFraction:
+        "\\dfrac{\\text{lower limit} + \\text{upper limit}}{2}",
+      markBoundariesFraction:
+        "\\dfrac{\\text{lower boundary} + \\text{upper boundary}}{2}",
       markBoundaries:
         "Class mark = (lower class boundary + upper class boundary) ÷ 2",
       boundaryLesson: {

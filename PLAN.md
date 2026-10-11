@@ -4,6 +4,9 @@ Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for 
 
 ## Statistical Charts intervals and boundary animation (11/10/2026)
 
+- [x] Draw the listed-limit spans and continuous boundaries on one numeric scale, with half-step insets and direct lower/upper class-limit arrows. Move definitions into an optional disclosure and remove repeated card prose.
+- [x] Render both class-mark formulas, their worked examples and the boundary midpoint calculation as stacked fractions. Keep accessible maths labels and enlarge fractions in projection mode.
+- [x] Verify eight focused browser scenarios, scoped ESLint and the production build. Review desktop/phone renders and recheck full projection fit, recall and hundredths after enlarging fractions.
 - [x] Introduce a class interval and distinguish its lower and upper class limits as the recorded values allowed at either end.
 - [x] Show both class-mark formulas, averaging limits or boundaries, with worked calculations for every whole-number/decimal example.
 - [x] Add Why boundaries? with gap-closing animation, shared boundaries, 35.4/35.5/35.6 and 40.4/40.5 assignment, manual measurement movement, Play/Pause, Previous/Next and Replay.

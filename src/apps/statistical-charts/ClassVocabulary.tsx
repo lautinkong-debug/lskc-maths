@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { copy } from "@/lib/copy";
+import { Math as MathText } from "@/components/Math";
 import { useAnswers } from "./answers";
 import { BoundaryLesson } from "./BoundaryLesson";
+import { ClassIntervalDiagram } from "./ClassIntervalDiagram";
 import { format } from "./statistics";
 import {
   classVocabulary,
@@ -109,190 +111,24 @@ export function ClassVocabulary() {
                 {v.lower}–{v.upper}
               </strong>
             </p>
+            <ClassIntervalDiagram
+              values={v}
+              active={active}
+              show={show}
+              learn={mode === "learn"}
+            />
             {mode === "learn" && (
-              <div className={s.intervalIntro}>
+              <details className={s.vocabularyNotes}>
+                <summary>{c.definitions}</summary>
                 <p>{c.intervalMeaning}</p>
+                <p>{c.lowerLimitMeaning}</p>
+                <p>{c.upperLimitMeaning}</p>
                 <p>
-                  {c.lowerLimitMeaning} {show && <strong>{v.lower}</strong>}
+                  {c.recordedStep} {input.precision}; {c.halfStep}{" "}
+                  {format(v.halfStep)}.
                 </p>
-                <p>
-                  {c.upperLimitMeaning} {show && <strong>{v.upper}</strong>}
-                </p>
-              </div>
-            )}
-            <p className={s.small}>
-              {c.recordedStep} {input.precision}; {c.halfStep}{" "}
-              {format(v.halfStep)}.
-            </p>
-            <svg
-              viewBox="0 0 710 430"
-              role="img"
-              aria-label={mode === "recall" ? c.recallDiagram : c.diagram}
-              data-testid="vocabulary-diagram"
-            >
-              {[0, 1, 2].map((j) => (
-                <g key={j}>
-                  <rect
-                    x={80 + j * 183}
-                    y={20}
-                    width={183}
-                    height={52}
-                    fill={j === 1 ? "#fff3b0" : "#f1f4f6"}
-                    stroke={j === 1 && active === 0 ? "#da2127" : "#0f4574"}
-                    strokeWidth={j === 1 && active === 0 ? 4 : 1}
-                  />
-                  <text
-                    x={171.5 + j * 183}
-                    y={53}
-                    textAnchor="middle"
-                    fontSize={22}
-                    fill="#0f4574"
-                    fontWeight={j === 1 ? 700 : 400}
-                  >
-                    {format(v.lower + (j - 1) * v.width)}–
-                    {format(v.upper + (j - 1) * v.width)}
-                  </text>
-                </g>
-              ))}
-              <rect
-                x={80}
-                y={235}
-                width={183}
-                height={85}
-                fill="#edf0f2"
-                stroke="#aaa"
-              />
-              <rect
-                x={446}
-                y={250}
-                width={183}
-                height={70}
-                fill="#edf0f2"
-                stroke="#aaa"
-              />
-              <rect
-                x={263}
-                y={170}
-                width={183}
-                height={150}
-                fill="#fff0a3"
-                stroke="#0f4574"
-                strokeWidth={2}
-              />
-              <line
-                x1={65}
-                x2={645}
-                y1={320}
-                y2={320}
-                stroke="#263645"
-                strokeWidth={2}
-              />
-              <g className={s.vocabularyHighlight} data-active={active === 3}>
-                <path
-                  d="M263 142H446 M263 142l10 -6 M263 142l10 6 M446 142l-10 -6 M446 142l-10 6"
-                  stroke={active === 3 ? "#da2127" : "#0f4574"}
-                  strokeWidth={active === 3 ? 4 : 2}
-                  fill="none"
-                />
-                <text
-                  x={354.5}
-                  y={122}
-                  textAnchor="middle"
-                  fontSize={22}
-                  fill="#0f4574"
-                >
-                  {mode === "learn"
-                    ? `${c.names[3]}${show ? ` = ${v.width}` : ""}`
-                    : "?"}
-                </text>
-              </g>
-              <g className={s.vocabularyHighlight} data-active={active === 1}>
-                {[263, 446].map((x) => (
-                  <line
-                    key={x}
-                    x1={x}
-                    x2={x}
-                    y1={170}
-                    y2={333}
-                    stroke={active === 1 ? "#da2127" : "#0f4574"}
-                    strokeWidth={active === 1 ? 5 : 2}
-                  />
-                ))}
-                <text
-                  x={263}
-                  y={358}
-                  textAnchor="middle"
-                  fontSize={23}
-                  fill="#0f4574"
-                >
-                  {show ? v.low : "?"}
-                </text>
-                <text
-                  x={446}
-                  y={358}
-                  textAnchor="middle"
-                  fontSize={23}
-                  fill="#0f4574"
-                >
-                  {show ? v.high : "?"}
-                </text>
-              </g>
-              <g className={s.vocabularyHighlight} data-active={active === 2}>
-                <path
-                  d="M354.5 218V320 M354.5 320l-6 -10 M354.5 320l6 -10"
-                  fill="none"
-                  stroke={active === 2 ? "#da2127" : "#0f4574"}
-                  strokeWidth={active === 2 ? 4 : 2}
-                />
-                <text
-                  x={354.5}
-                  y={202}
-                  textAnchor="middle"
-                  fontSize={20}
-                  fill="#0f4574"
-                >
-                  {mode === "learn" ? c.names[2] : "?"}
-                </text>
-                <text
-                  x={354.5}
-                  y={358}
-                  textAnchor="middle"
-                  fontSize={23}
-                  fill="#0f4574"
-                >
-                  {show ? v.mark : "?"}
-                </text>
-              </g>
-              <text
-                x={263}
-                y={393}
-                textAnchor="middle"
-                fontSize={15}
-                fill="#0f4574"
-              >
-                {mode === "learn" ? c.lowerBoundary : ""}
-              </text>
-              <text
-                x={446}
-                y={393}
-                textAnchor="middle"
-                fontSize={15}
-                fill="#0f4574"
-              >
-                {mode === "learn" ? c.upperBoundary : ""}
-              </text>
-            </svg>
-            {mode === "learn" && (
-              <div className={s.scaleNote}>
-                <strong>{c.halfRule}</strong>
                 <p>{c.precisionRule}</p>
-                {show && (
-                  <p>
-                    {v.lower} − {format(v.halfStep)} = {v.low} · {v.upper} +{" "}
-                    {format(v.halfStep)} = {v.high}
-                  </p>
-                )}
-              </div>
+              </details>
             )}
           </div>
           <div className={s.conceptCard}>
@@ -332,26 +168,34 @@ export function ClassVocabulary() {
                       <span className={s.memoryLetter}>{letters[i]}</span>
                       <span>
                         <strong>{c.phrases[i]}</strong>
-                        <span>{c.meanings[i]}</span>
                         {i === 2 && (
-                          <span className={s.markFormula}>{c.markLimits}</span>
+                          <span className={s.markFormula}>
+                            <span>{c.markEquals}</span>
+                            <MathText label={c.markLimits}>
+                              {c.markLimitsFraction}
+                            </MathText>
+                          </span>
                         )}
-                        {show && (
-                          <b>
-                            {i === 0
-                              ? `${c.fields[0]}: ${v.lower} · ${c.fields[1]}: ${v.upper}`
-                              : formulas[i]}
-                          </b>
-                        )}
+                        {show && i !== 0 && i !== 2 && <b>{formulas[i]}</b>}
                         {i === 2 && (
                           <>
+                            {show && (
+                              <MathText
+                                className={s.workedFraction}
+                                label={formulas[2]}
+                              >{`\\dfrac{${v.lower}+${v.upper}}{2}=${v.mark}`}</MathText>
+                            )}
                             <span className={s.markFormula}>
-                              {c.markBoundaries}
+                              <span>{c.markEquals}</span>
+                              <MathText label={c.markBoundaries}>
+                                {c.markBoundariesFraction}
+                              </MathText>
                             </span>
                             {show && (
-                              <b>
-                                ({v.low} + {v.high}) ÷ 2 = {v.mark}
-                              </b>
+                              <MathText
+                                className={s.workedFraction}
+                                label={`(${v.low} + ${v.high}) ÷ 2 = ${v.mark}`}
+                              >{`\\dfrac{${v.low}+${v.high}}{2}=${v.mark}`}</MathText>
                             )}
                           </>
                         )}
@@ -359,7 +203,6 @@ export function ClassVocabulary() {
                     </button>
                   ))}
                 </div>
-                <p className={s.small}>{c.sayAloud}</p>
               </>
             )}
             {mode === "recall" && (
@@ -445,15 +288,22 @@ export function ClassVocabulary() {
                               id={`vocabulary-feedback-${field}`}
                               className={correct ? s.small : s.frequencyError}
                             >
-                              {correct
-                                ? c.correct
-                                : field === "width"
-                                  ? `${c.widthHint} ${formulas[3]}`
-                                  : field === "low" || field === "high"
-                                    ? `${c.boundaryHint} ${formulas[1]}`
-                                    : field === "mark"
-                                      ? `${c.markHint} ${formulas[2]}`
-                                      : c.limitHint}
+                              {correct ? (
+                                c.correct
+                              ) : field === "width" ? (
+                                `${c.widthHint} ${formulas[3]}`
+                              ) : field === "low" || field === "high" ? (
+                                `${c.boundaryHint} ${formulas[1]}`
+                              ) : field === "mark" ? (
+                                <>
+                                  {c.markHint}{" "}
+                                  <MathText
+                                    label={formulas[2]}
+                                  >{`\\dfrac{${v.lower}+${v.upper}}{2}=${v.mark}`}</MathText>
+                                </>
+                              ) : (
+                                c.limitHint
+                              )}
                             </span>
                           )}
                         </label>
@@ -482,9 +332,6 @@ export function ClassVocabulary() {
             )}
           </div>
         </div>
-      )}
-      {mode === "learn" && (
-        <p className={s.memoryChant}>{c.phrases.join(" · ")}</p>
       )}
     </section>
   );

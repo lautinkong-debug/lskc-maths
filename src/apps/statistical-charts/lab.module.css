@@ -310,19 +310,49 @@
   width: 100%;
   max-height: 360px;
 }
-.intervalIntro {
+.vocabularyNotes {
   font-size: 14px;
   line-height: 1.5;
 }
-.intervalIntro p {
-  margin: 3px 0;
-}
-.intervalIntro strong {
+.vocabularyNotes summary {
+  cursor: pointer;
   color: var(--color-navy);
+  padding-top: 12px;
 }
-.memoryCard .markFormula {
-  font-size: 12px;
+.vocabularyNotes p {
+  margin: 8px 0;
+}
+.vocabulary .intervalDiagram {
+  max-height: 480px;
+}
+:global([data-presentation="true"]) .vocabulary .intervalDiagram {
+  max-height: 450px;
+}
+.lab .memoryCard > span:last-child > .markFormula {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
   line-height: 1.4;
+  margin: 12px 0;
+}
+.memoryCard .workedFraction {
+  font-size: 18px;
+  padding: 5px 0;
+}
+:global([data-presentation="true"])
+  .lab
+  .memoryCard
+  > span:last-child
+  > .markFormula {
+  font-size: 16px;
+}
+:global([data-presentation="true"]) .memoryCard .workedFraction {
+  font-size: 22px;
+}
+.memoryCard > span:last-child {
+  min-width: 0;
 }
 :global([data-presentation="true"]) .vocabulary .memoryCard {
   padding: 10px 14px;
@@ -355,12 +385,12 @@
   color: var(--color-navy);
   box-shadow: inset 3px 0 var(--color-crimson);
 }
-.memoryCard strong,
-.memoryCard span span,
-.memoryCard b {
+.memoryCard > span:last-child > strong,
+.memoryCard > span:last-child > span,
+.memoryCard > span:last-child > b {
   display: block;
 }
-.memoryCard span span {
+.memoryCard > span:last-child > span:not(.workedFraction) {
   font-size: 14px;
   font-weight: 400;
   margin: 5px 0;
