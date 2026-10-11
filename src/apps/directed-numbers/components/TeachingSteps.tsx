@@ -231,6 +231,37 @@ function EquationLine({
   );
 }
 
+/** Colour marks only the generated magnitude span; CSS animates that span in place. */
+function SplitOperationLine({
+  step,
+  applied,
+  latest,
+}: {
+  step: Step;
+  applied: boolean;
+  latest: boolean;
+}) {
+  const { prefix, sign, magnitude, suffix } = step.signReveal!;
+  const label = `= ${prefix}${sign}${applied ? magnitude : ""}${suffix}`;
+  return (
+    <div
+      className={`${styles.equation} ${styles.splitOperation} ${applied ? styles.magnitudeShown : ""}`}
+      data-equation-line="true"
+      data-tex={label}
+      data-testid="operation-sign-magnitude"
+      data-magnitude-shown={applied}
+    >
+      <span data-testid={latest ? "after-equation" : undefined}>
+        <span role="math" aria-label={label}>
+          <span aria-hidden="true">
+            <Tex>{`= ${prefix}${sign}\\textcolor{#13579B}{${magnitude}}${suffix}`}</Tex>
+          </span>
+        </span>
+      </span>
+    </div>
+  );
+}
+
 export function EquationFrame({
   ast,
   steps,
@@ -277,18 +308,26 @@ export function EquationFrame({
                   <span>{notes[step.noteKey]}</span>
                 </div>
                 <div
-                  className={`${styles.result} ${applied ? styles.expanded : ""}`}
-                  aria-hidden={!applied}
+                  className={`${styles.result} ${applied || step.signReveal ? styles.expanded : ""}`}
+                  aria-hidden={!applied && !step.signReveal}
                 >
                   <div className={styles.resultContents}>
-                    {applied && (
-                      <EquationLine
-                        tex={`= ${step.tex}`}
-                        nextStep={steps[index + 1]}
-                        arrowPhase={Math.max(0, position - (index + 1) * 2)}
-                        highlight={highlighting && index + 1 === completed}
+                    {step.signReveal ? (
+                      <SplitOperationLine
+                        step={step}
+                        applied={applied}
                         latest={index + 1 === completed}
                       />
+                    ) : (
+                      applied && (
+                        <EquationLine
+                          tex={`= ${step.tex}`}
+                          nextStep={steps[index + 1]}
+                          arrowPhase={Math.max(0, position - (index + 1) * 2)}
+                          highlight={highlighting && index + 1 === completed}
+                          latest={index + 1 === completed}
+                        />
+                      )
                     )}
                   </div>
                 </div>

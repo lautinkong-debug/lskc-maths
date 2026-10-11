@@ -10,6 +10,43 @@ import {
 } from "./demonstration";
 
 describe("teacher demonstration frames", () => {
+  it.each([
+    ["(+6)×(+2)", "+", "\\times"],
+    ["(+6)×(-2)", "-", "\\times"],
+    ["(-6)×(+2)", "-", "\\times"],
+    ["(-6)×(-2)", "+", "\\times"],
+    ["(+6)÷(+2)", "+", "\\div"],
+    ["(+6)÷(-2)", "-", "\\div"],
+    ["(-6)÷(+2)", "-", "\\div"],
+    ["(-6)÷(-2)", "+", "\\div"],
+  ])("%s separates sign and magnitude", (expression, sign, operation) => {
+    const parsed = parse(expression);
+    if (!parsed.ok) throw new Error(expression);
+    const first = demonstrationSteps(parsed.value)[0];
+    expect(first.signReveal).toEqual({
+      prefix: "",
+      sign,
+      magnitude: `\\left(6 ${operation} 2\\right)`,
+      suffix: "",
+    });
+  });
+  it.each(["0×(-6)", "0÷(-2)"])(
+    "%s never invents a sign for zero",
+    (expression) => {
+      const parsed = parse(expression);
+      if (!parsed.ok) throw new Error(expression);
+      expect(
+        demonstrationSteps(parsed.value).some((step) => step.signReveal),
+      ).toBe(false);
+    },
+  );
+  it("keeps fractional division as division during its sign and magnitude reveal", () => {
+    const parsed = parse("(-14)÷(-7/5)");
+    if (!parsed.ok) throw new Error("example");
+    expect(demonstrationSteps(parsed.value)[0].signReveal?.magnitude).toBe(
+      "\\left(14 \\div \\frac{7}{5}\\right)",
+    );
+  });
   it.each(["(+3.1)-(+4.9)", "(-5)×(-1.5)÷(-3)", "2.1+(-6.3)-(-0.2)"])(
     "%s keeps decimals in every intermediate line and highlight",
     (expression) => {
@@ -56,6 +93,27 @@ describe("teacher demonstration frames", () => {
       const steps = demonstrationSteps(input.value);
       expect(steps.length).toBeGreaterThan(0);
       for (const step of steps) {
+        if (step.signReveal) {
+          const { prefix, sign, magnitude, suffix } = step.signReveal;
+          const shown = parse(
+            step.tex
+              .replace(/\\frac\{(\d+)\}\{(\d+)\}/g, "($1/$2)")
+              .replace(/\\left|\\right/g, "")
+              .replace(/\\times/g, "×")
+              .replace(/\\div/g, "÷"),
+          );
+          expect(shown.ok).toBe(true);
+          if (shown.ok)
+            expect(equals(evaluate(shown.value), answer.value)).toBe(true);
+          expect(() =>
+            katex.renderToString(
+              `${prefix}${sign}\\textcolor{#13579B}{${magnitude}}${suffix}`,
+              { throwOnError: true, trust: false },
+            ),
+          ).not.toThrow();
+        }
+        if (q.expression.includes(".") && !q.expression.includes("/"))
+          expect(step.tex).not.toContain("\\frac");
         if (["++", "+-", "-+", "--"].includes(step.ruleId)) {
           const arrows = signArrowTex(step);
           expect(arrows).not.toBeNull();

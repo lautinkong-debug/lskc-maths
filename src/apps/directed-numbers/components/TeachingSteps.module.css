@@ -3,6 +3,26 @@
   padding-block: 0.5rem;
   font-size: 1.5rem;
 }
+.splitOperation {
+  white-space: nowrap;
+}
+.splitOperation :global(.katex-html) [style*="color"] {
+  color: inherit !important;
+}
+.splitOperation :global(.katex-html) [style*="color"]:not([style*="color"] *) {
+  display: inline-block;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition:
+    opacity 650ms ease,
+    transform 650ms ease;
+}
+.magnitudeShown :global(.katex-html) [style*="color"]:not([style*="color"] *) {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(0);
+}
 .layers {
   display: grid;
   width: max-content;
@@ -127,6 +147,9 @@
   .arrowsRow,
   .signArrow,
   .resultSign {
+    transition: none;
+  }
+  .splitOperation :global(.katex-html) [style*="color"] {
     transition: none;
   }
 }

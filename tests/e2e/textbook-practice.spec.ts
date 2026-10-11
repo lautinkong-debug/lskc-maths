@@ -75,6 +75,161 @@ test("separate clicks animate the magnitude beside a stationary sign", async ({
     .click();
   await expect(page.getByTestId("signed-magnitude-equation")).toHaveCount(0);
 });
+for (const [id, phase, sign, magnitude, answer] of [
+  ["2C-2a", 1, "-", "3 \\times 2", "-6"],
+  ["2C-1b", 1, "+", "8 \\times 5", "40"],
+  ["2C-6a", 1, "-", "24 \\div 3", "-8"],
+  ["2C-7a", 1, "+", "64 \\div 8", "8"],
+  ["2C-4a", 1, "-", "5 \\times 0.3", "-1.5"],
+  ["2C-8a", 1, "+", "14 \\div \\frac{7}{5}", "10"],
+  ["2C-8b", 3, "-", "40 \\div \\frac{8}{3}", "-15"],
+] as const) {
+  test(`textbook product/quotient split reveal: ${id}`, async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({
+      reducedMotion: id === "2C-2a" ? "no-preference" : "reduce",
+    });
+    await page.goto(`/apps/directed-numbers#textbook:e=${id}`);
+    await next(page, phase);
+    const row = page.getByTestId("operation-sign-magnitude");
+    const term = row.locator('.katex-html [style*="color"]').first();
+    await expect(row.getByRole("math")).toHaveAttribute(
+      "aria-label",
+      `= ${sign}`,
+    );
+    await expect(term).toBeHidden();
+    await row.evaluate((node) => node.setAttribute("data-retained", "yes"));
+    const before = await page
+      .locator('[data-equation-line]:not([data-magnitude-shown="false"])')
+      .evaluateAll((nodes) => nodes.map((n) => n.getAttribute("data-tex")));
+    await page.screenshot({
+      path: testInfo.outputPath("sign-only.png"),
+      fullPage: true,
+      animations: "disabled",
+    });
+    await next(page);
+    await expect(row).toHaveAttribute("data-retained", "yes");
+    await expect(row.getByRole("math")).toHaveAttribute(
+      "aria-label",
+      `= ${sign}\\left(${magnitude}\\right)`,
+    );
+    await expect(term).toBeVisible();
+    if (id === "2C-2a") {
+      const opacity = await term.evaluate((node) => {
+        const animation = node
+          .getAnimations()
+          .find(
+            (a) =>
+              a instanceof CSSTransition && a.transitionProperty === "opacity",
+          );
+        if (!animation) return null;
+        animation.pause();
+        animation.currentTime = 325;
+        const value = Number(getComputedStyle(node).opacity);
+        animation.finish();
+        return value;
+      });
+      expect(opacity).not.toBeNull();
+      expect(opacity!).toBeGreaterThan(0);
+      expect(opacity!).toBeLessThan(1);
+    }
+    expect(
+      (
+        await page
+          .locator("[data-equation-line]")
+          .evaluateAll((nodes) => nodes.map((n) => n.getAttribute("data-tex")))
+      ).slice(0, before.length),
+    ).toEqual(before);
+    await page
+      .getByRole("button", { name: "Previous step", exact: true })
+      .click();
+    await expect(term).toBeHidden();
+    await next(page, 3);
+    await expect(
+      page.getByTestId("after-equation").getByRole("math"),
+    ).toHaveAttribute("aria-label", `= ${answer}`);
+    await expect(row.getByRole("math")).toHaveAttribute(
+      "aria-label",
+      `= ${sign}\\left(${magnitude}\\right)`,
+    );
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page
+      .getByRole("button", { name: "Projection mode", exact: true })
+      .click();
+    await expect(page.getByTestId("after-equation")).toBeInViewport({
+      ratio: 1,
+    });
+    await page.screenshot({
+      path: testInfo.outputPath("complete-projector.png"),
+      fullPage: true,
+      animations: "disabled",
+    });
+    await page
+      .getByRole("button", { name: "Leave projection mode", exact: true })
+      .click();
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: testInfo.outputPath("complete-phone.png"),
+      fullPage: true,
+      animations: "disabled",
+    });
+    await page
+      .getByRole("button", { name: "Replay from start", exact: true })
+      .click();
+    await expect(page.getByTestId("operation-sign-magnitude")).toHaveCount(0);
+  });
+}
+test("chained products and quotients retain each earlier reveal during autoplay", async ({
+  page,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/apps/directed-numbers#textbook:e=2C-23a");
+  await page.clock.install();
+  await page
+    .getByRole("button", { name: "Play demonstration", exact: true })
+    .click();
+  await advanceAutoplay(page, 2);
+  const first = page.getByTestId("operation-sign-magnitude").first();
+  const firstText = await first.getAttribute("data-tex");
+  const retained = await page
+    .locator("[data-equation-line]")
+    .evaluateAll((nodes) => nodes.map((n) => n.getAttribute("data-tex")));
+  await advanceAutoplay(page, 3);
+  const second = page.getByTestId("operation-sign-magnitude").nth(1);
+  await expect(first).toHaveAttribute("data-tex", firstText!);
+  await expect(second.getByRole("math")).toHaveAttribute("aria-label", "= -");
+  await expect(
+    second.locator('.katex-html [style*="color"]').first(),
+  ).toBeHidden();
+  await advanceAutoplay(page, 1);
+  await expect(second.getByRole("math")).toHaveAttribute(
+    "aria-label",
+    "= -\\left(7.5 \\div 3\\right)",
+  );
+  await advanceAutoplay(page);
+  const lines = page.locator("[data-equation-line]");
+  expect(
+    (
+      await lines.evaluateAll((nodes) =>
+        nodes.map((n) => n.getAttribute("data-tex")),
+      )
+    ).slice(0, retained.length),
+  ).toEqual(retained);
+  for (const line of await lines.all()) await expect(line).toBeVisible();
+  await expect(
+    page.getByTestId("after-equation").getByRole("math"),
+  ).toHaveAttribute("aria-label", "= -2.5");
+  await page.screenshot({
+    path: testInfo.outputPath("chained-working.png"),
+    fullPage: true,
+  });
+});
 for (const [route, working, result] of [
   ["sign-magnitude:e=(+3.1)-(+4.9)", "-\\left(4.9 - 3.1\\right)", "-1.8"],
   ["textbook:e=2B-15a", "+\\left(43 - 21\\right)", "+22"],
@@ -369,9 +524,14 @@ test("all worked lines stay visible as each new step unfolds", async ({
     .evaluate((node) => node.getBoundingClientRect().top + window.scrollY);
   for (let phase = 1; phase <= 8; phase++) {
     await next(page);
-    await expect(lines).toHaveCount(1 + Math.floor(phase / 2));
+    const partialCount = await page
+      .locator('[data-equation-line][data-magnitude-shown="false"]')
+      .count();
+    await expect(lines).toHaveCount(1 + Math.floor(phase / 2) + partialCount);
     const current = await lines.evaluateAll((nodes) =>
-      nodes.map((n) => n.getAttribute("data-tex")),
+      nodes
+        .filter((n) => n.getAttribute("data-magnitude-shown") !== "false")
+        .map((n) => n.getAttribute("data-tex")),
     );
     expect(current.slice(0, previous.length)).toEqual(previous);
     for (const line of await lines.all()) await expect(line).toBeVisible();

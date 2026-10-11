@@ -43,6 +43,12 @@ export type RuleId =
   | "reciprocal"
   | "mixed-to-improper";
 export type Step = {
+  signReveal?: {
+    prefix: string;
+    sign: string;
+    magnitude: string;
+    suffix: string;
+  };
   numberStyle?: NumberStyle;
   tex: string;
   highlight?: Span;
@@ -430,22 +436,41 @@ function reduceTier(
   multiply: boolean,
   insideGroup: boolean,
   hasAddition: boolean,
+  reciprocalWorking: boolean,
 ): GeneralChange | null {
   if (ast.kind === "number") return null;
   if (ast.kind === "group" || ast.kind === "unary") {
     if (atomic(ast)) return null;
-    const inner = reduceTier(ast.child, multiply, insideGroup, hasAddition);
+    const inner = reduceTier(
+      ast.child,
+      multiply,
+      insideGroup,
+      hasAddition,
+      reciprocalWorking,
+    );
     return inner ? { ...inner, ast: { ...ast, child: inner.ast } } : null;
   }
-  const left = reduceTier(ast.left, multiply, insideGroup, hasAddition);
+  const left = reduceTier(
+    ast.left,
+    multiply,
+    insideGroup,
+    hasAddition,
+    reciprocalWorking,
+  );
   if (left) return { ...left, ast: { ...ast, left: left.ast } };
-  const right = reduceTier(ast.right, multiply, insideGroup, hasAddition);
+  const right = reduceTier(
+    ast.right,
+    multiply,
+    insideGroup,
+    hasAddition,
+    reciprocalWorking,
+  );
   if (right) return { ...right, ast: { ...ast, right: right.ast } };
   if ((ast.op === "*" || ast.op === "/") !== multiply) return null;
   if (!atomic(ast.left) || !atomic(ast.right)) return null;
   const a = evaluate(ast.left),
     b = evaluate(ast.right);
-  if (ast.op === "/" && b.d !== 1) {
+  if (reciprocalWorking && ast.op === "/" && b.d !== 1) {
     const reciprocal = div(rational(1), b);
     if (!reciprocal.ok) throw new RationalError(reciprocal.code);
     return {
@@ -487,37 +512,42 @@ function reduceTier(
 function reduceExpression(
   ast: Ast,
   insideGroup: boolean,
+  reciprocalWorking: boolean,
 ): GeneralChange | null {
   const hasAddition = contains(ast, "+-");
   return (
-    reduceTier(ast, true, insideGroup, hasAddition) ??
-    reduceTier(ast, false, insideGroup, hasAddition)
+    reduceTier(ast, true, insideGroup, hasAddition, reciprocalWorking) ??
+    reduceTier(ast, false, insideGroup, hasAddition, reciprocalWorking)
   );
 }
-function reduceInsideGroup(ast: Ast): GeneralChange | null {
+function reduceInsideGroup(
+  ast: Ast,
+  reciprocalWorking: boolean,
+): GeneralChange | null {
   if (ast.kind === "number") return null;
   if (ast.kind === "group") {
-    const nested = reduceInsideGroup(ast.child);
+    const nested = reduceInsideGroup(ast.child, reciprocalWorking);
     if (nested) return { ...nested, ast: { ...ast, child: nested.ast } };
     if (!atomic(ast.child)) {
-      const change = reduceExpression(ast.child, true);
+      const change = reduceExpression(ast.child, true, reciprocalWorking);
       if (change) return { ...change, ast: { ...ast, child: change.ast } };
     }
     return null;
   }
   if (ast.kind === "unary") {
-    const change = reduceInsideGroup(ast.child);
+    const change = reduceInsideGroup(ast.child, reciprocalWorking);
     return change ? { ...change, ast: { ...ast, child: change.ast } } : null;
   }
-  const left = reduceInsideGroup(ast.left);
+  const left = reduceInsideGroup(ast.left, reciprocalWorking);
   if (left) return { ...left, ast: { ...ast, left: left.ast } };
-  const right = reduceInsideGroup(ast.right);
+  const right = reduceInsideGroup(ast.right, reciprocalWorking);
   return right ? { ...right, ast: { ...ast, right: right.ast } } : null;
 }
 function generalWorkOut(
   input: Ast,
   signWorking: boolean,
   style: NumberStyle,
+  reciprocalWorking: boolean,
 ): Step[] {
   const steps: Step[] = [];
   let ast = input;
@@ -528,8 +558,8 @@ function generalWorkOut(
   ) {
     const change =
       convertMixed(ast) ??
-      reduceInsideGroup(ast) ??
-      reduceExpression(ast, false) ??
+      reduceInsideGroup(ast, reciprocalWorking) ??
+      reduceExpression(ast, false, reciprocalWorking) ??
       (atomic(ast)
         ? {
             ast: number(evaluate(ast), ast.span),
@@ -550,12 +580,21 @@ function generalWorkOut(
       const same = Math.sign(a.n) === Math.sign(b.n);
       const ruleId: RuleId = `${same ? "same" : "diff"}-sign-${op === "*" ? "product" : "quotient"}`;
       const previous = expressionTex(ast, style);
-      const replacement = `${same ? "+" : "-"}\\left(${toTex(abs(a), { style })} ${op === "*" ? "\\times" : "\\div"} ${toTex(abs(b), { style })}\\right)`;
+      // Keep a signed subexpression grouped when it sits inside a larger sum/product.
+      const nested = highlight.start > 0 || highlight.end < previous.length;
+      const signReveal = {
+        prefix: previous.slice(0, highlight.start) + (nested ? "\\left(" : ""),
+        sign: same ? "+" : "-",
+        magnitude: `\\left(${toTex(abs(a), { style })} ${op === "*" ? "\\times" : "\\div"} ${toTex(abs(b), { style })}\\right)`,
+        suffix: (nested ? "\\right)" : "") + previous.slice(highlight.end),
+      };
       steps.push({
         tex:
-          previous.slice(0, highlight.start) +
-          replacement +
-          previous.slice(highlight.end),
+          signReveal.prefix +
+          signReveal.sign +
+          signReveal.magnitude +
+          signReveal.suffix,
+        signReveal,
         numberStyle: style,
         highlight,
         sourceHighlight: change.sourceHighlight,
@@ -587,10 +626,15 @@ export function workOut(
   {
     signWorking = false,
     numberStyle = "improper",
-  }: { signWorking?: boolean; numberStyle?: NumberStyle } = {},
+    reciprocalWorking = true,
+  }: {
+    signWorking?: boolean;
+    numberStyle?: NumberStyle;
+    reciprocalWorking?: boolean;
+  } = {},
 ): Step[] {
   return contains(ast, "*/") || hasMixedNumber(ast)
-    ? generalWorkOut(ast, signWorking, numberStyle)
+    ? generalWorkOut(ast, signWorking, numberStyle, reciprocalWorking)
     : additiveWorkOut(ast, numberStyle);
 }
 export function totals(terms: Rational[]) {

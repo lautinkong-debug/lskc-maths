@@ -66,6 +66,16 @@ inside the bracket to the resulting sign immediately below the equation.
 The original signs and arrows stay visible with the completed working.
 Highlighted equations reserve their space to avoid shifting the text.
 
+Multiplication and division use the same two-click reveal in Textbook practice:
+the first click shows the sign, and the second fades/slides in the parenthesised
+magnitude beside that stationary sign. Each sign line stays visible when later
+operations are highlighted or calculated. Signed subexpressions in longer
+questions remain grouped. Fractional division stays as division in the teacher
+demonstration; the general worked-solution engine still supports reciprocal steps.
+Decimal working keeps decimals, fraction working keeps fractions, and zero has
+no invented positive or negative sign. Previous, Replay and autoplay follow the
+same sequence.
+
 Custom Sign & magnitude inputs accept integers, decimals, fractions such as
 `1/3`, and mixed numbers such as `-1 1/2`, between -100 and +100. Arithmetic,
 sign decisions and labels use exact rational values; decimal-only inputs retain

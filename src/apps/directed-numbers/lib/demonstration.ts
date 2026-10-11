@@ -34,7 +34,11 @@ export function demonstrationSteps(ast: Ast): Step[] {
   const numberStyle = demonstrationStyle(ast);
   return additive(ast)
     ? bracketSteps(ast, numberStyle)
-    : workOut(ast, { signWorking: true, numberStyle });
+    : workOut(ast, {
+        signWorking: true,
+        numberStyle,
+        reciprocalWorking: false,
+      });
 }
 export function highlightedTex(step: Step): string {
   const tex = expressionTex(step.before, step.numberStyle),
