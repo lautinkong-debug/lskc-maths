@@ -2,6 +2,15 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Directed Numbers teacher demonstrations (11/10/2026)
+
+- [x] Remove prediction from Sign & magnitude and replace textbook answer-entry/marking with teacher-controlled demonstrations.
+- [x] Animate each bracket separately: highlight the adjacent signs, combine them, and reveal the rewritten expression before moving on the number line.
+- [x] Draw starting, movement and remaining/total distance bars with an explicit magnitude calculation in the graph. Retain zero, equal-sign and opposite-sign cases.
+- [x] Add Play/Pause, Previous/Next step, Replay, Normal/Slow speed and reduced-motion support; cancel playback on question changes. Preserve exact fractions and operation order for all 122 textbook questions.
+- [x] 343 mathematical/rendering checks, TypeScript, scoped lint and production build passed. All 17 browser scenarios passed across focused runs; reviewed phone and 1920×1080 projector screenshots and ensured the full magnitude graph is visible.
+- [ ] Publish the revised teacher demonstration and verify it on the official website.
+
 ## Canonical GitHub source for Dot (11/10/2026)
 
 - [x] Consolidate the latest published Directed Numbers source with the vocabulary activity, retaining all previous department features.

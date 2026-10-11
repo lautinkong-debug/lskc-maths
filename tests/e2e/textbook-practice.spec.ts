@@ -1,112 +1,111 @@
-import { expect, test } from "@playwright/test";
-
-for (const [expression, sign, magnitude] of [
-  ["50-60", "Negative: left of 0", 10],
-  ["-50+30", "Negative: left of 0", 20],
-  ["-50+60", "Positive: right of 0", 10],
-  ["-50-30", "Negative: left of 0", 80],
-  ["-50-(-60)", "Positive: right of 0", 10],
-  ["50+(-50)", "Zero: neither positive nor negative", 0],
+import { expect, test, type Page } from "@playwright/test";
+async function next(page: Page, times = 1) {
+  for (let i = 0; i < times; i++)
+    await page.getByRole("button", { name: "Next step", exact: true }).click();
+}
+async function advanceAutoplay(page: Page, count?: number) {
+  const progress = page.getByText(/^Step \d+ of \d+$/);
+  const numbers = (await progress.innerText()).match(/\d+/g)!.map(Number);
+  const end = count === undefined ? numbers[1] : numbers[0] + count;
+  for (let i = numbers[0] + 1; i <= end; i++) {
+    await page.clock.runFor(1800);
+    await expect(progress).toHaveText(`Step ${i} of ${numbers[1]}`);
+  }
+}
+for (const [expression, sign, calculation] of [
+  ["(+50)-(+60)", "Negative: left of 0", "60 − 50 = 10"],
+  ["(-50)+(+30)", "Negative: left of 0", "50 − 30 = 20"],
+  ["(-50)+(+60)", "Positive: right of 0", "60 − 50 = 10"],
+  ["(-50)-(+30)", "Negative: left of 0", "50 + 30 = 80"],
+  ["(-50)-(-60)", "Positive: right of 0", "60 − 50 = 10"],
+  ["(+50)+(-50)", "Zero: neither positive nor negative", "50 − 50 = 0"],
 ] as const) {
-  test(`number-line magnitude: ${expression}`, async ({ page }) => {
+  test(`brackets before graph: ${expression}`, async ({ page }) => {
     await page.goto(
       `/apps/directed-numbers#sign-magnitude:e=${encodeURIComponent(expression)}`,
     );
-    const line = page.getByTestId("magnitude-line");
-    await expect(line).toHaveAttribute("data-stage", "0");
-    await expect(page.getByTestId("magnitude-result")).toHaveCount(0);
-    await page.clock.install();
-    await page
-      .getByRole("button", { name: "Show movement", exact: true })
-      .click();
-    await expect(line).toHaveAttribute("data-stage", "1");
-    await page.clock.runFor(1500);
-    const result = page.getByTestId("magnitude-result");
-    await expect(result.getByText(sign, { exact: true })).toBeVisible();
+    const graph = page.getByTestId("magnitude-line");
+    await expect(graph).toHaveAttribute("data-stage", "0");
     await expect(
-      result.getByText(`${magnitude} units from 0`, { exact: true }),
+      page.getByRole("button", { name: "Check prediction" }),
+    ).toHaveCount(0);
+    await next(page);
+    await expect(page.getByTestId("equation-frame")).toHaveAttribute(
+      "data-phase",
+      "highlight",
+    );
+    await next(page, 2);
+    await expect(
+      page
+        .getByTestId("before-equation")
+        .locator('.katex [style*="background-color"]'),
     ).toBeVisible();
-    await page
-      .getByRole("button", { name: "Start again", exact: true })
-      .click();
-    await expect(line).toHaveAttribute("data-stage", "0");
-    await expect(result).toHaveCount(0);
+    await expect(graph).toHaveAttribute("data-stage", "0");
+    await next(page);
+    await expect(page.getByTestId("after-equation")).toBeVisible();
+    await expect(page.getByTestId("graph-calculation")).toHaveCount(0);
+    await next(page);
+    await expect(page.getByTestId("distance-start")).toBeVisible();
+    await expect(page.getByTestId("distance-movement")).toHaveCount(0);
+    await next(page);
+    await expect(page.getByTestId("distance-movement")).toBeVisible();
+    await next(page);
+    await expect(page.getByTestId("graph-calculation")).toHaveText(calculation);
+    await expect(page.getByTestId("distance-result")).toBeVisible();
+    await next(page);
+    await expect(page.getByTestId("magnitude-result")).toContainText(sign);
+    await expect(
+      page.getByRole("button", { name: "Next step", exact: true }),
+    ).toBeDisabled();
+    await page.getByRole("button", { name: "Replay from start" }).click();
+    await expect(graph).toHaveAttribute("data-stage", "0");
+    await expect(page.getByTestId("graph-calculation")).toHaveCount(0);
   });
 }
 
-test("textbook reference, incorrect sign, equivalent fraction and filters", async ({
+test("textbook is a demonstration; autoplay pauses and changing question clears the timer", async ({
   page,
-}, testInfo) => {
+}) => {
   await page.goto("/apps/directed-numbers#textbook");
   await expect(
     page.getByRole("heading", { name: "Exercise 2B · Q1(a)" }),
   ).toBeVisible();
-  await page.getByLabel("Your answer", { exact: true }).fill("-4");
-  await page.getByRole("button", { name: "Check answer", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("magnitude is right");
-  await page.getByLabel("Your answer", { exact: true }).fill("8/2");
-  await page.getByRole("button", { name: "Check answer", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Correct.");
-  await expect(page.getByText(/Question 1 of 62 · 1 correct/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Check answer" })).toHaveCount(
+    0,
+  );
+  await expect(page.getByLabel("Your answer", { exact: true })).toHaveCount(0);
+  await page.clock.install();
+  await page.getByRole("button", { name: "Play demonstration" }).click();
+  await advanceAutoplay(page, 3);
+  await expect(page.getByTestId("equation-frame")).toHaveAttribute(
+    "data-phase",
+    "highlight",
+  );
+  await page.getByRole("button", { name: "Pause demonstration" }).click();
+  await page.clock.runFor(8000);
+  await expect(page.getByTestId("equation-frame")).toHaveAttribute(
+    "data-phase",
+    "highlight",
+  );
   await page
-    .getByRole("combobox", { name: "Difficulty", exact: true })
-    .selectOption("2");
-  await page
-    .getByRole("combobox", { name: "Question", exact: true })
-    .selectOption({ label: "Q24(d)" });
-  await expect(
-    page.getByRole("heading", { name: "Exercise 2B · Q24(d)" }),
-  ).toBeVisible();
-  await page.getByLabel("Your answer", { exact: true }).fill("-1 1/6");
-  await page.getByRole("button", { name: "Check answer", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Correct.");
-  await page.getByRole("button", { name: "Show working", exact: true }).click();
-  await expect(
-    page.getByRole("region", { name: "Working", exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: /Explore with the bird/ }),
-  ).toHaveCount(0);
-  await page
-    .getByRole("combobox", { name: "Exercise", exact: true })
-    .selectOption("2C");
-  await expect(
-    page.getByRole("heading", { name: "Exercise 2C · Q20(a)" }),
-  ).toBeVisible();
-  await expect(page.getByLabel("Your answer", { exact: true })).toHaveValue("");
-  await page
-    .getByRole("combobox", { name: "Question", exact: true })
-    .selectOption({ label: "Q33(b)" });
-  await page.getByLabel("Your answer", { exact: true }).fill("-2.25");
-  await page.getByRole("button", { name: "Check answer", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Correct.");
-  await expect(
-    page.getByRole("button", { name: "Next question", exact: false }),
-  ).toBeDisabled();
-  await page.getByRole("button", { name: "Show working", exact: true }).click();
-  await page.screenshot({
-    path: testInfo.outputPath("textbook-desktop.png"),
-    fullPage: true,
-  });
-  await page.setViewportSize({ width: 390, height: 844 });
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  ).toBe(true);
-  await page.screenshot({
-    path: testInfo.outputPath("textbook-phone.png"),
-    fullPage: true,
-  });
-});
-
-test("textbook connects to the correct bird and magnitude examples", async ({
-  page,
-}) => {
-  await page.goto("/apps/directed-numbers#textbook");
+    .getByRole("button", { name: "Previous step", exact: true })
+    .click();
+  await expect(page.getByTestId("equation-frame")).toHaveAttribute(
+    "data-phase",
+    "applied",
+  );
+  await page.getByRole("button", { name: "Play demonstration" }).click();
   await page
     .getByRole("combobox", { name: "Question", exact: true })
     .selectOption({ label: "Q4(c)" });
+  await page.clock.runFor(10000);
+  await expect(page.getByTestId("equation-frame")).toHaveAttribute(
+    "data-phase",
+    "start",
+  );
+  await expect(
+    page.getByRole("heading", { name: "Exercise 2B · Q4(c)" }),
+  ).toBeVisible();
   await page.getByRole("link", { name: /Explore with the bird/ }).click();
   await expect(page.getByTestId("walking-bird")).toHaveAttribute(
     "data-position",
@@ -116,46 +115,70 @@ test("textbook connects to the correct bird and magnitude examples", async ({
   await expect(
     page.getByRole("heading", { name: "Exercise 2B · Q4(c)" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Show working", exact: true }).click();
-  await expect(page.getByTestId("magnitude-result")).toContainText(
-    "Positive: right of 0",
-  );
-  await page.getByRole("link", { name: /Explore sign & magnitude/ }).click();
-  await expect(page.getByTestId("magnitude-line")).toHaveAttribute(
-    "aria-label",
-    /start at -3, move 8 units right/,
-  );
 });
 
-test("prediction, new expression, phone and projection layouts", async ({
+test("fractions and mixed operations animate complete exact working", async ({
+  page,
+}) => {
+  await page.goto("/apps/directed-numbers#textbook:e=2B-24d");
+  await expect(
+    page.getByRole("region", { name: "Animated working" }),
+  ).toBeVisible();
+  await page.clock.install();
+  await page.getByRole("button", { name: "Play demonstration" }).click();
+  await advanceAutoplay(page);
+  await expect(
+    page.getByText("Demonstration complete", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByTestId("after-equation").getByRole("math"),
+  ).toHaveAttribute("aria-label", "= -\\frac{7}{6}");
+  await page
+    .getByRole("combobox", { name: "Exercise", exact: true })
+    .selectOption("2C");
+  await page
+    .getByRole("combobox", { name: "Question", exact: true })
+    .selectOption({ label: "Q33(b)" });
+  await expect(page.getByTestId("equation-frame")).toHaveAttribute(
+    "data-phase",
+    "start",
+  );
+  await page.getByRole("button", { name: "Play demonstration" }).click();
+  await advanceAutoplay(page);
+  await expect(
+    page.getByTestId("after-equation").getByRole("math"),
+  ).toHaveAttribute("aria-label", "= -\\frac{9}{4}");
+  await expect(
+    page.getByRole("button", { name: /Next question/ }),
+  ).toBeDisabled();
+});
+
+test("teacher controls and calculation fit phone and projector; reduced motion is respected", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/apps/directed-numbers#sign-magnitude");
-  await page
-    .getByRole("combobox", { name: "Predicted sign", exact: true })
-    .selectOption("positive");
-  await page.getByLabel("Predicted magnitude", { exact: true }).fill("10");
-  await page
-    .getByRole("button", { name: "Check prediction", exact: true })
-    .click();
-  await expect(page.getByRole("status")).toContainText("which side of zero");
-  await page
-    .getByRole("combobox", { name: "Predicted sign", exact: true })
-    .selectOption("negative");
-  await page
-    .getByRole("button", { name: "Check prediction", exact: true })
-    .click();
-  await expect(page.getByRole("status")).toContainText("Correct.");
-  await page
-    .getByRole("button", { name: "Show movement", exact: true })
-    .click();
-  await expect(page.getByTestId("magnitude-result")).toBeVisible();
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/apps/directed-numbers#textbook:e=2B-4c");
+  await expect(
+    page.getByRole("button", { name: "Next step", exact: true }),
+  ).toBeVisible();
+  await next(page, 3);
+  await page.screenshot({
+    path: testInfo.outputPath("brackets-phone.png"),
+    fullPage: true,
+  });
+  await next(page, 5);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  await expect(page.getByTestId("graph-calculation")).toHaveText("8 − 3 = 5");
+  expect(
+    await page
+      .getByTestId("graph-calculation")
+      .evaluate((node) => getComputedStyle(node).animationName),
+  ).toBe("none");
   await page.screenshot({
     path: testInfo.outputPath("magnitude-phone.png"),
     fullPage: true,
@@ -164,24 +187,18 @@ test("prediction, new expression, phone and projection layouts", async ({
   await page
     .getByRole("button", { name: "Projection mode", exact: true })
     .click();
+  await expect(page.getByTestId("magnitude-line")).toBeInViewport({ ratio: 1 });
   await expect(page.getByTestId("magnitude-result")).toBeInViewport({
     ratio: 1,
   });
-  await expect(page.getByTestId("magnitude-line")).toBeInViewport({ ratio: 1 });
   await page.screenshot({
     path: testInfo.outputPath("magnitude-projection.png"),
     fullPage: true,
   });
-  await page.getByLabel("Starting value", { exact: true }).fill("50");
-  await page.getByLabel("Second number", { exact: true }).fill("30");
-  await page
-    .getByRole("button", { name: "Draw my number line", exact: true })
-    .click();
-  await expect(page.getByTestId("magnitude-line")).toHaveAttribute(
-    "data-stage",
-    "0",
-  );
-  await expect(
-    page.getByLabel("Predicted magnitude", { exact: true }),
-  ).toHaveValue("");
+  await page.getByRole("button", { name: "Replay from start" }).click();
+  await next(page, 3);
+  await page.screenshot({
+    path: testInfo.outputPath("brackets-projection.png"),
+    fullPage: true,
+  });
 });

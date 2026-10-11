@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { Math as Tex } from "@/components/Math";
 import { usePresentation } from "@/components/PresentationFrame";
 import { copy } from "@/lib/copy";
-import { button, field, primary } from "../components/ui";
+import { button, field } from "../components/ui";
 import { SignMagnitude } from "../components/SignMagnitude";
-import { parse, parseAnswer } from "../lib/parse";
-import { equals, abs, toTex } from "../lib/rational";
-import { expressionTex, workOut } from "../lib/steps";
+import { AnimatedWorking } from "../components/AnimatedWorking";
 import { parseJourney } from "../lib/moves";
 import {
   textbookQuestions,
@@ -14,131 +11,31 @@ import {
   type TextbookQuestion,
 } from "../lib/textbook";
 const c = copy.apps.directedNumbers.textbookLesson;
-
-function PracticeQuestion({
-  question,
-  onCorrect,
-}: {
-  question: TextbookQuestion;
-  onCorrect: () => void;
-}) {
-  const [answer, setAnswer] = useState(""),
-    [feedback, setFeedback] = useState("");
-  const [showWorking, setShowWorking] = useState(false);
-  const parsed = parse(question.expression),
-    expected = parseAnswer(question.answer);
-  if (!parsed.ok || !expected.ok) return null; // The complete bank is validated in textbook.test.ts.
+const t = copy.apps.directedNumbers.demonstration;
+function DemonstrationQuestion({ question }: { question: TextbookQuestion }) {
   const move = simpleMove(question.expression);
-  const bird = parseJourney(question.expression).ok;
   return (
-    <div className="min-w-0 space-y-5">
-      <div className="border-grid bg-navy-wash space-y-3 rounded border p-5">
-        <h3 className="text-navy font-semibold">
+    <div className="min-w-0 space-y-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h3 className="text-navy text-xl font-semibold">
           {c.reference(question.exercise, question.question, question.part)}
         </h3>
         <p className="text-pencil text-sm">
           {c.page(question.page)} · {c.levelName(question.level)}
         </p>
-        <div className="overflow-x-auto py-3 text-2xl">
-          <Tex>{expressionTex(parsed.value)}</Tex>
-        </div>
-        <form
-          className="space-y-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const submitted = parseAnswer(answer);
-            if (!submitted.ok) {
-              setFeedback(submitted.message);
-              return;
-            }
-            if (equals(submitted.value, expected.value)) {
-              setFeedback(c.correct);
-              onCorrect();
-            } else
-              setFeedback(
-                equals(abs(submitted.value), abs(expected.value))
-                  ? c.signHint
-                  : c.retry,
-              );
-          }}
-        >
-          <label className="block max-w-sm font-semibold">
-            {c.answer}
-            <input
-              className={field}
-              autoComplete="off"
-              value={answer}
-              aria-describedby="textbook-answer-help"
-              onChange={(e) => {
-                setAnswer(e.target.value);
-                setFeedback("");
-              }}
-            />
-          </label>
-          <p id="textbook-answer-help" className="text-sm">
-            {c.answerHelp}
-          </p>
-          <button className={primary}>{c.check}</button>
-          {feedback && (
-            <p role="status" className="font-medium">
-              {feedback}
-            </p>
-          )}
-        </form>
       </div>
-      <div className="flex flex-wrap gap-3">
-        <button
-          className={button}
-          aria-expanded={showWorking}
-          onClick={() => setShowWorking((value) => !value)}
+      {move ? (
+        <SignMagnitude move={move} expression={question.expression} wide />
+      ) : (
+        <AnimatedWorking expression={question.expression} />
+      )}
+      {parseJourney(question.expression).ok && (
+        <a
+          className={`${button} inline-flex`}
+          href={`#add-subtract:e=${encodeURIComponent(question.expression)}`}
         >
-          {showWorking ? c.hide : c.reveal}
-        </button>
-        {bird && (
-          <a
-            className={button}
-            href={`#add-subtract:e=${encodeURIComponent(question.expression)}`}
-          >
-            {c.bird} →
-          </a>
-        )}
-        {move && (
-          <a
-            className={button}
-            href={`#sign-magnitude:e=${encodeURIComponent(question.expression)}`}
-          >
-            {c.magnitude} →
-          </a>
-        )}
-      </div>
-      {showWorking && (
-        <div className="grid min-w-0 gap-5 lg:grid-cols-2">
-          <section
-            className="border-grid min-w-0 space-y-3 rounded border p-4"
-            aria-label={c.working}
-          >
-            <h3 className="font-semibold">{c.working}</h3>
-            <ol className="space-y-3">
-              {workOut(parsed.value).map((step, index) => (
-                <li
-                  key={index}
-                  className="overflow-x-auto border-l-2 border-[#c8d8e6] pl-3 text-xl"
-                >
-                  <Tex>{`= ${step.tex}`}</Tex>
-                </li>
-              ))}
-            </ol>
-            <p className="border-grid border-t pt-3 font-semibold">
-              {c.result}:{" "}
-              <Tex>
-                {toTex(expected.value, {
-                  style: question.answer.includes(".") ? "decimal" : "improper",
-                })}
-              </Tex>
-            </p>
-          </section>
-          {move && <SignMagnitude move={move} staticResult />}
-        </div>
+          {c.bird} →
+        </a>
       )}
     </div>
   );
@@ -160,7 +57,6 @@ export default function TextbookMode({
         .filter((q) => q.exercise === initial.exercise)
         .findIndex((q) => q.id === initial.id),
     );
-  const [correct, setCorrect] = useState<Set<string>>(new Set());
   const questions = textbookQuestions.filter(
     (q) =>
       q.exercise === exercise && (level === "all" || q.level === Number(level)),
@@ -175,10 +71,14 @@ export default function TextbookMode({
   }
   return (
     <section className={`min-w-0 space-y-5 ${presenting ? "text-xl" : ""}`}>
-      <h2 className="font-display text-navy text-2xl font-semibold">
-        {c.title}
-      </h2>
-      <p className="text-pencil max-w-3xl">{c.intro}</p>
+      {!presenting && (
+        <h2 className="font-display text-navy text-2xl font-semibold">
+          {c.title}
+        </h2>
+      )}
+      {!presenting && (
+        <p className="text-pencil max-w-3xl">{t.textbookIntro}</p>
+      )}
       <div className="grid gap-3 sm:grid-cols-3">
         <label>
           {c.exercise}
@@ -246,20 +146,12 @@ export default function TextbookMode({
           </select>
         </label>
       </div>
-      <p className="text-pencil text-sm">
-        {c.progress(
-          index + 1,
-          questions.length,
-          questions.filter((q) => correct.has(q.id)).length,
-        )}
-      </p>
-      <PracticeQuestion
-        key={question.id}
-        question={question}
-        onCorrect={() =>
-          setCorrect((previous) => new Set(previous).add(question.id))
-        }
-      />
+      {!presenting && (
+        <p className="text-pencil text-sm">
+          {t.selected(index + 1, questions.length)}
+        </p>
+      )}
+      <DemonstrationQuestion key={question.id} question={question} />
       <div className="flex flex-wrap justify-between gap-3">
         <button
           className={button}

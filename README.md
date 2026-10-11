@@ -11,7 +11,7 @@ Use **`main`** for the complete current website:
 
 This includes the Statistical Charts vocabulary and animated teaching activities,
 editable frequency tables, textbook-topic filtering, and Directed Numbers textbook
-practice, bird animation and sign/magnitude lessons. Read
+demonstrations with animated bracket removal, bird animation and graphical sign/magnitude lessons. Read
 [the Dot handoff](docs/dot-handoff.md) before continuing development.
 Earlier feature branches are superseded; their commits remain in Git history.
 

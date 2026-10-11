@@ -14,8 +14,8 @@ All 122 parts retain their question/part references and difficulty. Operands,
 brackets and operation order are preserved. Printed division bars are rendered
 as equivalent division expressions with grouped numerators/denominators where
 needed. Expected answers are transcribed from the printed answer key, separate
-from the evaluator. Equivalent integer, decimal, fraction and mixed-number
-answers are accepted by the existing exact rational arithmetic engine.
+from the evaluator. Exact rational arithmetic keeps integer, decimal, fraction
+and mixed-number working correct throughout each animation.
 
 Word problems, Exercise 2A, Quick Practice, Revision Exercise 2 and multiple-choice
 questions are not in this bank. The interface states the exact coverage.
@@ -27,11 +27,19 @@ The Sign & magnitude lesson uses the four cases supplied in the teacher's image:
 negative number and cancellation to zero. Custom operands are integers from
 −100 to +100, with a number line scaled to include the start, finish and zero.
 
-1. Start at the first number.
-2. Read both the operation and the second number's sign to determine movement.
-3. Animate an arrow whose length is proportional to the movement distance.
-4. Read the result's sign from its side of zero.
-5. Mark the result's magnitude as the distance between zero and the endpoint.
+1. Highlight the adjacent signs and animate one bracket removal at a time.
+2. Measure the starting point's distance from zero.
+3. Animate movement using the operation after bracket removal.
+4. Draw the starting, movement and remaining/total distance bars on the same
+   number-line scale. Show the magnitude calculation inside the graph, such as
+   `50 - 30 = 20`, `60 - 50 = 10`, or `50 + 30 = 80`.
+5. Read the final side of zero and attach the sign to the magnitude.
+
+This is a teacher demonstration. Sign & magnitude has no prediction controls;
+Textbook practice has no answer-entry form, marking or score counter. Both use
+Play/Pause, Previous/Next step, Replay from start and Normal/Slow speed.
+Changing a question or example cancels the old timeline. Reduced-motion settings
+retain the mathematical sequence while removing movement effects.
 
 For subtraction, show addition of the opposite before comparing magnitudes.
 For equal signs, add magnitudes. For opposite signs, subtract magnitudes and
@@ -41,25 +49,29 @@ nor negative. Do not confuse the movement distance with the result's magnitude.
 The bird lesson shows the final diagram after each completed move. Textbook
 questions link to the bird only when the existing integer journey parser accepts
 them; a single integer addition/subtraction can also open Sign & magnitude.
-Fractions and compound expressions use the exact step-by-step working instead.
+Fractions and compound expressions use animated, highlighted algebra working.
+Every additive bracket change remains separate; nested brackets and mixed
+operations retain the correct operation order. Completed steps can be expanded.
 
 ## Local review
 
 Start the existing local website and demo Firebase emulators with `npm.cmd run dev:all`.
 Use the normal emulator seed if the local database is empty.
 
-- `/apps/directed-numbers#textbook` — textbook selection, grading and working.
+- `/apps/directed-numbers#textbook` — textbook selection and teacher demonstration.
 - `/apps/directed-numbers#textbook:e=2B-4c` — a specific textbook question.
 - `/apps/directed-numbers#sign-magnitude` — the four illustrated cases.
 - `/apps/directed-numbers#sign-magnitude:e=-50-(-60)` — subtract a negative.
 
 Checks: `lib/textbook.test.ts` validates every question and every working step
 against the printed key, plus sign/magnitude and visual eligibility cases.
-`tests/e2e/textbook-practice.spec.ts` exercises staged movement, prediction,
-grading, filters, lesson links, question restoration, mobile and projection views.
+`lib/demonstration.test.ts` checks all 122 question animations against the printed
+key and verifies every highlighted TeX frame renders. The browser suite checks
+bracket-first timing, magnitude calculations, playback, reset, filters, fractions,
+lesson links, question restoration, mobile and projection views.
 The existing bird animation suite covers regression of sign turns and unit steps.
 
-## Production release
+## Initial production release
 
 Published with the owner's approval at `https://lskc-maths.vercel.app/apps/directed-numbers`.
 Deployment: `dpl_B4cpxr5ZKXgdjHRpKxSBLggMHUf4`.

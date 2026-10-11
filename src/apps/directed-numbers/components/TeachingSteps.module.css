@@ -1,0 +1,62 @@
+.signs {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 2.5rem;
+  font-size: 1.8rem;
+  color: #0f4574;
+}
+.first,
+.second {
+  background: #fff1ad;
+  border-radius: 0.25rem;
+  padding-inline: 0.4rem;
+}
+.combine .first {
+  animation: first 900ms ease both;
+}
+.combine .second {
+  animation: second 900ms ease both;
+}
+.combine .bracket {
+  animation: dissolve 900ms ease both;
+}
+.arrive {
+  animation: arrive 900ms ease both;
+}
+@keyframes first {
+  to {
+    transform: translateX(1.5rem);
+    opacity: 0.25;
+  }
+}
+@keyframes second {
+  to {
+    transform: translateX(-1.5rem);
+    opacity: 0.25;
+  }
+}
+@keyframes dissolve {
+  to {
+    opacity: 0.1;
+    transform: scaleY(0.6);
+  }
+}
+@keyframes arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .combine .first,
+  .combine .second,
+  .combine .bracket,
+  .arrive {
+    animation: none;
+  }
+}
