@@ -1,14 +1,18 @@
 import { expect, test, type Page } from "@playwright/test";
-test("independent calculations reveal together and controls follow long working", async ({
+test("independent calculations highlight on request and retain long working", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/apps/directed-numbers#textbook:e=R2-37b");
+  await expect(
+    page.getByRole("button", { name: "Next step", exact: true }),
+  ).toBeVisible();
   const initial = page.locator('[data-next-calculation="true"]');
+  await expect(initial).toHaveCount(0);
+  await next(page);
   await expect(initial).toHaveCount(1);
   await expect(initial.locator('[style*="background-color"]')).toHaveCount(3);
-  await next(page);
   const groups = page.locator("[data-arrow-group]");
   await expect(groups).toHaveCount(3);
   await expect(groups.locator("[data-result-sign]")).toHaveText([
@@ -20,6 +24,7 @@ test("independent calculations reveal together and controls follow long working"
   const first = page.getByTestId("operation-sign-magnitude");
   await expect(first).toHaveAttribute("data-magnitude-shown", "false");
   await next(page);
+  await expect(initial).toHaveCount(0);
   await expect(first).toHaveAttribute("data-magnitude-shown", "true");
   await expect(
     page.getByText("Optional written step", { exact: true }),
@@ -38,20 +43,10 @@ test("independent calculations reveal together and controls follow long working"
   await expect(
     page.getByTestId("after-equation").getByRole("math"),
   ).toHaveAttribute("aria-label", "= -4");
-  await expect
-    .poll(async () => {
-      const control = await page.getByTestId("teaching-controls").boundingBox();
-      const result = await page.getByTestId("after-equation").boundingBox();
-      return Boolean(
-        control &&
-        result &&
-        control.y >= 0 &&
-        control.y + control.height < 720 &&
-        result.y >= control.y + control.height &&
-        result.y + result.height <= 720,
-      );
-    })
-    .toBe(true);
+  await page.getByTestId("after-equation").scrollIntoViewIfNeeded();
+  await expect(page.getByTestId("teaching-controls")).toBeInViewport({
+    ratio: 1,
+  });
   await expect(groups).not.toHaveCount(0);
   await page.screenshot({
     path: testInfo.outputPath("sticky-controls-result.png"),
@@ -63,6 +58,82 @@ test("independent calculations reveal together and controls follow long working"
     page.getByText(`Step ${last - 1} of ${last}`, { exact: true }),
   ).toBeVisible();
 });
+test("late Next clicks keep the teacher's viewport steady", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/apps/directed-numbers#textbook:e=R2-34a");
+  await next(page, 8);
+  await page.locator("[data-equation-line]").last().scrollIntoViewIfNeeded();
+  await page.clock.install();
+  const scroll = await page.evaluate(() => window.scrollY);
+  const button = page.getByRole("button", { name: "Next step", exact: true });
+  const y = (await button.boundingBox())!.y;
+  for (let i = 0; i < 4; i++) {
+    await next(page);
+    await page.clock.runFor(1200);
+    expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(scroll, 0);
+    expect((await button.boundingBox())!.y).toBeCloseTo(y, 0);
+  }
+  await expect(
+    page.getByTestId("after-equation").getByRole("math"),
+  ).toHaveAttribute("aria-label", "= -4");
+  await page.getByTestId("after-equation").scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: testInfo.outputPath("addition-arrows-stable-view.png"),
+    fullPage: true,
+  });
+});
+
+for (const [id, pair, sign] of [
+  ["2B-2b", "+-", "−"],
+  ["2C-27a", "++", "+"],
+  ["2C-14b", "+-", "−"],
+  ["2C-13a", "-+", "−"],
+  ["2C-15a", "--", "+"],
+  ["2C-28a", "+-", "−"],
+  ["R2-34a", "+-", "−"],
+] as const) {
+  test(`addition/subtraction arrows and click-only highlights: ${id}`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto(`/apps/directed-numbers#textbook:e=${id}`);
+    const nextButton = page.getByRole("button", {
+      name: "Next step",
+      exact: true,
+    });
+    await expect(nextButton).toBeVisible();
+    const highlight = page.locator('[data-next-calculation="true"]');
+    await expect(highlight).toHaveCount(0);
+    const arrow = page.getByRole("img", {
+      name: `${pair[0]} (${pair[1]}) becomes ${sign}`,
+      exact: true,
+    });
+    while (await nextButton.isEnabled()) {
+      await nextButton.click();
+      const progress = (await page.getByText(/^Step \d+ of \d+$/).innerText())
+        .match(/\d+/g)!
+        .map(Number);
+      if (progress[0] % 2 === 0) await expect(highlight).toHaveCount(0);
+    }
+    await expect(arrow.first()).toBeVisible();
+    await expect(arrow.first().locator("[data-arrow]")).toHaveCount(2);
+    await expect(arrow.first().locator("[data-result-sign]")).toHaveText(sign);
+    await expect(arrow.first().locator("[data-result-sign]")).toHaveCSS(
+      "opacity",
+      "1",
+    );
+    await page
+      .getByRole("button", { name: "Replay from start", exact: true })
+      .click();
+    await expect(highlight).toHaveCount(0);
+    await expect(
+      page.getByRole("img", { name: /becomes/, exact: false }),
+    ).toHaveCount(0);
+  });
+}
 async function next(page: Page, times = 1) {
   for (let i = 0; i < times; i++)
     await page.getByRole("button", { name: "Next step", exact: true }).click();

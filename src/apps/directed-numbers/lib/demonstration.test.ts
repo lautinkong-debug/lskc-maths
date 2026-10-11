@@ -11,6 +11,32 @@ import {
 
 describe("teacher demonstration frames", () => {
   it.each([
+    ["6+[(+2)*1]", "++", "+", "8"],
+    ["6+(-2)*1", "+-", "-", "4"],
+    ["6-[(+2)*1]", "-+", "-", "4"],
+    ["6-(-2)*1", "--", "+", "8"],
+    ["6+(+20)÷(+4)×(-2)", "+-", "-", "-4"],
+    ["[6-(-2)*1]÷2", "--", "+", "4"],
+    ["0.6+(-0.2)*1", "+-", "-", "0.4"],
+    ["1/2-(-1/4)*1", "--", "+", "3/4"],
+  ])(
+    "%s combines additive signs before calculation",
+    (source, pair, operation, answer) => {
+      const parsed = parse(source),
+        expected = parseAnswer(answer);
+      if (!parsed.ok || !expected.ok) throw new Error(source);
+      const steps = demonstrationSteps(parsed.value);
+      const removal = steps.find(
+        (step) => step.kind === "bracket" && step.ruleId === pair,
+      );
+      expect(removal).toBeDefined();
+      expect(removal!.signArrows?.pair).toBe(pair);
+      expect(signArrowTex(removal!)!.match(/textcolor/g)).toHaveLength(2);
+      expect(pair[0] === pair[1] ? "+" : "-").toBe(operation);
+      expect(equals(evaluate(steps.at(-1)!.ast), expected.value)).toBe(true);
+    },
+  );
+  it.each([
     ["(+6)×(+2)", "+", "\\times"],
     ["(+6)×(-2)", "-", "\\times"],
     ["(-6)×(+2)", "-", "\\times"],
@@ -118,7 +144,7 @@ describe("teacher demonstration frames", () => {
           const arrows = signArrowTex(step);
           expect(arrows).not.toBeNull();
           expect(arrows!.match(/textcolor/g)).toHaveLength(2);
-          if (step.signReveal) {
+          if (step.signArrows) {
             const shown = parse(
               arrows!
                 .replace(/\\textcolor\{#DA2127\}\{([+-])\}/g, "$1")

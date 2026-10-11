@@ -117,13 +117,13 @@ function EquationLine({
         { signs: pair, result: pair[0] === pair[1] ? "+" : "−" },
       ])
     : [];
-  const focused = latest && Boolean(nextStep);
+  const focused = highlight && Boolean(nextStep);
   const operationArrows = Boolean(nextStep?.signArrows);
   const root = useRef<HTMLDivElement>(null);
   const marker = useId().replaceAll(":", "");
   const markedTex = focused
     ? `${original ? "" : "= "}${highlightedTex(nextStep!, true)}`
-    : marked
+    : marked && arrowPhase > 0
       ? `${original ? "" : "= "}${marked}`
       : tex;
   useLayoutEffect(() => {
@@ -190,7 +190,7 @@ function EquationLine({
       data-tex={tex}
       data-next-calculation={focused || undefined}
     >
-      {focused && <p className={styles.focusNote}>{t.calculateNext}</p>}
+      {focused && <span className="sr-only">{t.calculateNext}</span>}
       <div
         ref={root}
         className={`${styles.layers} ${arrowPhase > 0 ? styles.arrowsShown : ""} ${arrowPhase > 1 || (operationArrows && arrowPhase > 0) ? styles.arrowsCombined : ""}`}
@@ -272,10 +272,12 @@ function SplitOperationLine({
   step,
   applied,
   latest,
+  highlight,
 }: {
   step: Step;
   applied: boolean;
   latest: boolean;
+  highlight: boolean;
 }) {
   const reveal = step.signReveal;
   const label = `= ${step.batchReveal ? (applied ? step.tex : step.batchReveal.signTex) : `${reveal!.prefix}${reveal!.sign}${applied ? reveal!.magnitude : ""}${reveal!.suffix}`}`;
@@ -284,12 +286,14 @@ function SplitOperationLine({
     `${reveal!.prefix}${reveal!.sign}\\textcolor{#13579B}{${reveal!.magnitude}}${reveal!.suffix}`;
   return (
     <div
-      className={`${styles.equation} ${styles.splitOperation} ${applied ? styles.magnitudeShown : ""}`}
+      className={`${styles.equation} ${styles.splitOperation} ${applied ? styles.magnitudeShown : ""} ${highlight ? styles.splitFocused : ""}`}
       data-equation-line="true"
       data-tex={label}
       data-testid="operation-sign-magnitude"
       data-magnitude-shown={applied}
+      data-next-calculation={highlight || undefined}
     >
+      {highlight && <span className="sr-only">{t.calculateNext}</span>}
       <span data-testid={latest ? "after-equation" : undefined}>
         <span role="math" aria-label={label}>
           <span aria-hidden="true">
@@ -310,26 +314,6 @@ export function EquationFrame({
   steps: Step[];
   position: number;
 }) {
-  const frame = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!position) return;
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const timer = window.setTimeout(
-      () => {
-        const row = frame.current?.querySelector(
-          "[data-testid='working-step']:last-child",
-        );
-        row?.scrollIntoView({
-          block: "nearest",
-          behavior: reducedMotion ? "instant" : "smooth",
-        });
-      },
-      reducedMotion ? 0 : 750,
-    );
-    return () => window.clearTimeout(timer);
-  }, [position]);
   const completed = Math.min(steps.length, Math.floor(position / 2));
   const highlighting = position % 2 === 1 && completed < steps.length;
   const notes: Record<string, string> = {
@@ -338,8 +322,8 @@ export function EquationFrame({
   };
   return (
     <div
-      ref={frame}
       className="min-w-0"
+      style={{ overflowAnchor: "none" }}
       data-testid="equation-frame"
       data-phase={
         position === 0 ? "start" : highlighting ? "highlight" : "applied"
@@ -391,6 +375,7 @@ export function EquationFrame({
                         step={step}
                         applied={applied}
                         latest={index + 1 === completed}
+                        highlight={highlighting && index + 1 === completed}
                       />
                     ) : (
                       applied && (

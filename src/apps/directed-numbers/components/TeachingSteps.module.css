@@ -25,6 +25,9 @@
   opacity: 1;
   transform: translateX(0);
 }
+.splitFocused :global(.katex-html) [style*="color"]:not([style*="color"] *) {
+  background: #fff1ad;
+}
 .layers {
   display: grid;
   width: max-content;
@@ -163,12 +166,6 @@
   z-index: 30;
   background: var(--color-paper, #fff);
   box-shadow: 0 3px 8px #0f457412;
-}
-.focusNote {
-  margin-bottom: 0.35rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-navy, #0f4574);
 }
 .optionalBadge {
   padding: 0.1rem 0.45rem;

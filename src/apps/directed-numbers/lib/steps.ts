@@ -350,7 +350,20 @@ export function bracketSteps(
   const steps: AdditiveStep[] = [];
   let ast = input;
   for (let guard = 0; guard < 80; guard++) {
-    const change = hasGroup(ast) ? removeNext(ast) : reduceSum(ast);
+    const pending = hasGroup(ast) ? removeNext(ast) : reduceSum(ast);
+    const operand =
+      pending?.kind === "sum"
+        ? removeAdditiveOperand(ast, pending.highlight)
+        : null;
+    // Reduced negative numbers acquire display brackets; teach their signs too.
+    const change: Change | null = operand
+      ? {
+          ast: operand.ast,
+          ruleId: operand.ruleId as AdditiveRuleId,
+          highlight: operand.sourceHighlight,
+          kind: "bracket",
+        }
+      : pending;
     if (!change) break;
     steps.push({
       ...change,
@@ -564,6 +577,44 @@ function reduceInsideGroup(
   const right = reduceInsideGroup(ast.right, reciprocalWorking);
   return right ? { ...right, ast: { ...ast, right: right.ast } } : null;
 }
+
+/** Show the operation sign combining with a signed operand before evaluating a sum. */
+function removeAdditiveOperand(
+  ast: Ast,
+  target: Span,
+): (GeneralChange & { operand: Rational }) | null {
+  if (ast.kind === "number") return null;
+  if (ast.kind === "binary") {
+    if (
+      ast.span.start === target.start &&
+      ast.span.end === target.end &&
+      (ast.op === "+" || ast.op === "-") &&
+      atomic(ast.right)
+    ) {
+      const operand = evaluate(ast.right);
+      if (operand.n === 0 || (ast.right.kind === "number" && operand.n > 0))
+        return null;
+      const sign = operand.n < 0 ? "-" : "+";
+      return {
+        ast: {
+          ...ast,
+          op: ast.op === sign ? "+" : "-",
+          right: number(abs(operand), ast.right.span),
+        },
+        sourceHighlight: { start: ast.left.span.end, end: ast.right.span.end },
+        ruleId: `${ast.op}${sign}` as AdditiveRuleId,
+        kind: "bracket",
+        operand,
+      };
+    }
+    const left = removeAdditiveOperand(ast.left, target);
+    if (left) return { ...left, ast: { ...ast, left: left.ast } };
+    const right = removeAdditiveOperand(ast.right, target);
+    return right ? { ...right, ast: { ...ast, right: right.ast } } : null;
+  }
+  const inner = removeAdditiveOperand(ast.child, target);
+  return inner ? { ...inner, ast: { ...ast, child: inner.ast } } : null;
+}
 function generalWorkOut(
   input: Ast,
   signWorking: boolean,
@@ -577,7 +628,7 @@ function generalWorkOut(
     guard < 100 && (ast.kind !== "number" || ast.sourceForm === "mixed");
     guard++
   ) {
-    const change =
+    const pending =
       convertMixed(ast) ??
       reduceInsideGroup(ast, reciprocalWorking) ??
       reduceExpression(ast, false, reciprocalWorking) ??
@@ -589,7 +640,12 @@ function generalWorkOut(
             kind: "bracket" as Step["kind"],
           }
         : null);
-    if (!change) throw new Error("Could not finish the working");
+    if (!pending) throw new Error("Could not finish the working");
+    const additiveBracket =
+      signWorking && pending.kind === "sum"
+        ? removeAdditiveOperand(ast, pending.sourceHighlight)
+        : null;
+    const change = additiveBracket ?? pending;
     const highlight = texHighlight(ast, change.sourceHighlight, style);
     if (
       signWorking &&
@@ -650,6 +706,15 @@ function generalWorkOut(
     }
     steps.push({
       numberStyle: style,
+      signArrows: additiveBracket
+        ? {
+            pair: change.ruleId,
+            tex:
+              expressionTex(ast, style).slice(0, highlight.start) +
+              ` \\textcolor{#DA2127}{${change.ruleId[0]}} \\left(\\textcolor{#DA2127}{${change.ruleId[1]}}${toTex(abs(additiveBracket.operand), { style })}\\right)` +
+              expressionTex(ast, style).slice(highlight.end),
+          }
+        : undefined,
       tex: expressionTex(change.ast, style),
       highlight,
       sourceHighlight: change.sourceHighlight,
@@ -678,7 +743,9 @@ export function workOut(
 ): Step[] {
   return contains(ast, "*/") || hasMixedNumber(ast)
     ? generalWorkOut(ast, signWorking, numberStyle, reciprocalWorking)
-    : additiveWorkOut(ast, numberStyle);
+    : signWorking
+      ? bracketSteps(ast, numberStyle)
+      : additiveWorkOut(ast, numberStyle);
 }
 export function totals(terms: Rational[]) {
   return terms.reduce(
