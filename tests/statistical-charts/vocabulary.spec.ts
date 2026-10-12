@@ -13,9 +13,9 @@ test("the mnemonic highlights each feature and recalls all four without visible 
     exact: true,
   });
   await expect(lab.getByTestId("vocabulary-diagram")).toContainText("35.5");
-  await lab.getByRole("button", { name: /M Mark is the Middle/ }).click();
+  await lab.getByRole("button", { name: /M Class mark/ }).click();
   await expect(
-    lab.getByRole("button", { name: /M Mark is the Middle/ }),
+    lab.getByRole("button", { name: /M Class mark/ }),
   ).toHaveAttribute("aria-pressed", "true");
   await lab.screenshot({ path: "test-results/statistics-four-words.png" });
   await lab
@@ -60,9 +60,12 @@ test("calculation feedback catches limit-subtraction width and supports decimal 
   await lab
     .getByRole("button", { name: "Check my values", exact: true })
     .click();
+  await expect(lab.getByTestId("vocabulary-correction")).toContainText(
+    "Use boundaries, not limits.",
+  );
   await expect(
-    lab.getByText(/Use the whole bar between boundaries/),
-  ).toContainText("40.5 − 35.5 = 5");
+    lab.getByTestId("vocabulary-correction").getByRole("math"),
+  ).toBeVisible();
   await lab.getByLabel("Class width", { exact: true }).fill("5");
   await lab
     .getByRole("button", { name: "Check my values", exact: true })
@@ -104,16 +107,16 @@ test("word playback pauses and teacher hidden answers suppress worked values", a
     exact: true,
   });
   await lab
-    .getByRole("button", { name: "Play the four words", exact: true })
+    .getByRole("button", { name: "Play the five words", exact: true })
     .click();
   const boundary = lab.getByRole("button", {
-    name: /B Boundaries are Between/,
+    name: /B Class boundary/,
   });
   await expect(boundary).toHaveAttribute("aria-pressed", "true", {
-    timeout: 5000,
+    timeout: 7000,
   });
   await lab
-    .getByRole("button", { name: "Pause the four words", exact: true })
+    .getByRole("button", { name: "Pause the five words", exact: true })
     .click();
   await page.waitForTimeout(2400);
   await expect(boundary).toHaveAttribute("aria-pressed", "true");
@@ -126,6 +129,6 @@ test("word playback pauses and teacher hidden answers suppress worked values", a
     .click();
   await expect(lab.getByTestId("vocabulary-diagram")).not.toContainText("35.5");
   await expect(
-    lab.getByRole("button", { name: "Play the four words", exact: true }),
+    lab.getByRole("button", { name: "Play the five words", exact: true }),
   ).toBeDisabled();
 });

@@ -14,6 +14,12 @@ export const copy = {
       recordedStep: "Recorded to the nearest",
       halfStep: "half a step is",
       names: ["Class limits", "Class boundaries", "Class mark", "Class width"],
+      cardLabels: [
+        "Class limit",
+        "Class boundary",
+        "Class mark",
+        "Class width",
+      ],
       phrases: [
         "Limits are Listed",
         "Boundaries are Between",
@@ -34,6 +40,62 @@ export const copy = {
       ],
       intervalMeaning:
         "A class interval is one group of values in a frequency table.",
+      intervalLabel: "Class interval",
+      calculation: {
+        title: "Animate a calculation",
+        lessons: {
+          markLimits: "Class mark from limits",
+          markBoundaries: "Class mark from boundaries",
+          lowerLimit: "Lower boundary from the lower limit",
+          lowerBoundary: "Lower boundary from upper boundary − width",
+          upperLimit: "Upper boundary from the upper limit",
+          upperBoundary: "Upper boundary from lower boundary + width",
+        },
+        instructions: {
+          markLimits: [
+            "Read the two class limits.",
+            "Add the limits, then divide by 2.",
+            "Calculate the sum.",
+            "Divide by 2: the class mark is halfway.",
+          ],
+          markBoundaries: [
+            "Read the two class boundaries.",
+            "Add the boundaries, then divide by 2.",
+            "Calculate the sum.",
+            "Divide by 2: the same class mark.",
+          ],
+          lowerLimit: [
+            "Read the lower class limit.",
+            "Find half the recording step.",
+            "Subtract half a step from the lower limit.",
+            "This is the lower class boundary.",
+          ],
+          lowerBoundary: [
+            "Start at the upper class boundary.",
+            "Read the full class width.",
+            "Subtract the width from the upper boundary.",
+            "You reach the lower class boundary.",
+          ],
+          upperLimit: [
+            "Read the upper class limit.",
+            "Find half the recording step.",
+            "Add half a step to the upper limit.",
+            "This is the upper class boundary.",
+          ],
+          upperBoundary: [
+            "Start at the lower class boundary.",
+            "Read the full class width.",
+            "Add the width to the lower boundary.",
+            "You reach the upper class boundary.",
+          ],
+        },
+        play: "Play calculation",
+        pause: "Pause calculation",
+        next: "Next step",
+        previous: "Previous step",
+        replay: "Replay",
+        close: "Close calculation",
+      },
       lowerLimitMeaning:
         "Lower class limit: smallest value allowed in the recorded class.",
       upperLimitMeaning:
@@ -92,6 +154,25 @@ export const copy = {
         endpoint: "At a shared boundary, go to the class on the right.",
       },
       newExample: "Try another interval",
+      set: "Set",
+      correction: {
+        title: "Watch the idea click",
+        replay: "Replay the visual",
+        retry: "Let me try again",
+        show: "Show me",
+        captions: [
+          "Read the two listed numbers. These are the limits.",
+          "The red edge is half a recording step outside the limit.",
+          "The circled midpoint is halfway between the two limits.",
+          "Use boundaries, not limits. Measure the WHOLE bar.",
+        ],
+        diagrams: [
+          "Red circles highlight the listed class limits on the original diagram",
+          "Red circles and edges highlight the class boundaries on the original diagram",
+          "A red circle and arrow highlight the class mark on the original diagram",
+          "A red outline highlights the full class width arrow on the original diagram",
+        ],
+      },
       diagram: "One class interval showing limits, boundaries, mark and width",
       recallDiagram: "Name the highlighted feature of the class interval",
       lowerBoundary: "Lower boundary",
@@ -99,8 +180,8 @@ export const copy = {
       halfRule: "Recorded measurements: go HALF A STEP out.",
       precisionRule:
         "Nearest 1 → ±0.5; nearest 0.1 → ±0.05; nearest 0.01 → ±0.005. This rule is for rounded measurements, not intervals already given as continuous boundaries.",
-      play: "Play the four words",
-      pause: "Pause the four words",
+      play: "Play the five words",
+      pause: "Pause the five words",
       next: "Next word",
       sayAloud:
         "Say the phrase, point to the feature, then explain what it measures.",
@@ -1015,6 +1096,8 @@ export const copy = {
         independentSigns:
           "Find the signs of these independent products and quotients together.",
         optionalStep: "Optional written step",
+        hideOptional: "Hide optional written steps",
+        showOptional: "Show optional written steps",
         optionalHelp:
           "You may omit this intermediate line in written work once you can apply the sign rule mentally.",
         play: "Play demonstration",
@@ -1063,7 +1146,23 @@ export const copy = {
       magnitudeLesson: {
         title: "Where do we finish?",
         intro:
-          "Remove the brackets first. Then animate the movement and calculate the magnitude directly on the number line.",
+          "Choose a number line or a money account. Reveal the sign first, then the magnitude.",
+        method: "Explain with",
+        methods: { "number-line": "Number line", owe: "Owe" },
+        quickRule: {
+          button: "Quick rule",
+          title: "Remember when adding",
+          rewrite: "Subtracting? Add the opposite first.",
+          compare: "Compare the signs of the two numbers being added.",
+          same: "Same signs",
+          add: "Add the magnitudes",
+          sameSign: "Keep the common sign.",
+          different: "Different signs",
+          subtract: "Larger magnitude − smaller magnitude",
+          differentSign: "Keep the sign of the larger magnitude.",
+          zero: "Equal opposite amounts give 0. Adding 0 changes nothing.",
+        },
+        applyOwe: "Show my money example",
         start: "Starting value",
         operand: "Second number",
         operation: "Operation",
@@ -1075,6 +1174,114 @@ export const copy = {
         exactCaption: (start: string, movement: string, end?: string) =>
           `Number line: start at ${start}; ${movement}${end === undefined ? "." : `; finish at ${end}.`}`,
         examples: "Try these cases",
+        caseTypes: "Example groups",
+        caseGroups: {
+          integers: "1 · Integers",
+          signedIntegers: "2 · Signed integers",
+          decimals: "3 · Decimals",
+          fractions: "4 · Fractions",
+        },
+        caseForms: {
+          plain: "Without brackets",
+          signed: "With signed brackets",
+        },
+        magnitudeSubtract: "Large magnitude − small magnitude",
+        magnitudeAdd: "Magnitude + magnitude",
+        replayMagnitude: "Replay magnitude",
+        magnitudeAnimation: "Magnitude calculation",
+        money: {
+          title: "Have or owe?",
+          key: "+ means credit · − means money owed",
+          startStage: "2 · Read the starting balance",
+          moveStage: "3 · Read the transaction",
+          ready: "Read the expression. Press Next step to begin.",
+          signQuestion: "Will you have money left, or owe money?",
+          magnitudeQuestion: "Add the amounts, or find their difference?",
+          guidance: {
+            lessDebt: {
+              cue: "You owe less money.",
+              bridge: "Smaller amount owed → smaller magnitude.",
+            },
+            moreDebt: {
+              cue: "You owe more money.",
+              bridge: "Larger amount owed → larger magnitude.",
+            },
+            lessCredit: {
+              cue: "You have less money left.",
+              bridge: "Smaller amount left → smaller magnitude.",
+            },
+            moreCredit: {
+              cue: "You have more money.",
+              bridge: "Larger amount available → larger magnitude.",
+            },
+            settled: {
+              cue: "Nothing is left or owed.",
+              bridge: "The amounts cancel completely → magnitude is zero.",
+            },
+            debtToCredit: {
+              cue: "Clear the debt, then have money left.",
+              bridge: "The leftover money gives the magnitude.",
+            },
+            creditToDebt: {
+              cue: "Use up the money, then owe the shortfall.",
+              bridge: "The unpaid amount gives the magnitude.",
+            },
+            unchanged: {
+              cue: "The balance stays the same.",
+              bridge: "No change in the amount → same magnitude.",
+            },
+            startCredit: {
+              cue: "You now have money.",
+              bridge: "Starting from zero, the new credit gives the magnitude.",
+            },
+            startDebt: {
+              cue: "You now owe money.",
+              bridge:
+                "Starting from zero, the new amount owed gives the magnitude.",
+            },
+          },
+          rules: {
+            add: "Sum of magnitudes",
+            subtract: "Difference of magnitudes",
+            unchanged: "Keep the magnitude",
+            fromZero: "Use the transaction amount",
+          },
+          reasoning: {
+            moreCredit: "Credit + more credit: the amounts build up together.",
+            moreDebt:
+              "Debt + another debt: both amounts are owed, so add them.",
+            payDebt:
+              "You already owe money. With no credit to pay from, this payment adds another debt.",
+            receiveDebt:
+              "Use the money received to clear debt. Matching amounts cancel; find what is left.",
+            payCredit:
+              "Use your credit to pay. Matching amounts cancel; find what is left or still owed.",
+            borrowCredit:
+              "Use your credit to cover the new debt. Matching amounts cancel; find the difference.",
+            cancelDebt:
+              "Cancelling a debt charge offsets what you owe. Matching amounts cancel; find the difference.",
+            refundCredit:
+              "Cancelling a debt charge adds credit to the account, so the credits add up.",
+            fromZero:
+              "Start at zero: only this transaction contributes to the magnitude.",
+            unchanged:
+              "No money is added or taken away: keep the starting amount.",
+          },
+          currency: "HK$",
+          start: { credit: "Have", debt: "Owe", settled: "Start at zero" },
+          events: {
+            receive: "Receive money",
+            borrow: "New debt charge",
+            pay: "Pay money out",
+            repay: "Cancel a debt charge",
+            unchanged: "No transaction",
+          },
+          sign: {
+            positive: "Credit remains (+)",
+            negative: "Debt remains (−)",
+            zero: "Account settled (0)",
+          },
+        },
         sourceCases: "Examples from the textbook diagram",
         extraCases: "Explore negative subtraction and zero",
         move: "Show movement",

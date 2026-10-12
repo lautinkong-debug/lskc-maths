@@ -1,6 +1,24 @@
 .motion {
   transition: transform 1.2s ease-in-out;
 }
+.ruleButton {
+  margin-left: auto;
+  color: #49218c;
+  border-color: #c9b7eb;
+}
+.ruleButton[aria-expanded="true"] {
+  background: #f1ebfc;
+  border-color: #7540c8;
+}
+.ruleIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.4em;
+  height: 1.4em;
+  border-radius: 50%;
+  background: #f1ebfc;
+  font-size: 1.15em;
+}
 .reveal {
   animation: reveal 900ms ease both;
 }
@@ -17,6 +35,15 @@
   visibility: visible;
   opacity: 1;
   transform: translateX(0);
+}
+/* Update the rendered maths as well as its wrapper when changing methods. */
+.magnitudeTerm :global(.katex),
+.magnitudeTerm :global(.katex) * {
+  visibility: hidden;
+}
+.magnitudeTermShown :global(.katex),
+.magnitudeTermShown :global(.katex) * {
+  visibility: visible;
 }
 @keyframes reveal {
   from {

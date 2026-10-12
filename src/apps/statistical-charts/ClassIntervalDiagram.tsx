@@ -9,29 +9,62 @@ export function ClassIntervalDiagram({
   active,
   show,
   learn,
+  emphasis,
 }: {
   values: ReturnType<typeof classVocabulary>;
   active: number;
   show: boolean;
   learn: boolean;
+  emphasis?: {
+    term: number;
+    field: number | null;
+    attempt: number;
+    fields?: number[];
+  } | null;
 }) {
   // All strips and histogram bars share this numeric scale. Limits lie half a
   // recording step inside the boundaries; they must not fill the whole cell.
   const x = (value: number) => 263 + ((value - v.low) / v.width) * 183;
   const left = x(v.lower),
     right = x(v.upper);
-  const colour = (term: number) => (active === term ? "#da2127" : "#0f4574");
+  const colour = (term: number, field?: number) =>
+    active === term &&
+    (field == null || !emphasis?.fields || emphasis.fields.includes(field)) &&
+    (!emphasis ||
+      field == null ||
+      emphasis.field == null ||
+      emphasis.field === field)
+      ? "#da2127"
+      : "#0f4574";
+  const reveals = (field: number, term: number) =>
+    show ||
+    (emphasis?.term === 3 && (field === 2 || field === 3)) ||
+    (emphasis?.term === term &&
+      (emphasis.field == null || emphasis.field === field));
+  const named = (term: number) => learn || emphasis?.term === term;
+  const rings = emphasis
+    ? (emphasis.fields ??
+      (emphasis.field != null
+        ? [emphasis.field]
+        : [[0, 1], [2, 3], [4], [5]][emphasis.term]))
+    : [];
   return (
     <svg
       className={s.intervalDiagram}
       viewBox="0 0 710 465"
       role="img"
-      aria-label={learn ? c.diagram : c.recallDiagram}
+      aria-label={
+        emphasis
+          ? `${c.diagram}. ${c.correction.diagrams[emphasis.term]}`
+          : learn
+            ? c.diagram
+            : c.recallDiagram
+      }
       data-testid="vocabulary-diagram"
     >
       <g className={s.vocabularyHighlight} data-active={active === 0}>
         <text x={236} y={27} textAnchor="end" fontSize={18} fill="#0f4574">
-          {learn ? c.fields[0] : "?"}
+          {named(0) ? c.fields[0] : "?"}
         </text>
         <text
           x={236}
@@ -42,16 +75,16 @@ export function ClassIntervalDiagram({
           fill="#0f4574"
           data-testid="diagram-lower-limit"
         >
-          {show ? v.lower : "?"}
+          {reveals(0, 0) ? v.lower : "?"}
         </text>
         <path
           d={`M246 47H${left}V91 M${left - 5} 84l5 8 5 -8`}
           fill="none"
-          stroke={colour(0)}
+          stroke={colour(0, 0)}
           strokeWidth={2}
         />
         <text x={474} y={27} fontSize={18} fill="#0f4574">
-          {learn ? c.fields[1] : "?"}
+          {named(0) ? c.fields[1] : "?"}
         </text>
         <text
           x={474}
@@ -61,12 +94,12 @@ export function ClassIntervalDiagram({
           fill="#0f4574"
           data-testid="diagram-upper-limit"
         >
-          {show ? v.upper : "?"}
+          {reveals(1, 0) ? v.upper : "?"}
         </text>
         <path
           d={`M464 47H${right}V91 M${right - 5} 84l5 8 5 -8`}
           fill="none"
-          stroke={colour(0)}
+          stroke={colour(0, 1)}
           strokeWidth={2}
         />
         {[-1, 0, 1].map((i) => (
@@ -78,8 +111,10 @@ export function ClassIntervalDiagram({
               width={x(v.upper) - x(v.lower)}
               height={50}
               fill={i === 0 ? "#fff3b0" : "#f1f4f6"}
-              stroke={i === 0 ? colour(0) : "#94a7b6"}
-              strokeWidth={i === 0 ? 2.5 : 1}
+              stroke={
+                i === 0 ? (active === 4 ? "#da2127" : colour(0)) : "#94a7b6"
+              }
+              strokeWidth={i === 0 ? (active === 4 ? 5 : 2.5) : 1}
             />
             <text
               x={x(v.mark + i * v.width)}
@@ -105,7 +140,7 @@ export function ClassIntervalDiagram({
           strokeDasharray="4 5"
         />
       ))}
-      {show && (
+      {(show || emphasis?.term === 1) && (
         <g fill="#0f4574" fontSize={18}>
           <path
             d={`M${left} 165H263l5 -4 M263 165l5 4 M${right} 165H446l-5 -4 M446 165l-5 4`}
@@ -129,7 +164,9 @@ export function ClassIntervalDiagram({
           fontSize={22}
           fill="#0f4574"
         >
-          {learn ? `${c.names[3]}${show ? ` = ${v.width}` : ""}` : "?"}
+          {named(3)
+            ? `${c.names[3]}${reveals(5, 3) ? ` = ${v.width}` : ""}`
+            : "?"}
         </text>
         <path
           d="M263 222H446 M263 222l9 -5 M263 222l9 5 M446 222l-9 -5 M446 222l-9 5"
@@ -180,15 +217,15 @@ export function ClassIntervalDiagram({
             x2={edge}
             y1={240}
             y2={396}
-            stroke={colour(1)}
+            stroke={colour(1, edge === 263 ? 2 : 3)}
             strokeWidth={active === 1 ? 5 : 2}
           />
         ))}
         <text x={263} y={420} textAnchor="middle" fontSize={24} fill="#0f4574">
-          {show ? v.low : "?"}
+          {reveals(2, 1) ? v.low : "?"}
         </text>
         <text x={446} y={420} textAnchor="middle" fontSize={24} fill="#0f4574">
-          {show ? v.high : "?"}
+          {reveals(3, 1) ? v.high : "?"}
         </text>
       </g>
       <g className={s.vocabularyHighlight} data-active={active === 2}>
@@ -199,7 +236,7 @@ export function ClassIntervalDiagram({
           fontSize={21}
           fill="#0f4574"
         >
-          {learn ? c.names[2] : "?"}
+          {named(2) ? c.names[2] : "?"}
         </text>
         <path
           d="M354.5 289V385 M354.5 385l-6 -10 M354.5 385l6 -10"
@@ -214,15 +251,64 @@ export function ClassIntervalDiagram({
           fontSize={24}
           fill="#0f4574"
         >
-          {show ? v.mark : "?"}
+          {reveals(4, 2) ? v.mark : "?"}
         </text>
       </g>
       <text x={263} y={450} textAnchor="middle" fontSize={16} fill="#0f4574">
-        {learn ? c.lowerBoundary : ""}
+        {named(1) ? c.lowerBoundary : ""}
       </text>
       <text x={446} y={450} textAnchor="middle" fontSize={16} fill="#0f4574">
-        {learn ? c.upperBoundary : ""}
+        {named(1) ? c.upperBoundary : ""}
       </text>
+      {emphasis && (
+        <g
+          key={`${emphasis.term}:${emphasis.field}:${emphasis.attempt}`}
+          className={s.diagramEmphasis}
+          fill="none"
+          stroke="#da2127"
+          strokeWidth={3.5}
+          pointerEvents="none"
+          data-testid="diagram-emphasis"
+          data-term={emphasis.term}
+        >
+          {rings.map((field) => {
+            if (field === 5)
+              return (
+                <rect
+                  key={field}
+                  data-testid={`focus-ring-${field}`}
+                  x={237}
+                  y={180}
+                  width={235}
+                  height={52}
+                  rx={20}
+                />
+              );
+            const value = [v.lower, v.upper, v.low, v.high, v.mark][field];
+            const half = String(value).length * (field < 2 ? 7 : 7.5);
+            return (
+              <ellipse
+                key={field}
+                data-testid={`focus-ring-${field}`}
+                cx={
+                  field === 0
+                    ? 236 - half
+                    : field === 1
+                      ? 474 + half
+                      : field === 2
+                        ? 263
+                        : field === 3
+                          ? 446
+                          : 354.5
+                }
+                cy={field < 2 ? 49 : 413}
+                rx={half + 10}
+                ry={field < 2 ? 23 : 21}
+              />
+            );
+          })}
+        </g>
+      )}
     </svg>
   );
 }

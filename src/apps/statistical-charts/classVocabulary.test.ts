@@ -5,7 +5,26 @@ import {
   classVocabulary,
   matchesVocabularyAnswer,
   vocabularyExamples,
+  vocabularyRecallOrders,
 } from "./vocabularyModel";
+it("adds four varied sets with independently checked boundaries, midpoints and widths", () => {
+  expect(vocabularyExamples).toHaveLength(8);
+  const answers = [
+    [20.5, 30.5, 25.5, 10],
+    [50.5, 70.5, 60.5, 20],
+    [2.35, 2.95, 2.65, 0.6],
+    [0.415, 0.495, 0.455, 0.08],
+  ];
+  vocabularyExamples.slice(4).forEach((e, i) => {
+    const v = classVocabulary(e.lower, e.upper, e.precision);
+    expect([v.low, v.high, v.mark, v.width]).toEqual(answers[i]);
+  });
+  for (const order of vocabularyRecallOrders)
+    expect([...order].sort()).toEqual([0, 1, 2, 3]);
+  expect(
+    new Set(vocabularyRecallOrders.map((order) => order.join())).size,
+  ).toBe(8);
+});
 it("distinguishes the four concepts in the teacher's whole-number example", () => {
   expect(classVocabulary(36, 40, 1)).toEqual({
     lower: 36,

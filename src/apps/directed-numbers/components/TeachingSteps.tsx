@@ -1,4 +1,11 @@
-import { useEffect, useState, useId, useRef, useLayoutEffect } from "react";
+import {
+  useEffect,
+  useState,
+  useId,
+  useRef,
+  useLayoutEffect,
+  type ReactNode,
+} from "react";
 import { Math as Tex } from "@/components/Math";
 import { copy } from "@/lib/copy";
 import { type Ast } from "../lib/parse";
@@ -27,6 +34,10 @@ export function useDemonstration(last: number, initial = 0) {
     playing,
     delay,
     setDelay,
+    seek: (next: number) => {
+      setPlaying(false);
+      setPosition(next);
+    },
     next: () => {
       setPlaying(false);
       setPosition((n) => Math.min(last, n + 1));
@@ -47,8 +58,10 @@ export function useDemonstration(last: number, initial = 0) {
 }
 export function TeachingControls({
   timeline,
+  children,
 }: {
   timeline: ReturnType<typeof useDemonstration>;
+  children?: ReactNode;
 }) {
   return (
     <div
@@ -90,6 +103,7 @@ export function TeachingControls({
       <span className="text-pencil text-sm">
         {t.progress(timeline.position, timeline.last)}
       </span>
+      {children}
     </div>
   );
 }
@@ -102,6 +116,8 @@ function EquationLine({
   latest,
   original = false,
   arrowPhase = 0,
+  reveal,
+  magnitudeShown = true,
 }: {
   tex: string;
   nextStep?: Step;
@@ -109,6 +125,8 @@ function EquationLine({
   latest: boolean;
   original?: boolean;
   arrowPhase?: number;
+  reveal?: Step["compactReveal"];
+  magnitudeShown?: boolean;
 }) {
   const marked = nextStep ? signArrowTex(nextStep) : null;
   const pair = marked ? (nextStep!.signArrows?.pair ?? nextStep!.ruleId) : null;
@@ -119,13 +137,16 @@ function EquationLine({
     : [];
   const focused = highlight && Boolean(nextStep);
   const operationArrows = Boolean(nextStep?.signArrows);
+  const revealing = Boolean(reveal) && arrowPhase === 0 && !focused;
   const root = useRef<HTMLDivElement>(null);
   const marker = useId().replaceAll(":", "");
   const markedTex = focused
     ? `${original ? "" : "= "}${highlightedTex(nextStep!, true)}`
     : marked && arrowPhase > 0
       ? `${original ? "" : "= "}${marked}`
-      : tex;
+      : revealing
+        ? `= ${reveal!.animatedTex}`
+        : tex;
   useLayoutEffect(() => {
     const node = root.current;
     if (!node || !marked) return;
@@ -178,7 +199,9 @@ function EquationLine({
   }, [marked, markedTex, nextStep, pair]);
   return (
     <div
-      className={styles.equation}
+      className={`${styles.equation} ${revealing ? `${styles.splitOperation} ${magnitudeShown ? styles.magnitudeShown : ""}` : ""}`}
+      data-compact-reveal={reveal ? true : undefined}
+      data-magnitude-shown={reveal ? magnitudeShown : undefined}
       data-testid={
         highlight
           ? "before-equation"
@@ -195,7 +218,15 @@ function EquationLine({
         ref={root}
         className={`${styles.layers} ${arrowPhase > 0 ? styles.arrowsShown : ""} ${arrowPhase > 1 || (operationArrows && arrowPhase > 0) ? styles.arrowsCombined : ""}`}
       >
-        <Tex className={styles.plain} label={tex}>
+        {nextStep && (
+          <span className={styles.sizing} aria-hidden="true">
+            <Tex>{`${original ? "" : "= "}${highlightedTex(nextStep, true)}`}</Tex>
+          </span>
+        )}
+        <Tex
+          className={styles.plain}
+          label={revealing && !magnitudeShown ? `= ${reveal!.signTex}` : tex}
+        >
           {markedTex}
         </Tex>
         {pair && (
@@ -415,8 +446,13 @@ export function EquationFrame({
                 )}
               </div>
               <div
-                className={`${styles.result} ${applied || step.signReveal || step.batchReveal ? styles.expanded : ""}`}
-                aria-hidden={!applied && !step.signReveal && !step.batchReveal}
+                className={`${styles.result} ${applied || step.signReveal || step.batchReveal || step.compactReveal ? styles.expanded : ""}`}
+                aria-hidden={
+                  !applied &&
+                  !step.signReveal &&
+                  !step.batchReveal &&
+                  !step.compactReveal
+                }
               >
                 <div className={styles.resultContents}>
                   {step.signReveal || step.batchReveal ? (
@@ -427,8 +463,10 @@ export function EquationFrame({
                       highlight={highlighting && index + 1 === completed}
                     />
                   ) : (
-                    applied && (
+                    (applied || step.compactReveal) && (
                       <EquationLine
+                        reveal={step.compactReveal}
+                        magnitudeShown={applied}
                         tex={`= ${step.tex}`}
                         nextStep={steps[index + 1]}
                         arrowPhase={Math.max(0, position - (index + 1) * 2)}
@@ -459,9 +497,7 @@ export function EquationFrame({
         <div ref={probe} className={styles.measure} aria-hidden="true" inert>
           {[null, ...steps].map((step, index) => {
             const next = steps[index];
-            const tex = next
-              ? (signArrowTex(next) ?? step?.tex ?? originalTex)
-              : step!.tex;
+            const tex = next ? highlightedTex(next, true) : step!.tex;
             return (
               <div key={index}>
                 {step && (

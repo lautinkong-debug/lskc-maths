@@ -43,6 +43,7 @@ export type RuleId =
   | "reciprocal"
   | "mixed-to-improper";
 export type Step = {
+  compactReveal?: { signTex: string; animatedTex: string };
   signArrows?: {
     tex: string;
     pair: string;
@@ -168,6 +169,55 @@ export function expressionTex(
   return texPieces(ast, false, style)
     .map((piece) => piece.text)
     .join("");
+}
+/** Highlight evaluated signs and reveal their magnitudes separately in place. */
+export function evaluatedReveal(
+  before: Ast,
+  after: Ast,
+  style: NumberStyle = "improper",
+) {
+  const leaves = (node: Ast): Extract<Ast, { kind: "number" }>[] =>
+    node.kind === "number"
+      ? [node]
+      : node.kind === "binary"
+        ? [...leaves(node.left), ...leaves(node.right)]
+        : leaves(node.child);
+  const key = (span: Span) => `${span.start}:${span.end}`;
+  const originals = new Set(leaves(before).map((node) => key(node.span)));
+  const changed = new Map(
+    leaves(after)
+      .filter((node) => !originals.has(key(node.span)))
+      .map((node) => [key(node.span), node]),
+  );
+  const pieces = texPieces(after, false, style).map((piece) => {
+    const node = changed.get(key(piece.span));
+    if (!node || node.value.n === 0)
+      return { full: piece.text, sign: piece.text, animated: piece.text };
+    const magnitude = toTex(abs(node.value), {
+      style: node.sourceForm === "decimal" ? "decimal" : style,
+    });
+    const at = piece.text.indexOf(magnitude);
+    if (at < 0) throw new Error("Missing evaluated magnitude");
+    let prefix = piece.text.slice(0, at);
+    let suffix = piece.text.slice(at + magnitude.length);
+    if (node.value.n > 0 && !prefix.includes("+")) {
+      // An explicit positive operand inside an expression needs brackets.
+      if (after.kind !== "number" && !prefix.includes("\\left")) {
+        prefix = `\\left(${prefix}+`;
+        suffix += "\\right)";
+      } else prefix += "+";
+    }
+    return {
+      full: prefix + magnitude + suffix,
+      sign: prefix + suffix,
+      animated: `${prefix.replace(/([+-])(?=[^+-]*$)/, "\\textcolor{#DA2127}{$1}")}\\textcolor{#13579B}{${magnitude}}${suffix}`,
+    };
+  });
+  return {
+    tex: pieces.map((p) => p.full).join(""),
+    signTex: pieces.map((p) => p.sign).join(""),
+    animatedTex: pieces.map((p) => p.animated).join(""),
+  };
 }
 /** Map the original source positions onto the immediately preceding TeX line. */
 export function texHighlight(

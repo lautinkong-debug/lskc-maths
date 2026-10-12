@@ -1,4 +1,4 @@
-import { useId, useLayoutEffect, useRef } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { Math as Tex } from "@/components/Math";
 import { usePresentation } from "@/components/PresentationFrame";
 import { copy } from "@/lib/copy";
@@ -16,6 +16,10 @@ import {
 } from "./TeachingSteps";
 import styles from "./SignMagnitude.module.css";
 import { GraphNumberText, StackedNumberText } from "./GraphNumberText";
+import { MagnitudeCalculation } from "./MagnitudeCalculation";
+import { MagnitudeRule } from "./MagnitudeRule";
+import { button, primary } from "./ui";
+export type ExplanationMethod = "number-line" | "owe";
 const c = copy.apps.directedNumbers.magnitudeLesson;
 const t = copy.apps.directedNumbers.demonstration;
 function MagnitudeGraph({
@@ -398,15 +402,21 @@ export function SignMagnitude({
   startLabel,
   staticResult = false,
   wide = false,
+  method = "number-line",
+  onMethodChange,
 }: {
   move: SimpleMove;
   expression?: string;
   startLabel?: string;
   staticResult?: boolean;
   wide?: boolean;
+  method?: ExplanationMethod;
+  onMethodChange?: (method: ExplanationMethod) => void;
 }) {
   const presenting = usePresentation();
   const parsed = parse(expression ?? magnitudeExpression(move));
+  const [showRule, setShowRule] = useState(false);
+  const ruleId = useId();
   if (!parsed.ok) throw new Error("Invalid number-line demonstration");
   const steps = demonstrationSteps(parsed.value).filter(
     (step) => step.kind === "bracket",
@@ -422,9 +432,13 @@ export function SignMagnitude({
     stage === 0
       ? t.bracketStage
       : stage === 1
-        ? t.startStage
+        ? method === "owe"
+          ? c.money.startStage
+          : t.startStage
         : stage === 2
-          ? t.moveStage
+          ? method === "owe"
+            ? c.money.moveStage
+            : t.moveStage
           : stage === 3
             ? t.signStage
             : stage === 4
@@ -441,7 +455,45 @@ export function SignMagnitude({
       >
         {title}
       </h3>
-      {!staticResult && <TeachingControls timeline={timeline} />}
+      {!staticResult && (
+        <TeachingControls timeline={timeline}>
+          <button
+            type="button"
+            className={`${button} ${styles.ruleButton}`}
+            aria-expanded={showRule}
+            aria-controls={ruleId}
+            onClick={() => {
+              timeline.seek(timeline.position);
+              setShowRule((shown) => !shown);
+            }}
+          >
+            <span aria-hidden="true" className={styles.ruleIcon}>
+              ±
+            </span>
+            {c.quickRule.button}
+          </button>
+        </TeachingControls>
+      )}
+      {onMethodChange && (
+        <div
+          className="flex flex-wrap items-center gap-2"
+          role="group"
+          aria-label={c.method}
+        >
+          <span className="text-pencil mr-1 text-sm">{c.method}</span>
+          {(["number-line", "owe"] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              className={method === value ? primary : button}
+              aria-pressed={method === value}
+              onClick={() => onMethodChange(value)}
+            >
+              {c.methods[value]}
+            </button>
+          ))}
+        </div>
+      )}
       <div
         className={
           wide ? "grid min-w-0 items-start gap-5 lg:grid-cols-2" : "space-y-4"
@@ -465,7 +517,8 @@ export function SignMagnitude({
             <ol className="space-y-3 text-sm" aria-label={t.graphSteps}>
               <li className={styles.reveal}>
                 <p className="font-semibold">
-                  {t.signFirst} {c[m.sign]}
+                  {t.signFirst}{" "}
+                  {method === "owe" ? c.money.sign[m.sign] : c[m.sign]}
                 </p>
                 <div
                   className={`mt-2 overflow-x-auto text-2xl whitespace-nowrap ${m.sign === "zero" && stage === 3 ? "invisible" : ""}`}
@@ -488,12 +541,6 @@ export function SignMagnitude({
                   </span>
                 </div>
               </li>
-              {stage >= 4 && (
-                <li className={styles.reveal}>
-                  <p className="font-semibold">{t.magnitudeNext}</p>
-                  <p>{c[m.kind]}</p>
-                </li>
-              )}
               {stage === 5 && (
                 <li className={styles.reveal}>
                   <div
@@ -505,43 +552,54 @@ export function SignMagnitude({
                 </li>
               )}
             </ol>
-          )}{" "}
+          )}
+          {showRule && <MagnitudeRule id={ruleId} move={move} />}
         </div>
         <div className="min-w-0 space-y-3">
-          <MagnitudeGraph move={move} stage={stage} startLabel={startLabel} />
-          {stage >= 3 && (
-            <div
-              data-testid="magnitude-result"
-              className="space-y-3 text-sm"
-              aria-live="polite"
-            >
-              {m.kind === "opposite" && (
-                <p>{m.distance > m.a ? c.crosses : c.stays}</p>
-              )}
-              {m.kind === "cancel" && <p>{t.zero}</p>}
-              <dl className="grid gap-3 sm:grid-cols-2">
+          {method === "owe" ? (
+            <MagnitudeCalculation move={move} stage={stage} />
+          ) : (
+            <>
+              <MagnitudeGraph
+                move={move}
+                stage={stage}
+                startLabel={startLabel}
+              />
+              {stage >= 3 && (
                 <div
-                  className="bg-navy-wash rounded p-3"
-                  data-testid="result-sign"
+                  data-testid="magnitude-result"
+                  className="space-y-3 text-sm"
+                  aria-live="polite"
                 >
-                  <dt className="text-sm">{c.sign}</dt>
-                  <dd className="text-navy font-semibold">{c[m.sign]}</dd>
+                  {m.kind === "opposite" && (
+                    <p>{m.distance > m.a ? c.crosses : c.stays}</p>
+                  )}
+                  {m.kind === "cancel" && <p>{t.zero}</p>}
+                  <dl className="grid gap-3 sm:grid-cols-2">
+                    <div
+                      className="bg-navy-wash rounded p-3"
+                      data-testid="result-sign"
+                    >
+                      <dt className="text-sm">{c.sign}</dt>
+                      <dd className="text-navy font-semibold">{c[m.sign]}</dd>
+                    </div>
+                    {stage >= 4 && (
+                      <div
+                        className="bg-navy-wash rounded p-3"
+                        data-testid="result-magnitude"
+                      >
+                        <dt className="text-sm">{c.magnitude}</dt>
+                        <dd className="text-navy font-semibold">
+                          <StackedNumberText>
+                            {c.distance(m.labels.magnitude)}
+                          </StackedNumberText>
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
                 </div>
-                {stage >= 4 && (
-                  <div
-                    className="bg-navy-wash rounded p-3"
-                    data-testid="result-magnitude"
-                  >
-                    <dt className="text-sm">{c.magnitude}</dt>
-                    <dd className="text-navy font-semibold">
-                      <StackedNumberText>
-                        {c.distance(m.labels.magnitude)}
-                      </StackedNumberText>
-                    </dd>
-                  </div>
-                )}
-              </dl>
-            </div>
+              )}
+            </>
           )}
         </div>
       </div>

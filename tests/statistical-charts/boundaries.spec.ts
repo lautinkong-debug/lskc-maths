@@ -28,7 +28,7 @@ test("labels limits directly, keeps definitions optional and shows both midpoint
       "A class interval is one group of values in a frequency table.",
     ),
   ).toBeVisible();
-  const mark = lab.getByRole("button", { name: /M Mark is the Middle/ });
+  const mark = lab.getByRole("button", { name: /M Class mark/ });
   for (const name of [
     "Class mark = (lower class limit + upper class limit) ÷ 2",
     "(36 + 40) ÷ 2 = 38",

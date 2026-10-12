@@ -1,4 +1,102 @@
 import { expect, test, type Page } from "@playwright/test";
+test("quick magnitude rule is teacher-controlled and keeps the lesson in place", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto("/apps/directed-numbers#sign-magnitude:e=-0.2-0.3");
+  await page.getByRole("button", { name: "Owe", exact: true }).click();
+  await next(page, 4);
+  const progress = page.getByText(/^Step \d+ of \d+$/);
+  const before = await progress.innerText();
+  const control = page.getByRole("button", { name: "Quick rule", exact: true });
+  const panel = page.getByTestId("magnitude-quick-rule");
+  await expect(control).toHaveAttribute("aria-expanded", "false");
+  await expect(panel).toHaveCount(0);
+  await page
+    .getByTestId("teaching-controls")
+    .evaluate((n) => n.scrollIntoView({ block: "start" }));
+  const y = (await control.boundingBox())!.y;
+  await control.click();
+  await expect(control).toHaveAttribute("aria-expanded", "true");
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText("Same signs");
+  await expect(panel).toContainText("Add the magnitudes");
+  await expect(panel).toContainText("Different signs");
+  await expect(panel).toContainText("Larger magnitude − smaller magnitude");
+  await expect(progress).toHaveText(before);
+  expect(Math.abs((await control.boundingBox())!.y - y)).toBeLessThan(2);
+  await expect(
+    panel.getByTestId("rule-addends").getByRole("math"),
+  ).toHaveAttribute("aria-label", "(−0.2) + (−0.3)");
+  await page.screenshot({
+    path: testInfo.outputPath("quick-rule-owe-desktop.png"),
+    animations: "disabled",
+  });
+  await page.getByRole("button", { name: "Number line", exact: true }).click();
+  await expect(progress).toHaveText(before);
+  await expect(panel).toBeVisible();
+  await expect(page.getByTestId("magnitude-line")).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("quick-rule-number-line.png"),
+    animations: "disabled",
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await panel.scrollIntoViewIfNeeded();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("quick-rule-phone.png"),
+    animations: "disabled",
+  });
+  await control.click();
+  await expect(panel).toHaveCount(0);
+  await expect(progress).toHaveText(before);
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto("/apps/directed-numbers#textbook:e=2B-3b");
+  await expect(control).toHaveAttribute("aria-expanded", "false");
+  await control.click();
+  await expect(
+    panel.getByTestId("rule-addends").getByRole("math"),
+  ).toHaveAttribute("aria-label", "(−5) + (−5)");
+});
+
+test("quick magnitude rule compares addends after subtraction for all sign pairs", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const [expression, addends] of [
+    ["20+30", "(+20) + (+30)"],
+    ["20+(-30)", "(+20) + (−30)"],
+    ["(-20)+30", "(−20) + (+30)"],
+    ["(-20)+(-30)", "(−20) + (−30)"],
+    ["20-30", "(+20) + (−30)"],
+    ["20-(-30)", "(+20) + (+30)"],
+    ["(-20)-30", "(−20) + (−30)"],
+    ["(-20)-(-30)", "(−20) + (+30)"],
+    ["(-3/5)-(-2/5)", "(−3/5) + (+2/5)"],
+    ["0-0", "(0) + (0)"],
+  ]) {
+    await page.goto(
+      `/apps/directed-numbers#sign-magnitude:e=${encodeURIComponent(expression)}`,
+    );
+    const progress = page.getByText(/^Step \d+ of \d+$/);
+    await expect(progress).toHaveText(/^Step 0 of \d+$/);
+    await page.getByRole("button", { name: "Quick rule", exact: true }).click();
+    const panel = page.getByTestId("magnitude-quick-rule");
+    await expect(
+      panel.getByTestId("rule-addends").getByRole("math"),
+    ).toHaveAttribute("aria-label", addends);
+    await expect(page.getByTestId("final-equation")).toHaveCount(0);
+    await expect(progress).toHaveText(/^Step 0 of \d+$/);
+    if (expression.includes("/")) {
+      await expect(panel.locator(".mfrac")).toHaveCount(2);
+    }
+  }
+});
+
 for (const id of ["2B-28b", "2C-33b", "R2-33b", "R2-37a", "R2-37b", "R2-38b"]) {
   test(`long practice continues on the right without scrolling: ${id}`, async ({
     page,
@@ -1446,3 +1544,603 @@ for (const [expression, sign] of [
     }
   });
 }
+
+test("teaching presentation: grouped cases preserve plain, decimal and fraction notation", async ({
+  page,
+}, testInfo) => {
+  await page.goto("/apps/directed-numbers#sign-magnitude");
+  const cases = page.getByRole("region", {
+    name: "Try these cases",
+    exact: true,
+  });
+  for (const [group, plain, signed] of [
+    ["Integers", 4, 0],
+    ["Signed integers", 0, 8],
+    ["Decimals", 4, 8],
+    ["Fractions", 4, 8],
+  ] as const) {
+    await cases
+      .getByRole("button", { name: new RegExp(`· ${group}$`) })
+      .click();
+    await expect(
+      cases.getByTestId("cases-plain").getByRole("button"),
+    ).toHaveCount(plain);
+    await expect(
+      cases.getByTestId("cases-signed").getByRole("button"),
+    ).toHaveCount(signed);
+    for (const form of ["plain", "signed"]) {
+      const buttons = cases.getByTestId(`cases-${form}`).getByRole("button");
+      for (let i = 0; i < (await buttons.count()); i++) {
+        const tex = await buttons
+          .nth(i)
+          .getByRole("math")
+          .getAttribute("aria-label");
+        await buttons.nth(i).click();
+        await expect(
+          page
+            .getByTestId("equation-frame")
+            .locator("[data-equation-line]")
+            .first(),
+        ).toHaveAttribute("data-tex", tex!);
+        await expect(
+          page.getByText("Step 0 of", { exact: false }),
+        ).toBeVisible();
+      }
+    }
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await cases.scrollIntoViewIfNeeded();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: testInfo.outputPath("fraction-cases-phone.png"),
+    fullPage: true,
+  });
+});
+
+test("teaching presentation: magnitude animation subtracts, joins, cancels and replays", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  for (const [expression, operation, equation] of [
+    ["50-60", "subtract", "60 - 50 = 10"],
+    ["-20-30", "add", "20 + 30 = 50"],
+    ["0.2-0.3", "subtract", "0.3 - 0.2 = 0.1"],
+    ["2/5-3/5", "subtract", "\\frac{3}{5} - \\frac{2}{5} = \\frac{1}{5}"],
+    ["20-20", "subtract", "20 - 20 = 0"],
+    ["0+0", "add", "0 + 0 = 0"],
+  ]) {
+    await page.goto(
+      `/apps/directed-numbers#sign-magnitude:e=${encodeURIComponent(expression)}`,
+    );
+    await page.getByRole("button", { name: "Owe", exact: true }).click();
+    const progress = page.getByText(/^Step \d+ of \d+$/);
+    await expect(progress).toBeVisible();
+    const last = Number((await progress.innerText()).match(/\d+/g)![1]);
+    await next(page, last - 2);
+    await expect(page.getByTestId("magnitude-animation")).toHaveCount(0);
+    await next(page);
+    const animation = page.getByTestId("magnitude-animation");
+    await expect(animation).toHaveAttribute("data-operation", operation);
+    await expect(
+      animation.getByTestId("magnitude-animation-result").getByRole("math"),
+    ).toHaveAttribute("aria-label", equation);
+    await expect
+      .poll(() =>
+        animation.evaluate(
+          (node) =>
+            node
+              .getAnimations({ subtree: true })
+              .filter((a) => a.playState === "running").length,
+        ),
+      )
+      .toBe(0);
+    await expect(animation.getByTestId("magnitude-animation-result")).toHaveCSS(
+      "opacity",
+      "1",
+    );
+    await page
+      .getByRole("button", { name: "Replay magnitude", exact: true })
+      .click();
+    expect(
+      await animation.evaluate((node) =>
+        node
+          .getAnimations({ subtree: true })
+          .some((a) => a.playState === "running"),
+      ),
+    ).toBe(true);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(animation.getByTestId("magnitude-animation-result")).toHaveCSS(
+      "opacity",
+      "1",
+    );
+    await next(page);
+    if (expression === "2/5-3/5") {
+      await page
+        .getByTestId("teaching-controls")
+        .evaluate((n) => n.scrollIntoView({ block: "start" }));
+      await page.screenshot({
+        path: testInfo.outputPath("magnitude-fractions.png"),
+      });
+      await page.setViewportSize({ width: 390, height: 844 });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await page.setViewportSize({ width: 1600, height: 1000 });
+    }
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+  }
+});
+
+test("teaching presentation: optional steps toggle without losing answers or sign arrows", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/apps/directed-numbers#textbook:e=R2-37b");
+  const hide = page.getByRole("button", {
+    name: "Hide optional written steps",
+    exact: true,
+  });
+  await expect(hide).toBeVisible();
+  await hide.click();
+  const progress = page.getByText(/^Step \d+ of \d+$/);
+  const count = Number((await progress.innerText()).match(/\d+/g)![1]);
+  await page
+    .getByTestId("teaching-controls")
+    .evaluate((n) => n.scrollIntoView({ block: "start" }));
+  await next(page);
+  await expect(page.getByTestId("before-equation")).toBeVisible();
+  await expect(page.getByTestId("sign-combination").first()).toBeVisible();
+  await next(page, count - 1);
+  await expect(
+    page.getByText("Optional written step", { exact: true }),
+  ).toHaveCount(0);
+  const answer = await page
+    .getByTestId("after-equation")
+    .getAttribute("data-tex");
+  await expect(page.getByTestId("after-equation")).toBeInViewport();
+  await page.screenshot({ path: testInfo.outputPath("compact-working.png") });
+  await page
+    .getByRole("button", { name: "Show optional written steps", exact: true })
+    .click();
+  expect(
+    Number((await progress.innerText()).match(/\d+/g)![1]),
+  ).toBeGreaterThan(count);
+  await expect(
+    page.getByText("Optional written step", { exact: true }).first(),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Next step", exact: true }),
+  ).toBeDisabled();
+  await expect(page.getByTestId("after-equation")).toHaveAttribute(
+    "data-tex",
+    answer!,
+  );
+  await hide.click();
+  await page
+    .getByRole("button", { name: "Replay from start", exact: true })
+    .click();
+  await next(page);
+  await page
+    .getByRole("button", { name: "Show optional written steps", exact: true })
+    .click();
+  await expect(progress).toHaveText(/^Step 1 of/);
+  await hide.click();
+  await page
+    .getByRole("combobox", { name: /^Question/ })
+    .selectOption({ label: "Q38(b)" });
+  await expect(
+    page.getByRole("button", {
+      name: "Show optional written steps",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(progress).toHaveText(/^Step 0 of/);
+});
+
+test("compact result keeps its sign in place and fills magnitudes on the next click", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/apps/directed-numbers#textbook:e=R2-38a");
+  await page
+    .getByRole("button", { name: "Hide optional written steps", exact: true })
+    .click();
+  await next(page);
+  const row = page.locator("[data-compact-reveal]").first();
+  await expect(row).toHaveAttribute("data-magnitude-shown", "false");
+  const magnitudes = row
+    .getByRole("math")
+    .locator('.katex-html [style*="#13579B" i]')
+    .filter({ hasNot: page.locator('[style*="#13579B" i]') });
+  await expect(magnitudes).toHaveCount(2);
+  for (const mag of await magnitudes.all()) await expect(mag).toBeHidden();
+  const signs = row
+    .getByRole("math")
+    .locator('.katex-html [style*="#DA2127" i]');
+  await expect(signs).toHaveText(["−", "+"]);
+  for (const sign of await signs.all()) {
+    await expect(sign).toBeVisible();
+    await expect(sign).toHaveCSS("color", "rgb(218, 33, 39)");
+    await expect(sign).toHaveCSS("background-color", "rgb(255, 241, 173)");
+  }
+  const signPositions = await signs.evaluateAll((nodes) =>
+    nodes.map((n) => n.getBoundingClientRect().x),
+  );
+  const before = await row.boundingBox();
+  await row.evaluate((n) => n.setAttribute("data-retained", "true"));
+  await next(page);
+  await expect(row).toHaveAttribute("data-retained", "true");
+  await expect(row).toHaveAttribute("data-magnitude-shown", "true");
+  for (const mag of await magnitudes.all()) await expect(mag).toBeVisible();
+  expect(
+    await signs.evaluateAll((nodes) =>
+      nodes.map((n) => n.getBoundingClientRect().x),
+    ),
+  ).toEqual(signPositions);
+  const after = await row.boundingBox();
+  expect(after!.x).toBeCloseTo(before!.x, 0);
+  expect(after!.y).toBeCloseTo(before!.y, 0);
+  expect(after!.height).toBeCloseTo(before!.height, 0);
+  await page
+    .getByTestId("teaching-controls")
+    .evaluate((n) => n.scrollIntoView({ block: "start" }));
+  await page.screenshot({
+    path: testInfo.outputPath("compact-sign-then-magnitude.png"),
+  });
+  await next(page);
+  await expect(page.getByTestId("before-equation")).toBeVisible();
+  while (
+    await page
+      .getByRole("button", { name: "Next step", exact: true })
+      .isEnabled()
+  )
+    await next(page);
+  await expect(page.getByTestId("after-equation")).toHaveAttribute(
+    "data-tex",
+    "= -8",
+  );
+});
+
+test("money analogies cover every sign and operation without revealing the amount early", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const [expression, event, sign, equation, reason] of [
+    [
+      "20+30",
+      "receive",
+      "Credit remains (+)",
+      "20 + 30 = 50",
+      "Credit + more credit",
+    ],
+    [
+      "20+(-30)",
+      "borrow",
+      "Debt remains (−)",
+      "30 - 20 = 10",
+      "cover the new debt",
+    ],
+    ["(-20)+30", "receive", "Credit remains (+)", "30 - 20 = 10", "clear debt"],
+    [
+      "(-20)+(-30)",
+      "borrow",
+      "Debt remains (−)",
+      "20 + 30 = 50",
+      "both amounts are owed",
+    ],
+    ["20-30", "pay", "Debt remains (−)", "30 - 20 = 10", "credit to pay"],
+    ["20-(-30)", "repay", "Credit remains (+)", "20 + 30 = 50", "adds credit"],
+    [
+      "(-20)-30",
+      "pay",
+      "Debt remains (−)",
+      "20 + 30 = 50",
+      "payment adds another debt",
+    ],
+    [
+      "(-20)-(-30)",
+      "repay",
+      "Credit remains (+)",
+      "30 - 20 = 10",
+      "offsets what you owe",
+    ],
+    [
+      "(-20)+20",
+      "receive",
+      "Account settled (0)",
+      "20 - 20 = 0",
+      "Matching amounts cancel",
+    ],
+    ["0-30", "pay", "Debt remains (−)", "0 + 30 = 30", "only this transaction"],
+    [
+      "-20+0",
+      "unchanged",
+      "Debt remains (−)",
+      "20 + 0 = 20",
+      "keep the starting amount",
+    ],
+  ]) {
+    await page.goto(
+      `/apps/directed-numbers#sign-magnitude:e=${encodeURIComponent(expression)}`,
+    );
+    await page.getByRole("button", { name: "Owe", exact: true }).click();
+    const progress = page.getByText(/^Step \d+ of \d+$/);
+    await expect(progress).toBeVisible();
+    const last = Number((await progress.innerText()).match(/\d+/g)![1]);
+    await next(page, last - 3);
+    const card = page.getByTestId("money-analogy");
+    await expect(card).toHaveAttribute("data-event", event);
+    await expect(page.getByTestId("magnitude-line")).toHaveCount(0);
+    await expect(card.getByTestId("money-outcome")).toHaveCount(0);
+    await expect(card.getByTestId("money-question")).toHaveText(
+      "Will you have money left, or owe money?",
+    );
+    await next(page);
+    await expect(card.getByTestId("money-outcome")).toHaveAttribute(
+      "data-sign",
+      sign.startsWith("Credit")
+        ? "positive"
+        : sign.startsWith("Debt")
+          ? "negative"
+          : "zero",
+    );
+    await expect(card.getByTestId("money-question")).toHaveText(
+      "Add the amounts, or find their difference?",
+    );
+    await expect(card.getByTestId("magnitude-animation")).toHaveCount(0);
+    await expect(card.getByTestId("money-reason")).toHaveCount(0);
+    await expect(card.locator("[data-money-picture]")).toHaveCount(2);
+    await next(page);
+    await expect(
+      card.getByTestId("magnitude-animation-result").getByRole("math"),
+    ).toHaveAttribute("aria-label", equation);
+    await expect(card.getByTestId("money-reason")).toContainText(reason);
+    if (expression === "(-20)+30") {
+      await page
+        .getByTestId("teaching-controls")
+        .evaluate((n) => n.scrollIntoView({ block: "start" }));
+      await page.screenshot({
+        path: testInfo.outputPath("money-credit-after-debt.png"),
+      });
+      await page.setViewportSize({ width: 390, height: 844 });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      await card.scrollIntoViewIfNeeded();
+      await page.screenshot({ path: testInfo.outputPath("money-phone.png") });
+      await page.setViewportSize({ width: 1600, height: 1000 });
+    }
+  }
+});
+
+test("explanation switch keeps progress, shows one method and remembers the teacher's choice", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/apps/directed-numbers#sign-magnitude:e=-0.2-0.3");
+  const method = page.getByRole("group", { name: "Explain with", exact: true });
+  const progress = page.getByText(/^Step \d+ of \d+$/);
+  await expect(page.getByTestId("magnitude-line")).toBeVisible();
+  await expect(page.getByTestId("money-analogy")).toHaveCount(0);
+  const last = Number((await progress.innerText()).match(/\d+/g)![1]);
+  await next(page, last - 2);
+  const before = await progress.innerText();
+  await method.getByRole("button", { name: "Owe", exact: true }).click();
+  await expect(progress).toHaveText(before);
+  await expect(page.getByTestId("magnitude-line")).toHaveCount(0);
+  await expect(page.getByTestId("money-question")).toHaveText(
+    "Add the amounts, or find their difference?",
+  );
+  await expect(page.getByTestId("magnitude-animation")).toHaveCount(0);
+  await page
+    .getByTestId("teaching-controls")
+    .evaluate((n) => n.scrollIntoView({ block: "start" }));
+  await page.screenshot({ path: testInfo.outputPath("owe-think-first.png") });
+  await next(page);
+  await expect(
+    page.getByTestId("magnitude-animation-result").getByRole("math"),
+  ).toHaveAttribute("aria-label", "0.2 + 0.3 = 0.5");
+  await expect(page.getByTestId("result-magnitude-term")).toBeVisible();
+  await expect(page.getByTestId("result-magnitude-term")).toHaveCSS(
+    "opacity",
+    "1",
+  );
+  await expect(
+    page.getByTestId("result-magnitude-term").locator(".katex"),
+  ).toBeVisible();
+  await expect(
+    page.getByTestId("result-magnitude-term").locator(".mord").first(),
+  ).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("owe-add-debts.png") });
+  await page
+    .getByRole("button", { name: "Previous step", exact: true })
+    .click();
+  await expect(
+    page.getByTestId("result-magnitude-term").locator(".katex"),
+  ).toBeHidden();
+  await expect(page.getByTestId("money-question")).toBeVisible();
+  await next(page);
+  await expect(
+    page.getByTestId("result-magnitude-term").locator(".katex"),
+  ).toBeVisible();
+  const current = await progress.innerText();
+  await method
+    .getByRole("button", { name: "Number line", exact: true })
+    .click();
+  await expect(progress).toHaveText(current);
+  await expect(page.getByTestId("money-analogy")).toHaveCount(0);
+  await expect(page.getByTestId("graph-calculation")).toBeVisible();
+  await method.getByRole("button", { name: "Owe", exact: true }).click();
+  await expect(
+    page.getByTestId("magnitude-animation-result").getByRole("math"),
+  ).toHaveAttribute("aria-label", "0.2 + 0.3 = 0.5");
+  await page.getByTestId("cases-plain").getByRole("button").first().click();
+  await expect(
+    method.getByRole("button", { name: "Owe", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(progress).toHaveText(/^Step 0 of/);
+  await expect(page.getByTestId("money-event")).toHaveCount(0);
+  await expect(page.getByTestId("money-outcome")).toHaveCount(0);
+  await page.getByLabel("Starting value", { exact: true }).fill("-0.2");
+  await page
+    .getByRole("combobox", { name: "Operation", exact: true })
+    .selectOption("+");
+  await page.getByLabel("Second number", { exact: true }).fill("0.3");
+  await page
+    .getByRole("button", { name: "Show my money example", exact: true })
+    .click();
+  const count = Number((await progress.innerText()).match(/\d+/g)![1]);
+  await next(page, count);
+  await expect(
+    page.getByTestId("magnitude-animation-result").getByRole("math"),
+  ).toHaveAttribute("aria-label", "0.3 - 0.2 = 0.1");
+  await page
+    .getByTestId("teaching-controls")
+    .evaluate((n) => n.scrollIntoView({ block: "start" }));
+  await page.screenshot({ path: testInfo.outputPath("owe-cancel-debt.png") });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.getByTestId("money-analogy").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: testInfo.outputPath("owe-phone.png") });
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.goto("/apps/directed-numbers#textbook:e=2B-15a");
+  await method.getByRole("button", { name: "Owe", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Next question", exact: false })
+    .click();
+  await expect(
+    method.getByRole("button", { name: "Owe", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByTestId("money-analogy")).toBeVisible();
+  await expect(page.getByTestId("magnitude-line")).toHaveCount(0);
+});
+
+test("money pictures and everyday prompts lead to magnitude without an early calculation", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const [expression, cue, bridge, equation] of [
+    [
+      "(-2.6)+0.9",
+      "You owe less money.",
+      "Smaller amount owed → smaller magnitude.",
+      "2.6 - 0.9 = 1.7",
+    ],
+    [
+      "(-2.6)-0.9",
+      "You owe more money.",
+      "Larger amount owed → larger magnitude.",
+      "2.6 + 0.9 = 3.5",
+    ],
+    [
+      "2.6-0.9",
+      "You have less money left.",
+      "Smaller amount left → smaller magnitude.",
+      "2.6 - 0.9 = 1.7",
+    ],
+    [
+      "2.6+0.9",
+      "You have more money.",
+      "Larger amount available → larger magnitude.",
+      "2.6 + 0.9 = 3.5",
+    ],
+    [
+      "(-0.2)+0.9",
+      "Clear the debt, then have money left.",
+      "The leftover money gives the magnitude.",
+      "0.9 - 0.2 = 0.7",
+    ],
+    [
+      "0.2-0.9",
+      "Use up the money, then owe the shortfall.",
+      "The unpaid amount gives the magnitude.",
+      "0.9 - 0.2 = 0.7",
+    ],
+    [
+      "(-0.9)+0.9",
+      "Nothing is left or owed.",
+      "The amounts cancel completely → magnitude is zero.",
+      "0.9 - 0.9 = 0",
+    ],
+    [
+      "(-3/5)+2/5",
+      "You owe less money.",
+      "Smaller amount owed → smaller magnitude.",
+      "\\frac{3}{5} - \\frac{2}{5} = \\frac{1}{5}",
+    ],
+  ]) {
+    await page.goto(
+      `/apps/directed-numbers#sign-magnitude:e=${encodeURIComponent(expression)}`,
+    );
+    await page.getByRole("button", { name: "Owe", exact: true }).click();
+    const progress = page.getByText(/^Step \d+ of \d+$/);
+    const last = Number((await progress.innerText()).match(/\d+/g)![1]);
+    const card = page.getByTestId("money-analogy");
+    await expect(card.locator("[data-money-picture]")).toHaveCount(0);
+    await next(page, last - 4);
+    await expect(card.locator("[data-money-picture]")).toHaveCount(1);
+    await next(page);
+    await expect(card.locator("[data-money-picture]")).toHaveCount(2);
+    await expect(card.getByTestId("money-outcome")).toHaveCount(0);
+    await next(page);
+    await expect(card.getByTestId("money-outcome")).toContainText(cue);
+    await expect(card.getByTestId("money-outcome")).toContainText(bridge);
+    await expect(card.getByTestId("money-question")).toHaveText(
+      "Add the amounts, or find their difference?",
+    );
+    await expect(card.getByTestId("magnitude-animation")).toHaveCount(0);
+    if (expression === "(-2.6)+0.9") {
+      await page
+        .getByTestId("teaching-controls")
+        .evaluate((n) => n.scrollIntoView({ block: "start" }));
+      await page.screenshot({
+        path: testInfo.outputPath("owe-less-think.png"),
+      });
+      await page.setViewportSize({ width: 390, height: 844 });
+      await card.scrollIntoViewIfNeeded();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth,
+        ),
+      ).toBe(true);
+      for (const picture of await card.locator("[data-money-picture]").all()) {
+        const box = await picture.boundingBox();
+        expect(box!.width).toBeGreaterThan(40);
+        await expect(picture).toBeVisible();
+      }
+      await page.screenshot({
+        path: testInfo.outputPath("owe-less-phone.png"),
+      });
+      await page.setViewportSize({ width: 1600, height: 1000 });
+    }
+    await next(page);
+    await expect(
+      card.getByTestId("magnitude-animation-result").getByRole("math"),
+    ).toHaveAttribute("aria-label", equation);
+    if (expression === "(-2.6)+0.9") {
+      await page
+        .getByTestId("teaching-controls")
+        .evaluate((n) => n.scrollIntoView({ block: "start" }));
+      await page.screenshot({
+        path: testInfo.outputPath("owe-less-calculation.png"),
+      });
+    }
+  }
+});

@@ -9,7 +9,9 @@
 .splitOperation :global(.katex-html) [style*="color"] {
   color: inherit !important;
 }
-.splitOperation :global(.katex-html) [style*="color"]:not([style*="color"] *) {
+.splitOperation
+  :global(.katex-html)
+  [style*="#13579B" i]:not([style*="#13579B" i] *) {
   display: inline-block;
   visibility: hidden;
   opacity: 0;
@@ -18,7 +20,9 @@
     opacity 650ms ease,
     transform 650ms ease;
 }
-.magnitudeShown :global(.katex-html) [style*="color"]:not([style*="color"] *) {
+.magnitudeShown
+  :global(.katex-html)
+  [style*="#13579B" i]:not([style*="#13579B" i] *) {
   background: #edf3f9;
   border-radius: 0.2rem;
   visibility: visible;
@@ -36,6 +40,11 @@
 .layers > * {
   grid-area: 1 / 1;
   transition: opacity 450ms ease;
+}
+.layers > .sizing,
+.layers > .sizing * {
+  visibility: hidden !important;
+  pointer-events: none;
 }
 .highlight {
   opacity: 0;
@@ -200,6 +209,12 @@
 }
 .layers:not(.arrowsShown) .plain [style*="color"] {
   color: inherit !important;
+}
+.splitOperation .layers .plain [style*="#DA2127" i] {
+  color: #da2127 !important;
+  background: #fff1ad;
+  border-radius: 0.15em;
+  box-shadow: 0 0 0 0.08em #fff1ad;
 }
 @keyframes unfold {
   from {

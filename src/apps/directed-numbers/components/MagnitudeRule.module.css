@@ -1,0 +1,89 @@
+.rule {
+  border: 1px solid #d4c5fa;
+  border-radius: 14px;
+  padding: clamp(1rem, 2vw, 1.4rem);
+  background: linear-gradient(135deg, #fff 25%, #faf7ff);
+  color: #0f4574;
+  animation: appear 220ms ease-out both;
+}
+.rule h4 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #49218c;
+}
+.context {
+  margin-block: 0.65rem 1rem;
+  font-size: 0.95rem;
+}
+.example {
+  margin-top: 0.5rem;
+  font-size: 1.35rem;
+  overflow-x: auto;
+}
+.row {
+  padding: 0.8rem 1rem;
+  border-left: 4px solid;
+  border-radius: 0 8px 8px 0;
+}
+.same {
+  background: #eaf2f8;
+  border-color: #0f4574;
+}
+.different {
+  margin-top: 0.7rem;
+  background: #f1ebfc;
+  border-color: #7540c8;
+  color: #49218c;
+}
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem 1rem;
+  font-weight: 600;
+}
+.pairs {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.pairs span {
+  min-width: 2.8rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 5px;
+  background: #fff;
+  text-align: center;
+}
+.action {
+  margin-top: 0.25rem;
+  font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+  font-weight: 750;
+  line-height: 1.4;
+  text-wrap: balance;
+}
+.sign {
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+}
+.zero {
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+  color: #53647a;
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rule {
+    animation: none;
+  }
+}

@@ -2,8 +2,12 @@ import { useState } from "react";
 import { copy } from "@/lib/copy";
 import { Math as Tex } from "@/components/Math";
 import { usePresentation } from "@/components/PresentationFrame";
-import { SignMagnitude } from "../components/SignMagnitude";
+import {
+  SignMagnitude,
+  type ExplanationMethod,
+} from "../components/SignMagnitude";
 import { button, field, primary } from "../components/ui";
+import { teachingCaseGroups } from "../lib/teachingCases";
 import {
   simpleMove,
   readMagnitudeMove,
@@ -11,14 +15,6 @@ import {
   type SimpleMove,
 } from "../lib/textbook";
 const c = copy.apps.directedNumbers.magnitudeLesson;
-const examples: SimpleMove[] = [
-  { start: 50, op: "-", b: 60 },
-  { start: -50, op: "+", b: 30 },
-  { start: -50, op: "+", b: 60 },
-  { start: -50, op: "-", b: 30 },
-  { start: -50, op: "-", b: -60 },
-  { start: 50, op: "+", b: -50 },
-];
 function inputExpression(a: string, op: SimpleMove["op"], b: string) {
   // Only signed inputs need brackets. Do not invent a unary plus for an
   // unsigned input; keep the original decimal or fraction notation as well.
@@ -35,7 +31,10 @@ export default function SignMagnitudeMode({
   const initialMove = initialExpression
     ? simpleMove(initialExpression, true)
     : null;
-  const initial = initialMove ?? examples[0];
+  const initial = initialMove ?? { start: 50, op: "-" as const, b: 60 };
+  const [caseGroup, setCaseGroup] = useState(0);
+  const [method, setMethod] = useState<ExplanationMethod>("number-line");
+  const group = teachingCaseGroups[caseGroup];
   const initialA = magnitudeModel(initial).labels.start.replace(/^\+/, "");
   const initialB = magnitudeModel(initial).labels.b.replace(/^\+/, "");
   const [move, setMove] = useState(initial);
@@ -54,12 +53,17 @@ export default function SignMagnitudeMode({
     [op, setOp] = useState(initial.op);
   const [error, setError] = useState(false),
     [version, setVersion] = useState(0);
-  function load(value: SimpleMove, entered?: { a: string; b: string }) {
+  function load(
+    value: SimpleMove,
+    entered?: { a: string; b: string; expression?: string },
+  ) {
     const labels = magnitudeModel(value).labels;
     const nextA = entered?.a ?? labels.start.replace(/^\+/, "");
     const nextB = entered?.b ?? labels.b.replace(/^\+/, "");
     setMove(value);
-    setExpression(inputExpression(nextA, value.op, nextB));
+    setExpression(
+      entered?.expression ?? inputExpression(nextA, value.op, nextB),
+    );
     setStartLabel(
       nextA.startsWith("+") ? labels.start : labels.start.replace(/^\+/, ""),
     );
@@ -77,16 +81,56 @@ export default function SignMagnitudeMode({
         move={move}
         expression={expression}
         startLabel={startLabel}
+        method={method}
+        onMethodChange={setMethod}
         wide
       />
-      <div className="flex flex-wrap items-center gap-2">
-        <h3 className="mr-2 font-semibold">{c.examples}</h3>
-        {examples.map((value, i) => (
-          <button className={button} key={i} onClick={() => load(value)}>
-            <Tex>{`${value.start} ${value.op} (${value.b})`}</Tex>
-          </button>
-        ))}
-      </div>
+      <section
+        className="border-grid space-y-3 rounded border p-4"
+        aria-label={c.examples}
+      >
+        <h3 className="font-semibold">{c.examples}</h3>
+        <div
+          className="flex flex-wrap gap-2"
+          role="group"
+          aria-label={c.caseTypes}
+        >
+          {teachingCaseGroups.map((value, i) => (
+            <button
+              key={value.id}
+              className={caseGroup === i ? primary : button}
+              aria-pressed={caseGroup === i}
+              onClick={() => setCaseGroup(i)}
+            >
+              {c.caseGroups[value.id]}
+            </button>
+          ))}
+        </div>
+        {(["plain", "signed"] as const).map(
+          (form) =>
+            group[form].length > 0 && (
+              <div
+                key={form}
+                className="space-y-2"
+                data-testid={`cases-${form}`}
+              >
+                <p className="text-pencil text-sm">{c.caseForms[form]}</p>
+                <div className="flex flex-wrap gap-2">
+                  {group[form].map((value) => (
+                    <button
+                      key={value.expression}
+                      className={`${button} py-3 text-lg`}
+                      aria-pressed={expression === value.expression}
+                      onClick={() => load(value.move, value)}
+                    >
+                      <Tex>{value.tex}</Tex>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ),
+        )}
+      </section>
       <form
         className="border-grid grid items-end gap-3 border-t pt-4 sm:grid-cols-4"
         onSubmit={(e) => {
@@ -134,7 +178,9 @@ export default function SignMagnitudeMode({
             onChange={(e) => setB(e.target.value)}
           />
         </label>
-        <button className={primary}>{c.apply}</button>
+        <button className={primary}>
+          {method === "owe" ? c.applyOwe : c.apply}
+        </button>
         <p
           id="number-line-input-help"
           className="text-pencil text-sm sm:col-span-4"

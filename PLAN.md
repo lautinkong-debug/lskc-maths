@@ -2,6 +2,46 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Combined Directed Numbers and Statistical Charts release (12/10/2026)
+
+- [x] Owner explicitly approved publishing both updates together. Confirm the existing `lautinkong-4501/lskc-maths` Vercel project, linked to `lautinkong-debug/lskc-maths` on production branch `main`.
+- [x] Verify the combined snapshot: 785 maths/teaching checks, 14 browser scenarios on the integrated local site, scoped ESLint, whitespace checks and the full production build pass. Check that application files have not changed since verification.
+- [ ] Publish the approved snapshot and verify the official Directed Numbers and Statistical Charts pages, teaching interactions and protected-route response. Previous production: `dpl_HwSRqy64KjotwYrJH1iPPfnUfWqD`.
+
+## Directed Numbers magnitude visuals and reusable cases — local review (12/10/2026)
+
+- [x] Add a teacher-controlled Quick rule button to the Sign & magnitude toolbar, shared with simple textbook practice. Reveal an optional navy/purple reminder: same signs add magnitudes and keep the common sign; different signs subtract the smaller magnitude from the larger and keep the larger magnitude's sign. Show the current expression as addition (including the opposite of a subtracted operand), with zero/cancellation reminders. Keep the current step and explanation method, and pause playback when toggling.
+- [x] Verify two focused browser scenarios covering all eight sign/operation pairs, exact fractions, zero, hidden-by-default behaviour, stable controls/progress, both explanation methods and textbook availability. Review desktop and phone renders. Scoped ESLint, whitespace checks and the local production build pass. Local preview only; Vercel publication still requires owner confirmation.
+
+- [x] Review revision: before asking sum/difference, show a case-specific everyday cue and its magnitude connection (owe/have less or more, settled, unchanged, or crossing zero). Treat crossing zero separately so a final magnitude is never incorrectly described as smaller. Add symbolic debt-note, wallet, receive/pay and cancelled-debt pictures inside the existing amount cards.
+- [x] Verify 232 maths checks and four focused browser scenarios, including the supplied −2.6 + 0.9 example, hidden calculations until Next step, all sign/operation cases, exact fractions, method persistence, replay/reduced motion and phone fit. Inspect desktop/phone pictures and working; scoped lint, whitespace checks and the local production build pass. Still local pending owner approval.
+
+- [x] Review revision: highlight newly revealed result signs in red/yellow while optional written steps are hidden; the next click fills the magnitudes in the same row. Add a Number line / Owe choice in Sign & magnitude and simple textbook practice, retain progress when switching and remember the choice across cases/questions. Show one explanation at a time.
+- [x] Simplify the money explanation to a starting balance, transaction and teacher-controlled question. Ask about sum or difference before revealing it; connect two debts/two credits to addition, and paying off or offsetting amounts to subtraction. Keep decimal/fraction notation and reduced-motion support. Check the actual rendered maths remains visible after switching methods.
+- [x] Verify 211 maths checks, six focused browser scenarios including all eight money sign/operation combinations and zero cases, projector/phone rendering, same-row sign highlights, method persistence, and existing optional-step/column behaviour. Scoped lint and local production build pass. Preview: `http://localhost:3000/apps/directed-numbers#sign-magnitude`; choose Owe and use Next step. Keep local for owner review.
+
+- [x] Review revision: remove the extra magnitude bar. Add money-account analogies for receiving money, recording borrowed debt, payments and repaid/cancelled debt, with a consistent credit-minus-debt model. Reveal the outcome sign before its amount; retain decimal/fraction notation and reduced-motion support.
+- [x] Review revision: with optional lines hidden, reveal evaluated result signs first, then fill the numerical magnitudes on the same row on the next click. Reserve highlight height to prevent vertical movement. Verify 211 maths checks (including all 180 textbook answers), displayed compact-equation values, all eight money sign/operation cases, cancellation, phone fit, replay, compact Q38(a), and large-column regressions. Local production build passes; publication still awaits owner approval.
+
+- [x] Replace the long magnitude explanation with a replayable bar animation: align and remove the smaller magnitude for opposite signs; join magnitudes for same signs. Keep exact decimal/fraction notation, separate sign reveal, and a static completed view for reduced motion.
+- [x] Add 36 reusable cases in four groups: ordinary integers, signed integers, decimals, and fractions. Use consistent pairs 20/30, 0.2/0.3, and 2/5 with 3/5; include plain and signed-bracket variants for decimals and fractions.
+- [x] Add one toolbar toggle to hide/show all optional written lines in textbook practice. Keep sign arrows, highlights and results; remove redundant clicks, preserve progress, and carry the preference between questions.
+- [x] Verify all 180 textbook answers and compact-progress mapping, all 36 presets, animation/replay/reduced-motion and phone fit, optional-toggle persistence, and existing large-column layout. Five focused browser scenarios passed across the final runs; scoped ESLint, TypeScript, local production build, and diff whitespace checks passed.
+- [x] Owner approved Vercel publication together with the Statistical Charts update on 12/10/2026.
+
+## Statistical Charts extra practice and animated correction (12/10/2026)
+
+- [x] Add lower-boundary walkthroughs from lower limit minus half the recording step and upper boundary minus class width, retaining the same graph and red operand/result highlights. Use formal Class limit / Class boundary / Class mark / Class width card headings and remove the repeated Class interval sentence.
+- [x] Verify nine maths checks and fifteen focused browser scenarios, scoped lint, diff whitespace and the full local build. All six calculation views fit the 1920×1080 projector; phone layout has no horizontal overflow or browser errors. Keep local pending approval.
+- [x] Add Class interval as a fifth right-hand card and include it in word playback. Add four calculation walkthroughs on the unchanged graph: class mark from limits or boundaries, and upper boundary from upper limit plus half the recording step or lower boundary plus class width. Include Play/Pause, Previous/Next, Replay, stacked fractions and operand/result highlights; reset when changing examples or modes.
+- [x] Verify seven mathematical checks and ten focused browser scenarios, including decimal calculations, five-word playback, graph retention, reduced motion, hidden answers and existing correction/retry flows. Keep this addition local pending owner approval.
+- [x] Review all four calculation methods in the production preview: the graph, five cards and working fit a 1920×1080 projector. Phone checks report no horizontal overflow or browser errors. Full build and scoped lint pass.
+- [x] Add four sets: 21–30, 51–70, 2.4–2.9 and 0.42–0.49. The eight total sets use varied class widths and distinct recall orders; keep the recording precision visible in every mode.
+- [x] Wrong recall/calculation answers keep the original graph and add red circles, edges and arrows to its matching element. Each Show me button targets the specific lower/upper limit or boundary, midpoint or width arrow. Keep stacked fractions, replay, reduced motion, hidden-answer controls and a focused retry that preserves entered values.
+- [x] Confirm the same SVG remains mounted and the graph geometry stays fixed across all six correction buttons; animate only the highlight and hide it again for retries or hidden answers.
+- [x] Verify five maths tests and twelve focused browser scenarios across the final runs, including all new answer sets, motion, replay, retry/reset, decimal boundaries and hidden answers. Scoped lint and the production build pass. Review phone and all four projector correction states; shorten repeated error text so even six wrong answers fit on a 1920×1080 screen.
+- [x] Owner approved Vercel publication together with the Directed Numbers update on 12/10/2026.
+
 ## Statistical Charts intervals and boundary animation (11/10/2026)
 
 - [x] Draw the listed-limit spans and continuous boundaries on one numeric scale, with half-step insets and direct lower/upper class-limit arrows. Move definitions into an optional disclosure and remove repeated card prose.

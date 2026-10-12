@@ -4,7 +4,22 @@ export const vocabularyExamples = [
   { lower: 11, upper: 15, precision: 1 },
   { lower: 7.1, upper: 7.5, precision: 0.1 },
   { lower: 1.23, upper: 1.27, precision: 0.01 },
+  { lower: 21, upper: 30, precision: 1 },
+  { lower: 51, upper: 70, precision: 1 },
+  { lower: 2.4, upper: 2.9, precision: 0.1 },
+  { lower: 0.42, upper: 0.49, precision: 0.01 },
 ];
+export const vocabularyRecallOrders = [
+  [1, 3, 0, 2],
+  [0, 2, 1, 3],
+  [2, 0, 3, 1],
+  [3, 1, 2, 0],
+  [0, 3, 2, 1],
+  [2, 1, 0, 3],
+  [3, 0, 1, 2],
+  [1, 2, 3, 0],
+];
+export const vocabularyFieldTerms = [0, 0, 1, 1, 2, 3];
 export function classVocabulary(
   lower: number,
   upper: number,

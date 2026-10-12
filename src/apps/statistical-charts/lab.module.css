@@ -314,6 +314,124 @@
   font-size: 14px;
   line-height: 1.5;
 }
+.vocabularyGrid[data-practice="false"] .intervalDiagram {
+  max-height: 360px;
+}
+:global([data-presentation="true"])
+  .vocabularyGrid[data-practice="false"]
+  .intervalDiagram {
+  max-height: 360px;
+}
+.calculationLaunch {
+  margin-top: 10px;
+}
+.calculationLesson {
+  border-top: 2px solid var(--color-navy);
+  margin-top: 10px;
+  padding-top: 8px;
+}
+.calculationLesson .field {
+  gap: 4px;
+  font-size: 13px;
+}
+.calculationStep {
+  min-height: 96px;
+  padding: 8px 0;
+  animation: calculationReveal 400ms ease-out;
+}
+.calculationStep p {
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+.calculationStep > span {
+  font-size: clamp(18px, 1.4vw, 24px);
+}
+.calculationActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.lab .calculationActions button {
+  font-size: 12px;
+  padding: 8px;
+}
+@keyframes calculationReveal {
+  from {
+    opacity: 0.3;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .calculationStep {
+    animation: none;
+  }
+}
+.correction {
+  border-top: 2px solid var(--color-crimson);
+  padding-top: 8px;
+}
+.correction h4 {
+  font-size: 18px;
+  margin: 4px 0;
+  color: var(--color-navy);
+}
+.correctionCaption {
+  color: var(--color-navy);
+  font-size: 14px;
+  margin: 6px 0;
+}
+.correctionEquation {
+  display: block;
+  font-size: 21px;
+  margin: 10px 0;
+}
+.correctionEquations,
+.correctionActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 8px 0;
+}
+.correctionEquations {
+  font-size: 18px;
+}
+.lab .correctionLink {
+  justify-self: start;
+  padding: 3px 8px;
+  font-size: 13px;
+}
+.vocabularyGrid[data-practice="true"] .intervalDiagram {
+  max-height: 340px;
+}
+:global([data-presentation="true"])
+  .vocabularyGrid[data-practice="true"]
+  .intervalDiagram {
+  max-height: 420px;
+}
+.diagramEmphasis {
+  animation: emphasisPulse 1.6s ease-out both;
+}
+@keyframes emphasisPulse {
+  0% {
+    opacity: 0.3;
+    stroke-width: 7px;
+  }
+  40% {
+    opacity: 1;
+    stroke-width: 5px;
+  }
+  100% {
+    opacity: 1;
+    stroke-width: 3.5px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diagramEmphasis {
+    animation: none;
+  }
+}
 .vocabularyNotes summary {
   cursor: pointer;
   color: var(--color-navy);

@@ -2,7 +2,10 @@ import { useState } from "react";
 import { usePresentation } from "@/components/PresentationFrame";
 import { copy } from "@/lib/copy";
 import { button, field } from "../components/ui";
-import { SignMagnitude } from "../components/SignMagnitude";
+import {
+  SignMagnitude,
+  type ExplanationMethod,
+} from "../components/SignMagnitude";
 import { AnimatedWorking } from "../components/AnimatedWorking";
 import { parseJourney } from "../lib/moves";
 import {
@@ -12,7 +15,19 @@ import {
 } from "../lib/textbook";
 const c = copy.apps.directedNumbers.textbookLesson;
 const t = copy.apps.directedNumbers.demonstration;
-function DemonstrationQuestion({ question }: { question: TextbookQuestion }) {
+function DemonstrationQuestion({
+  question,
+  hideOptional,
+  setHideOptional,
+  method,
+  setMethod,
+}: {
+  question: TextbookQuestion;
+  hideOptional: boolean;
+  setHideOptional: (value: boolean) => void;
+  method: ExplanationMethod;
+  setMethod: (method: ExplanationMethod) => void;
+}) {
   const move = simpleMove(question.expression, true);
   return (
     <div className="min-w-0 space-y-3">
@@ -25,9 +40,19 @@ function DemonstrationQuestion({ question }: { question: TextbookQuestion }) {
         </p>
       </div>
       {move ? (
-        <SignMagnitude move={move} expression={question.expression} wide />
+        <SignMagnitude
+          move={move}
+          expression={question.expression}
+          method={method}
+          onMethodChange={setMethod}
+          wide
+        />
       ) : (
-        <AnimatedWorking expression={question.expression} />
+        <AnimatedWorking
+          expression={question.expression}
+          hideOptional={hideOptional}
+          setHideOptional={setHideOptional}
+        />
       )}
       {parseJourney(question.expression).ok && (
         <a
@@ -47,6 +72,8 @@ export default function TextbookMode({
   initialQuestion?: string;
 }) {
   const presenting = usePresentation();
+  const [hideOptional, setHideOptional] = useState(false);
+  const [method, setMethod] = useState<ExplanationMethod>("number-line");
   const initial =
     textbookQuestions.find((q) => q.id === initialQuestion) ??
     textbookQuestions[0];
@@ -153,7 +180,14 @@ export default function TextbookMode({
           {t.selected(index + 1, questions.length)}
         </p>
       )}
-      <DemonstrationQuestion key={question.id} question={question} />
+      <DemonstrationQuestion
+        key={question.id}
+        question={question}
+        hideOptional={hideOptional}
+        setHideOptional={setHideOptional}
+        method={method}
+        setMethod={setMethod}
+      />
       <div className="flex flex-wrap justify-between gap-3">
         <button
           className={button}

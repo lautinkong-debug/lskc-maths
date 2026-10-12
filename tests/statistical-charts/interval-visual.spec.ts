@@ -29,11 +29,11 @@ test("limits use a narrower span on the same scale as boundaries for each exampl
     await expect(lab.getByTestId("diagram-lower-limit")).toHaveText(lower);
     await expect(lab.getByTestId("diagram-upper-limit")).toHaveText(upper);
     await expect(
-      lab.getByRole("button", { name: /W Width is the Whole bar/ }),
+      lab.getByRole("button", { name: /W Class width/ }),
     ).not.toContainText("Subtract the lower boundary");
   }
   await lab.getByLabel("Class example").selectOption("1");
-  await lab.getByRole("button", { name: /B Boundaries are Between/ }).click();
+  await lab.getByRole("button", { name: /B Class boundary/ }).click();
   await page.waitForTimeout(450);
   await lab.screenshot({ path: "test-results/interval-visual-desktop.png" });
   await page.setViewportSize({ width: 390, height: 844 });
