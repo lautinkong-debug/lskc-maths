@@ -102,11 +102,14 @@ export function SiteHeader() {
   );
 
   return (
-    <header className="bg-navy text-white">
-      <div className="mx-auto flex w-full max-w-[1400px] items-center gap-4 px-4 py-3 sm:px-6">
+    <header className="studio-header bg-navy text-white">
+      <a href="#site-content" className="studio-skip">
+        {copy.studio.skip}
+      </a>
+      <div className="studio-header-inner">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-3"
+          className="studio-brand flex items-center gap-3"
           onClick={() => setOpen(false)}
         >
           <Image
@@ -129,7 +132,7 @@ export function SiteHeader() {
 
         <nav
           aria-label="Main"
-          className="ml-auto hidden items-center gap-4 whitespace-nowrap xl:flex"
+          className="studio-desktop-nav ml-auto hidden items-center gap-3 xl:flex"
         >
           {NAV.map((item) => (
             <Link
@@ -138,8 +141,8 @@ export function SiteHeader() {
               aria-current={isActive(pathname, item.href) ? "page" : undefined}
               className={
                 isActive(pathname, item.href)
-                  ? "border-highlight border-b-2 pb-0.5 text-sm text-white"
-                  : "text-navy-soft border-b-2 border-transparent pb-0.5 text-sm hover:text-white"
+                  ? "studio-nav-link studio-nav-active"
+                  : "studio-nav-link"
               }
             >
               {item.label}

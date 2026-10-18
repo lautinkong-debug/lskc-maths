@@ -1,0 +1,211 @@
+.workspace {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+  min-width: 0;
+  --lesson-ink: #102f48;
+  --lesson-line: #d9e3e5;
+}
+.rail {
+  position: sticky;
+  top: 16px;
+  padding: 18px 12px;
+  border: 1px solid var(--lesson-line);
+  border-radius: 14px;
+  background: #f1f5f4;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 3px 20px;
+}
+.identity p {
+  margin: 0 0 3px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+  color: #536b76;
+}
+.identity strong {
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--lesson-ink);
+}
+.symbol {
+  display: grid;
+  place-items: center;
+  flex: 0 0 32px;
+  height: 36px;
+  border-radius: 9px;
+  background: #102f48;
+  color: #f3d589;
+  font:
+    24px Georgia,
+    serif;
+}
+.rail nav {
+  display: grid;
+  gap: 5px;
+}
+.rail nav a,
+.rail nav button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 11px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #3d596b;
+  text-align: left;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.rail nav a:hover,
+.rail nav button:hover {
+  background: #e4edeb;
+}
+.rail nav a[aria-current],
+.rail nav button[aria-pressed="true"] {
+  background: #0f4574;
+  color: white;
+  border-color: #0f4574;
+  font-weight: 600;
+  box-shadow: 0 3px 6px #0f457414;
+}
+.rail nav button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.stage,
+.content {
+  min-width: 0;
+}
+.stageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 0 14px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--lesson-line);
+}
+.stageHeader > div {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #0f4574;
+}
+.activeDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #398273;
+}
+.stageHeader button,
+.mobileBar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #cbd9de;
+  border-radius: 7px;
+  background: white;
+  color: #37556a;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.stageHeader button:hover,
+.mobileBar button:hover {
+  background: #eaf1f4;
+}
+.mobileBar {
+  display: none;
+}
+.workspace[data-collapsed="true"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.workspace[data-collapsed="true"] .rail {
+  display: none;
+}
+.workspace[data-projecting="true"],
+:global([data-presentation="true"]) .workspace {
+  display: block;
+}
+.workspace[data-projecting="true"][data-mobile-open] > .rail,
+.workspace[data-projecting="true"] > .mobileBar,
+.workspace[data-projecting="true"] > .stage > .stageHeader,
+:global([data-presentation="true"]) .workspace[data-mobile-open] > .rail,
+:global([data-presentation="true"]) .workspace > .mobileBar,
+:global([data-presentation="true"]) .workspace > .stage > .stageHeader {
+  display: none;
+}
+@media (max-width: 1199px) {
+  .workspace {
+    display: block;
+  }
+  .stageHeader {
+    display: none;
+  }
+  .mobileBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    background: #edf3f2;
+    border: 1px solid var(--lesson-line);
+    border-radius: 10px;
+    color: #0f4574;
+    font-weight: 600;
+  }
+  .mobileBar button {
+    flex-shrink: 0;
+  }
+  .rail,
+  .workspace[data-collapsed="true"] .rail {
+    display: none;
+    position: static;
+    max-height: none;
+    margin-bottom: 20px;
+  }
+  .workspace[data-mobile-open="true"] .rail {
+    display: block;
+  }
+  .rail nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 480px) {
+  .mobileBar {
+    align-items: start;
+    font-size: 14px;
+  }
+  .rail nav {
+    grid-template-columns: 1fr;
+  }
+}
+@media print {
+  .workspace {
+    display: block;
+  }
+  .rail,
+  .stageHeader,
+  .mobileBar {
+    display: none;
+  }
+}

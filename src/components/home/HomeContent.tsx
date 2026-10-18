@@ -72,7 +72,7 @@ export function HomeContent() {
     : "";
 
   return (
-    <section className="graph-paper-lg border-grid border-b">
+    <section className="studio-hero">
       <div className="mx-auto w-full max-w-[1400px] px-4 pt-6 sm:px-6">
         {error && (
           <p role="alert" className="text-crimson">
@@ -204,8 +204,12 @@ export function HomeContent() {
           </div>
         )}
       </div>
-      <div className="mx-auto grid w-full max-w-[1400px] items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14 lg:py-16">
-        <div>
+      <div className="studio-hero-layout">
+        <div className="studio-hero-copy">
+          <p className="studio-eyebrow">
+            <span className="studio-status-dot" />
+            {copy.studio.eyebrow}
+          </p>
           <EditableText
             as="h1"
             label={copy.home.heroTitleLabel}
@@ -213,7 +217,7 @@ export function HomeContent() {
             maxLength={100}
             updatedBy={content.updatedBy}
             updatedAt={content.updatedAt}
-            className="font-display text-hero text-navy font-semibold"
+            className="studio-hero-title"
             onSave={(value) => saveHomeContent({ heroTitle: value }, email())}
           />
           <div className="mt-4">
@@ -228,6 +232,16 @@ export function HomeContent() {
               onSave={(value) => saveHomeContent({ intro: value }, email())}
             />
           </div>
+          <div className="studio-hero-actions">
+            <Link className="studio-button studio-button-primary" href="/apps">
+              {copy.studio.explore}
+              <span aria-hidden="true">↗</span>
+            </Link>
+            <Link className="studio-text-link" href="/join">
+              {copy.studio.challenge}
+              <span aria-hidden="true">→</span>
+            </Link>
+          </div>
           <Link
             href="/apps/quadratic-explorer"
             className="text-navy text-meta hover:text-navy-deep mt-5 inline-block underline underline-offset-4"
@@ -235,7 +249,15 @@ export function HomeContent() {
             {copy.home.openFullApp} &rarr;
           </Link>
         </div>
-        <ParabolaHero />
+        <div className="studio-graph-card">
+          <div className="studio-graph-heading">
+            <span className="studio-eyebrow">{copy.studio.graphTag}</span>
+            <span aria-hidden="true">↗</span>
+          </div>
+          <h2>{copy.studio.graphTitle}</h2>
+          <p>{copy.studio.graphHint}</p>
+          <ParabolaHero />
+        </div>
       </div>
     </section>
   );

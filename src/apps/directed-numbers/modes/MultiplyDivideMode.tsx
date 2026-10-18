@@ -1,3 +1,4 @@
+import styles from "../DirectedNumbers.module.css";
 import { useMemo, useState } from "react";
 import { Math as Tex } from "@/components/Math";
 import { usePresentation } from "@/components/PresentationFrame";
@@ -821,7 +822,7 @@ export default function MultiplyDivideMode({
           </button>
         ))}
       </nav>
-      <div className="graph-paper border-grid min-w-0 rounded border p-4 sm:p-6">
+      <div className={styles.graphBoard}>
         {panel === "pattern" ? (
           <PatternPanel />
         ) : panel === "repeated" ? (

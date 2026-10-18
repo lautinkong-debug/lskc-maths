@@ -5,6 +5,7 @@ test("department projection keeps the frequency table and chart together", async
 }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await page.goto("/apps/statistical-charts");
+  await page.getByText("Prepare the data", { exact: true }).click();
   await expect(page.getByTestId("lab-settings")).toBeVisible();
   await page
     .getByTestId("lab-settings")

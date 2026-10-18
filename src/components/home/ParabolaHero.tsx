@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Math as Tex } from "@/components/Math";
+import { CanvasGrid } from "./CanvasGrid";
 import { copy } from "@/lib/copy";
 
 const A = 0.5;
@@ -90,91 +91,93 @@ export function ParabolaHero() {
 
   return (
     <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 lg:max-w-none">
-      <svg
-        ref={svgRef}
-        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-        className="h-auto w-full touch-none"
-        role="img"
-        aria-label={copy.home.heroGraphLabel}
-        onPointerMove={(e) => dragging && moveTo(e.clientX, e.clientY)}
-      >
-        <clipPath id="hero-plot">
-          <rect x="0" y="0" width={WIDTH} height={HEIGHT} />
-        </clipPath>
+      <div className="studio-plot">
+        <CanvasGrid />
+        <svg
+          ref={svgRef}
+          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+          className="relative h-auto w-full touch-none"
+          role="img"
+          aria-label={copy.home.heroGraphLabel}
+          onPointerMove={(e) => dragging && moveTo(e.clientX, e.clientY)}
+        >
+          <clipPath id="hero-plot">
+            <rect x="0" y="0" width={WIDTH} height={HEIGHT} />
+          </clipPath>
 
-        <line
-          x1="0"
-          y1={toSvgY(0)}
-          x2={WIDTH}
-          y2={toSvgY(0)}
-          className="stroke-grid-strong"
-          strokeWidth="1.5"
-        />
-        <line
-          x1={toSvgX(0)}
-          y1="0"
-          x2={toSvgX(0)}
-          y2={HEIGHT}
-          className="stroke-grid-strong"
-          strokeWidth="1.5"
-        />
-
-        <g clipPath="url(#hero-plot)">
           <line
-            x1={toSvgX(h)}
-            y1="0"
-            x2={toSvgX(h)}
-            y2={HEIGHT}
-            className="stroke-crimson"
+            x1="0"
+            y1={toSvgY(0)}
+            x2={WIDTH}
+            y2={toSvgY(0)}
+            className="stroke-grid-strong"
             strokeWidth="1.5"
-            strokeDasharray="6 5"
           />
-          <path
-            d={curvePath(h, k)}
-            fill="none"
-            className="stroke-navy"
-            strokeWidth="3"
-            strokeLinecap="round"
+          <line
+            x1={toSvgX(0)}
+            y1="0"
+            x2={toSvgX(0)}
+            y2={HEIGHT}
+            className="stroke-grid-strong"
+            strokeWidth="1.5"
           />
-          {distinctRoots.map((r) => (
-            <circle
-              key={r}
-              cx={toSvgX(r)}
-              cy={toSvgY(0)}
-              r="6"
-              className="fill-crimson"
+
+          <g clipPath="url(#hero-plot)">
+            <line
+              x1={toSvgX(h)}
+              y1="0"
+              x2={toSvgX(h)}
+              y2={HEIGHT}
+              className="stroke-crimson"
+              strokeWidth="1.5"
+              strokeDasharray="6 5"
             />
-          ))}
-        </g>
+            <path
+              d={curvePath(h, k)}
+              fill="none"
+              className="stroke-navy"
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+            {distinctRoots.map((r) => (
+              <circle
+                key={r}
+                cx={toSvgX(r)}
+                cy={toSvgY(0)}
+                r="6"
+                className="fill-crimson"
+              />
+            ))}
+          </g>
 
-        <circle
-          cx={toSvgX(h)}
-          cy={toSvgY(k)}
-          r="11"
-          className="fill-highlight stroke-graphite cursor-grab"
-          strokeWidth="2.5"
-          tabIndex={0}
-          role="slider"
-          aria-label={`Vertex. Currently at ${num(h)}, ${num(k)}. Use the arrow keys to move it.`}
-          aria-valuemin={H_RANGE.min}
-          aria-valuemax={H_RANGE.max}
-          aria-valuenow={h}
-          aria-valuetext={`${num(h)}, ${num(k)}`}
-          onKeyDown={onKeyDown}
-          onPointerDown={(e) => {
-            e.currentTarget.setPointerCapture(e.pointerId);
-            setDragging(true);
-            moveTo(e.clientX, e.clientY);
-          }}
-          onPointerUp={(e) => {
-            e.currentTarget.releasePointerCapture(e.pointerId);
-            setDragging(false);
-          }}
-          onPointerCancel={() => setDragging(false)}
-        />
-      </svg>
-
-      <div className="border-grid flex flex-wrap items-center gap-x-5 gap-y-2 border bg-white px-4 py-3 shadow-[0_1px_0_0_var(--color-grid)]">
+          <circle
+            cx={toSvgX(h)}
+            cy={toSvgY(k)}
+            r="11"
+            className="fill-highlight stroke-graphite cursor-grab"
+            strokeWidth="2.5"
+            tabIndex={0}
+            role="slider"
+            aria-label={`Vertex. Currently at ${num(h)}, ${num(k)}. Use the arrow keys to move it.`}
+            aria-valuemin={H_RANGE.min}
+            aria-valuemax={H_RANGE.max}
+            aria-valuenow={h}
+            aria-valuetext={`${num(h)}, ${num(k)}`}
+            onKeyDown={onKeyDown}
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture(e.pointerId);
+              setDragging(true);
+              moveTo(e.clientX, e.clientY);
+            }}
+            onPointerUp={(e) => {
+              e.currentTarget.releasePointerCapture(e.pointerId);
+              setDragging(false);
+            }}
+            onPointerCancel={() => setDragging(false)}
+          />
+        </svg>
+      </div>
+      <div className="studio-graph-readout">
         <Tex className="text-lg">{vertexFormTex(h, k)}</Tex>
         <span className="text-pencil text-meta">
           Vertex ({num(h)}, {num(k)})
@@ -186,9 +189,17 @@ export function ParabolaHero() {
             "No real roots"
           )}
         </span>
-        <span className="text-pencil text-meta ml-auto hidden sm:inline">
-          {copy.home.heroHint}
-        </span>
+        <button
+          type="button"
+          className="studio-reset"
+          onClick={() => {
+            setH(1);
+            setK(-2);
+          }}
+        >
+          {copy.studio.graphReset}
+          <span aria-hidden="true"> ↺</span>
+        </button>
       </div>
     </div>
   );

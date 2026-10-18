@@ -1,3 +1,4 @@
+import styles from "../DirectedNumbers.module.css";
 import { useState } from "react";
 import { copy } from "@/lib/copy";
 import { Math as Tex } from "@/components/Math";
@@ -86,7 +87,7 @@ export default function SignMagnitudeMode({
         wide
       />
       <section
-        className="border-grid space-y-3 rounded border p-4"
+        className={`${styles.examplePanel} space-y-3`}
         aria-label={c.examples}
       >
         <h3 className="font-semibold">{c.examples}</h3>
@@ -132,7 +133,7 @@ export default function SignMagnitudeMode({
         )}
       </section>
       <form
-        className="border-grid grid items-end gap-3 border-t pt-4 sm:grid-cols-4"
+        className={`${styles.exampleForm} grid items-end gap-3 sm:grid-cols-4`}
         onSubmit={(e) => {
           e.preventDefault();
           const value = readMagnitudeMove(a, op, b);

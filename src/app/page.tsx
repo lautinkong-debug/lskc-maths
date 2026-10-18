@@ -60,16 +60,25 @@ function RedPenGlyph() {
 
 export default function Home() {
   return (
-    <main>
+    <main className="studio-home">
       <HomeContent />
 
       <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6">
-        <section className="grid gap-5 py-10 sm:grid-cols-2 lg:py-14">
+        <div className="studio-section-heading">
+          <div>
+            <p className="studio-eyebrow">{copy.studio.routesIntro}</p>
+            <h2>{copy.studio.routes}</h2>
+          </div>
+        </div>
+        <section className="studio-route-grid">
           <Link
             href="/apps"
-            className="border-grid border-t-navy group hover:bg-navy-wash border border-t-[3px] bg-white p-6 lg:p-8"
+            className="studio-route-card studio-route-explore group"
           >
-            <ParabolaGlyph />
+            <div className="studio-route-top">
+              <span>{copy.studio.exploreLabel}</span>
+              <ParabolaGlyph />
+            </div>
             <h2 className="font-display text-card text-navy lg:text-section mt-3 font-semibold">
               {copy.home.appsCardTitle}
             </h2>
@@ -83,9 +92,12 @@ export default function Home() {
 
           <Link
             href="/mistakes-book"
-            className="border-grid border-t-crimson group hover:bg-crimson-wash border border-t-[3px] bg-white p-6 lg:p-8"
+            className="studio-route-card studio-route-reflect group"
           >
-            <RedPenGlyph />
+            <div className="studio-route-top">
+              <span>{copy.studio.practiseLabel}</span>
+              <RedPenGlyph />
+            </div>
             <h2 className="font-display text-card text-crimson-deep lg:text-section mt-3 font-semibold">
               {copy.home.booksCardTitle}
             </h2>
@@ -94,6 +106,22 @@ export default function Home() {
             </p>
             <span className="text-crimson-deep text-meta mt-4 inline-block group-hover:underline">
               {copy.home.booksCardAction} &rarr;
+            </span>
+          </Link>
+          <Link
+            href="/join"
+            className="studio-route-card studio-route-challenge group"
+          >
+            <div className="studio-route-top">
+              <span>{copy.studio.challengeLabel}</span>
+              <span className="studio-route-symbol" aria-hidden="true">
+                ↗
+              </span>
+            </div>
+            <h2>{copy.studio.challengeTitle}</h2>
+            <p>{copy.studio.challengeBody}</p>
+            <span className="studio-route-action">
+              {copy.studio.challenge} →
             </span>
           </Link>
         </section>

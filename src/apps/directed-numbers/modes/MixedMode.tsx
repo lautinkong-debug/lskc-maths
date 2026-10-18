@@ -1,3 +1,4 @@
+import styles from "../DirectedNumbers.module.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Math as Tex } from "@/components/Math";
 import { usePresentation } from "@/components/PresentationFrame";
@@ -164,7 +165,7 @@ export default function MixedMode({
       </h2>
       {!presenting && <p>{m.intro}</p>}
       <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className="graph-paper border-grid min-w-0 space-y-4 rounded border p-4">
+        <div className={`${styles.graphBoard} space-y-4`}>
           <div
             className={`min-w-0 overflow-x-auto py-3 ${presenting ? "text-4xl" : "text-2xl"}`}
           >

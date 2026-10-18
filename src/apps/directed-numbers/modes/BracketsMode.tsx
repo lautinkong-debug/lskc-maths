@@ -1,3 +1,4 @@
+import styles from "../DirectedNumbers.module.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Math as Tex } from "@/components/Math";
 import { usePresentation } from "@/components/PresentationFrame";
@@ -226,7 +227,7 @@ export default function BracketsMode({
       </h2>
       {!presenting && <p>{b.intro}</p>}
       <div className="grid min-w-0 gap-5 lg:grid-cols-[3fr_2fr]">
-        <div className="graph-paper border-grid min-w-0 rounded border p-4">
+        <div className={styles.graphBoard}>
           <div
             className={`flex min-h-24 items-center gap-2 overflow-x-auto py-4 whitespace-nowrap ${presenting ? "text-4xl" : "text-2xl"}`}
           >

@@ -1,3 +1,4 @@
+import styles from "../DirectedNumbers.module.css";
 import { useState } from "react";
 import { usePresentation } from "@/components/PresentationFrame";
 import { copy } from "@/lib/copy";
@@ -108,7 +109,7 @@ export default function TextbookMode({
       {!presenting && (
         <p className="text-pencil max-w-3xl">{t.textbookIntro}</p>
       )}
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className={styles.questionPicker}>
         <label>
           {c.exercise}
           <select

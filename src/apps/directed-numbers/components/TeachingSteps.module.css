@@ -247,6 +247,40 @@
   z-index: 30;
   background: var(--color-paper, #fff);
   box-shadow: 0 3px 8px #0f457412;
+  border: 1px solid #cfdfe5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f1f5f7;
+}
+.controls button {
+  border-radius: 7px;
+}
+.controls > span {
+  font-variant-numeric: tabular-nums;
+}
+.teachingBoard {
+  padding: 20px;
+  border: 1px solid #d4e0e4;
+  border-top: 3px solid #0f4574;
+  border-radius: 14px;
+  background: white;
+  min-width: 0;
+}
+@media (max-width: 639px) {
+  .teachingBoard {
+    padding: 12px;
+  }
+  .controls {
+    gap: 6px;
+    padding: 8px;
+  }
+  .controls button {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+}
+:global([data-presentation="true"]) .teachingBoard {
+  padding: 16px;
 }
 .optionalBadge {
   padding: 0.1rem 0.45rem;

@@ -27,7 +27,7 @@ export function LatestUploads() {
   );
 
   return (
-    <section className="pb-4">
+    <section className="studio-latest">
       <h2 className="font-display border-grid text-section border-b pb-2 font-semibold">
         {copy.home.latestTitle}
       </h2>

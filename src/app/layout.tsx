@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans, Spectral } from "next/font/google";
 import "katex/dist/katex.min.css";
 import "./globals.css";
+import "./studio.css";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { copy } from "@/lib/copy";
@@ -41,7 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AuthProvider>
           <EditModeProvider>
             <SiteHeader />
-            <div className="flex-1">
+            <div id="site-content" tabIndex={-1} className="flex-1">
               <AuthGate>{children}</AuthGate>
             </div>
             <SiteFooter />

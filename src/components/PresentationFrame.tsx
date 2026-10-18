@@ -69,9 +69,11 @@ export function PresentationFrame({
         className={`bg-paper text-graphite ${fullscreen ? "h-screen overflow-y-auto" : ""} ${presenting ? "text-lg" : ""}`}
       >
         <div
-          className={`mx-auto w-full ${presenting ? "max-w-[1800px] px-4 py-5 sm:px-8" : "max-w-[1400px] px-4 py-7 sm:px-6 lg:py-9"}`}
+          className={`studio-app-frame mx-auto w-full ${presenting ? "max-w-[1800px] px-4 py-5 sm:px-8" : "max-w-[1400px] px-4 py-7 sm:px-6 lg:py-9"}`}
         >
-          <div className="flex flex-wrap items-start justify-between gap-4">
+          <div
+            className={`flex flex-wrap items-start justify-between gap-4 ${presenting ? "" : "studio-lesson-heading"}`}
+          >
             <div>
               {!presenting && (
                 <Link

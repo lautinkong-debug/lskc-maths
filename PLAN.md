@@ -2,11 +2,33 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Approved website and lesson layout release (17/10/2026)
+
+- [x] Owner explicitly requested deployment to GitHub and Vercel. Include the homepage, shared navigation, app library, Directed Numbers and Statistics redesigns reviewed below. Exclude the separate Similarity work in progress.
+- [x] Refresh the release checks: 803 maths/teaching tests, scoped ESLint, production compilation and TypeScript checks pass. The previous layout review passed 26 teaching/layout browser scenarios and seven site/navigation scenarios. Publish through GitHub `main` to the existing `lautinkong-4501/lskc-maths` project, then verify the production pages and teaching flows. No Firebase data, rules or production configuration changes.
+
+## Directed Numbers and Statistics lesson layouts — local review (15/10/2026)
+
+- [x] Add a shared lesson workspace with an active lesson menu, collapsible desktop rail, accessible phone menu and a wider teaching area. Folding the menu keeps the active lesson mounted; projection automatically uses the full teaching width.
+- [x] Refresh Directed Numbers teaching boards, the Number line / Owe choice, example collections and textbook selectors. Move Add & subtract step controls above the activity and keep them sticky. Preserve bird turns, teacher-controlled signs/highlights, magnitude reveals, optional steps, exact fractions and working columns.
+- [x] Redesign Statistics around the frequency table and chart, with data preparation in an expandable panel. Group teacher/sharing tools and saved activities; refresh learning headers, vocabulary cards and visual panels. Preserve all eight activity modes, data edits, teaching reveals, correction, exports and projection.
+- [x] Verify 26 browser scenarios: 14 existing teaching regressions, three new layout/state/navigation scenarios, the department table/chart projection check and eight bird checks. Inspect desktop, 390px phone and 1920×1080 projection screenshots. Scoped ESLint, TypeScript, production build and standalone Statistics build pass. Review screenshots: ignored `out/lesson-preview/`.
+- [x] Owner approved publishing the Directed Numbers and Statistics layouts together with the website redesign on 17/10/2026. Release to the existing GitHub `main` branch and Vercel production project; keep unrelated Similarity work out of this release.
+
+## Canvas UI / Mathematics studio redesign — local review (15/10/2026)
+
+- [x] Inspect the requested `DavidHDev/canvas-ui` repository. It has no Codex skill; install its dependency-free Grid WebGL engine as local application source, preserving its MIT + Commons Clause licence and upstream revision. No new npm dependencies or experimental browser flags.
+- [x] Redesign the homepage with a larger editorial heading, interactive parabola card, three learning routes and visible app previews. Keep teacher-edited content and app visibility settings. Refresh shared navigation, the app library with a filter sidebar, Mistakes Book discovery styling and lesson headers; preserve lesson controls and fullscreen presentation.
+- [x] Retain keyboard graph movement, add graph reset, skip navigation, accessible filter labels, responsive phone layouts and a reduced-motion / no-WebGL fallback. Load the Canvas effect only on the homepage and only when motion is permitted. Keep animation idle until pointer interaction.
+- [x] Verify 14 Directed Numbers / Statistics browser scenarios plus seven site/navigation/filter/fallback scenarios. Correct filter accessible names and the development overlay obscuring the phone menu. Check the teacher content editor, real WebGL context without GL errors, 375/390px phone fit and 1920×1080 projection locally. No browser page errors in the preview pass; lint, TypeScript and local production build pass.
+- [x] Save review screenshots under ignored `out/studio-preview/`; local website and demo Firebase emulators run at `http://localhost:3000`. The preview uses demo data, so production uploads are not displayed here.
+- [x] Owner approved publishing the redesign to GitHub and Vercel on 17/10/2026.
+
 ## Combined Directed Numbers and Statistical Charts release (12/10/2026)
 
 - [x] Owner explicitly approved publishing both updates together. Confirm the existing `lautinkong-4501/lskc-maths` Vercel project, linked to `lautinkong-debug/lskc-maths` on production branch `main`.
 - [x] Verify the combined snapshot: 785 maths/teaching checks, 14 browser scenarios on the integrated local site, scoped ESLint, whitespace checks and the full production build pass. Check that application files have not changed since verification.
-- [ ] Publish the approved snapshot and verify the official Directed Numbers and Statistical Charts pages, teaching interactions and protected-route response. Previous production: `dpl_HwSRqy64KjotwYrJH1iPPfnUfWqD`.
+- [x] Publish approved commit `27d54e9` from GitHub `main` to Vercel production deployment `dpl_BKmcWkN3sKouhrH66EuVCsT255ok` (`https://lskc-maths.vercel.app`). All 14 combined Chrome scenarios pass on the official site, covering both teaching methods, the Quick rule, sign/magnitude and optional-step reveals, columns, Statistics calculations and correction/retry. Home and both lesson routes return HTTP 200; unsigned challenge joining returns HTTP 401. No Firebase data or rules changes. Previous production: `dpl_HwSRqy64KjotwYrJH1iPPfnUfWqD`.
 
 ## Directed Numbers magnitude visuals and reusable cases — local review (12/10/2026)
 

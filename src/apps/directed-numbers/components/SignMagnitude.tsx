@@ -446,7 +446,7 @@ export function SignMagnitude({
               : t.answerStage;
   return (
     <section
-      className={`border-grid bg-paper min-w-0 rounded border p-4 ${presenting ? "space-y-2" : "space-y-4"}`}
+      className={`${styles.board} min-w-0 ${presenting ? "space-y-2" : "space-y-4"}`}
       aria-label={c.title}
     >
       <h3
@@ -475,11 +475,7 @@ export function SignMagnitude({
         </TeachingControls>
       )}
       {onMethodChange && (
-        <div
-          className="flex flex-wrap items-center gap-2"
-          role="group"
-          aria-label={c.method}
-        >
+        <div className={styles.methodPicker} role="group" aria-label={c.method}>
           <span className="text-pencil mr-1 text-sm">{c.method}</span>
           {(["number-line", "owe"] as const).map((value) => (
             <button
@@ -494,12 +490,9 @@ export function SignMagnitude({
           ))}
         </div>
       )}
-      <div
-        className={
-          wide ? "grid min-w-0 items-start gap-5 lg:grid-cols-2" : "space-y-4"
-        }
-      >
-        <div className="min-w-0 space-y-4">
+      <div className={wide ? styles.lessonGrid : "space-y-4"}>
+        <div className={`${styles.workingPanel} min-w-0 space-y-4`}>
+          <p className={styles.panelLabel}>{copy.lessonWorkspace.working}</p>
           {!staticResult ? (
             <EquationFrame
               ast={parsed.value}
@@ -555,7 +548,8 @@ export function SignMagnitude({
           )}
           {showRule && <MagnitudeRule id={ruleId} move={move} />}
         </div>
-        <div className="min-w-0 space-y-3">
+        <div className={`${styles.visualPanel} min-w-0 space-y-3`}>
+          <p className={styles.panelLabel}>{copy.lessonWorkspace.visual}</p>
           {method === "owe" ? (
             <MagnitudeCalculation move={move} stage={stage} />
           ) : (

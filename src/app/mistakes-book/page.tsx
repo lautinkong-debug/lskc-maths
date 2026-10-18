@@ -69,7 +69,8 @@ export default function MistakesBookPage() {
   );
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
+    <main className="studio-books mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:py-14">
+      <p className="studio-eyebrow">{copy.studio.booksEyebrow}</p>
       <h1 className="font-display text-hero text-crimson-deep font-semibold">
         {copy.books.title}
       </h1>

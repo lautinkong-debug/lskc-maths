@@ -23,6 +23,11 @@ function hostingFirebaseEnv(): NonNullable<NextConfig["env"]> | undefined {
   return fields as Record<keyof typeof fields, string>;
 }
 
-const nextConfig: NextConfig = { env: hostingFirebaseEnv() };
+const nextConfig: NextConfig = {
+  env: hostingFirebaseEnv(),
+  // Keep the local classroom preview free of the floating developer menu.
+  // Next.js still reports compile and runtime errors.
+  devIndicators: false,
+};
 
 export default nextConfig;

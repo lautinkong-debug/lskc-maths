@@ -1,3 +1,4 @@
+import styles from "../DirectedNumbers.module.css";
 import { useEffect, useEffectEvent, useState, type KeyboardEvent } from "react";
 import { Math as Tex } from "@/components/Math";
 import { usePresentation } from "@/components/PresentationFrame";
@@ -337,7 +338,7 @@ export default function AddSubtractMode({
       className="min-w-0 space-y-5"
     >
       {!presenting && <p className="text-pencil max-w-3xl">{c.intro}</p>}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className={styles.lessonOptions}>
         <label className="inline-flex min-h-12 items-center gap-3 font-semibold">
           <input
             type="checkbox"
@@ -383,8 +384,27 @@ export default function AddSubtractMode({
           </span>
         )}
       </div>
+      <div className={styles.controlStrip}>
+        <StepControls
+          position={position}
+          total={total}
+          hidden={hidden}
+          nextLabel={
+            showBird && skin === "plain" && turnStage < 2
+              ? turnStage === 0
+                ? c.bird.readOperation
+                : c.bird.readNumber
+              : undefined
+          }
+          backEnabled={showBird && skin === "plain" && turnStage > 0}
+          onNext={() => next()}
+          onBack={back}
+          onReset={() => load(journey)}
+          onNew={newExample}
+        />
+      </div>
       <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className="min-w-0 space-y-4">
+        <div className={`${styles.graphBoard} min-w-0 space-y-4`}>
           <NumberLine
             key={animationKey}
             journey={journey}
@@ -612,7 +632,7 @@ export default function AddSubtractMode({
             </div>
           )}
         </div>
-        <div className="min-w-0 space-y-4">
+        <div className={`${styles.workingBoard} min-w-0 space-y-4`}>
           <Working
             journey={journey}
             completedMoves={moveIndex + (complete ? 1 : 0)}
@@ -689,23 +709,6 @@ export default function AddSubtractMode({
         </div>
       </div>
       <div className="border-grid space-y-4 border-t pt-5">
-        <StepControls
-          position={position}
-          total={total}
-          hidden={hidden}
-          nextLabel={
-            showBird && skin === "plain" && turnStage < 2
-              ? turnStage === 0
-                ? c.bird.readOperation
-                : c.bird.readNumber
-              : undefined
-          }
-          backEnabled={showBird && skin === "plain" && turnStage > 0}
-          onNext={() => next()}
-          onBack={back}
-          onReset={() => load(journey)}
-          onNew={newExample}
-        />
         <ExpressionInput
           value={input}
           onChange={setInput}

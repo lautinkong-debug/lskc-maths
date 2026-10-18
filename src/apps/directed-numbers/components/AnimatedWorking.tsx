@@ -8,6 +8,7 @@ import {
   expandedPosition,
 } from "../lib/compactWorking";
 import { button } from "./ui";
+import styles from "./TeachingSteps.module.css";
 import {
   EquationFrame,
   TeachingControls,
@@ -38,7 +39,7 @@ export function AnimatedWorking({
   if (!parsed.ok) throw new Error("Invalid textbook expression");
   return (
     <section
-      className="border-grid space-y-4 rounded border p-4"
+      className={`${styles.teachingBoard} space-y-4`}
       aria-label={t.working}
     >
       <h3 className="font-display text-navy text-xl font-semibold">

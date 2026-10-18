@@ -3,6 +3,20 @@
  * can be changed in one place. UI language is English - see CLAUDE.md.
  */
 export const copy = {
+  lessonWorkspace: {
+    studio: "Lesson studio",
+    menu: "Lesson menu",
+    closeMenu: "Close menu",
+    hideMenu: "Hide lesson menu",
+    showMenu: "Show lesson menu",
+    directed: "Directed numbers",
+    statistics: "Statistics",
+    dataCharts: "Data & charts",
+    configure: "Prepare the data",
+    configureHint: "Dataset, class intervals & raw values",
+    working: "Working",
+    visual: "Visual explanation",
+  },
   statisticalCharts: {
     vocabulary: {
       title: "Four words, one class",
@@ -1040,10 +1054,38 @@ export const copy = {
     loading: "Loading challenge…",
   },
 
+  studio: {
+    eyebrow: "LSKC · Mathematics studio",
+    explore: "Explore the apps",
+    challenge: "Join a challenge",
+    routes: "Choose your next step",
+    routesIntro: "A little curiosity. A clearer understanding.",
+    exploreLabel: "01 / EXPLORE",
+    practiseLabel: "02 / REFLECT",
+    challengeLabel: "03 / CHALLENGE",
+    challengeTitle: "Put your thinking to the test.",
+    challengeBody: "Have a class code? Join your teacher’s live challenge.",
+    graphTitle: "One curve. Endless possibilities.",
+    graphTag: "TRY IT LIVE",
+    graphHint: "Move the gold point. Watch the equation change.",
+    graphReset: "Reset graph",
+    libraryEyebrow: "THE EXPLORATION LIBRARY",
+    libraryIntro: "Choose a topic. Change a value. See the mathematics happen.",
+    filterTitle: "Find your next idea",
+    resetFilters: "Clear filters",
+    filterHint: "Start with your form, or search for a topic you are learning.",
+    browseAll: "Browse all apps",
+    collectionTitle: "Ideas you can interact with",
+    featuredEyebrow: "READY FOR YOUR NEXT LESSON",
+    booksEyebrow: "LEARN FROM THE WORKING",
+    booksHeading: "A mistake is a starting point.",
+    footerLine: "Explore. Question. Understand.",
+    skip: "Skip to content",
+  },
   home: {
-    heroTitle: "Mathematics Department",
+    heroTitle: "Make sense of the mathematics.",
     heroIntro:
-      "Interactive tools for the classroom, and every Mistakes Book in one place.",
+      "Move a point. Test an idea. Discover the why behind the answer — with interactive lessons and thoughtful practice.",
     heroHint: "Drag the vertex",
     heroGraphLabel:
       "A parabola on graph paper. Drag its vertex, or use the arrow keys, to change the equation.",
