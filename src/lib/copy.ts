@@ -3,6 +3,155 @@
  * can be changed in one place. UI language is English - see CLAUDE.md.
  */
 export const copy = {
+  similarity: {
+    title: "Similarity Studio",
+    topic: "2B08 · Similarity",
+    summary:
+      "Lift shapes out of a busy diagram. Move, turn and flip them to discover corresponding angles and sides.",
+    questionBank: "Question bank",
+    search: "Find a question",
+    all: "All sections",
+    questions: "questions",
+    original: "Original diagram",
+    workspace: "Move the shapes",
+    source: "Read the textbook question",
+    page: "Page",
+    originalHint:
+      "Drag inside a shape to move it. Drag a ring at a vertex to turn and resize it.",
+    originalTurn: "Turn original 90°",
+    originalLeft: "Turn original −15°",
+    originalRight: "Turn original +15°",
+    originalFlipH: "Flip original left / right",
+    originalFlipV: "Flip original up / down",
+    originalReset: "Restore original positions",
+    originalFocus: "Enlarge original diagram",
+    view: "view",
+    diagramZoom: "Diagram zoom",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    fitTriangles: "Fit triangles",
+    resetView: "Reset view",
+    panHint:
+      "Drag empty space to move the view. Zoom keeps the original lengths.",
+    sideRatio: "Ratio",
+    bothBoards: "Show both boards",
+    originalMove: "Move original",
+    flipShort: "Flip",
+    intro:
+      "Choose shapes in the original diagram, then move them apart to see their relationship.",
+    choose: "Choose up to three shapes",
+    selected: "Selected shape",
+    custom: "Make another shape",
+    customHint:
+      "Select vertices around the boundary in order. Choose three for a triangle.",
+    add: "Add shape",
+    clear: "Clear selection",
+    noShape:
+      "This question has no diagram. Use its stated similarity and the correspondence in the teaching notes.",
+    noResults: "No matching questions. Try a question number, page or section.",
+    reset: "Reset question",
+    separate: "Separate",
+    stack: "Stack centres",
+    orient: "Match orientation",
+    enlarge: "Match first side length",
+    rotateLeft: "Turn −15°",
+    rotateRight: "Turn +15°",
+    quarterTurn: "Turn 90°",
+    flipH: "Flip left / right",
+    flipV: "Flip up / down",
+    angle: "Rotation",
+    scale: "Scale",
+    opacity: "Opacity",
+    move: "Move",
+    left: "Move left",
+    right: "Move right",
+    up: "Move up",
+    down: "Move down",
+    dragHint:
+      "Drag inside to move; drag a vertex ring to turn and resize. Keyboard: shape arrows move; R turns; H/V flip. Vertex arrows ←/→ turn, ↑/↓ resize.",
+    vertexHandle: "Turn or resize at vertex",
+    vertexHelp:
+      "Drag around the centre to rotate; drag away from the centre to enlarge. Arrow keys: left/right rotate, up/down resize.",
+    vertexMode: "Vertex drag",
+    vertexBoth: "Turn & resize",
+    vertexRotate: "Rotate only",
+    vertexResize: "Resize only",
+    showReasons: "Explain matching marks",
+    hideReasons: "Hide explanation",
+    showMarks: "Show matching marks",
+    hideMarks: "Hide matching marks",
+    hideAngles: "Hide angles",
+    showAngles: "Show angles",
+    hideLengths: "Hide lengths & ratios",
+    showLengths: "Show lengths & ratios",
+    restoreMarks: "Restore hidden marks",
+    hideAngleAt: "Hide matching angle at",
+    hideSide: "Hide matching side",
+    markClickHint:
+      "Click an angle mark or side label to hide that matching pair on both diagrams.",
+    snap: "Snap matching triangles",
+    snapHint:
+      "Release near a matching triangle to snap its position, turn and size. Flip it first if needed.",
+    snapped: "Snapped to the corresponding triangle.",
+    constructed:
+      "Teaching diagram for a question with no printed figure. Unspecified lengths are illustrative. The original question is below.",
+    bothMarks: "Angles & sides",
+    proofMarks: "Proof conditions",
+    matchedAngles: "Matching arcs and labels show equal corresponding angles.",
+    originalRatio: "Corresponding sides · original lengths",
+    followsAAA: "These side ratios follow from AAA similarity.",
+    followsSimilarity:
+      "These are corresponding sides of the named similar figures.",
+    reasonPair: "Compare this pair",
+    allMarks: "All marks",
+    angleMarks: "Equal angles",
+    sideMarks: "Side ratios",
+    givenReason: "Similarity given",
+    aaaReason: "AAA — three equal angle pairs",
+    sssReason: "3 sides proportional (SSS)",
+    sasReason: "2 sides proportional + included angle (SAS)",
+    polygonReason: "Equal angles + proportional sides",
+    notSimilarReason: "Not similar — side ratios differ",
+    reasonHint:
+      "Select a condition to highlight it on both diagrams. Markings come from the question and proof; dragging does not change them.",
+    givenHint:
+      "Similarity is given in this question. These marks show its consequences, rather than a new proof.",
+    missingPair:
+      "Select both named shapes above to see all matching marks. Extra shapes are not included in this proof.",
+    originalLengths:
+      "Side labels refer to the original question, even after resizing a copy. Matching colours identify corresponding sides; they do not mean equal lengths.",
+    noDiagramReason: "Use the given correspondence in the working below.",
+    rigid:
+      "Moving, turning and flipping preserve lengths and angles. Scaling changes lengths, but preserves angles and side ratios.",
+    tracing:
+      "Source outlines are schematic, not measurements. Establish similarity using the givens and a proof.",
+    exact:
+      "Exact model for Q19. The original printed diagram is available below.",
+    comparison: "Compare the vertex order",
+    comparisonHint:
+      "A visual match is a clue. Use the named pair and reasons in the proof to justify similarity.",
+    orderHint:
+      "These are the selected vertex orders, not a claim that every selected shape is similar.",
+    revealOrder: "Show vertex order",
+    hideOrder: "Hide vertex order",
+    teaching: "Build the explanation",
+    reveal: "Reveal next step",
+    hide: "Hide working",
+    complete: "All steps shown",
+    proofHint:
+      "Keep the working hidden while students identify the shapes and corresponding vertices.",
+    outline: "Shape",
+    previous: "Previous question",
+    next: "Next question",
+    pilot: "Q19 pilot",
+    jump: "Open Q19 pilot",
+    sourceCredit:
+      "Source: Junior Secondary Mathematics in Action 2B, Chapter 8 (2021), supplied school textbook and full solutions. Traced outlines are teaching aids.",
+    transformNote:
+      "Orientation uses the listed vertex orders. Matching the first side uses one uniform scale factor; it does not prove similarity.",
+    saveNote:
+      "The selected question is kept in this browser. Reset restores its original shapes and hides all working.",
+  },
   lessonWorkspace: {
     studio: "Lesson studio",
     menu: "Lesson menu",

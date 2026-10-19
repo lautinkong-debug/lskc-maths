@@ -113,6 +113,7 @@
   background: #398273;
 }
 .stageHeader button,
+.railToggle,
 .mobileBar button {
   display: inline-flex;
   align-items: center;
@@ -129,11 +130,24 @@
   cursor: pointer;
 }
 .stageHeader button:hover,
+.railToggle:hover,
 .mobileBar button:hover {
   background: #eaf1f4;
 }
 .mobileBar {
   display: none;
+}
+.railToggle {
+  width: 100%;
+  margin-bottom: 16px;
+}
+.railToggle > span,
+.restoreMenu > span {
+  font-size: 24px;
+  line-height: 1;
+}
+.stageHeader:has(.restoreMenu) {
+  justify-content: flex-start;
 }
 .workspace[data-collapsed="true"] {
   grid-template-columns: minmax(0, 1fr);
@@ -158,6 +172,9 @@
     display: block;
   }
   .stageHeader {
+    display: none;
+  }
+  .railToggle {
     display: none;
   }
   .mobileBar {

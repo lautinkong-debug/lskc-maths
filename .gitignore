@@ -60,6 +60,9 @@ emulator-data/
 /blob-report/
 /playwright/.cache/
 
+# Local source PDFs and rendering scratch files for Similarity
+/tmp/similarity-source/
+
 .vercel
 .env*
 !.env.example

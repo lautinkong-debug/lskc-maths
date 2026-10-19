@@ -24,7 +24,15 @@ export function LessonWorkspace({
   const [mobileOpen, setMobileOpen] = useState(false);
   const id = useId();
   const mobileTitle = useRef<HTMLSpanElement>(null);
+  const hideButton = useRef<HTMLButtonElement>(null);
+  const showButton = useRef<HTMLButtonElement>(null);
   const c = copy.lessonWorkspace;
+  function toggleSidebar(next: boolean) {
+    setCollapsed(next);
+    requestAnimationFrame(() =>
+      (next ? showButton : hideButton).current?.focus({ preventScroll: true }),
+    );
+  }
   return (
     <div
       className={styles.workspace}
@@ -49,6 +57,16 @@ export function LessonWorkspace({
         </button>
       </div>
       <aside className={styles.rail} id={id}>
+        <button
+          type="button"
+          ref={hideButton}
+          className={styles.railToggle}
+          aria-controls={id}
+          aria-expanded={!collapsed}
+          onClick={() => toggleSidebar(true)}
+        >
+          <span aria-hidden="true">‹</span> {c.hideMenu}
+        </button>
         <div className={styles.identity}>
           <span className={styles.symbol} aria-hidden="true">
             {symbol}
@@ -72,36 +90,22 @@ export function LessonWorkspace({
       </aside>
       <div className={styles.stage}>
         <header className={styles.stageHeader}>
+          {collapsed && (
+            <button
+              type="button"
+              ref={showButton}
+              className={styles.restoreMenu}
+              aria-expanded={false}
+              aria-controls={id}
+              onClick={() => toggleSidebar(false)}
+            >
+              <span aria-hidden="true">›</span> {c.showMenu}
+            </button>
+          )}
           <div>
             <span className={styles.activeDot} aria-hidden="true" />
             <strong>{active}</strong>
           </div>
-          <button
-            type="button"
-            aria-expanded={!collapsed}
-            aria-controls={id}
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 20 20"
-              fill="none"
-              aria-hidden="true"
-            >
-              <rect
-                x="2"
-                y="3"
-                width="16"
-                height="14"
-                rx="2"
-                stroke="currentColor"
-                strokeWidth="1.4"
-              />
-              <path d="M7 3v14" stroke="currentColor" strokeWidth="1.4" />
-            </svg>
-            {collapsed ? c.showMenu : c.hideMenu}
-          </button>
         </header>
         <div className={styles.content}>{children}</div>
       </div>

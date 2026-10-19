@@ -6,6 +6,7 @@ import UnitCircleThumbnail from "./unit-circle/Thumbnail";
 import InequalityThumbnail from "./inequality-number-line/Thumbnail";
 import DirectedNumbersThumbnail from "./directed-numbers/Thumbnail";
 import StatisticalChartsThumbnail from "./statistical-charts/Thumbnail";
+import SimilarityThumbnail from "./similarity/Thumbnail";
 
 export interface AppEntry {
   slug: string;
@@ -22,6 +23,17 @@ export interface AppEntry {
 
 /** The index and detail route both use this list. New apps register here. */
 export const appRegistry: readonly AppEntry[] = [
+  {
+    slug: "similarity",
+    topicCodes: ["2B08"],
+    title: copy.similarity.title,
+    topic: copy.similarity.topic,
+    levels: ["F2"],
+    strand: "measures-shape-space",
+    summary: copy.similarity.summary,
+    thumbnail: SimilarityThumbnail,
+    load: () => import("./similarity"),
+  },
   {
     slug: "statistical-charts",
     topicCodes: ["2A06"],

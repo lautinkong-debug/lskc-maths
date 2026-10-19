@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, Spectral } from "next/font/google";
+import localFont from "next/font/local";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 import "./studio.css";
@@ -10,16 +10,28 @@ import { AuthProvider } from "@/lib/auth";
 import { AuthGate } from "@/components/AuthGate";
 import { EditModeProvider } from "@/lib/editMode";
 
-const spectral = Spectral({
-  subsets: ["latin"],
-  weight: ["400", "600"],
+const spectral = localFont({
+  src: [
+    {
+      path: "./fonts/spectral-latin-400.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/spectral-latin-600.woff2",
+      weight: "600",
+      style: "normal",
+    },
+  ],
+  adjustFontFallback: "Times New Roman",
   variable: "--font-spectral",
   display: "swap",
 });
 
-const plexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const plexSans = localFont({
+  src: "./fonts/ibm-plex-sans-latin.woff2",
+  weight: "100 700",
+  style: "normal",
   variable: "--font-plex-sans",
   display: "swap",
 });
