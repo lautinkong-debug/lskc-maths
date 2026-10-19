@@ -2,6 +2,11 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Similarity textbook proof terminology (19/10/2026)
+
+- [x] Owner supplied the textbook's conditions and corrected the displayed terminology. Use **AAA**, **3 sides prop.**, and **ratio of 2 sides, inc. ∠** in proof headings, conclusions and explanatory notes. Internal criterion keys continue to control the same required marks; no SSS/SAS abbreviations are shown to students.
+- [x] Scoped ESLint, TypeScript and production build pass. Four existing browser scenarios pass with the textbook labels. Inspect the two-side/included-angle proof on desktop and a 390px phone, including the longer conclusion and revealed consequence notes; phone layout has no horizontal overflow. Release this correction through the already approved GitHub/Vercel integration. Evidence: ignored `out/similarity-release/terminology-*.log` and `out/similarity-preview/textbook-criterion-phone.png`.
+
 ## Similarity proof beside the diagram (19/10/2026)
 
 - [x] Owner requested a visible explanation beside the current diagram, then asked to hide angles/sides that are not used in that proof. Show the question-specific reason panel by default, alongside an enlarged diagram on desktop and stacked on phones. Include matching symbols, reasons for each condition and the final ordered similarity statement; clicking a step highlights its corresponding marks. Keep calculation answers under their existing reveal controls.

@@ -1,7 +1,17 @@
+import { copy } from "@/lib/copy";
 import type { Shape, SourceQuestion } from "./types";
 
 export type Criterion =
   "AAA" | "SSS" | "SAS" | "given" | "polygon" | "not-similar";
+/** Textbook proof names; internal criterion keys are never shown to students. */
+export const criterionNames: Record<Criterion, string> = {
+  AAA: copy.similarity.aaaCriterion,
+  SSS: copy.similarity.sssReason,
+  SAS: copy.similarity.sasReason,
+  given: copy.similarity.givenReason,
+  polygon: copy.similarity.polygonReason,
+  "not-similar": copy.similarity.notSimilarReason,
+};
 export type ReasonView = "proof" | "angles" | "sides" | "both";
 export type ReasonPair = {
   shapes: [number, number];
@@ -659,7 +669,7 @@ export function conditions(
         degrees: pair.angleValues?.[i],
         consequence,
         note: consequence
-          ? `Corresponding angles are equal after establishing similarity by ${pair.criterion}.`
+          ? `Corresponding angles are equal after establishing similarity (${criterionNames[pair.criterion]}).`
           : (pair.angleReasons?.[i] ??
             "Corresponding angles in the given similar figures are equal."),
       });
@@ -692,7 +702,7 @@ export function conditions(
         consequence,
         text: `${sideName(a, edge)}/${sideName(b, edge)}${av && bv && `${av}/${bv}` === pair.ratio ? "" : fraction} = ${pair.ratio ?? "k"}`,
         note: consequence
-          ? `Follows from ${pair.criterion} similarity: all corresponding sides have the same ratio.${q.id === "ex8c-19" ? " FE/BC = 2/3; EA = 3 and CA = 4.5 cm." : ""}`
+          ? `Follows from similarity (${criterionNames[pair.criterion]}): all corresponding sides have the same ratio.${q.id === "ex8c-19" ? " FE/BC = 2/3; EA = 3 and CA = 4.5 cm." : ""}`
           : pair.criterion === "given"
             ? "The same ratio k for all corresponding sides follows from the given similarity."
             : pair.criterion === "polygon"

@@ -6,8 +6,8 @@ test("each proof starts with only its required angle and side conditions", async
   await page.setViewportSize({ width: 1920, height: 1080 });
   for (const [id, angles, sides, criterion] of [
     ["ex8c-19", 3, 0, "AAA"],
-    ["qp8-6", 0, 3, "SSS"],
-    ["qp8-8", 1, 2, "SAS"],
+    ["qp8-6", 0, 3, "3 sides prop."],
+    ["qp8-8", 1, 2, "ratio of 2 sides, inc. ∠"],
     ["ex8d-17", 4, 4, "Equal angles + proportional sides"],
     ["ex8d-20", 0, 2, "Not similar"],
   ] as const) {

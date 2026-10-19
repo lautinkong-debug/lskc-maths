@@ -1,18 +1,19 @@
 import { copy } from "@/lib/copy";
 import { GeometryText } from "./Notation";
 import type { SourceQuestion } from "./types";
-import type { Condition, ReasonPair, ReasonView } from "./reasons";
+import {
+  criterionNames,
+  type Condition,
+  type ReasonPair,
+  type ReasonView,
+} from "./reasons";
 import { markColours } from "./ReasonMarks";
 import styles from "./similarity.module.css";
 
 const c = copy.similarity;
 const titles = {
+  ...criterionNames,
   AAA: c.aaaReason,
-  SSS: c.sssReason,
-  SAS: c.sasReason,
-  given: c.givenReason,
-  polygon: c.polygonReason,
-  "not-similar": c.notSimilarReason,
 };
 export function ReasonsPanel({
   question,
@@ -40,7 +41,7 @@ export function ReasonsPanel({
   const pair = pairs[pairIndex];
   if (!pair) return null;
   const [a, b] = pair.shapes.map((i) => question.shapes[i]);
-  const conclusion = `${a.name} ${pair.criterion === "not-similar" ? "≁" : "∼"} ${b.name}${["AAA", "SSS", "SAS"].includes(pair.criterion) ? ` (${pair.criterion})` : ""}`;
+  const conclusion = `${a.name} ${pair.criterion === "not-similar" ? "≁" : "∼"} ${b.name}${["AAA", "SSS", "SAS"].includes(pair.criterion) ? ` (${criterionNames[pair.criterion]})` : ""}`;
   return (
     <section
       className={styles.reasonPanel}

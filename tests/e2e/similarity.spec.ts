@@ -555,14 +555,14 @@ test("matching angles, right angles and revealed side ratios follow extracted tr
     .screenshot({ path: "out/similarity-preview/matching-q19.png" });
 });
 
-test("diagram reasons mark AAA, SSS, SAS, givens and counterexamples without marking distractors", async ({
+test("diagram reasons mark the textbook criteria, givens and counterexamples without marking distractors", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1500, height: 1200 });
   for (const [id, title, angles, sides] of [
     ["ex8c-19", "AAA — three equal angle pairs", 3, 0],
-    ["qp8-6", "3 sides proportional (SSS)", 0, 3],
-    ["qp8-8", "2 sides proportional + included angle (SAS)", 1, 2],
+    ["qp8-6", "3 sides prop.", 0, 3],
+    ["qp8-8", "ratio of 2 sides, inc. ∠", 1, 2],
     ["qp8-3", "Similarity given", 3, 0],
     ["ex8d-20", "Not similar — side ratios differ", 0, 2],
   ] as const) {

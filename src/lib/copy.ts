@@ -116,8 +116,9 @@ export const copy = {
     sideMarks: "Side ratios",
     givenReason: "Similarity given",
     aaaReason: "AAA — three equal angle pairs",
-    sssReason: "3 sides proportional (SSS)",
-    sasReason: "2 sides proportional + included angle (SAS)",
+    aaaCriterion: "AAA",
+    sssReason: "3 sides prop.",
+    sasReason: "ratio of 2 sides, inc. ∠",
     polygonReason: "Equal angles + proportional sides",
     notSimilarReason: "Not similar — side ratios differ",
     reasonHint:
