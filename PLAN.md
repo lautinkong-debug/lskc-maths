@@ -2,6 +2,13 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Similarity proof beside the diagram (19/10/2026)
+
+- [x] Owner requested a visible explanation beside the current diagram, then asked to hide angles/sides that are not used in that proof. Show the question-specific reason panel by default, alongside an enlarged diagram on desktop and stacked on phones. Include matching symbols, reasons for each condition and the final ordered similarity statement; clicking a step highlights its corresponding marks. Keep calculation answers under their existing reveal controls.
+- [x] Default to proof conditions for every proof: AAA shows only three angle pairs; SSS only three side ratios; SAS only the included angle and its two adjacent sides; squares retain both equal angles and proportional sides; counterexamples show the unequal ratios. Given-similarity questions are explicitly labelled as givens. Filter both boards, ratio summaries and source backgrounds; teachers can reveal other measurements with Angles & sides or Show lengths & ratios. Reset and changing comparisons restore the appropriate proof filter.
+- [x] Verify 13 focused mathematics tests, scoped ESLint and the production build. All 23 local Chrome scenarios pass, covering all 72 activities, proof criteria, independent reveals, touch/mouse manipulation, snapping, zoom, lesson-menu state and phone layout. Seven affected scenarios pass after increasing proof text for projection; all three proof scenarios also pass after keeping Q19 vertex names clear of the angle marks. Inspect the final desktop and phone screenshots. Evidence: ignored `out/similarity-release/proof-*.log` and `out/similarity-preview/proof-*.png`.
+- [ ] Publish the verified follow-up through the existing GitHub main branch and Vercel project, then check the live proof panel and filtered diagrams.
+
 ## Approved Similarity Studio release (19/10/2026)
 
 - [x] Owner explicitly requested integration into the Mathematics Department website and publication to GitHub and Vercel. Include all 72 Level 2 / Quick Practice activities, source and extracted-shape manipulation, matching angles/right angles/side ratios, independent reveal controls, snapping, paired vertex/side labels, camera zoom/pan, and the shared lesson-menu toggle.

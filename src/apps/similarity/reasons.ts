@@ -642,7 +642,7 @@ export function conditions(
   const sides =
     view === "sides" ||
     view === "both" ||
-    (view === "proof" && ["SSS", "SAS"].includes(pair.criterion));
+    (view === "proof" && ["SSS", "SAS", "polygon"].includes(pair.criterion));
   const rows: Condition[] = [];
   if (angles) {
     for (let i = 0; i < n; i++) {

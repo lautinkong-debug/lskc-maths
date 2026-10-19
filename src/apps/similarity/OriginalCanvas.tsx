@@ -57,6 +57,7 @@ export function OriginalCanvas({
   vertexMode,
   reasonPair,
   reasonRows,
+  proofOnly,
   showAngles,
   showLengths,
   hiddenMarks,
@@ -79,6 +80,7 @@ export function OriginalCanvas({
   vertexMode: VertexDragMode;
   reasonPair?: ReasonPair;
   reasonRows: Condition[];
+  proofOnly: boolean;
   showAngles: boolean;
   showLengths: boolean;
   hiddenMarks: string[];
@@ -233,6 +235,7 @@ export function OriginalCanvas({
   }
   const moved = Object.keys(poses).length > 0;
   const plainReference =
+    proofOnly ||
     question.constructed ||
     !showAngles ||
     !showLengths ||
@@ -315,8 +318,22 @@ export function OriginalCanvas({
               {points.map((p) => (
                 <text
                   key={p.label}
-                  x={p.x + unit * 0.6}
-                  y={p.y - unit * 0.7}
+                  x={
+                    p.x +
+                    (pilot
+                      ? p.label === "A" || p.label === "B"
+                        ? -19
+                        : 7
+                      : unit * 0.6)
+                  }
+                  y={
+                    p.y +
+                    (pilot
+                      ? p.label === "C" || p.label === "F"
+                        ? 19
+                        : -8
+                      : -unit * 0.7)
+                  }
                   className={styles.sourceLabel}
                 >
                   {p.label}
@@ -551,6 +568,9 @@ export function OriginalCanvas({
         <ComparisonKey
           question={question}
           pair={reasonPair}
+          visibleSides={reasonRows
+            .filter((r) => r.kind === "side")
+            .map((r) => r.id)}
           hiddenSides={hiddenMarks}
           showAngles={showAngles}
         />

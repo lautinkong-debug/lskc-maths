@@ -39,8 +39,21 @@ export function ReasonsPanel({
 }) {
   const pair = pairs[pairIndex];
   if (!pair) return null;
+  const [a, b] = pair.shapes.map((i) => question.shapes[i]);
+  const conclusion = `${a.name} ${pair.criterion === "not-similar" ? "≁" : "∼"} ${b.name}${["AAA", "SSS", "SAS"].includes(pair.criterion) ? ` (${pair.criterion})` : ""}`;
   return (
-    <section className={styles.reasonPanel} data-testid="diagram-reasons">
+    <section
+      className={styles.reasonPanel}
+      data-testid="diagram-reasons"
+      aria-label={c.proofTitle}
+    >
+      <h3>
+        {pair.criterion === "given"
+          ? c.proofGiven
+          : pair.criterion === "not-similar"
+            ? c.proofCounterexample
+            : c.proofTitle}
+      </h3>
       <div className={styles.reasonHeading}>
         <strong>{titles[pair.criterion]}</strong>
         {pairs.length > 1 ? (
@@ -64,10 +77,7 @@ export function ReasonsPanel({
             </GeometryText>
           </span>
         )}
-        <div className={styles.tools}>
-          <button onClick={() => onFocus(null)} aria-pressed={focus === null}>
-            {c.allMarks}
-          </button>
+        <div className={styles.tools} role="group" aria-label={c.markOptions}>
           <>
             <button
               onClick={() => onView("both")}
@@ -96,7 +106,13 @@ export function ReasonsPanel({
           </>
         </div>
       </div>
-      <p>{pair.criterion === "given" ? c.givenHint : c.reasonHint}</p>
+      <p>
+        {pair.criterion === "given"
+          ? c.givenHint
+          : view === "proof"
+            ? c.proofOnlyHint
+            : c.reasonHint}
+      </p>
       {!pair.shapes.every((i) => selected.includes(i)) && (
         <p role="status">{c.missingPair}</p>
       )}
@@ -133,6 +149,11 @@ export function ReasonsPanel({
             </span>
             <span>
               <GeometryText>{r.text}</GeometryText>
+              {r.consequence && (
+                <small className={styles.consequence}>
+                  {c.afterSimilarity}
+                </small>
+              )}
               <small>
                 <GeometryText>{r.note}</GeometryText>
               </small>
@@ -140,6 +161,17 @@ export function ReasonsPanel({
           </button>
         ))}
       </div>
+      {focus !== null && (
+        <button className={styles.clearCondition} onClick={() => onFocus(null)}>
+          {c.allMarks}
+        </button>
+      )}
+      <p className={styles.proofConclusion} data-testid="similarity-conclusion">
+        <span>
+          {pair.criterion === "given" ? c.proofGiven : c.proofConclusion}
+        </span>
+        <GeometryText>{conclusion}</GeometryText>
+      </p>
       {rows.some((r) => r.kind === "side") && <p>{c.originalLengths}</p>}
     </section>
   );

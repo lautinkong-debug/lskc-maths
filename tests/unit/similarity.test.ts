@@ -19,6 +19,36 @@ import { pairedSideLabels } from "../../src/apps/similarity/pairedSides";
 
 describe("Similarity studio", () => {
   const q19 = questions.find((q) => q.id === "ex8c-19")!;
+  it("uses only establishing conditions for AAA, SSS and SAS, and both requirements for squares", () => {
+    for (const [id, angles, sides] of [
+      ["ex8c-19", 3, 0],
+      ["qp8-6", 0, 3],
+      ["qp8-8", 1, 2],
+      ["ex8d-17", 4, 4],
+      ["ex8d-20", 0, 2],
+    ] as const) {
+      const question = questions.find((q) => q.id === id)!;
+      const pair = reasonPairs(question)[0];
+      const rows = conditions(question, pair, "proof");
+      expect(
+        rows.filter((r) => r.kind === "angle"),
+        id,
+      ).toHaveLength(angles);
+      expect(
+        rows.filter((r) => r.kind === "side"),
+        id,
+      ).toHaveLength(sides);
+      expect(
+        rows.some((r) => r.consequence),
+        id,
+      ).toBe(false);
+      if (pair.criterion === "SAS") {
+        const angle = rows.find((r) => r.kind === "angle")!;
+        for (const side of rows.filter((r) => r.kind === "side"))
+          expect(side.edge, id).toContain(angle.index);
+      }
+    }
+  });
   it("keeps paired side values and ratios tied to the source when the drawing is enlarged", () => {
     const sets = boardShapes(q19.shapes, q19Points());
     const poses = comparisonPoses(sets, true),

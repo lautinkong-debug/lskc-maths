@@ -11,15 +11,19 @@ export function ComparisonKey({
   pair,
   hiddenSides = [],
   showAngles = true,
+  visibleSides,
 }: {
   question: SourceQuestion;
   pair: ReasonPair;
   hiddenSides?: string[];
   showAngles?: boolean;
+  visibleSides?: string[];
 }) {
   const c = copy.similarity;
   const sides = conditions(question, pair, "sides").filter(
-    (row) => !hiddenSides.includes(row.id),
+    (row) =>
+      !hiddenSides.includes(row.id) &&
+      (!visibleSides || visibleSides.includes(row.id)),
   );
   if (!sides.length) return null;
   if (pair.criterion === "not-similar")
@@ -43,7 +47,7 @@ export function ComparisonKey({
       ? `\\frac{${ratio[0]}}{${ratio[1]}}`
       : ratio[0]
     : "k";
-  const tex = `${fractions.join(" = ")}${a.vertices.length > 4 ? " = \\cdots" : ""} = ${value}`;
+  const tex = `${fractions.join(" = ")}${sides.length > shown.length ? " = \\cdots" : ""} = ${value}`;
   const label = `${sides.map((row) => row.text.split(" = ")[0]).join(" = ")} = ${pair.ratio ?? "k"}`;
   return (
     <div className={styles.matchKey} data-testid="corresponding-ratio-key">

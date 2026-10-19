@@ -198,7 +198,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
   const [originalExpanded, setOriginalExpanded] = useState(false);
   const [resetVersion, setResetVersion] = useState(0);
   const [vertexMode, setVertexMode] = useState<VertexDragMode>("both");
-  const [showReasons, setShowReasons] = useState(false);
+  const [showReasons, setShowReasons] = useState(true);
   const [showMarks, setShowMarks] = useState(true);
   const [showAngles, setShowAngles] = useState(true);
   const [showLengths, setShowLengths] = useState(true);
@@ -206,11 +206,17 @@ function Lesson({ question }: { question: SourceQuestion }) {
   const [snapping, setSnapping] = useState(true);
   const [snapMessage, setSnapMessage] = useState("");
   const [pairIndex, setPairIndex] = useState(0);
-  const [reasonView, setReasonView] = useState<ReasonView>("both");
+  const [reasonView, setReasonView] = useState<ReasonView>(
+    reasonPairs(question)[0]?.criterion === "given" ? "both" : "proof",
+  );
   const [conditionFocus, setConditionFocus] = useState<string | null>(null);
   const pairs = reasonPairs(question);
   const pair = pairs[pairIndex];
   const rows = pair ? conditions(question, pair, reasonView) : [];
+  const anglesVisible =
+    showMarks && showAngles && rows.some((r) => r.kind === "angle");
+  const lengthsVisible =
+    showMarks && showLengths && rows.some((r) => r.kind === "side");
   const hiddenForPair = hiddenMarks
     .filter((id) => id.startsWith(`${pairIndex}:`))
     .map((id) => id.split(":")[1]);
@@ -287,13 +293,13 @@ function Lesson({ question }: { question: SourceQuestion }) {
     setOpacity(0.2);
     setTracing(false);
     setVertices([]);
-    setShowReasons(false);
+    setShowReasons(true);
     setShowMarks(true);
     setShowAngles(true);
     setShowLengths(true);
     setHiddenMarks([]);
     setSnapMessage("");
-    setReasonView("both");
+    setReasonView(pairs[0]?.criterion === "given" ? "both" : "proof");
     setPairIndex(0);
     setConditionFocus(null);
   }
@@ -513,21 +519,27 @@ function Lesson({ question }: { question: SourceQuestion }) {
                 </button>
                 <button
                   onClick={() => {
-                    setShowAngles(!showAngles);
+                    setShowAngles(!anglesVisible);
+                    setConditionFocus(null);
+                    if (!rows.some((r) => r.kind === "angle"))
+                      setReasonView("both");
                     setShowMarks(true);
                   }}
-                  aria-pressed={showMarks && showAngles}
+                  aria-pressed={anglesVisible}
                 >
-                  {showAngles ? c.hideAngles : c.showAngles}
+                  {anglesVisible ? c.hideAngles : c.showAngles}
                 </button>
                 <button
                   onClick={() => {
-                    setShowLengths(!showLengths);
+                    setShowLengths(!lengthsVisible);
+                    setConditionFocus(null);
+                    if (!rows.some((r) => r.kind === "side"))
+                      setReasonView("both");
                     setShowMarks(true);
                   }}
-                  aria-pressed={showMarks && showLengths}
+                  aria-pressed={lengthsVisible}
                 >
-                  {showLengths ? c.hideLengths : c.showLengths}
+                  {lengthsVisible ? c.hideLengths : c.showLengths}
                 </button>
                 {hiddenMarks.length > 0 && (
                   <button
@@ -566,474 +578,531 @@ function Lesson({ question }: { question: SourceQuestion }) {
             {c.markClickHint} {snapping && c.snapHint}{" "}
             <span role="status">{snapMessage}</span>
           </p>
-          {showReasons && (
-            <ReasonsPanel
-              question={question}
-              pairs={pairs}
-              pairIndex={pairIndex}
-              onPair={(i) => {
-                setPairIndex(i);
-                setConditionFocus(null);
-              }}
-              view={reasonView}
-              onView={(v) => {
-                setReasonView(v);
-                setConditionFocus(null);
-              }}
-              rows={rows}
-              focus={conditionFocus}
-              onFocus={setConditionFocus}
-              selected={selected}
-            />
-          )}
-          <div
-            className={styles.boards}
-            data-original-expanded={originalExpanded}
-          >
-            <section className={styles.original} aria-label={c.original}>
-              <div className={styles.panelTitle}>
-                <span>01</span>
-                <h3>{c.original}</h3>
-              </div>
-              <OriginalCanvas
-                key={resetVersion}
-                question={question}
-                points={points}
-                shapes={shapes}
-                selected={selected}
-                active={active}
-                onActivate={activateOriginal}
-                tracing={tracing}
-                vertices={vertices}
-                onVertex={vertex}
-                expanded={originalExpanded}
-                onExpand={() => setOriginalExpanded((v) => !v)}
-                vertexMode={vertexMode}
-                reasonPair={showMarks ? pair : undefined}
-                reasonRows={visibleRows}
-                showAngles={showMarks && showAngles}
-                showLengths={showMarks && showLengths}
-                hiddenMarks={hiddenForPair}
-                onHideMark={hideMark}
-                snapping={snapping}
-                pairs={pairs}
-                onSnap={() => setSnapMessage(c.snapped)}
-              />
-              <p className={styles.micro}>
-                {question.constructed
-                  ? c.constructed
-                  : pilot
-                    ? c.exact
-                    : c.tracing}
-              </p>
-              <fieldset className={styles.choices}>
-                <legend>{c.choose}</legend>
-                {shapes.map((s, i) => (
-                  <button
-                    type="button"
-                    key={`${s.name}-${i}`}
-                    aria-pressed={selected.includes(i)}
-                    aria-label={s.name}
-                    onClick={() => select(i)}
-                    style={
-                      selected.includes(i)
-                        ? {
-                            borderColor: colours[selected.indexOf(i)],
-                            color: colours[selected.indexOf(i)],
-                          }
-                        : undefined
-                    }
-                  >
-                    <GeometryName>{s.name}</GeometryName>
-                  </button>
-                ))}
-              </fieldset>
-              <button
-                className={styles.textButton}
-                onClick={() => {
-                  setTracing(!tracing);
-                  setVertices([]);
-                }}
-                aria-expanded={tracing}
+          <div className={styles.teachingArea}>
+            <div
+              className={styles.diagramLayout}
+              data-has-proof={showReasons && !!pair}
+              data-original-expanded={originalExpanded}
+            >
+              <div
+                className={styles.boards}
+                data-original-expanded={originalExpanded}
               >
-                ＋ {c.custom}
-              </button>
-              {tracing && (
-                <div className={styles.tracePanel}>
-                  <p>{c.customHint}</p>
-                  <div className={styles.tools}>
-                    {points.map((p) => (
+                <section className={styles.original} aria-label={c.original}>
+                  <div className={styles.panelTitle}>
+                    <span>01</span>
+                    <h3>{c.original}</h3>
+                  </div>
+                  <OriginalCanvas
+                    key={resetVersion}
+                    question={question}
+                    points={points}
+                    shapes={shapes}
+                    selected={selected}
+                    active={active}
+                    onActivate={activateOriginal}
+                    tracing={tracing}
+                    vertices={vertices}
+                    onVertex={vertex}
+                    expanded={originalExpanded}
+                    onExpand={() => setOriginalExpanded((v) => !v)}
+                    vertexMode={vertexMode}
+                    reasonPair={showMarks ? pair : undefined}
+                    reasonRows={visibleRows}
+                    proofOnly={reasonView !== "both"}
+                    showAngles={showMarks && showAngles}
+                    showLengths={showMarks && showLengths}
+                    hiddenMarks={hiddenForPair}
+                    onHideMark={hideMark}
+                    snapping={snapping}
+                    pairs={pairs}
+                    onSnap={() => setSnapMessage(c.snapped)}
+                  />
+                  <p className={styles.micro}>
+                    {question.constructed
+                      ? c.constructed
+                      : pilot
+                        ? c.exact
+                        : c.tracing}
+                  </p>
+                  <fieldset className={styles.choices}>
+                    <legend>{c.choose}</legend>
+                    {shapes.map((s, i) => (
                       <button
-                        key={p.label}
-                        aria-label={p.label}
-                        aria-pressed={vertices.includes(p.label)}
-                        onClick={() => vertex(p.label)}
+                        type="button"
+                        key={`${s.name}-${i}`}
+                        aria-pressed={selected.includes(i)}
+                        aria-label={s.name}
+                        onClick={() => select(i)}
+                        style={
+                          selected.includes(i)
+                            ? {
+                                borderColor: colours[selected.indexOf(i)],
+                                color: colours[selected.indexOf(i)],
+                              }
+                            : undefined
+                        }
                       >
-                        <GeometryName>{p.label}</GeometryName>
+                        <GeometryName>{s.name}</GeometryName>
                       </button>
                     ))}
-                  </div>
-                  <p aria-live="polite">{vertices.join(" → ") || "—"}</p>
-                  <div className={styles.tools}>
-                    <button
-                      onClick={addShape}
-                      disabled={
-                        vertices.length < 3 || Math.abs(customArea) < 0.001
-                      }
-                    >
-                      {c.add}
-                    </button>
-                    <button onClick={() => setVertices([])}>{c.clear}</button>
-                  </div>
-                </div>
-              )}
-            </section>
-            <section className={styles.manipulation} aria-label={c.workspace}>
-              <div className={styles.panelTitle}>
-                <span>02</span>
-                <h3>{c.workspace}</h3>
-                <div className={styles.tools}>
+                  </fieldset>
                   <button
+                    className={styles.textButton}
                     onClick={() => {
-                      setPoses(separatePoses(selected.length));
-                      view.reset();
+                      setTracing(!tracing);
+                      setVertices([]);
                     }}
+                    aria-expanded={tracing}
                   >
-                    {c.separate}
+                    ＋ {c.custom}
                   </button>
-                  <button
-                    disabled={!poses.length}
-                    onClick={() =>
-                      setPoses((prev) =>
-                        prev.map((p) => ({ ...p, x: 420, y: 235 })),
-                      )
-                    }
-                  >
-                    {c.stack}
-                  </button>
-                </div>
-              </div>
-              <DiagramViewControls title={c.workspace} view={view} />
-              <svg
-                ref={svg}
-                viewBox={`${view.frame.x} ${view.frame.y} ${view.frame.width} ${view.frame.height}`}
-                className={styles.board}
-                onPointerDown={view.startPan}
-                onPointerMove={moveDrag}
-                onPointerUp={finishDrag}
-                onPointerCancel={() => {
-                  view.endPan();
-                  drag.current = null;
-                }}
-                onLostPointerCapture={() => {
-                  view.endPan();
-                  drag.current = null;
-                }}
-                aria-label={c.workspace}
-                data-testid="manipulation-board"
-              >
-                <defs>
-                  <pattern
-                    id={`grid-${question.id}`}
-                    width="30"
-                    height="30"
-                    patternUnits="userSpaceOnUse"
-                  >
-                    <path
-                      d="M30 0H0V30"
-                      fill="none"
-                      stroke="var(--color-grid)"
-                      strokeWidth=".7"
-                    />
-                  </pattern>
-                </defs>
-                <rect
-                  {...view.frame}
-                  data-pan-background="true"
-                  fill={`url(#grid-${question.id})`}
-                />
-                {sets
-                  .map((_, i) => i)
-                  .sort((a, b) => Number(a === active) - Number(b === active))
-                  .map((i) => {
-                    const transformed = placedShapes[i].points,
-                      mid = centre(transformed);
-                    return (
-                      <g
-                        key={`${chosen[i].name}-${i}`}
-                        tabIndex={0}
-                        role="button"
-                        aria-label={`${c.move} ${chosen[i].name}`}
-                        aria-pressed={active === i}
-                        onPointerDown={(e) => startDrag(e, i)}
-                        onFocus={() => setActive(i)}
-                        onKeyDown={(e) => {
-                          const p = poses[i];
-                          const delta = e.shiftKey ? 20 : 5;
-                          const movement: Record<string, [number, number]> = {
-                            ArrowLeft: [-delta, 0],
-                            ArrowRight: [delta, 0],
-                            ArrowUp: [0, -delta],
-                            ArrowDown: [0, delta],
-                          };
-                          if (movement[e.key]) {
-                            e.preventDefault();
-                            const [x, y] = movement[e.key];
-                            update(
-                              {
-                                x: Math.min(780, Math.max(60, p.x + x)),
-                                y: Math.min(400, Math.max(65, p.y + y)),
-                              },
-                              i,
-                            );
+                  {tracing && (
+                    <div className={styles.tracePanel}>
+                      <p>{c.customHint}</p>
+                      <div className={styles.tools}>
+                        {points.map((p) => (
+                          <button
+                            key={p.label}
+                            aria-label={p.label}
+                            aria-pressed={vertices.includes(p.label)}
+                            onClick={() => vertex(p.label)}
+                          >
+                            <GeometryName>{p.label}</GeometryName>
+                          </button>
+                        ))}
+                      </div>
+                      <p aria-live="polite">{vertices.join(" → ") || "—"}</p>
+                      <div className={styles.tools}>
+                        <button
+                          onClick={addShape}
+                          disabled={
+                            vertices.length < 3 || Math.abs(customArea) < 0.001
                           }
-                          if (e.key.toLowerCase() === "r") {
-                            e.preventDefault();
-                            update({ angle: p.angle + 15 }, i);
-                          }
-                          if (e.key.toLowerCase() === "h") {
-                            e.preventDefault();
-                            update({ flipX: -p.flipX }, i);
-                          }
-                          if (e.key.toLowerCase() === "v") {
-                            e.preventDefault();
-                            update({ flipY: -p.flipY }, i);
-                          }
-                        }}
-                        className={styles.movable}
-                        data-testid={`shape-${i}`}
-                        data-angle={poses[i].angle}
-                        data-scale={poses[i].scale}
-                        data-x={poses[i].x}
-                        data-y={poses[i].y}
-                        data-flip-x={poses[i].flipX}
-                        data-flip-y={poses[i].flipY}
-                      >
-                        <polygon
-                          points={path(transformed)}
-                          fill={colours[i]}
-                          fillOpacity={opacity}
-                          stroke={colours[i]}
-                          strokeWidth={active === i ? 4 : 2.5}
-                          strokeDasharray={
-                            i === 1 ? "10 4" : i === 2 ? "3 3" : undefined
-                          }
-                        />
-                        {showMarks && pair?.shapes.includes(selected[i]) && (
-                          <ReasonMarks
-                            points={transformed}
-                            rows={visibleRows}
-                            member={pair.shapes.indexOf(selected[i])}
-                            showSideLabels={!sideLabels.length}
-                            onHide={hideMark}
-                            onMoveStart={(event) => startDrag(event, i)}
-                          />
-                        )}
-                        {transformed.map((p, j) => {
-                          const dx = p.x - mid.x,
-                            dy = p.y - mid.y,
-                            length = Math.hypot(dx, dy) || 1;
-                          return (
-                            <g key={p.label}>
-                              <circle
-                                cx={p.x}
-                                cy={p.y}
-                                r="4"
-                                fill={colours[i]}
-                              />
-                              {!pairedShapes.has(selected[i]) && (
-                                <text
-                                  data-testid="vertex-name"
-                                  x={p.x + (22 * dx) / length}
-                                  y={p.y + (22 * dy) / length + 7}
-                                  textAnchor="middle"
-                                  className={styles.vertexLabel}
-                                  fill={colours[i]}
-                                >
-                                  {p.label}
-                                  {order ? (
-                                    <tspan fontSize="13" dy="-9">
-                                      {j + 1}
-                                    </tspan>
-                                  ) : null}
-                                </text>
-                              )}
-                            </g>
-                          );
-                        })}
-                        {active === i && (
-                          <VertexHandles
-                            points={transformed}
-                            colour={colours[i]}
-                            prefix={`shape-${i}`}
-                            onStart={(event, point) =>
-                              startDrag(event, i, point)
-                            }
-                            pose={poses[i]}
-                            onChange={(patch) =>
-                              update(
-                                fitPose(
-                                  sets[i],
-                                  { ...poses[i], ...patch },
-                                  { x: 0, y: 0, width: 840, height: 470 },
-                                  30,
-                                  patch.scale === undefined,
-                                ),
-                                i,
-                              )
-                            }
-                          />
-                        )}
-                      </g>
-                    );
-                  })}
-                <PairedSideLabels
-                  labels={sideLabels}
-                  onHide={hideMark}
-                  onMoveStart={(event) =>
-                    startDrag(
-                      event,
-                      pair!.shapes.includes(selected[active])
-                        ? active
-                        : selected.indexOf(pair!.shapes[0]),
-                    )
-                  }
-                />
-                <PairedVertexLabels
-                  groups={labelGroups}
-                  shapes={placedShapes}
-                  frame={view.frame}
-                  showOrder={order}
-                />
-              </svg>
-              {showMarks &&
-                showLengths &&
-                pair?.shapes.every((i) => selected.includes(i)) && (
-                  <ComparisonKey
-                    question={question}
-                    pair={pair}
-                    hiddenSides={hiddenForPair}
-                    showAngles={showAngles}
-                  />
-                )}
-              <p className={styles.dragHint}>{c.dragHint}</p>
-              <div className={styles.controlPanel}>
-                <div className={styles.activeShapes}>
-                  <span>{c.selected}</span>
-                  {chosen.map((s, i) => (
-                    <button
-                      key={`${s.name}-${i}`}
-                      onClick={() => setActive(i)}
-                      aria-pressed={active === i}
-                      aria-label={s.name}
-                      style={{ color: colours[i] }}
-                    >
-                      <GeometryName>{s.name}</GeometryName>
-                    </button>
-                  ))}
-                </div>
-                {pose && (
-                  <>
+                        >
+                          {c.add}
+                        </button>
+                        <button onClick={() => setVertices([])}>
+                          {c.clear}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </section>
+                <section
+                  className={styles.manipulation}
+                  aria-label={c.workspace}
+                >
+                  <div className={styles.panelTitle}>
+                    <span>02</span>
+                    <h3>{c.workspace}</h3>
                     <div className={styles.tools}>
                       <button
-                        onClick={() => update({ angle: pose.angle - 15 })}
-                      >
-                        {c.rotateLeft}
-                      </button>
-                      <button
-                        onClick={() => update({ angle: pose.angle + 15 })}
-                      >
-                        {c.rotateRight}
-                      </button>
-                      <button
-                        onClick={() => update({ angle: pose.angle + 90 })}
-                      >
-                        {c.quarterTurn}
-                      </button>
-                      <button onClick={() => update({ flipX: -pose.flipX })}>
-                        {c.flipH}
-                      </button>
-                      <button onClick={() => update({ flipY: -pose.flipY })}>
-                        {c.flipV}
-                      </button>
-                    </div>
-                    <div className={styles.sliders}>
-                      <label>
-                        {c.angle} <output>{Math.round(pose.angle)}°</output>
-                        <input
-                          aria-label={c.angle}
-                          type="range"
-                          min="-360"
-                          max="360"
-                          value={((pose.angle + 360) % 720) - 360}
-                          onChange={(e) =>
-                            update({ angle: Number(e.target.value) })
-                          }
-                        />
-                      </label>
-                      <label>
-                        {c.scale} <output>×{pose.scale.toFixed(2)}</output>
-                        <input
-                          aria-label={c.scale}
-                          type="range"
-                          min=".25"
-                          max="3"
-                          step=".05"
-                          value={pose.scale}
-                          onChange={(e) =>
-                            update({ scale: Number(e.target.value) })
-                          }
-                        />
-                      </label>
-                      <label>
-                        {c.opacity}{" "}
-                        <output>{Math.round(opacity * 100)}%</output>
-                        <input
-                          aria-label={c.opacity}
-                          type="range"
-                          min=".05"
-                          max=".75"
-                          step=".05"
-                          value={opacity}
-                          onChange={(e) => setOpacity(Number(e.target.value))}
-                        />
-                      </label>
-                    </div>
-                    <div className={styles.tools}>
-                      <span>{c.move}</span>
-                      <button aria-label={c.left} onClick={() => nudge(-15, 0)}>
-                        ←
-                      </button>
-                      <button aria-label={c.up} onClick={() => nudge(0, -15)}>
-                        ↑
-                      </button>
-                      <button aria-label={c.down} onClick={() => nudge(0, 15)}>
-                        ↓
-                      </button>
-                      <button aria-label={c.right} onClick={() => nudge(15, 0)}>
-                        →
-                      </button>
-                      <button
-                        disabled={sets.length < 2}
-                        onClick={() => setPoses(comparisonPoses(sets))}
-                      >
-                        {c.orient}
-                      </button>
-                      <button
-                        disabled={sets.length < 2}
                         onClick={() => {
-                          const next = comparisonPoses(sets, true);
-                          setPoses(next);
-                          fitComparison(next);
+                          setPoses(separatePoses(selected.length));
+                          view.reset();
                         }}
                       >
-                        {c.enlarge}
+                        {c.separate}
+                      </button>
+                      <button
+                        disabled={!poses.length}
+                        onClick={() =>
+                          setPoses((prev) =>
+                            prev.map((p) => ({ ...p, x: 420, y: 235 })),
+                          )
+                        }
+                      >
+                        {c.stack}
                       </button>
                     </div>
-                  </>
-                )}
+                  </div>
+                  <DiagramViewControls title={c.workspace} view={view} />
+                  <svg
+                    ref={svg}
+                    viewBox={`${view.frame.x} ${view.frame.y} ${view.frame.width} ${view.frame.height}`}
+                    className={styles.board}
+                    onPointerDown={view.startPan}
+                    onPointerMove={moveDrag}
+                    onPointerUp={finishDrag}
+                    onPointerCancel={() => {
+                      view.endPan();
+                      drag.current = null;
+                    }}
+                    onLostPointerCapture={() => {
+                      view.endPan();
+                      drag.current = null;
+                    }}
+                    aria-label={c.workspace}
+                    data-testid="manipulation-board"
+                  >
+                    <defs>
+                      <pattern
+                        id={`grid-${question.id}`}
+                        width="30"
+                        height="30"
+                        patternUnits="userSpaceOnUse"
+                      >
+                        <path
+                          d="M30 0H0V30"
+                          fill="none"
+                          stroke="var(--color-grid)"
+                          strokeWidth=".7"
+                        />
+                      </pattern>
+                    </defs>
+                    <rect
+                      {...view.frame}
+                      data-pan-background="true"
+                      fill={`url(#grid-${question.id})`}
+                    />
+                    {sets
+                      .map((_, i) => i)
+                      .sort(
+                        (a, b) => Number(a === active) - Number(b === active),
+                      )
+                      .map((i) => {
+                        const transformed = placedShapes[i].points,
+                          mid = centre(transformed);
+                        return (
+                          <g
+                            key={`${chosen[i].name}-${i}`}
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`${c.move} ${chosen[i].name}`}
+                            aria-pressed={active === i}
+                            onPointerDown={(e) => startDrag(e, i)}
+                            onFocus={() => setActive(i)}
+                            onKeyDown={(e) => {
+                              const p = poses[i];
+                              const delta = e.shiftKey ? 20 : 5;
+                              const movement: Record<string, [number, number]> =
+                                {
+                                  ArrowLeft: [-delta, 0],
+                                  ArrowRight: [delta, 0],
+                                  ArrowUp: [0, -delta],
+                                  ArrowDown: [0, delta],
+                                };
+                              if (movement[e.key]) {
+                                e.preventDefault();
+                                const [x, y] = movement[e.key];
+                                update(
+                                  {
+                                    x: Math.min(780, Math.max(60, p.x + x)),
+                                    y: Math.min(400, Math.max(65, p.y + y)),
+                                  },
+                                  i,
+                                );
+                              }
+                              if (e.key.toLowerCase() === "r") {
+                                e.preventDefault();
+                                update({ angle: p.angle + 15 }, i);
+                              }
+                              if (e.key.toLowerCase() === "h") {
+                                e.preventDefault();
+                                update({ flipX: -p.flipX }, i);
+                              }
+                              if (e.key.toLowerCase() === "v") {
+                                e.preventDefault();
+                                update({ flipY: -p.flipY }, i);
+                              }
+                            }}
+                            className={styles.movable}
+                            data-testid={`shape-${i}`}
+                            data-angle={poses[i].angle}
+                            data-scale={poses[i].scale}
+                            data-x={poses[i].x}
+                            data-y={poses[i].y}
+                            data-flip-x={poses[i].flipX}
+                            data-flip-y={poses[i].flipY}
+                          >
+                            <polygon
+                              points={path(transformed)}
+                              fill={colours[i]}
+                              fillOpacity={opacity}
+                              stroke={colours[i]}
+                              strokeWidth={active === i ? 4 : 2.5}
+                              strokeDasharray={
+                                i === 1 ? "10 4" : i === 2 ? "3 3" : undefined
+                              }
+                            />
+                            {showMarks &&
+                              pair?.shapes.includes(selected[i]) && (
+                                <ReasonMarks
+                                  points={transformed}
+                                  rows={visibleRows}
+                                  member={pair.shapes.indexOf(selected[i])}
+                                  showSideLabels={!sideLabels.length}
+                                  onHide={hideMark}
+                                  onMoveStart={(event) => startDrag(event, i)}
+                                />
+                              )}
+                            {transformed.map((p, j) => {
+                              const dx = p.x - mid.x,
+                                dy = p.y - mid.y,
+                                length = Math.hypot(dx, dy) || 1;
+                              return (
+                                <g key={p.label}>
+                                  <circle
+                                    cx={p.x}
+                                    cy={p.y}
+                                    r="4"
+                                    fill={colours[i]}
+                                  />
+                                  {!pairedShapes.has(selected[i]) && (
+                                    <text
+                                      data-testid="vertex-name"
+                                      x={p.x + (22 * dx) / length}
+                                      y={p.y + (22 * dy) / length + 7}
+                                      textAnchor="middle"
+                                      className={styles.vertexLabel}
+                                      fill={colours[i]}
+                                    >
+                                      {p.label}
+                                      {order ? (
+                                        <tspan fontSize="13" dy="-9">
+                                          {j + 1}
+                                        </tspan>
+                                      ) : null}
+                                    </text>
+                                  )}
+                                </g>
+                              );
+                            })}
+                            {active === i && (
+                              <VertexHandles
+                                points={transformed}
+                                colour={colours[i]}
+                                prefix={`shape-${i}`}
+                                onStart={(event, point) =>
+                                  startDrag(event, i, point)
+                                }
+                                pose={poses[i]}
+                                onChange={(patch) =>
+                                  update(
+                                    fitPose(
+                                      sets[i],
+                                      { ...poses[i], ...patch },
+                                      { x: 0, y: 0, width: 840, height: 470 },
+                                      30,
+                                      patch.scale === undefined,
+                                    ),
+                                    i,
+                                  )
+                                }
+                              />
+                            )}
+                          </g>
+                        );
+                      })}
+                    <PairedSideLabels
+                      labels={sideLabels}
+                      onHide={hideMark}
+                      onMoveStart={(event) =>
+                        startDrag(
+                          event,
+                          pair!.shapes.includes(selected[active])
+                            ? active
+                            : selected.indexOf(pair!.shapes[0]),
+                        )
+                      }
+                    />
+                    <PairedVertexLabels
+                      groups={labelGroups}
+                      shapes={placedShapes}
+                      frame={view.frame}
+                      showOrder={order}
+                    />
+                  </svg>
+                  {showMarks &&
+                    showLengths &&
+                    pair?.shapes.every((i) => selected.includes(i)) && (
+                      <ComparisonKey
+                        question={question}
+                        pair={pair}
+                        visibleSides={visibleRows
+                          .filter((r) => r.kind === "side")
+                          .map((r) => r.id)}
+                        hiddenSides={hiddenForPair}
+                        showAngles={showAngles}
+                      />
+                    )}
+                  <p className={styles.dragHint}>{c.dragHint}</p>
+                  <div className={styles.controlPanel}>
+                    <div className={styles.activeShapes}>
+                      <span>{c.selected}</span>
+                      {chosen.map((s, i) => (
+                        <button
+                          key={`${s.name}-${i}`}
+                          onClick={() => setActive(i)}
+                          aria-pressed={active === i}
+                          aria-label={s.name}
+                          style={{ color: colours[i] }}
+                        >
+                          <GeometryName>{s.name}</GeometryName>
+                        </button>
+                      ))}
+                    </div>
+                    {pose && (
+                      <>
+                        <div className={styles.tools}>
+                          <button
+                            onClick={() => update({ angle: pose.angle - 15 })}
+                          >
+                            {c.rotateLeft}
+                          </button>
+                          <button
+                            onClick={() => update({ angle: pose.angle + 15 })}
+                          >
+                            {c.rotateRight}
+                          </button>
+                          <button
+                            onClick={() => update({ angle: pose.angle + 90 })}
+                          >
+                            {c.quarterTurn}
+                          </button>
+                          <button
+                            onClick={() => update({ flipX: -pose.flipX })}
+                          >
+                            {c.flipH}
+                          </button>
+                          <button
+                            onClick={() => update({ flipY: -pose.flipY })}
+                          >
+                            {c.flipV}
+                          </button>
+                        </div>
+                        <div className={styles.sliders}>
+                          <label>
+                            {c.angle} <output>{Math.round(pose.angle)}°</output>
+                            <input
+                              aria-label={c.angle}
+                              type="range"
+                              min="-360"
+                              max="360"
+                              value={((pose.angle + 360) % 720) - 360}
+                              onChange={(e) =>
+                                update({ angle: Number(e.target.value) })
+                              }
+                            />
+                          </label>
+                          <label>
+                            {c.scale} <output>×{pose.scale.toFixed(2)}</output>
+                            <input
+                              aria-label={c.scale}
+                              type="range"
+                              min=".25"
+                              max="3"
+                              step=".05"
+                              value={pose.scale}
+                              onChange={(e) =>
+                                update({ scale: Number(e.target.value) })
+                              }
+                            />
+                          </label>
+                          <label>
+                            {c.opacity}{" "}
+                            <output>{Math.round(opacity * 100)}%</output>
+                            <input
+                              aria-label={c.opacity}
+                              type="range"
+                              min=".05"
+                              max=".75"
+                              step=".05"
+                              value={opacity}
+                              onChange={(e) =>
+                                setOpacity(Number(e.target.value))
+                              }
+                            />
+                          </label>
+                        </div>
+                        <div className={styles.tools}>
+                          <span>{c.move}</span>
+                          <button
+                            aria-label={c.left}
+                            onClick={() => nudge(-15, 0)}
+                          >
+                            ←
+                          </button>
+                          <button
+                            aria-label={c.up}
+                            onClick={() => nudge(0, -15)}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            aria-label={c.down}
+                            onClick={() => nudge(0, 15)}
+                          >
+                            ↓
+                          </button>
+                          <button
+                            aria-label={c.right}
+                            onClick={() => nudge(15, 0)}
+                          >
+                            →
+                          </button>
+                          <button
+                            disabled={sets.length < 2}
+                            onClick={() => setPoses(comparisonPoses(sets))}
+                          >
+                            {c.orient}
+                          </button>
+                          <button
+                            disabled={sets.length < 2}
+                            onClick={() => {
+                              const next = comparisonPoses(sets, true);
+                              setPoses(next);
+                              fitComparison(next);
+                            }}
+                          >
+                            {c.enlarge}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </section>
               </div>
-            </section>
+              {showReasons && (
+                <ReasonsPanel
+                  question={question}
+                  pairs={pairs}
+                  pairIndex={pairIndex}
+                  onPair={(i) => {
+                    setPairIndex(i);
+                    setReasonView(
+                      pairs[i].criterion === "given" ? "both" : "proof",
+                    );
+                    setConditionFocus(null);
+                    setShowAngles(true);
+                    setShowLengths(true);
+                  }}
+                  view={reasonView}
+                  onView={(v) => {
+                    setReasonView(v);
+                    setConditionFocus(null);
+                    setShowMarks(true);
+                    setShowAngles(true);
+                    setShowLengths(true);
+                  }}
+                  rows={rows}
+                  focus={conditionFocus}
+                  onFocus={(id) => {
+                    setConditionFocus(id);
+                    if (id) {
+                      setShowMarks(true);
+                      setShowAngles(true);
+                      setShowLengths(true);
+                      setHiddenMarks((prev) =>
+                        prev.filter((key) => key !== `${pairIndex}:${id}`),
+                      );
+                    }
+                  }}
+                  selected={selected}
+                />
+              )}
+            </div>
           </div>
           <p className={styles.principle}>{c.rigid}</p>
           <div className={styles.correspondence}>

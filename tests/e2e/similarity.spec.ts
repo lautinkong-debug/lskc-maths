@@ -87,6 +87,9 @@ test("angles and lengths hide independently and individual matching marks can be
   ]) {
     await page.goto(`/apps/similarity#${id}`);
     await page
+      .getByRole("button", { name: "Angles & sides", exact: true })
+      .click();
+    await page
       .getByRole("button", { name: "Hide angles", exact: true })
       .click();
     await expect(page.locator('svg [data-condition^="angle-"]')).toHaveCount(0);
@@ -137,6 +140,9 @@ test("nearby triangles snap position, rotation and size on both boards and can b
   await page.setViewportSize({ width: 1500, height: 1100 });
   for (const original of [false, true]) {
     await page.goto("/apps/similarity#ex8c-19");
+    await page
+      .getByRole("button", { name: "Angles & sides", exact: true })
+      .click();
     await page
       .getByRole("checkbox", { name: "Snap matching triangles", exact: true })
       .check();
@@ -233,6 +239,7 @@ test("touch snapping and independent marks work on a phone", async ({
   });
   const page = await context.newPage();
   await page.goto("/apps/similarity#ex8c-19");
+  await page.getByRole("button", { name: "Angles & sides", exact: true }).tap();
   await page
     .getByRole("button", { name: "Match first side length", exact: true })
     .tap();
@@ -299,6 +306,9 @@ test("zoom, fit and pan enlarge both diagrams without changing shapes or origina
     await page.goto("/apps/similarity#ex8c-19");
     await page
       .getByRole("button", { name: "Reset question", exact: false })
+      .click();
+    await page
+      .getByRole("button", { name: "Angles & sides", exact: true })
       .click();
     const title = original ? "Original diagram" : "Move the shapes";
     const board = page.getByTestId(
@@ -460,12 +470,15 @@ test("vertex handles turn and resize both boards, preserve shape and offer keybo
   await expect(shape).toHaveAttribute("data-angle", beforeAngle!);
 });
 
-test("matching angles, right angles and side ratios follow extracted triangles by default", async ({
+test("matching angles, right angles and revealed side ratios follow extracted triangles", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1500, height: 1100 });
   await page.goto("/apps/similarity#ex8c-19");
-  await expect(page.getByTestId("diagram-reasons")).toHaveCount(0);
+  await expect(page.getByTestId("diagram-reasons")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Angles & sides", exact: true })
+    .click();
   await expect(page.getByTestId("similarity-studio")).toContainText("//");
   await expect(page.getByTestId("similarity-studio")).not.toContainText("∥");
   for (const board of ["original-board", "manipulation-board"]) {
@@ -524,13 +537,8 @@ test("matching angles, right angles and side ratios follow extracted triangles b
     await expect(shape.locator('[data-vertex="F"]')).toHaveText("90°");
     await expect(shape.locator('[data-condition="side-1"]')).toHaveText("FE=2");
   }
-  await page
-    .getByRole("button", { name: "Explain matching marks", exact: true })
-    .click();
   await expect(page.getByTestId("diagram-reasons")).toContainText("AF // BC");
-  await page
-    .getByRole("button", { name: "Hide explanation", exact: true })
-    .click();
+  await page.getByRole("button", { name: "Hide proof", exact: true }).click();
   await expect(page.getByTestId("right-angle-mark")).toHaveCount(4);
   await page
     .getByRole("button", { name: "Hide matching marks", exact: true })
@@ -541,7 +549,7 @@ test("matching angles, right angles and side ratios follow extracted triangles b
     .getByRole("button", { name: "Reset question", exact: false })
     .click();
   await expect(page.getByTestId("right-angle-mark")).toHaveCount(4);
-  await expect(page.getByTestId("diagram-reasons")).toHaveCount(0);
+  await expect(page.getByTestId("diagram-reasons")).toBeVisible();
   await page
     .getByTestId("similarity-studio")
     .screenshot({ path: "out/similarity-preview/matching-q19.png" });
@@ -559,10 +567,7 @@ test("diagram reasons mark AAA, SSS, SAS, givens and counterexamples without mar
     ["ex8d-20", "Not similar — side ratios differ", 0, 2],
   ] as const) {
     await page.goto(`/apps/similarity#${id}`);
-    await expect(page.getByTestId("diagram-reasons")).toHaveCount(0);
-    await page
-      .getByRole("button", { name: "Explain matching marks", exact: true })
-      .click();
+    await expect(page.getByTestId("diagram-reasons")).toBeVisible();
     await expect(page.getByTestId("diagram-reasons")).toContainText(title);
     await page
       .getByRole("button", { name: "Proof conditions", exact: true })
@@ -583,7 +588,9 @@ test("diagram reasons mark AAA, SSS, SAS, givens and counterexamples without mar
     await expect(
       page.getByTestId("manipulation-board").locator("[data-condition]"),
     ).toHaveCount(2);
-    await page.getByRole("button", { name: "All marks", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Clear step highlight", exact: true })
+      .click();
     if (id === "qp8-6") {
       await page
         .getByRole("group", { name: "Choose up to three shapes", exact: true })
@@ -601,9 +608,6 @@ test("diagram reasons mark AAA, SSS, SAS, givens and counterexamples without mar
       .screenshot({ path: `out/similarity-preview/reasons-${id}.png` });
   }
   await page.goto("/apps/similarity#rev8-35");
-  await page
-    .getByRole("button", { name: "Explain matching marks", exact: true })
-    .click();
   await page
     .getByRole("combobox", { name: "Compare this pair", exact: true })
     .selectOption("1");
@@ -625,6 +629,9 @@ test("clean source diagrams retain givens without printed footer images", async 
     ["ex8b-23", ["3 cm", "5 cm", "4 cm", "2 cm"]],
   ] as const) {
     await page.goto(`/apps/similarity#${id}`);
+    await page
+      .getByRole("button", { name: "Angles & sides", exact: true })
+      .click();
     const original = page.getByTestId("original-board");
     await expect(original.getByTestId("clean-source")).toBeVisible();
     await expect(original.locator("image")).toHaveCount(0);
@@ -648,9 +655,7 @@ test("touch vertex gestures and proof overlays fit a phone", async ({
   });
   const page = await context.newPage();
   await page.goto("/apps/similarity#ex8c-19");
-  await page
-    .getByRole("button", { name: "Explain matching marks", exact: true })
-    .tap();
+  await page.getByRole("button", { name: "Angles & sides", exact: true }).tap();
   const cdp = await context.newCDPSession(page);
   for (const prefix of ["original-shape-0", "shape-0"]) {
     const shape = page.getByTestId(prefix),
@@ -716,7 +721,7 @@ test("sidebar controls sit on the rail and preserve Similarity state when hidden
   await page.setViewportSize({ width: 1500, height: 1100 });
   await page.goto("/apps/similarity#ex8c-19");
   await page
-    .getByRole("button", { name: "Explain matching marks", exact: true })
+    .getByRole("button", { name: "Angles & sides", exact: true })
     .click();
   const shape = page.getByTestId("shape-0");
   await shape.focus();
@@ -987,7 +992,11 @@ test("all 72 source questions, figures and hidden explanations load", async ({
       page.getByTestId("manipulation-board").locator("polygon"),
     ).toHaveCount(Math.min(2, q.shapes.length));
     const pair = reasonPairs(q)[0],
-      annotations = conditions(q, pair, "both");
+      annotations = conditions(
+        q,
+        pair,
+        pair.criterion === "given" ? "both" : "proof",
+      );
     await expect(
       page
         .getByTestId("manipulation-board")

@@ -138,6 +138,15 @@
   gap: 15px;
   align-items: start;
 }
+.teachingArea {
+  container-type: inline-size;
+}
+.diagramLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
 .original,
 .manipulation {
   min-width: 0;
@@ -402,9 +411,19 @@
   border: 1px solid var(--stroke);
   border-left: 3px solid var(--color-navy);
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 14px;
+  padding: 16px;
+  min-width: 0;
+  order: -1;
   background: var(--color-navy-wash);
+}
+.reasonPanel h3 {
+  font: 600 1.3rem/1.25 var(--font-display);
+  color: var(--color-navy);
+  margin-bottom: 12px;
+}
+.reasonHeading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
 }
 .reasonPanel > p {
   font-size: 0.78rem;
@@ -418,24 +437,30 @@
   min-width: 0;
 }
 .reasonHeading .tools {
-  margin-left: auto;
+  margin-left: 0;
+}
+.reasonHeading .tools button {
+  font-size: 0.78rem;
+  padding: 7px 9px;
 }
 .reasonRows {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: 8px;
-  max-height: 230px;
-  overflow: auto;
+  margin-top: 12px;
 }
 .reasonRows button {
   display: flex;
   gap: 10px;
   text-align: left;
-  font-size: 0.85rem;
+  font-size: 1rem;
   align-items: start;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .reasonRows small {
   display: block;
+  font-size: 0.875rem;
   font-weight: 400;
   margin-top: 4px;
   color: var(--color-graphite);
@@ -445,6 +470,52 @@
   font-size: 1.2rem;
   font-family: var(--font-display);
   font-weight: 700;
+  flex-shrink: 0;
+}
+.reasonPanel .proofConclusion {
+  border-top: 1px solid var(--stroke);
+  margin-top: 16px;
+  padding-top: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-navy);
+  overflow-wrap: anywhere;
+}
+.proofConclusion > span:first-child {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+}
+.clearCondition {
+  margin-top: 10px;
+  font-size: 0.8rem;
+}
+.reasonRows .consequence {
+  font-weight: 600;
+}
+@container (min-width: 1050px) {
+  .diagramLayout[data-has-proof="true"] {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+  .diagramLayout > .reasonPanel {
+    order: 0;
+    position: sticky;
+    top: 16px;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+  }
+}
+@container (min-width: 760px) {
+  .diagramLayout[data-original-expanded="true"][data-has-proof="true"] {
+    grid-template-columns: minmax(0, 1fr) 340px;
+  }
+  .diagramLayout[data-original-expanded="true"] > .reasonPanel {
+    order: 0;
+    position: sticky;
+    top: 16px;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+  }
 }
 .movable:focus-visible polygon {
   stroke-width: 6px;
@@ -646,6 +717,15 @@
 }
 .app[data-projecting="true"] .prompt {
   font-size: 1.1rem;
+}
+.app[data-projecting="true"] .reasonRows button {
+  font-size: 1.1rem;
+}
+.app[data-projecting="true"] .reasonRows small {
+  font-size: 1rem;
+}
+.app[data-projecting="true"] .reasonPanel > p {
+  font-size: 0.9rem;
 }
 .app[data-projecting="true"] .controlPanel button {
   font-size: 0.95rem;

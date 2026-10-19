@@ -1,7 +1,11 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
-  testMatch: ["similarity.spec.ts", "lesson-layout.spec.ts"],
+  testMatch: [
+    "similarity.spec.ts",
+    "similarity-proof.spec.ts",
+    "lesson-layout.spec.ts",
+  ],
   workers: 1,
   reporter: "list",
   use: {
