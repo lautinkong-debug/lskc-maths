@@ -3,6 +3,13 @@ import { edgeCrossesLabel } from "../../src/apps/similarity/vertexLabels";
 import { textbookSolutions } from "../../src/apps/similarity/textbook";
 import type { Locator } from "@playwright/test";
 
+// Retain the inline studio regression suite; classroom mode has its own suite.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() =>
+    sessionStorage.setItem("similarity-classroom", "off"),
+  );
+});
+
 async function showAll(proof: Locator) {
   const details = proof.locator("details");
   if ((await details.getAttribute("open")) === null)

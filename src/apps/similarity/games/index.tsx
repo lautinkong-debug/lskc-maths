@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { Math as MathText } from "@/components/Math";
 import { copy } from "@/lib/copy";
 import { Board, evidenceName } from "./Board";
@@ -171,6 +177,11 @@ export default function SimilarityGames({
     return [];
   });
   const [finished, setFinished] = useState(false);
+  // A stable listener must survive the parent's hash-navigation render.
+  const exitClassroom = useCallback(() => {
+    setGame(null);
+    setFinished(false);
+  }, []);
   function complete(id: string) {
     const next = [...new Set([...done, id])];
     try {
@@ -268,12 +279,7 @@ export default function SimilarityGames({
           </p>
         </>
       ) : (
-        <Classroom
-          onExit={() => {
-            setGame(null);
-            setFinished(false);
-          }}
-        >
+        <Classroom onExit={exitClassroom}>
           <header className={styles.gameHeader}>
             <button
               onClick={() => {

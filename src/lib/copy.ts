@@ -158,6 +158,22 @@ export const copy = {
     originalLengths: "Side labels show the original lengths.",
   },
   similarity: {
+    classroom: "Textbook classroom",
+    enterClassroom: "Classroom view",
+    exitClassroom: "Back to studio",
+    chooseQuestion: "Choose a question",
+    questionTab: "Question",
+    solutionTab: "Solution",
+    controlsTab: "Diagram controls",
+    previousLines: "Show earlier steps",
+    hidePreviousLines: "Hide earlier steps",
+    stepReady: "Start with the diagram.",
+    stepReadyHint:
+      "Move the triangles to explore. Then reveal the textbook solution one line at a time.",
+    classroomHint:
+      "Drag inside a triangle to move it. Drag a vertex to turn and resize.",
+    showOriginal: "Original diagram",
+    showExtracted: "Extracted triangles",
     title: "Similarity Studio",
     topic: "2B08 · Similarity",
     summary:

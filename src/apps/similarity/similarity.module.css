@@ -2,6 +2,26 @@
   color: var(--color-graphite);
   --stroke: var(--color-grid);
 }
+.classroomDesk,
+.solutionPane,
+.proofBody {
+  display: contents;
+}
+.practiceFrame {
+  position: static;
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  overflow: visible;
+}
+.classroomOpener {
+  margin-bottom: 14px;
+}
 .app button,
 .app input,
 .app select {
@@ -557,7 +577,7 @@
   .diagramLayout[data-has-proof="true"] {
     grid-template-columns: minmax(0, 1fr) 440px;
   }
-  .diagramLayout > .reasonPanel {
+  .diagramLayout .reasonPanel {
     order: 0;
     position: sticky;
     top: 16px;
@@ -569,7 +589,7 @@
   .diagramLayout[data-original-expanded="true"][data-has-proof="true"] {
     grid-template-columns: minmax(0, 1fr) 440px;
   }
-  .diagramLayout[data-original-expanded="true"] > .reasonPanel {
+  .diagramLayout[data-original-expanded="true"] .reasonPanel {
     order: 0;
     position: sticky;
     top: 16px;
@@ -876,4 +896,580 @@
 .modeTabs button[aria-pressed="true"] {
   background: var(--color-navy);
   color: var(--color-paper);
+}
+/* A single mounted lesson, expanded into the browser's top layer for teaching. */
+:global(body):has(.practiceFrame[data-classroom="true"][open]) {
+  overflow: hidden;
+}
+.practiceFrame[data-classroom="true"][open] {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  max-width: none;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--color-paper);
+  font-size: 16px;
+}
+.classroomHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 0 0 auto;
+  padding: 12px 18px;
+  color: var(--color-paper);
+  background: #102f48;
+  border-bottom: 3px solid #e6c77d;
+}
+.classroomHeader .classroomIdentity {
+  margin-right: auto;
+  min-width: 0;
+}
+.classroomIdentity > span {
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  color: #e6c77d;
+}
+.classroomIdentity h2 {
+  font: 600 20px/1.2 var(--font-display);
+}
+.app .classroomHeader button {
+  color: white;
+  background: #23465f;
+  border-color: #567083;
+  font-size: 13px;
+}
+.app .classroomHeader button:hover {
+  background: #385c76;
+}
+.classroomPicker {
+  display: grid;
+  gap: 3px;
+  font-size: 11px;
+}
+.classroomPicker select {
+  width: 240px;
+  padding: 7px;
+  color: var(--color-navy);
+  background: var(--color-paper);
+  border-radius: 5px;
+  font-size: 14px;
+  min-height: 36px;
+}
+.classroomPager {
+  display: flex;
+  gap: 5px;
+}
+.practiceFrame[data-classroom="true"] .lesson {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.classroomTask {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--stroke);
+}
+.classroomTask p {
+  color: var(--color-pencil);
+  font-size: 12px;
+}
+.boardTabs {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.boardTabs button {
+  font-size: 13px;
+  min-height: 38px;
+  white-space: nowrap;
+}
+.practiceFrame[data-classroom="true"]
+  .lesson
+  > :is(.prompt, .topActions, .micro, .principle, .correspondence) {
+  display: none;
+}
+.practiceFrame[data-classroom="true"] .teachingArea {
+  flex: 1;
+  min-height: 0;
+}
+.practiceFrame[data-classroom="true"] .diagramLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(380px, 31vw, 470px);
+  gap: 0;
+  height: 100%;
+  align-items: stretch;
+}
+.practiceFrame[data-classroom="true"] .boards {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  gap: 0;
+}
+.practiceFrame[data-classroom="true"] .boards > section {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+.practiceFrame[data-classroom="true"]
+  .boards[data-classroom-board="original"]
+  > .manipulation,
+.practiceFrame[data-classroom="true"]
+  .boards[data-classroom-board="extracted"]
+  > .original {
+  display: none;
+}
+.practiceFrame[data-classroom="true"]
+  .original
+  > :is(.panelTitle, .originalToolbar, .sourceControls),
+.practiceFrame[data-classroom="true"]
+  .boards
+  > section
+  > :is(.comparisonKey, .dragHint, .controlPanel) {
+  display: none;
+}
+.practiceFrame[data-classroom="true"] .manipulation .panelTitle {
+  padding: 5px 12px;
+}
+.practiceFrame[data-classroom="true"] .sourceSvg,
+.practiceFrame[data-classroom="true"] .board {
+  flex: 1;
+  min-height: 0;
+  height: 0;
+  width: 100%;
+  padding: 14px;
+  background: var(--color-paper);
+}
+.practiceFrame[data-classroom="true"] .viewControls {
+  flex: 0 0 auto;
+  padding: 7px 12px;
+  gap: 6px;
+  border: 0;
+  font-size: 12px;
+}
+.practiceFrame[data-classroom="true"] .viewControls small {
+  display: none;
+}
+.practiceFrame[data-classroom="true"] .viewControls input {
+  width: 88px;
+}
+.practiceFrame[data-classroom="true"] .viewControls button {
+  min-height: 36px;
+  padding: 5px 9px;
+}
+.practiceFrame[data-classroom="true"] .classroomDesk {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  border-left: 1px solid var(--stroke);
+  background: #edf3f7;
+}
+.deskTabs {
+  display: flex;
+  flex: 0 0 auto;
+  padding: 8px;
+  gap: 4px;
+  border-bottom: 1px solid var(--stroke);
+}
+.deskTabs button {
+  flex: 1;
+  padding: 5px;
+  font-size: 13px;
+}
+.practiceFrame[data-classroom="true"] .solutionPane {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.practiceFrame[data-classroom="true"] .solutionPane[hidden],
+.practiceFrame[data-classroom="true"] .deskBody[hidden] {
+  display: none;
+}
+.practiceFrame[data-classroom="true"] .reasonPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: static;
+  min-height: 0;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  padding: 18px;
+  background: transparent;
+  overflow: hidden;
+  order: 0;
+}
+.practiceFrame[data-classroom="true"] .reasonPanel h3 {
+  margin-bottom: 4px;
+  font-size: 22px;
+}
+.practiceFrame[data-classroom="true"] .solutionControls {
+  position: static;
+  flex: 0 0 auto;
+  padding: 8px 0;
+  background: transparent;
+}
+.practiceFrame[data-classroom="true"] .solutionControls button {
+  flex: 1;
+  padding: 6px;
+  font-size: 12px;
+}
+.practiceFrame[data-classroom="true"] .solutionControls button:nth-child(2) {
+  background: var(--color-navy);
+  color: white;
+}
+.practiceFrame[data-classroom="true"]
+  .solutionControls
+  button:nth-child(2):hover {
+  background: #102f48;
+}
+.practiceFrame[data-classroom="true"] .reasonPanel > p {
+  flex: 0 0 auto;
+  font-size: 13px;
+  color: var(--color-pencil);
+}
+.practiceFrame[data-classroom="true"] .proofBody {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.practiceFrame[data-classroom="true"] .proofTable {
+  margin: 10px 0 18px;
+  font-size: clamp(16px, 1.3vw, 22px);
+}
+.practiceFrame[data-classroom="true"] .proofTable td + td {
+  font-size: clamp(14px, 1.1vw, 18px);
+}
+.practiceFrame[data-classroom="true"] .proofTable tr[hidden] {
+  display: none;
+}
+.practiceFrame[data-classroom="true"] .proofBody > p {
+  font-size: 11px;
+  color: var(--color-pencil);
+  margin: 10px 0;
+}
+.practiceFrame[data-classroom="true"] .historyToggle {
+  align-self: start;
+  padding: 3px 0;
+  min-height: 32px;
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+  font-size: 12px;
+}
+.proofStart {
+  padding: 30px 8px 20px;
+}
+.proofStart > span {
+  font: italic 42px var(--font-display);
+  color: var(--color-navy);
+}
+.proofStart h4 {
+  margin: 18px 0 8px;
+  font: 600 24px var(--font-display);
+  color: var(--color-navy);
+}
+.proofStart p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--color-pencil);
+}
+.deskBody {
+  padding: 18px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.deskBody .diagramTools {
+  margin: 0 0 12px;
+}
+.deskBody .diagramTools button {
+  font-size: 12px;
+}
+.deskBody .diagramTools button[aria-expanded] {
+  display: none;
+}
+.deskBody .sourceControls,
+.deskBody .controlPanel {
+  margin: 0 0 14px;
+  padding: 10px;
+}
+.deskBody .sourceControls button,
+.deskBody .controlPanel button {
+  font-size: 12px;
+}
+.deskBody .sourceControls .tools {
+  margin-top: 8px;
+}
+.deskBody .choices {
+  margin: 12px 0;
+}
+.deskBody .micro {
+  padding: 0;
+}
+.deskBody [data-controls-for="original"] [data-control-board="extracted"],
+.deskBody [data-controls-for="extracted"] [data-control-board="original"] {
+  display: none;
+}
+.classroomPrompt {
+  font: 20px/1.8 var(--font-display);
+  margin: 12px 0;
+}
+@media (max-width: 900px) and (min-width: 760px) {
+  .classroomIdentity {
+    display: none;
+  }
+  .classroomPicker {
+    margin-right: auto;
+  }
+  .classroomTask p {
+    display: none;
+  }
+  .practiceFrame[data-classroom="true"] .diagramLayout {
+    grid-template-columns: minmax(0, 1fr) 350px;
+  }
+}
+@media (max-width: 759px) {
+  .classroomHeader {
+    padding: 7px 10px;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .classroomIdentity {
+    display: none;
+  }
+  .classroomPicker {
+    flex: 1;
+    min-width: 0;
+  }
+  .classroomPicker > span {
+    display: none;
+  }
+  .classroomPicker select {
+    width: 100%;
+    font-size: 12px;
+  }
+  .classroomPager {
+    display: none;
+  }
+  .app .classroomHeader button {
+    padding: 6px;
+    font-size: 11px;
+    min-height: 38px;
+  }
+  .classroomTask {
+    padding: 4px 8px;
+  }
+  .classroomTask p {
+    display: none;
+  }
+  .boardTabs {
+    width: 100%;
+  }
+  .boardTabs button {
+    flex: 1;
+    min-height: 36px;
+    padding: 4px;
+    font-size: 12px;
+  }
+  .practiceFrame[data-classroom="true"] .diagramLayout {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(300px, 52%) minmax(0, 1fr);
+  }
+  .practiceFrame[data-classroom="true"] .classroomDesk {
+    border-left: 0;
+    border-top: 1px solid var(--stroke);
+  }
+  .practiceFrame[data-classroom="true"] .viewControls {
+    padding: 5px 6px;
+    gap: 5px;
+    font-size: 10px;
+  }
+  .practiceFrame[data-classroom="true"] .viewControls input {
+    width: 55px;
+  }
+  .practiceFrame[data-classroom="true"] .viewControls button {
+    padding: 3px 5px;
+    font-size: 10px;
+    min-width: 30px;
+    min-height: 32px;
+  }
+  .practiceFrame[data-classroom="true"] .sourceSvg,
+  .practiceFrame[data-classroom="true"] .board {
+    padding: 6px;
+  }
+  .deskTabs {
+    padding: 4px 8px;
+  }
+  .deskTabs button {
+    min-height: 36px;
+    font-size: 12px;
+  }
+  .practiceFrame[data-classroom="true"] .reasonPanel {
+    padding: 6px 12px;
+  }
+  .practiceFrame[data-classroom="true"] .reasonPanel h3 {
+    display: none;
+  }
+  .practiceFrame[data-classroom="true"] .solutionControls {
+    padding: 0;
+    gap: 5px;
+  }
+  .practiceFrame[data-classroom="true"] .solutionControls button {
+    font-size: 11px;
+    min-height: 38px;
+  }
+  .practiceFrame[data-classroom="true"] .reasonPanel > p {
+    margin: 3px 0;
+    font-size: 11px;
+  }
+  .practiceFrame[data-classroom="true"] .proofTable {
+    margin: 4px 0 10px;
+    font-size: 16px;
+  }
+  .practiceFrame[data-classroom="true"] .proofTable td {
+    padding: 5px;
+  }
+  .practiceFrame[data-classroom="true"] .proofTable td + td {
+    font-size: 13px;
+  }
+  .practiceFrame[data-classroom="true"] .historyToggle {
+    min-height: 26px;
+    padding: 0;
+    font-size: 11px;
+  }
+  .proofStart {
+    padding: 10px 0;
+  }
+  .proofStart > span {
+    display: none;
+  }
+  .proofStart h4 {
+    margin: 4px 0;
+    font-size: 20px;
+  }
+  .proofStart p {
+    font-size: 13px;
+  }
+  .deskBody {
+    padding: 10px 12px;
+  }
+}
+@media (max-width: 759px) and (max-height: 700px) {
+  .practiceFrame[data-classroom="true"] .diagramLayout {
+    grid-template-rows: minmax(280px, 50%) minmax(0, 1fr);
+  }
+}
+@media (max-width: 400px) {
+  .practiceFrame[data-classroom="true"] .viewControls input {
+    display: none;
+  }
+}
+
+.practiceFrame[data-classroom="true"] .boards {
+  align-items: stretch;
+}
+.practiceFrame[data-classroom="true"] .boards > section {
+  height: 100%;
+}
+/* Landscape phones need two columns; two stacked panels cannot fit their height. */
+@media (min-width: 600px) and (max-height: 550px) {
+  .practiceFrame[data-classroom="true"] .viewControls label {
+    font-size: 0;
+  }
+  .practiceFrame[data-classroom="true"] .viewControls output {
+    font-size: 11px;
+  }
+  .practiceFrame[data-classroom="true"] .viewControls input {
+    display: none;
+  }
+  .classroomHeader {
+    padding: 5px 10px;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+  .classroomIdentity,
+  .classroomPicker > span,
+  .classroomPager,
+  .classroomTask p {
+    display: none;
+  }
+  .classroomPicker {
+    flex: 1;
+    margin-right: auto;
+  }
+  .classroomPicker select {
+    width: 100%;
+    max-width: 300px;
+  }
+  .classroomTask {
+    padding: 4px 10px;
+  }
+  .boardTabs {
+    width: auto;
+  }
+  .boardTabs button,
+  .app .classroomHeader button {
+    min-height: 34px;
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  .practiceFrame[data-classroom="true"] .diagramLayout {
+    grid-template-columns: minmax(0, 1fr) 350px;
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .practiceFrame[data-classroom="true"] .classroomDesk {
+    border-top: 0;
+    border-left: 1px solid var(--stroke);
+  }
+  .deskTabs {
+    padding: 4px 8px;
+  }
+  .deskTabs button {
+    min-height: 34px;
+    font-size: 12px;
+  }
+  .practiceFrame[data-classroom="true"] .reasonPanel {
+    padding: 5px 12px;
+  }
+  .practiceFrame[data-classroom="true"] .reasonPanel h3 {
+    display: none;
+  }
+  .practiceFrame[data-classroom="true"] .solutionControls {
+    padding: 0;
+  }
+  .practiceFrame[data-classroom="true"] .solutionControls button {
+    min-height: 36px;
+    font-size: 11px;
+  }
+  .practiceFrame[data-classroom="true"] .reasonPanel > p {
+    margin: 3px 0;
+    font-size: 11px;
+  }
+  .practiceFrame[data-classroom="true"] .historyToggle {
+    min-height: 24px;
+  }
+  .practiceFrame[data-classroom="true"] .proofTable {
+    margin-top: 0;
+    font-size: 15px;
+  }
+  .practiceFrame[data-classroom="true"] .proofTable th,
+  .practiceFrame[data-classroom="true"] .proofTable td {
+    padding: 4px;
+  }
 }

@@ -2,6 +2,16 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Textbook practice classroom layout (20/10/2026)
+
+- [x] Apply the approved games layout to all 72 textbook questions: a full-window classroom with larger original/extracted diagrams, the current printed solution line and its reason alongside, and persistent Previous/Next/Reset controls. Keep earlier lines available on request.
+- [x] Put diagram adjustments and the question/source in adjacent tabs. Preserve the same mounted lesson, triangle poses, step progress, zoom and snapping when switching views or visiting the games. Retain the existing inline studio and question bank through Back to studio.
+- [x] Keep the diagram pinned above the panel on portrait phones; use compact columns on landscape phones. Independent review identified landscape height and proof-scroll issues; reserve a usable current-step area and reset its scroll on every step transition.
+- [x] Preserve source solutions, proof order, reasons, fractions and mathematical highlights. All 77 focused maths/source checks pass; all 72 classroom question choices open correctly. Long-proof inspection covers 81 successive lines across five representative questions.
+- [x] Production build and formatting pass. The full 51-scenario browser suite passed 50 checks and exposed an inline sidebar landmark conflict; after that correction, all 11 affected classroom, navigation and sidebar scenarios pass on the final production build. The complete source audit covers all 72 printed solutions, fractions, reasons, question images and step highlights. Keep the game exit callback stable so direct question links close its dialog reliably.
+
+Approved release target: GitHub `lautinkong-debug/lskc-maths` main and the existing Vercel site, route `/apps/similarity#ex8c-19`. Verify the deployment is Ready and run the seven classroom scenarios on the official address after publishing. No dependencies, backend, Firebase rules, environment or textbook source records changed.
+
 ## Similarity games classroom layout (20/10/2026)
 
 - [x] Owner requested larger triangles, controls and proof beside the graph, and a more attractive game experience. Use the linked gamedev-skills game-ui-ux and game-feel guidance for responsive framing and restrained action feedback. Retain the school navy/crimson palette, textbook terminology and existing mathematics.

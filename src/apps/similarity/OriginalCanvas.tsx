@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type PointerEvent } from "react";
+import { createPortal } from "react-dom";
 import { copy } from "@/lib/copy";
 import {
   bounds,
@@ -47,6 +48,8 @@ const contextOutlines: Record<string, string> = {
 /** Independent rigid copies on the original diagram. The printed figure stays as a reference. */
 export function OriginalCanvas({
   question,
+  classroom = false,
+  controlsHost,
   points,
   shapes,
   selected,
@@ -72,6 +75,8 @@ export function OriginalCanvas({
   onSnap,
 }: {
   question: SourceQuestion;
+  classroom?: boolean;
+  controlsHost?: HTMLElement | null;
   points: Point[];
   shapes: Shape[];
   selected: number[];
@@ -180,7 +185,9 @@ export function OriginalCanvas({
       ),
     );
   const view = useDiagramView(
-    box,
+    classroom
+      ? bounds([...points, ...vertexLabelPoints(referenceLabels)], unit * 2.5)
+      : box,
     [
       ...points,
       ...vertexLabelPoints(referenceLabels),
@@ -309,6 +316,74 @@ export function OriginalCanvas({
         (a === index ? 2 : selected.includes(a) ? 1 : 0) -
         (b === index ? 2 : selected.includes(b) ? 1 : 0),
     );
+  const controls = (
+    <>
+      {showLengths && reasonPair?.shapes.every((i) => selected.includes(i)) && (
+        <ComparisonKey
+          question={question}
+          pair={reasonPair}
+          visibleSides={reasonRows
+            .filter((r) => r.kind === "side")
+            .map((r) => r.id)}
+          hiddenSides={hiddenMarks}
+          showAngles={showAngles}
+        />
+      )}
+      <div className={styles.sourceControls}>
+        <div className={styles.activeShapes}>
+          <span>{c.selected}</span>
+          {selected.map((i, j) => (
+            <button
+              key={i}
+              onClick={() => onActivate(i)}
+              aria-pressed={index === i}
+              aria-label={shapes[i].name}
+              style={{ color: colours[j] }}
+            >
+              <GeometryName>{shapes[i].name}</GeometryName>
+            </button>
+          ))}
+        </div>
+        {current && (
+          <div className={styles.tools}>
+            <button
+              aria-label={c.originalLeft}
+              onClick={() => update(index, { angle: current.angle - 15 })}
+            >
+              −15°
+            </button>
+            <button
+              aria-label={c.originalRight}
+              onClick={() => update(index, { angle: current.angle + 15 })}
+            >
+              +15°
+            </button>
+            <button
+              aria-label={c.originalTurn}
+              onClick={() => update(index, { angle: current.angle + 90 })}
+            >
+              ↻ 90°
+            </button>
+            <button
+              aria-label={c.originalFlipH}
+              onClick={() => update(index, { flipX: -current.flipX })}
+            >
+              ↔ {c.flipShort}
+            </button>
+            <button
+              aria-label={c.originalFlipV}
+              onClick={() => update(index, { flipY: -current.flipY })}
+            >
+              ↕ {c.flipShort}
+            </button>
+          </div>
+        )}
+        <button className={styles.restore} onClick={() => setPoses({})}>
+          {c.originalReset} ↺
+        </button>
+      </div>
+    </>
+  );
   return (
     <>
       <div className={styles.originalToolbar}>
@@ -631,70 +706,12 @@ export function OriginalCanvas({
             </g>
           ))}
       </svg>
-      {showLengths && reasonPair?.shapes.every((i) => selected.includes(i)) && (
-        <ComparisonKey
-          question={question}
-          pair={reasonPair}
-          visibleSides={reasonRows
-            .filter((r) => r.kind === "side")
-            .map((r) => r.id)}
-          hiddenSides={hiddenMarks}
-          showAngles={showAngles}
-        />
-      )}
-      <div className={styles.sourceControls}>
-        <div className={styles.activeShapes}>
-          <span>{c.selected}</span>
-          {selected.map((i, j) => (
-            <button
-              key={i}
-              onClick={() => onActivate(i)}
-              aria-pressed={index === i}
-              aria-label={shapes[i].name}
-              style={{ color: colours[j] }}
-            >
-              <GeometryName>{shapes[i].name}</GeometryName>
-            </button>
-          ))}
-        </div>
-        {current && (
-          <div className={styles.tools}>
-            <button
-              aria-label={c.originalLeft}
-              onClick={() => update(index, { angle: current.angle - 15 })}
-            >
-              −15°
-            </button>
-            <button
-              aria-label={c.originalRight}
-              onClick={() => update(index, { angle: current.angle + 15 })}
-            >
-              +15°
-            </button>
-            <button
-              aria-label={c.originalTurn}
-              onClick={() => update(index, { angle: current.angle + 90 })}
-            >
-              ↻ 90°
-            </button>
-            <button
-              aria-label={c.originalFlipH}
-              onClick={() => update(index, { flipX: -current.flipX })}
-            >
-              ↔ {c.flipShort}
-            </button>
-            <button
-              aria-label={c.originalFlipV}
-              onClick={() => update(index, { flipY: -current.flipY })}
-            >
-              ↕ {c.flipShort}
-            </button>
-          </div>
-        )}
-        <button className={styles.restore} onClick={() => setPoses({})}>
-          {c.originalReset} ↺
-        </button>
-      </div>
+      {classroom && controlsHost
+        ? createPortal(
+            <div data-control-board="original">{controls}</div>,
+            controlsHost,
+          )
+        : controls}
     </>
   );
 }

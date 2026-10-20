@@ -4,6 +4,13 @@ import { questions } from "../../src/apps/similarity/data";
 import { reasonPairs, conditions } from "../../src/apps/similarity/reasons";
 import { textbookSolutions } from "../../src/apps/similarity/textbook";
 
+// Retain the inline studio regression suite; classroom mode has its own suite.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() =>
+    sessionStorage.setItem("similarity-classroom", "off"),
+  );
+});
+
 async function openDiagramMarks(page: Page) {
   const details = page
     .getByTestId("diagram-reasons")
@@ -314,6 +321,9 @@ test("touch snapping and independent marks work on a phone", async ({
     isMobile: true,
   });
   const page = await context.newPage();
+  await page.addInitScript(() =>
+    sessionStorage.setItem("similarity-classroom", "off"),
+  );
   await page.goto("/apps/similarity#ex8c-19");
   await chooseDiagramMarks(page);
   await page
@@ -728,6 +738,9 @@ test("touch vertex gestures and proof overlays fit a phone", async ({
     isMobile: true,
   });
   const page = await context.newPage();
+  await page.addInitScript(() =>
+    sessionStorage.setItem("similarity-classroom", "off"),
+  );
   await page.goto("/apps/similarity#ex8c-19");
   await chooseDiagramMarks(page);
   const cdp = await context.newCDPSession(page);
@@ -942,6 +955,9 @@ test("phone touch, custom triangle and projection", async ({ browser }) => {
     isMobile: true,
   });
   const page = await context.newPage();
+  await page.addInitScript(() =>
+    sessionStorage.setItem("similarity-classroom", "off"),
+  );
   await page.goto("/apps/similarity#ex8c-19");
   await expect(page.getByTestId("shape-0")).toBeVisible();
   await page.getByRole("button", { name: "Turn 90°", exact: true }).tap();
@@ -968,6 +984,9 @@ test("phone touch, custom triangle and projection", async ({ browser }) => {
   const desktop = await browser.newPage({
     viewport: { width: 1920, height: 1080 },
   });
+  await desktop.addInitScript(() =>
+    sessionStorage.setItem("similarity-classroom", "off"),
+  );
   await desktop.goto("/apps/similarity#ex8c-19");
   await desktop
     .getByRole("button", { name: "Projection mode", exact: true })
@@ -1040,6 +1059,9 @@ test("original diagram supports real touch dragging", async ({ browser }) => {
     isMobile: true,
   });
   const page = await context.newPage();
+  await page.addInitScript(() =>
+    sessionStorage.setItem("similarity-classroom", "off"),
+  );
   await page.goto("/apps/similarity#ex8c-19");
   const original = page.getByTestId("original-shape-0");
   await expect(original).toBeVisible();

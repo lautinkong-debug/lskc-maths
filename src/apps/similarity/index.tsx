@@ -2,10 +2,13 @@
 
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { createPortal } from "react-dom";
+import { PracticeFrame } from "./PracticeFrame";
 import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { copy } from "@/lib/copy";
@@ -14,6 +17,7 @@ import { usePresentation } from "@/components/PresentationFrame";
 import { groups, questions } from "./data";
 import {
   boardShapes,
+  bounds,
   centre,
   comparisonPoses,
   modelPoints,
@@ -55,6 +59,15 @@ const colours = [
 const name = (q: SourceQuestion) =>
   `${q.group} · ${q.group === "Quick Practice" ? q.number : `Q${q.number}`}`;
 const path = (ps: Point[]) => ps.map((p) => `${p.x},${p.y}`).join(" ");
+const subscribeToClassroomPreference = () => () => {};
+const serverClassroomPreference = () => false;
+function readClassroomPreference() {
+  try {
+    return sessionStorage.getItem("similarity-classroom") !== "off";
+  } catch {
+    return true;
+  }
+}
 
 export default function SimilarityStudio() {
   const [id, setId] = useState("ex8c-19");
@@ -62,6 +75,23 @@ export default function SimilarityStudio() {
   const [query, setQuery] = useState("");
   const [mode, setMode] = useState<"practice" | "games">("practice");
   const [gamesOpened, setGamesOpened] = useState(false);
+  const [classroomChoice, setClassroom] = useState<boolean | null>(null);
+  const savedClassroom = useSyncExternalStore(
+    subscribeToClassroomPreference,
+    readClassroomPreference,
+    serverClassroomPreference,
+  );
+  const classroom = classroomChoice ?? savedClassroom;
+  const classroomOpener = useRef<HTMLButtonElement>(null);
+  function setClassroomView(open: boolean) {
+    setClassroom(open);
+    try {
+      sessionStorage.setItem("similarity-classroom", open ? "on" : "off");
+    } catch {
+      /* Optional. */
+    }
+    if (!open) requestAnimationFrame(() => classroomOpener.current?.focus());
+  }
   const presenting = usePresentation();
   useEffect(() => {
     const read = () => {
@@ -220,14 +250,96 @@ export default function SimilarityStudio() {
               </button>
             </div>
           </div>
-          <Lesson key={question.id} question={question} />
+          <button
+            ref={classroomOpener}
+            aria-label={c.enterClassroom}
+            className={styles.classroomOpener}
+            onClick={() => setClassroomView(true)}
+          >
+            {c.enterClassroom} ↗
+          </button>
+          <PracticeFrame
+            classroom={classroom}
+            active={mode === "practice"}
+            onExit={() => setClassroomView(false)}
+            header={
+              <header className={styles.classroomHeader}>
+                <button
+                  aria-label={c.exitClassroom}
+                  onClick={() => setClassroomView(false)}
+                >
+                  ← {c.exitClassroom}
+                </button>
+                <div className={styles.classroomIdentity}>
+                  <span>{c.title}</span>
+                  <h2>{name(question)}</h2>
+                </div>
+                <label className={styles.classroomPicker}>
+                  <span>{c.chooseQuestion}</span>
+                  <select
+                    aria-label={c.chooseQuestion}
+                    value={id}
+                    onChange={(e) => choose(e.target.value)}
+                  >
+                    {groups.map((g) => (
+                      <optgroup key={g} label={g}>
+                        {questions
+                          .filter((q) => q.group === g)
+                          .map((q) => (
+                            <option key={q.id} value={q.id}>
+                              {name(q)} · p. 8.{q.page}
+                            </option>
+                          ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </label>
+                <div className={styles.classroomPager}>
+                  <button
+                    aria-label={c.previous}
+                    disabled={currentIndex === 0}
+                    onClick={() => choose(questions[currentIndex - 1].id)}
+                  >
+                    ←
+                  </button>
+                  <button
+                    aria-label={c.next}
+                    disabled={currentIndex === questions.length - 1}
+                    onClick={() => choose(questions[currentIndex + 1].id)}
+                  >
+                    →
+                  </button>
+                </div>
+                <button onClick={() => chooseMode("games")}>
+                  {copy.similarityGames.games}
+                </button>
+              </header>
+            }
+          >
+            <Lesson
+              key={question.id}
+              question={question}
+              classroom={classroom}
+            />
+          </PracticeFrame>
         </LessonWorkspace>
       </div>
     </div>
   );
 }
 
-function Lesson({ question }: { question: SourceQuestion }) {
+function Lesson({
+  question,
+  classroom,
+}: {
+  question: SourceQuestion;
+  classroom: boolean;
+}) {
+  const [deskTab, setDeskTab] = useState<"solution" | "controls" | "question">(
+    "solution",
+  );
+  const [classroomBoard, setClassroomBoard] = useState("original");
+  const [controlHost, setControlHost] = useState<HTMLDivElement | null>(null);
   const points = modelPoints(question);
   const [customShapes, setCustomShapes] = useState<Shape[]>([]);
   const shapes = [...question.shapes, ...customShapes];
@@ -356,7 +468,14 @@ function Lesson({ question }: { question: SourceQuestion }) {
       ),
     );
   const view = useDiagramView(
-    { x: 0, y: 0, width: 840, height: 470 },
+    classroom && sets.length
+      ? bounds(
+          sets.flatMap((set, i) =>
+            transform(set, separatePoses(sets.length)[i]),
+          ),
+          55,
+        )
+      : { x: 0, y: 0, width: 840, height: 470 },
     [
       ...placedShapes.flatMap((s) => s.points),
       ...sideLabelPoints(sideLabels),
@@ -647,8 +766,331 @@ function Lesson({ question }: { question: SourceQuestion }) {
           )!;
           return sum + p.x * q.y - q.x * p.y;
         }, 0);
-  return (
+  const diagramTools = (
+    <div className={styles.diagramTools}>
+      <label>
+        {c.vertexMode}{" "}
+        <select
+          value={vertexMode}
+          onChange={(e) => setVertexMode(e.target.value as VertexDragMode)}
+        >
+          <option value="both">{c.vertexBoth}</option>
+          <option value="rotate">{c.vertexRotate}</option>
+          <option value="resize">{c.vertexResize}</option>
+        </select>
+      </label>
+      {pairs.length > 0 && (
+        <>
+          <button
+            onClick={() => {
+              if (!focused && !exploreMarks) {
+                setExploreMarks(true);
+                setShowMarks(true);
+              } else setShowMarks(!showMarks);
+            }}
+            aria-pressed={showMarks && (!!focused || exploreMarks)}
+          >
+            {showMarks && (!!focused || exploreMarks)
+              ? c.hideMarks
+              : c.showMarks}
+          </button>
+          <button
+            onClick={() => {
+              setShowAngles(!anglesVisible);
+              setConditionFocus(null);
+              if (!focused?.highlights.angles?.length) {
+                setFocusedStep(null);
+                setExploreMarks(true);
+              }
+              if (!rows.some((r) => r.kind === "angle")) setReasonView("both");
+              setShowMarks(true);
+            }}
+            aria-pressed={anglesVisible}
+          >
+            {anglesVisible ? c.hideAngles : c.showAngles}
+          </button>
+          <button
+            onClick={() => {
+              setShowLengths(!lengthsVisible);
+              setConditionFocus(null);
+              if (!focused?.highlights.sides?.length) {
+                setFocusedStep(null);
+                setExploreMarks(true);
+              }
+              if (!rows.some((r) => r.kind === "side")) setReasonView("both");
+              setShowMarks(true);
+            }}
+            aria-pressed={lengthsVisible}
+          >
+            {lengthsVisible ? c.hideLengths : c.showLengths}
+          </button>
+          {hiddenMarks.length > 0 && (
+            <button
+              onClick={() => {
+                setHiddenMarks([]);
+                setShowMarks(true);
+              }}
+            >
+              {c.restoreMarks}
+            </button>
+          )}
+          <button
+            onClick={() => {
+              if (!showReasons) setShowMarks(true);
+              setShowReasons(!showReasons);
+            }}
+            aria-expanded={showReasons}
+          >
+            {showReasons ? c.hideReasons : c.showReasons}
+          </button>
+        </>
+      )}
+      <label className={styles.snapToggle}>
+        <input
+          type="checkbox"
+          checked={snapping}
+          onChange={(e) => {
+            setSnapping(e.target.checked);
+            setSnapMessage("");
+          }}
+        />{" "}
+        {c.snap}
+      </label>
+    </div>
+  );
+  const shapeTools = (
     <>
+      <p className={styles.micro}>
+        {question.constructed ? c.constructed : pilot ? c.exact : c.tracing}
+      </p>
+      <fieldset className={styles.choices}>
+        <legend>{c.choose}</legend>
+        {shapes.map((s, i) => (
+          <button
+            type="button"
+            key={`${s.name}-${i}`}
+            aria-pressed={selected.includes(i)}
+            aria-label={s.name}
+            onClick={() => select(i)}
+            style={
+              selected.includes(i)
+                ? {
+                    borderColor: colours[selected.indexOf(i)],
+                    color: colours[selected.indexOf(i)],
+                  }
+                : undefined
+            }
+          >
+            <GeometryName>{s.name}</GeometryName>
+          </button>
+        ))}
+      </fieldset>
+      <button
+        className={styles.textButton}
+        onClick={() => {
+          setTracing(!tracing);
+          setVertices([]);
+        }}
+        aria-expanded={tracing}
+      >
+        ＋ {c.custom}
+      </button>
+      {tracing && (
+        <div className={styles.tracePanel}>
+          <p>{c.customHint}</p>
+          <div className={styles.tools}>
+            {points.map((p) => (
+              <button
+                key={p.label}
+                aria-label={p.label}
+                aria-pressed={vertices.includes(p.label)}
+                onClick={() => vertex(p.label)}
+              >
+                <GeometryName>{p.label}</GeometryName>
+              </button>
+            ))}
+          </div>
+          <p aria-live="polite">{vertices.join(" → ") || "—"}</p>
+          <div className={styles.tools}>
+            <button
+              onClick={addShape}
+              disabled={vertices.length < 3 || Math.abs(customArea) < 0.001}
+            >
+              {c.add}
+            </button>
+            <button onClick={() => setVertices([])}>{c.clear}</button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+  const source = (
+    <details className={styles.source}>
+      <summary>
+        {c.source} · p. 8.{question.page}
+      </summary>
+      <Image
+        unoptimized
+        src={`/similarity/questions/${question.id}.webp`}
+        alt={`${name(question)}, textbook page 8.${question.page}. ${question.prompt}`}
+        width={1200}
+        height={Math.round(
+          (1200 * (question.crop[3] - question.crop[1]) * 1.32) /
+            (question.crop[2] - question.crop[0]),
+        )}
+      />
+      <p>{c.sourceCredit}</p>
+    </details>
+  );
+  const manipulationControls = (
+    <>
+      {showMarks &&
+        showLengths &&
+        pair?.shapes.every((i) => selected.includes(i)) && (
+          <ComparisonKey
+            question={question}
+            pair={pair}
+            visibleSides={visibleRows
+              .filter((r) => r.kind === "side")
+              .map((r) => r.id)}
+            hiddenSides={hiddenForPair}
+            showAngles={showAngles}
+          />
+        )}
+
+      <p className={styles.dragHint}>{c.dragHint}</p>
+      <div className={styles.controlPanel}>
+        <div className={styles.activeShapes}>
+          <span>{c.selected}</span>
+          {chosen.map((s, i) => (
+            <button
+              key={`${s.name}-${i}`}
+              onClick={() => setActive(i)}
+              aria-pressed={active === i}
+              aria-label={s.name}
+              style={{ color: colours[i] }}
+            >
+              <GeometryName>{s.name}</GeometryName>
+            </button>
+          ))}
+        </div>
+        {pose && (
+          <>
+            <div className={styles.tools}>
+              <button onClick={() => update({ angle: pose.angle - 15 })}>
+                {c.rotateLeft}
+              </button>
+              <button onClick={() => update({ angle: pose.angle + 15 })}>
+                {c.rotateRight}
+              </button>
+              <button onClick={() => update({ angle: pose.angle + 90 })}>
+                {c.quarterTurn}
+              </button>
+              <button onClick={() => update({ flipX: -pose.flipX })}>
+                {c.flipH}
+              </button>
+              <button onClick={() => update({ flipY: -pose.flipY })}>
+                {c.flipV}
+              </button>
+            </div>
+            <div className={styles.sliders}>
+              <label>
+                {c.angle} <output>{Math.round(pose.angle)}°</output>
+                <input
+                  aria-label={c.angle}
+                  type="range"
+                  min="-360"
+                  max="360"
+                  value={((pose.angle + 360) % 720) - 360}
+                  onChange={(e) => update({ angle: Number(e.target.value) })}
+                />
+              </label>
+              <label>
+                {c.scale} <output>×{pose.scale.toFixed(2)}</output>
+                <input
+                  aria-label={c.scale}
+                  type="range"
+                  min=".25"
+                  max="3"
+                  step=".05"
+                  value={pose.scale}
+                  onChange={(e) => update({ scale: Number(e.target.value) })}
+                />
+              </label>
+              <label>
+                {c.opacity} <output>{Math.round(opacity * 100)}%</output>
+                <input
+                  aria-label={c.opacity}
+                  type="range"
+                  min=".05"
+                  max=".75"
+                  step=".05"
+                  value={opacity}
+                  onChange={(e) => setOpacity(Number(e.target.value))}
+                />
+              </label>
+            </div>
+            <div className={styles.tools}>
+              <span>{c.move}</span>
+              <button aria-label={c.left} onClick={() => nudge(-15, 0)}>
+                ←
+              </button>
+              <button aria-label={c.up} onClick={() => nudge(0, -15)}>
+                ↑
+              </button>
+              <button aria-label={c.down} onClick={() => nudge(0, 15)}>
+                ↓
+              </button>
+              <button aria-label={c.right} onClick={() => nudge(15, 0)}>
+                →
+              </button>
+              <button
+                disabled={sets.length < 2}
+                onClick={() => setPoses(comparisonPoses(sets))}
+              >
+                {c.orient}
+              </button>
+              <button
+                disabled={sets.length < 2}
+                onClick={() => {
+                  const next = comparisonPoses(sets, true);
+                  setPoses(next);
+                  fitComparison(next);
+                }}
+              >
+                {c.enlarge}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
+  return (
+    <div className={styles.lesson}>
+      {classroom && (
+        <div className={styles.classroomTask}>
+          <div
+            className={styles.boardTabs}
+            role="group"
+            aria-label={c.workspace}
+          >
+            <button
+              aria-pressed={classroomBoard === "original"}
+              onClick={() => setClassroomBoard("original")}
+            >
+              {c.showOriginal}
+            </button>
+            <button
+              aria-pressed={classroomBoard === "extracted"}
+              onClick={() => setClassroomBoard("extracted")}
+            >
+              {c.showExtracted}
+            </button>
+          </div>
+          <p>{c.classroomHint}</p>
+        </div>
+      )}
       <p className={styles.prompt}>
         <GeometryText>{question.prompt}</GeometryText>
       </p>
@@ -660,100 +1102,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
       </div>
       {points.length > 0 ? (
         <>
-          <div className={styles.diagramTools}>
-            <label>
-              {c.vertexMode}{" "}
-              <select
-                value={vertexMode}
-                onChange={(e) =>
-                  setVertexMode(e.target.value as VertexDragMode)
-                }
-              >
-                <option value="both">{c.vertexBoth}</option>
-                <option value="rotate">{c.vertexRotate}</option>
-                <option value="resize">{c.vertexResize}</option>
-              </select>
-            </label>
-            {pairs.length > 0 && (
-              <>
-                <button
-                  onClick={() => {
-                    if (!focused && !exploreMarks) {
-                      setExploreMarks(true);
-                      setShowMarks(true);
-                    } else setShowMarks(!showMarks);
-                  }}
-                  aria-pressed={showMarks && (!!focused || exploreMarks)}
-                >
-                  {showMarks && (!!focused || exploreMarks)
-                    ? c.hideMarks
-                    : c.showMarks}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowAngles(!anglesVisible);
-                    setConditionFocus(null);
-                    if (!focused?.highlights.angles?.length) {
-                      setFocusedStep(null);
-                      setExploreMarks(true);
-                    }
-                    if (!rows.some((r) => r.kind === "angle"))
-                      setReasonView("both");
-                    setShowMarks(true);
-                  }}
-                  aria-pressed={anglesVisible}
-                >
-                  {anglesVisible ? c.hideAngles : c.showAngles}
-                </button>
-                <button
-                  onClick={() => {
-                    setShowLengths(!lengthsVisible);
-                    setConditionFocus(null);
-                    if (!focused?.highlights.sides?.length) {
-                      setFocusedStep(null);
-                      setExploreMarks(true);
-                    }
-                    if (!rows.some((r) => r.kind === "side"))
-                      setReasonView("both");
-                    setShowMarks(true);
-                  }}
-                  aria-pressed={lengthsVisible}
-                >
-                  {lengthsVisible ? c.hideLengths : c.showLengths}
-                </button>
-                {hiddenMarks.length > 0 && (
-                  <button
-                    onClick={() => {
-                      setHiddenMarks([]);
-                      setShowMarks(true);
-                    }}
-                  >
-                    {c.restoreMarks}
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    if (!showReasons) setShowMarks(true);
-                    setShowReasons(!showReasons);
-                  }}
-                  aria-expanded={showReasons}
-                >
-                  {showReasons ? c.hideReasons : c.showReasons}
-                </button>
-              </>
-            )}
-            <label className={styles.snapToggle}>
-              <input
-                type="checkbox"
-                checked={snapping}
-                onChange={(e) => {
-                  setSnapping(e.target.checked);
-                  setSnapMessage("");
-                }}
-              />{" "}
-              {c.snap}
-            </label>
-          </div>
+          {!classroom && diagramTools}
           <p className={styles.micro}>
             {c.markClickHint} {snapping && c.snapHint}{" "}
             <span role="status">{snapMessage}</span>
@@ -766,6 +1115,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
             >
               <div
                 className={styles.boards}
+                data-classroom-board={classroom ? classroomBoard : undefined}
                 data-original-expanded={originalExpanded}
               >
                 <section className={styles.original} aria-label={c.original}>
@@ -776,6 +1126,8 @@ function Lesson({ question }: { question: SourceQuestion }) {
                   <OriginalCanvas
                     key={resetVersion}
                     question={question}
+                    classroom={classroom}
+                    controlsHost={controlHost}
                     points={points}
                     shapes={shapes}
                     selected={selected}
@@ -804,76 +1156,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
                     pairs={pairs}
                     onSnap={() => setSnapMessage(c.snapped)}
                   />
-                  <p className={styles.micro}>
-                    {question.constructed
-                      ? c.constructed
-                      : pilot
-                        ? c.exact
-                        : c.tracing}
-                  </p>
-                  <fieldset className={styles.choices}>
-                    <legend>{c.choose}</legend>
-                    {shapes.map((s, i) => (
-                      <button
-                        type="button"
-                        key={`${s.name}-${i}`}
-                        aria-pressed={selected.includes(i)}
-                        aria-label={s.name}
-                        onClick={() => select(i)}
-                        style={
-                          selected.includes(i)
-                            ? {
-                                borderColor: colours[selected.indexOf(i)],
-                                color: colours[selected.indexOf(i)],
-                              }
-                            : undefined
-                        }
-                      >
-                        <GeometryName>{s.name}</GeometryName>
-                      </button>
-                    ))}
-                  </fieldset>
-                  <button
-                    className={styles.textButton}
-                    onClick={() => {
-                      setTracing(!tracing);
-                      setVertices([]);
-                    }}
-                    aria-expanded={tracing}
-                  >
-                    ＋ {c.custom}
-                  </button>
-                  {tracing && (
-                    <div className={styles.tracePanel}>
-                      <p>{c.customHint}</p>
-                      <div className={styles.tools}>
-                        {points.map((p) => (
-                          <button
-                            key={p.label}
-                            aria-label={p.label}
-                            aria-pressed={vertices.includes(p.label)}
-                            onClick={() => vertex(p.label)}
-                          >
-                            <GeometryName>{p.label}</GeometryName>
-                          </button>
-                        ))}
-                      </div>
-                      <p aria-live="polite">{vertices.join(" → ") || "—"}</p>
-                      <div className={styles.tools}>
-                        <button
-                          onClick={addShape}
-                          disabled={
-                            vertices.length < 3 || Math.abs(customArea) < 0.001
-                          }
-                        >
-                          {c.add}
-                        </button>
-                        <button onClick={() => setVertices([])}>
-                          {c.clear}
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  {!classroom && shapeTools}
                 </section>
                 <section
                   className={styles.manipulation}
@@ -1107,195 +1390,121 @@ function Lesson({ question }: { question: SourceQuestion }) {
                       obstacles={sideLabels}
                     />
                   </svg>
-                  {showMarks &&
-                    showLengths &&
-                    pair?.shapes.every((i) => selected.includes(i)) && (
-                      <ComparisonKey
-                        question={question}
-                        pair={pair}
-                        visibleSides={visibleRows
-                          .filter((r) => r.kind === "side")
-                          .map((r) => r.id)}
-                        hiddenSides={hiddenForPair}
-                        showAngles={showAngles}
-                      />
-                    )}
-                  <p className={styles.dragHint}>{c.dragHint}</p>
-                  <div className={styles.controlPanel}>
-                    <div className={styles.activeShapes}>
-                      <span>{c.selected}</span>
-                      {chosen.map((s, i) => (
-                        <button
-                          key={`${s.name}-${i}`}
-                          onClick={() => setActive(i)}
-                          aria-pressed={active === i}
-                          aria-label={s.name}
-                          style={{ color: colours[i] }}
-                        >
-                          <GeometryName>{s.name}</GeometryName>
-                        </button>
-                      ))}
-                    </div>
-                    {pose && (
-                      <>
-                        <div className={styles.tools}>
-                          <button
-                            onClick={() => update({ angle: pose.angle - 15 })}
-                          >
-                            {c.rotateLeft}
-                          </button>
-                          <button
-                            onClick={() => update({ angle: pose.angle + 15 })}
-                          >
-                            {c.rotateRight}
-                          </button>
-                          <button
-                            onClick={() => update({ angle: pose.angle + 90 })}
-                          >
-                            {c.quarterTurn}
-                          </button>
-                          <button
-                            onClick={() => update({ flipX: -pose.flipX })}
-                          >
-                            {c.flipH}
-                          </button>
-                          <button
-                            onClick={() => update({ flipY: -pose.flipY })}
-                          >
-                            {c.flipV}
-                          </button>
-                        </div>
-                        <div className={styles.sliders}>
-                          <label>
-                            {c.angle} <output>{Math.round(pose.angle)}°</output>
-                            <input
-                              aria-label={c.angle}
-                              type="range"
-                              min="-360"
-                              max="360"
-                              value={((pose.angle + 360) % 720) - 360}
-                              onChange={(e) =>
-                                update({ angle: Number(e.target.value) })
-                              }
-                            />
-                          </label>
-                          <label>
-                            {c.scale} <output>×{pose.scale.toFixed(2)}</output>
-                            <input
-                              aria-label={c.scale}
-                              type="range"
-                              min=".25"
-                              max="3"
-                              step=".05"
-                              value={pose.scale}
-                              onChange={(e) =>
-                                update({ scale: Number(e.target.value) })
-                              }
-                            />
-                          </label>
-                          <label>
-                            {c.opacity}{" "}
-                            <output>{Math.round(opacity * 100)}%</output>
-                            <input
-                              aria-label={c.opacity}
-                              type="range"
-                              min=".05"
-                              max=".75"
-                              step=".05"
-                              value={opacity}
-                              onChange={(e) =>
-                                setOpacity(Number(e.target.value))
-                              }
-                            />
-                          </label>
-                        </div>
-                        <div className={styles.tools}>
-                          <span>{c.move}</span>
-                          <button
-                            aria-label={c.left}
-                            onClick={() => nudge(-15, 0)}
-                          >
-                            ←
-                          </button>
-                          <button
-                            aria-label={c.up}
-                            onClick={() => nudge(0, -15)}
-                          >
-                            ↑
-                          </button>
-                          <button
-                            aria-label={c.down}
-                            onClick={() => nudge(0, 15)}
-                          >
-                            ↓
-                          </button>
-                          <button
-                            aria-label={c.right}
-                            onClick={() => nudge(15, 0)}
-                          >
-                            →
-                          </button>
-                          <button
-                            disabled={sets.length < 2}
-                            onClick={() => setPoses(comparisonPoses(sets))}
-                          >
-                            {c.orient}
-                          </button>
-                          <button
-                            disabled={sets.length < 2}
-                            onClick={() => {
-                              const next = comparisonPoses(sets, true);
-                              setPoses(next);
-                              fitComparison(next);
-                            }}
-                          >
-                            {c.enlarge}
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
+                  {classroom && controlHost
+                    ? createPortal(
+                        <div data-control-board="extracted">
+                          {manipulationControls}
+                        </div>,
+                        controlHost,
+                      )
+                    : manipulationControls}
                 </section>
               </div>
-              {showReasons && (
-                <ReasonsPanel
-                  question={question}
-                  pairs={pairs}
-                  pairIndex={pairIndex}
-                  onPair={(i) => {
-                    setPairIndex(i);
-                    setExploreMarks(true);
-                    setReasonView(
-                      pairs[i].criterion === "given" ? "both" : "proof",
-                    );
-                    setConditionFocus(null);
-                    setFocusedStep(null);
-                    setShowAngles(true);
-                    setShowLengths(true);
-                  }}
-                  view={reasonView}
-                  onView={(v) => {
-                    setReasonView(v);
-                    setExploreMarks(true);
-                    setConditionFocus(null);
-                    setFocusedStep(null);
-                    setShowMarks(true);
-                    setShowAngles(true);
-                    setShowLengths(true);
-                  }}
-                  solution={solution}
-                  visible={visibleSteps}
-                  onVisible={setVisibleSteps}
-                  onReset={() => {
-                    setVisibleSteps(0);
-                    setFocusedStep(null);
-                    setExploreMarks(false);
-                  }}
-                  focus={focusedStep}
-                  onFocus={focusSolution}
-                  selected={selected}
-                />
-              )}
+              <div className={styles.classroomDesk} data-desk-tab={deskTab}>
+                {classroom && (
+                  <div
+                    className={styles.deskTabs}
+                    role="group"
+                    aria-label={c.textbookSolution}
+                  >
+                    {(["solution", "controls", "question"] as const).map(
+                      (tab) => (
+                        <button
+                          key={tab}
+                          aria-pressed={deskTab === tab}
+                          onClick={() => setDeskTab(tab)}
+                        >
+                          {tab === "solution"
+                            ? c.solutionTab
+                            : tab === "controls"
+                              ? c.controlsTab
+                              : c.questionTab}
+                        </button>
+                      ),
+                    )}
+                  </div>
+                )}
+                <div
+                  className={styles.solutionPane}
+                  hidden={classroom && deskTab !== "solution"}
+                >
+                  {(showReasons || classroom) && (
+                    <ReasonsPanel
+                      classroom={classroom}
+                      question={question}
+                      pairs={pairs}
+                      pairIndex={pairIndex}
+                      onPair={(i) => {
+                        setPairIndex(i);
+                        setExploreMarks(true);
+                        setReasonView(
+                          pairs[i].criterion === "given" ? "both" : "proof",
+                        );
+                        setConditionFocus(null);
+                        setFocusedStep(null);
+                        setShowAngles(true);
+                        setShowLengths(true);
+                      }}
+                      view={reasonView}
+                      onView={(v) => {
+                        setReasonView(v);
+                        setExploreMarks(true);
+                        setConditionFocus(null);
+                        setFocusedStep(null);
+                        setShowMarks(true);
+                        setShowAngles(true);
+                        setShowLengths(true);
+                      }}
+                      solution={solution}
+                      visible={visibleSteps}
+                      onVisible={setVisibleSteps}
+                      onReset={() => {
+                        setVisibleSteps(0);
+                        setFocusedStep(null);
+                        setExploreMarks(false);
+                      }}
+                      focus={focusedStep}
+                      onFocus={focusSolution}
+                      selected={selected}
+                    />
+                  )}
+                </div>
+                {classroom && (
+                  <>
+                    <div
+                      className={styles.deskBody}
+                      hidden={deskTab !== "controls"}
+                    >
+                      {diagramTools}
+                      <div
+                        ref={setControlHost}
+                        data-controls-for={classroomBoard}
+                      />
+                      {shapeTools}
+                      <button onClick={reset}>{c.reset} ↺</button>
+                    </div>
+                    <div
+                      className={styles.deskBody}
+                      hidden={deskTab !== "question"}
+                    >
+                      <p className={styles.reference}>
+                        {question.group === "Quick Practice"
+                          ? "Quick Practice"
+                          : "Level 2"}{" "}
+                        · p. 8.{question.page}
+                      </p>
+                      <p
+                        className={styles.classroomPrompt}
+                        data-testid="classroom-question"
+                      >
+                        <GeometryText>{question.prompt}</GeometryText>
+                      </p>
+                      {source}
+                      <p className={styles.micro}>{c.rigid}</p>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
           <p className={styles.principle}>{c.rigid}</p>
@@ -1324,22 +1533,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
       ) : (
         <p className={styles.empty}>{c.noShape}</p>
       )}
-      <details className={styles.source}>
-        <summary>
-          {c.source} · p. 8.{question.page}
-        </summary>
-        <Image
-          unoptimized
-          src={`/similarity/questions/${question.id}.webp`}
-          alt={`${name(question)}, textbook page 8.${question.page}. ${question.prompt}`}
-          width={1200}
-          height={Math.round(
-            (1200 * (question.crop[3] - question.crop[1]) * 1.32) /
-              (question.crop[2] - question.crop[0]),
-          )}
-        />
-        <p>{c.sourceCredit}</p>
-      </details>
-    </>
+      {!classroom && source}
+    </div>
   );
 }

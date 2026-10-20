@@ -9,6 +9,13 @@ import {
 } from "../../src/apps/similarity/games/model";
 import { edgeCrossesLabel } from "../../src/apps/similarity/vertexLabels";
 
+// Retain the inline studio regression suite; classroom mode has its own suite.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() =>
+    sessionStorage.setItem("similarity-classroom", "off"),
+  );
+});
+
 const c = copy.similarityGames;
 const game = (page: Page) => page.getByTestId("similarity-games");
 
@@ -173,7 +180,7 @@ test("phone keeps the graph in place while the control panel scrolls and hash na
   await page.evaluate(() => {
     location.hash = "#ex8c-19";
   });
-  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByTestId("game-classroom")).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Exercise 8C · Q19", exact: true }),
   ).toBeVisible();
