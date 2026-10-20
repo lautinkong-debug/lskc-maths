@@ -11,7 +11,46 @@ import { edgeCrossesLabel } from "../../src/apps/similarity/vertexLabels";
 
 const c = copy.similarityGames;
 const game = (page: Page) => page.getByTestId("similarity-games");
+
+test("classroom layout keeps large triangles and adjustments together without page scrolling", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.goto("/apps/similarity#games");
+  const opener = game(page).getByRole("button", {
+    name: c.missions.aaa.title,
+    exact: true,
+  });
+  await opener.click();
+  const board = game(page).getByTestId("game-board");
+  await page.screenshot({
+    path: "out/similarity-preview/classroom-laptop.png",
+  });
+  const box = await board.boundingBox();
+  const input = await game(page)
+    .getByRole("spinbutton", { name: c.angleD, exact: true })
+    .boundingBox();
+  expect(box!.y + box!.height).toBeLessThanOrEqual(768);
+  expect(input!.x).toBeGreaterThan(box!.x + box!.width);
+  expect(input!.y).toBeGreaterThanOrEqual(box!.y);
+  const shape = await game(page)
+    .getByTestId("game-triangle-0")
+    .locator("polygon")
+    .boundingBox();
+  expect(shape!.width).toBeGreaterThan(260);
+  expect(shape!.height).toBeGreaterThan(230);
+  await page.keyboard.press("Escape");
+  await expect(opener).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: c.practice, exact: true }),
+  ).toBeEnabled();
+});
 async function selectProof(page: Page, round: Round) {
+  const collect = game(page).getByRole("button", {
+    name: c.collectEvidence,
+    exact: false,
+  });
+  if (await collect.isVisible()) await collect.click();
   for (const id of round.required)
     await game(page).getByTestId(`evidence-${id}`).click();
   await game(page)
@@ -34,6 +73,7 @@ async function explain(page: Page, round: Round) {
   for (let i = 0; i < round.proof.length; i++) {
     await proof.getByRole("button", { name: c.nextStep, exact: true }).click();
     await expect(proof.locator("tbody tr")).toHaveCount(i + 1);
+    await expect(proof.locator("tbody tr:visible")).toHaveCount(1);
     await expect(
       proof.locator("tbody tr").last().locator("td").last(),
     ).toHaveText(c.reasons[round.proof[i].reasonKey as keyof typeof c.reasons]);
@@ -58,6 +98,167 @@ async function explain(page: Page, round: Round) {
     proof.getByRole("button", { name: c.nextStep, exact: true }),
   ).toBeDisabled();
 }
+
+test("classroom proof remains beside the drawing at laptop, tablet and projection sizes", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.goto("/apps/similarity#games");
+  await game(page)
+    .getByRole("button", { name: c.missions.sides.title, exact: true })
+    .click();
+  await game(page).getByLabel(c.thirdSide, { exact: true }).fill("14");
+  const round = lessonRound("sides", 0, { thirdSide: 14 });
+  await selectProof(page, round);
+  const proof = game(page).getByTestId("game-proof");
+  await proof.getByRole("button", { name: c.nextStep, exact: true }).click();
+  for (const viewport of [
+    { width: 1366, height: 768 },
+    { width: 1024, height: 768 },
+    { width: 1920, height: 1080 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const board = await game(page).getByTestId("game-board").boundingBox();
+    const row = await proof.locator("tbody tr:visible").boundingBox();
+    const next = await proof
+      .getByRole("button", { name: c.nextStep, exact: true })
+      .boundingBox();
+    expect(row!.x).toBeGreaterThanOrEqual(board!.x + board!.width);
+    for (const box of [board!, row!, next!]) {
+      expect(box.y).toBeGreaterThanOrEqual(0);
+      expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+    }
+    await page.screenshot({
+      path: `out/similarity-preview/classroom-proof-${viewport.width}.png`,
+    });
+  }
+  await proof.getByRole("button", { name: c.nextStep, exact: true }).click();
+  await proof.getByRole("button", { name: c.showHistory, exact: true }).click();
+  await expect(proof.locator("tbody tr:visible")).toHaveCount(2);
+  await proof.getByRole("button", { name: c.hideHistory, exact: true }).click();
+  await expect(proof.locator("tbody tr:visible")).toHaveCount(1);
+  await page.keyboard.press("Escape");
+  await page
+    .getByRole("button", { name: "Projection mode", exact: true })
+    .click();
+  await game(page)
+    .getByRole("button", { name: c.missions.included.title, exact: true })
+    .click();
+  await expect(game(page)).toHaveAttribute("data-projecting", "true");
+  await expect(game(page).getByLabel(c.hinge, { exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page
+    .getByRole("button", { name: copy.apps.exitPresentation, exact: true })
+    .click();
+});
+
+test("phone keeps the graph in place while the control panel scrolls and hash navigation exits", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/apps/similarity#games");
+  await game(page)
+    .getByRole("button", { name: c.missions.aaa.title, exact: true })
+    .click();
+  const board = game(page).getByTestId("game-board");
+  const before = await board.boundingBox();
+  await game(page)
+    .getByRole("button", { name: c.collectEvidence, exact: false })
+    .click();
+  const after = await board.boundingBox();
+  expect(after!.y).toBeCloseTo(before!.y);
+  expect(after!.height).toBeCloseTo(before!.height);
+  expect(after!.y + after!.height).toBeLessThan(500);
+  await page.screenshot({ path: "out/similarity-preview/classroom-phone.png" });
+  await page.evaluate(() => {
+    location.hash = "#ex8c-19";
+  });
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Exercise 8C · Q19", exact: true }),
+  ).toBeVisible();
+  expect(await page.evaluate(() => document.body.style.overflow)).not.toBe(
+    "hidden",
+  );
+});
+
+test("default phone diagrams keep all measurements inside the drawing area", async ({
+  page,
+}) => {
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 360, height: 640 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/apps/similarity#games");
+    for (const mission of ["aaa", "sides", "included"] as Mission[]) {
+      await game(page)
+        .getByRole("button", { name: c.missions[mission].title, exact: true })
+        .click();
+      const board = game(page).getByTestId("game-board");
+      await expect
+        .poll(async () =>
+          board.evaluate((svg) => {
+            const bounds = svg.getBoundingClientRect();
+            return [...svg.querySelectorAll("text")]
+              .filter((el) => {
+                const r = el.getBoundingClientRect();
+                return (
+                  r.left < bounds.left ||
+                  r.top < bounds.top ||
+                  r.right > bounds.right ||
+                  r.bottom > bounds.bottom
+                );
+              })
+              .map((el) => el.textContent);
+          }),
+        )
+        .toEqual([]);
+      await page.screenshot({
+        path: `out/similarity-preview/classroom-${mission}-${viewport.width}.png`,
+      });
+      await game(page)
+        .getByRole("button", { name: `← ${c.back}`, exact: true })
+        .click();
+    }
+  }
+});
+
+test("short phones retain usable controls when feedback is displayed", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 360, height: 640 });
+  await page.goto("/apps/similarity#games");
+  await game(page)
+    .getByRole("button", { name: c.missions.aaa.title, exact: true })
+    .click();
+  await game(page)
+    .getByRole("button", { name: c.collectEvidence, exact: false })
+    .click();
+  await game(page)
+    .getByRole("button", { name: c.missions.aaa.rule, exact: true })
+    .click();
+  await game(page).getByRole("button", { name: c.check, exact: true }).click();
+  await expect(game(page).getByRole("status")).toHaveText(c.feedback.third);
+  await page.screenshot({
+    path: "out/similarity-preview/classroom-phone-feedback.png",
+  });
+  const check = await game(page)
+    .getByRole("button", { name: c.check, exact: true })
+    .boundingBox();
+  expect(check!.y + check!.height).toBeLessThanOrEqual(640);
+  const body = await game(page).locator('[class*="panelBody"]').boundingBox();
+  expect(body!.height).toBeGreaterThanOrEqual(90);
+  await game(page)
+    .getByRole("button", { name: c.dismissFeedback, exact: true })
+    .click();
+  await game(page)
+    .getByRole("combobox", { name: c.level, exact: true })
+    .selectOption("1");
+  await expect(
+    game(page).getByRole("spinbutton", { name: c.angleD, exact: true }),
+  ).toBeVisible();
+});
 
 test("games integrate with textbook practice and keep its question", async ({
   page,
@@ -193,16 +394,25 @@ test("wrong construction and third-angle answers cannot pass", async ({
     .getByRole("button", { name: c.missions.aaa.title, exact: true })
     .click();
   await game(page)
-    .getByRole("button", { name: c.missions.aaa.rule, exact: true })
-    .click();
-  await game(page)
     .getByRole("spinbutton", { name: c.thirdAngle, exact: true })
     .fill("60");
+  await game(page)
+    .getByRole("button", { name: c.collectEvidence, exact: false })
+    .click();
+  await game(page)
+    .getByRole("button", { name: c.missions.aaa.rule, exact: true })
+    .click();
   await game(page).getByRole("button", { name: c.check, exact: true }).click();
   await expect(game(page).getByRole("status")).toHaveText(c.feedback.third);
   await game(page)
+    .getByRole("button", { name: c.explore, exact: true })
+    .click();
+  await game(page)
     .getByRole("spinbutton", { name: c.thirdAngle, exact: true })
     .fill("70");
+  await game(page)
+    .getByRole("button", { name: c.collectEvidence, exact: false })
+    .click();
   for (const id of ["angle-0", "angle-1", "angle-2"])
     await game(page).getByTestId(`evidence-${id}`).click();
   await game(page).getByRole("button", { name: c.check, exact: true }).click();
@@ -381,7 +591,7 @@ test("phone touch drag, labels, proof columns and projection remain readable", a
   await explain(page, round);
   const proof = game(page).getByTestId("game-proof");
   await expect(proof.locator(".katex-error")).toHaveCount(0);
-  for (const row of await proof.locator("tbody tr").all()) {
+  for (const row of await proof.locator("tbody tr:visible").all()) {
     const a = await row.locator("td").first().boundingBox(),
       b = await row.locator("td").last().boundingBox();
     expect(b!.x).toBeGreaterThanOrEqual(a!.x + a!.width - 1);
@@ -396,16 +606,12 @@ test("phone touch drag, labels, proof columns and projection remain readable", a
     path: "out/similarity-preview/games-proof-phone.png",
   });
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page
-    .getByRole("button", { name: "Projection mode", exact: true })
-    .click();
-  await expect(game(page)).toHaveAttribute("data-projecting", "true");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await game(page).screenshot({
+  await game(page).getByTestId("game-classroom").screenshot({
     path: "out/similarity-preview/games-proof-desktop.png",
   });
   await context.close();
@@ -417,6 +623,9 @@ test("an incorrect reason and partial evidence cannot complete a repaired game",
   await page.goto("/apps/similarity#games");
   await page.getByRole("button", { name: "Ratio Repair", exact: true }).click();
   await page.getByLabel("Third side FD", { exact: true }).fill("14");
+  await game(page)
+    .getByRole("button", { name: c.collectEvidence, exact: false })
+    .click();
   await page.getByRole("button", { name: "Check proof", exact: true }).click();
   await expect(page.getByRole("status")).toContainText("Choose");
   await page

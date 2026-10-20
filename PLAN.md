@@ -2,6 +2,14 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Similarity games classroom layout (20/10/2026)
+
+- [x] Owner requested larger triangles, controls and proof beside the graph, and a more attractive game experience. Use the linked gamedev-skills game-ui-ux and game-feel guidance for responsive framing and restrained action feedback. Retain the school navy/crimson palette, textbook terminology and existing mathematics.
+- [x] Open missions in an accessible full-window classroom, size triangles to the available canvas, and keep Explore/Solve controls and the current proof step in an adjacent rail. Keep earlier proof lines available on demand. Portrait phones retain a visible graph above an independently scrollable control panel. Dock the primary action, preserve keyboard focus on exit, and close cleanly when navigating to textbook practice.
+- [x] All 16 game browser scenarios pass against the production build, covering all nine missions/twelve mixed rounds, 1024/1366/1920px layouts, 360/390px phones, projection, focus/exit, touch/mouse/keyboard transforms and proof/history. All 35 maths checks, scoped ESLint, TypeScript and production compilation pass. Independent review led to larger phone text, retained help, and a compact short-phone mission selector with dismissible feedback; measurement labels stay in frame and the action remains visible. Evidence: ignored `out/similarity-preview/classroom-*.png`.
+
+Approved release target: GitHub `lautinkong-debug/lskc-maths` main, existing Vercel `lskc-maths`, route `/apps/similarity#games`. Confirm the production deployment is Ready and verify the live classroom flow after the push. No backend, Firebase, environment or dependency changes.
+
 ## Approved Similarity Detective games (20/10/2026)
 
 The owner approved all three games and a mixed challenge, integration into Similarity Studio, and publication to GitHub/Vercel. Reference: gMath's three interactive similarity-condition activities, inspected in-browser. Build original activities with the existing school palette and large mathematical diagrams.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Math as MathText } from "@/components/Math";
 import { copy } from "@/lib/copy";
 import { Board, evidenceName } from "./Board";
@@ -27,6 +27,46 @@ const rule = (criterion: Criterion) =>
   criterion === "insufficient" ? c.insufficient : c.missions[criterion].rule;
 const stageTitle = (mission: Mission | "mixed") =>
   mission === "mixed" ? c.mixed : c.missions[mission].title;
+
+// A native modal supplies focus containment and restores focus to the mission
+// button on exit. The top layer also works inside the site's projection frame.
+function Classroom({
+  children,
+  onExit,
+}: {
+  children: ReactNode;
+  onExit: () => void;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const node = dialog.current!;
+    node.showModal();
+    return () => {
+      node.close();
+    };
+  }, []);
+  useEffect(() => {
+    const leaveGames = () => {
+      if (window.location.hash !== "#games") onExit();
+    };
+    window.addEventListener("hashchange", leaveGames);
+    return () => window.removeEventListener("hashchange", leaveGames);
+  }, [onExit]);
+  return (
+    <dialog
+      ref={dialog}
+      className={styles.classroom}
+      aria-label={c.classroom}
+      data-testid="game-classroom"
+      onCancel={(event) => {
+        event.preventDefault();
+        onExit();
+      }}
+    >
+      {children}
+    </dialog>
+  );
+}
 
 function Symbol({ kind }: { kind: Mission | "mixed" }) {
   return (
@@ -99,6 +139,17 @@ export default function SimilarityGames({
   presenting?: boolean;
 }) {
   const [game, setGame] = useState<Mission | "mixed" | null>(null);
+  const root = useRef<HTMLElement>(null);
+  const returnMission = useRef<Mission | "mixed" | null>(null);
+  useEffect(() => {
+    if (!game && returnMission.current) {
+      root.current
+        ?.querySelector<HTMLButtonElement>(
+          `[data-mission="${returnMission.current}"]`,
+        )
+        ?.focus();
+    }
+  }, [game]);
   const [level, setLevel] = useState(0);
   const [done, setDone] = useState<string[]>(() => {
     try {
@@ -130,6 +181,7 @@ export default function SimilarityGames({
     setDone(next);
   }
   function open(mission: Mission | "mixed") {
+    returnMission.current = mission;
     setGame(mission);
     setFinished(false);
     const ids =
@@ -141,6 +193,7 @@ export default function SimilarityGames({
   }
   return (
     <section
+      ref={root}
       className={styles.games}
       data-projecting={presenting}
       data-testid="similarity-games"
@@ -165,6 +218,7 @@ export default function SimilarityGames({
             {missions.map((mission, i) => (
               <button
                 key={mission}
+                data-mission={mission}
                 className={styles.mission}
                 aria-label={c.missions[mission].title}
                 onClick={() => open(mission)}
@@ -188,6 +242,7 @@ export default function SimilarityGames({
           </div>
           <button
             className={styles.mixedCard}
+            data-mission="mixed"
             aria-label={c.mixed}
             onClick={() => open("mixed")}
           >
@@ -213,7 +268,12 @@ export default function SimilarityGames({
           </p>
         </>
       ) : (
-        <>
+        <Classroom
+          onExit={() => {
+            setGame(null);
+            setFinished(false);
+          }}
+        >
           <header className={styles.gameHeader}>
             <button
               onClick={() => {
@@ -233,6 +293,20 @@ export default function SimilarityGames({
               {game === "mixed" ? c.round : c.level} {level + 1} /{" "}
               {game === "mixed" ? 12 : 3}
             </span>
+            {!finished && (
+              <select
+                className={styles.compactRounds}
+                aria-label={game === "mixed" ? c.round : c.level}
+                value={level}
+                onChange={(event) => setLevel(Number(event.target.value))}
+              >
+                {Array.from({ length: game === "mixed" ? 12 : 3 }, (_, i) => (
+                  <option value={i} key={i}>
+                    {i + 1} / {game === "mixed" ? 12 : 3}
+                  </option>
+                ))}
+              </select>
+            )}
           </header>
           {finished ? (
             <div className={styles.finished} role="status">
@@ -295,7 +369,7 @@ export default function SimilarityGames({
               />
             </>
           )}
-        </>
+        </Classroom>
       )}
     </section>
   );
@@ -324,6 +398,10 @@ function RoundGame({
   const [passed, setPassed] = useState(false);
   const [revealed, setRevealed] = useState(0);
   const [hint, setHint] = useState(false);
+  const [panel, setPanel] = useState<"build" | "evidence">(
+    mission === "mixed" ? "evidence" : "build",
+  );
+  const [history, setHistory] = useState(false);
   const round =
     mission === "mixed"
       ? mixedRounds[level]
@@ -407,12 +485,7 @@ function RoundGame({
   };
   const isLast = level === (mission === "mixed" ? 11 : 2);
   return (
-    <>
-      <ol className={styles.flow} aria-label={c.title}>
-        <li data-current={!passed}>{c.explore}</li>
-        <li data-current={!passed && !!choice}>{c.solve}</li>
-        <li data-current={passed}>{c.explain}</li>
-      </ol>
+    <div className={styles.roundWorkspace}>
       <p className={styles.task}>
         {mission === "mixed" ? c.mixedTask : c.missions[mission].task}
       </p>
@@ -428,136 +501,201 @@ function RoundGame({
             onSelect={toggle}
             thirdKnown={thirdKnown}
           />
-          {!passed && (
-            <section className={styles.evidenceSection} aria-label={c.evidence}>
-              <h3>{c.evidence}</h3>
-              <p>{c.evidenceHint}</p>
-              <div className={styles.evidenceList}>
-                {round.evidence
-                  .filter(
-                    (e) => thirdKnown || e.kind !== "angle" || e.index !== 2,
-                  )
-                  .map((e) => (
-                    <button
-                      key={e.id}
-                      data-testid={`evidence-${e.id}`}
-                      aria-pressed={selected.includes(e.id)}
-                      onClick={() => toggle(e.id)}
-                    >
-                      <span className={styles.tick} aria-hidden="true">
-                        {selected.includes(e.id) ? "✓" : "+"}
-                      </span>
-                      <EvidenceEquation round={round} id={e.id} />
-                    </button>
-                  ))}
-              </div>
-            </section>
-          )}
         </div>
-        <aside className={styles.desk}>
+        <aside className={styles.desk} aria-label={c.controlPanel}>
           {!passed ? (
             <>
-              {setup && (
-                <section className={styles.construction}>
-                  <h3>{c.construction}</h3>
-                  {(Object.keys(setup.start) as (keyof Changes)[]).map(
-                    (key) => (
-                      <label key={key} className={styles.control}>
-                        <span>{labels[key]}</span>
+              <div
+                className={styles.panelTabs}
+                role="group"
+                aria-label={c.phase}
+              >
+                {setup && (
+                  <button
+                    aria-pressed={panel === "build"}
+                    onClick={() => setPanel("build")}
+                  >
+                    {c.explore}
+                  </button>
+                )}
+                <button
+                  aria-pressed={panel === "evidence"}
+                  onClick={() => setPanel("evidence")}
+                >
+                  {c.solve}{" "}
+                  <span className={styles.evidenceCount}>
+                    {selected.length}
+                  </span>
+                </button>
+              </div>
+              <div className={styles.panelBody} key={panel}>
+                {panel === "evidence" && (
+                  <section
+                    className={styles.evidenceSection}
+                    aria-label={c.evidence}
+                  >
+                    <h3>{c.evidence}</h3>
+                    <div className={styles.evidenceList}>
+                      {round.evidence
+                        .filter(
+                          (e) =>
+                            thirdKnown || e.kind !== "angle" || e.index !== 2,
+                        )
+                        .map((e) => (
+                          <button
+                            key={e.id}
+                            data-testid={`evidence-${e.id}`}
+                            aria-pressed={selected.includes(e.id)}
+                            onClick={() => toggle(e.id)}
+                          >
+                            <span className={styles.tick} aria-hidden="true">
+                              {selected.includes(e.id) ? "✓" : "+"}
+                            </span>
+                            <EvidenceEquation round={round} id={e.id} />
+                          </button>
+                        ))}
+                    </div>
+                  </section>
+                )}
+                {setup && panel === "build" && (
+                  <section className={styles.construction}>
+                    <h3>{c.construction}</h3>
+                    {(Object.keys(setup.start) as (keyof Changes)[]).map(
+                      (key) => (
+                        <label key={key} className={styles.control}>
+                          <span>{labels[key]}</span>
+                          <input
+                            type="number"
+                            aria-label={labels[key]}
+                            value={drafts[key] ?? changes[key] ?? ""}
+                            min={setup.limits[key]!.min}
+                            max={setup.limits[key]!.max}
+                            step={setup.limits[key]!.step}
+                            onChange={(e) => typeValue(key, e.target.value)}
+                            onBlur={() => commitValue(key)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") commitValue(key);
+                            }}
+                          />
+                          <input
+                            type="range"
+                            aria-label={`${labels[key]} ${c.explore}`}
+                            min={setup.limits[key]!.min}
+                            max={setup.limits[key]!.max}
+                            step={setup.limits[key]!.step}
+                            value={changes[key]}
+                            onChange={(e) => {
+                              setDrafts((old) => ({
+                                ...old,
+                                [key]: e.target.value,
+                              }));
+                              edit(key, Number(e.target.value));
+                            }}
+                          />
+                        </label>
+                      ),
+                    )}
+                    {mission === "aaa" && (
+                      <label className={styles.control}>
+                        <span>{c.thirdAngle}</span>
                         <input
                           type="number"
-                          aria-label={labels[key]}
-                          value={drafts[key] ?? changes[key] ?? ""}
-                          min={setup.limits[key]!.min}
-                          max={setup.limits[key]!.max}
-                          step={setup.limits[key]!.step}
-                          onChange={(e) => typeValue(key, e.target.value)}
-                          onBlur={() => commitValue(key)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") commitValue(key);
-                          }}
-                        />
-                        <input
-                          type="range"
-                          aria-label={`${labels[key]} ${c.explore}`}
-                          min={setup.limits[key]!.min}
-                          max={setup.limits[key]!.max}
-                          step={setup.limits[key]!.step}
-                          value={changes[key]}
+                          min="1"
+                          max="179"
+                          aria-label={c.thirdAngle}
+                          value={third}
                           onChange={(e) => {
-                            setDrafts((old) => ({
-                              ...old,
-                              [key]: e.target.value,
-                            }));
-                            edit(key, Number(e.target.value));
+                            setThird(e.target.value);
+                            setSelected((old) =>
+                              old.filter((id) => id !== "angle-2"),
+                            );
+                            setFeedback("");
                           }}
                         />
+                        <small>{c.thirdHint}</small>
                       </label>
-                    ),
+                    )}
+                    <p className={styles.small}>{c.constructionHint}</p>
+                  </section>
+                )}
+                {panel === "evidence" && (
+                  <>
+                    <fieldset className={styles.conditions}>
+                      <legend>{c.condition}</legend>
+                      {[
+                        ...missions,
+                        ...(mission === "mixed"
+                          ? ["insufficient" as const]
+                          : []),
+                      ].map((criterion) => (
+                        <button
+                          key={criterion}
+                          aria-pressed={choice === criterion}
+                          onClick={() => {
+                            setChoice(criterion);
+                            setFeedback("");
+                          }}
+                        >
+                          {rule(criterion)}
+                        </button>
+                      ))}
+                    </fieldset>
+                  </>
+                )}
+              </div>
+              <div className={styles.deskActions}>
+                <div className={styles.feedbackNotice} data-open={!!feedback}>
+                  <p className={styles.feedback} role="status">
+                    {feedback}
+                  </p>
+                  {feedback && (
+                    <button
+                      className={styles.feedbackClose}
+                      aria-label={c.dismissFeedback}
+                      onClick={() => setFeedback("")}
+                    >
+                      ×
+                    </button>
                   )}
-                  {mission === "aaa" && (
-                    <label className={styles.control}>
-                      <span>{c.thirdAngle}</span>
-                      <input
-                        type="number"
-                        min="1"
-                        max="179"
-                        aria-label={c.thirdAngle}
-                        value={third}
-                        onChange={(e) => {
-                          setThird(e.target.value);
-                          setSelected((old) =>
-                            old.filter((id) => id !== "angle-2"),
-                          );
-                          setFeedback("");
-                        }}
-                      />
-                      <small>{c.thirdHint}</small>
-                    </label>
+                </div>
+                <div className={styles.actionRow}>
+                  {panel === "build" ? (
+                    <button
+                      className={styles.check}
+                      onClick={() => setPanel("evidence")}
+                    >
+                      {c.collectEvidence} <span aria-hidden="true">→</span>
+                    </button>
+                  ) : (
+                    <button className={styles.check} onClick={check}>
+                      {c.check}
+                    </button>
                   )}
-                  <p className={styles.small}>{c.constructionHint}</p>
-                </section>
-              )}
-              <fieldset className={styles.conditions}>
-                <legend>{c.condition}</legend>
-                {[
-                  ...missions,
-                  ...(mission === "mixed" ? ["insufficient" as const] : []),
-                ].map((criterion) => (
                   <button
-                    key={criterion}
-                    aria-pressed={choice === criterion}
-                    onClick={() => {
-                      setChoice(criterion);
-                      setFeedback("");
-                    }}
+                    className={styles.hintButton}
+                    aria-label={c.hint}
+                    title={c.hint}
+                    aria-expanded={hint}
+                    onClick={() => setHint(!hint)}
                   >
-                    {rule(criterion)}
+                    ?
                   </button>
-                ))}
-              </fieldset>
-              <button className={styles.check} onClick={check}>
-                {c.check}
-              </button>
-              <p className={styles.feedback} role="status">
-                {feedback}
-              </p>
-              <button
-                className={styles.hintButton}
-                aria-expanded={hint}
-                onClick={() => setHint(!hint)}
-              >
-                {c.hint}
-              </button>
-              {hint && <p className={styles.hint}>{c.hints[mission]}</p>}
+                </div>
+                {hint && <p className={styles.hint}>{c.hints[mission]}</p>}
+              </div>
             </>
           ) : (
             <section className={styles.proof} data-testid="game-proof">
               <p className={styles.success} role="status">
                 ✓ {feedback}
               </p>
-              <h3>{c.proof}</h3>
-              <p>{c.proofHint}</p>
+              <div className={styles.proofHeading}>
+                <h3>{c.proof}</h3>
+                <span>
+                  {revealed} / {round.proof.length}
+                </span>
+              </div>
+              <p className={styles.small}>{c.proofHint}</p>
               <div className={styles.proofControls}>
                 <button
                   onClick={() =>
@@ -574,27 +712,46 @@ function RoundGame({
                   {c.restartProof}
                 </button>
               </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>{c.statement}</th>
-                    <th>{c.reason}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {round.proof.slice(0, revealed).map((step, i) => (
-                    <tr key={i} data-current={i === revealed - 1}>
-                      <td>
-                        <MathText>{`\\displaystyle ${proofLayout(step.tex)}`}</MathText>
-                      </td>
-                      <td>
-                        {c.reasons[step.reasonKey as keyof typeof c.reasons] ??
-                          step.reasonKey}
-                      </td>
+              <div className={styles.proofPaper}>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>{c.statement}</th>
+                      <th>{c.reason}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {round.proof.slice(0, revealed).map((step, i) => (
+                      <tr
+                        key={i}
+                        data-current={i === revealed - 1}
+                        hidden={!history && i !== revealed - 1}
+                      >
+                        <td>
+                          <MathText>{`\\displaystyle ${proofLayout(step.tex)}`}</MathText>
+                        </td>
+                        <td>
+                          {c.reasons[
+                            step.reasonKey as keyof typeof c.reasons
+                          ] ?? step.reasonKey}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {revealed === 0 && (
+                  <p className={styles.proofStart}>{c.proofStart}</p>
+                )}
+              </div>
+              {revealed > 1 && (
+                <button
+                  className={styles.historyButton}
+                  aria-expanded={history}
+                  onClick={() => setHistory(!history)}
+                >
+                  {history ? c.hideHistory : c.showHistory}
+                </button>
+              )}
               {revealed === round.proof.length && (
                 <>
                   <p className={styles.explanation}>
@@ -623,7 +780,7 @@ function RoundGame({
           )}
         </aside>
       </div>
-    </>
+    </div>
   );
 }
 

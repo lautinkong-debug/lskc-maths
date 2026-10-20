@@ -41,9 +41,9 @@ export function Board({
   onSelect: (id: string) => void;
   thirdKnown?: boolean;
 }) {
-  const wrapper = useRef<HTMLDivElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
   const svg = useRef<SVGSVGElement>(null);
-  const [narrow, setNarrow] = useState(false);
+  const [size, setSize] = useState({ width: 840, height: 500 });
   const [poses, setPoses] = useState<Pose[]>(initial);
   const [active, setActive] = useState(0);
   const [zoom, setZoom] = useState(1);
@@ -56,24 +56,24 @@ export function Board({
     pointer: number;
   } | null>(null);
   useEffect(() => {
-    if (!wrapper.current) return;
-    const observer = new ResizeObserver(([entry]) =>
-      setNarrow(entry.contentRect.width < 560),
-    );
-    observer.observe(wrapper.current);
+    if (!viewport.current) return;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (width > 0 && height > 0) setSize({ width, height });
+    });
+    observer.observe(viewport.current);
     return () => observer.disconnect();
   }, []);
-  const width = narrow ? 440 : 840,
-    height = narrow ? 700 : 420;
-  const anchors = narrow
-    ? [
-        [220, 175],
-        [220, 515],
-      ]
-    : [
-        [220, 220],
-        [620, 220],
-      ];
+  // Match the available drawing area, rather than letterboxing a small fixed
+  // SVG. A minimum logical width keeps labels clear on portrait phones.
+  const width = Math.max(680, size.width),
+    height = Math.max(280, (size.height * width) / size.width);
+  const anchors = [
+    [width * 0.25, height / 2],
+    [width * 0.75, height / 2],
+  ];
+  const drawingRadius = Math.max(75, Math.min(width / 4 - 35, height / 2 - 45));
+  const typeScale = Math.min(1.25, width / size.width);
   const base = round.triangles.map((t) => {
     const mid = centre(t.points);
     const radius = Math.max(
@@ -81,8 +81,8 @@ export function Board({
     );
     return t.points.map((p) => ({
       ...p,
-      x: ((p.x - mid.x) * 110) / radius,
-      y: ((p.y - mid.y) * 110) / radius,
+      x: ((p.x - mid.x) * drawingRadius) / radius,
+      y: ((p.y - mid.y) * drawingRadius) / radius,
     }));
   });
   const polygons = base.map((ps, i) =>
@@ -111,18 +111,18 @@ export function Board({
           dy = y - mid.y,
           length = Math.hypot(dx, dy) || 1;
         const text = `${evidenceName(round, e.id, member)} = ${pretty(e.values[member])}`;
-        const tx = x + (dx / length) * 28,
-          ty = y + (dy / length) * 28;
+        const tx = x + (dx / length) * 28 * typeScale,
+          ty = y + (dy / length) * 28 * typeScale;
         return {
           id: e.id,
           member,
           text,
           textX: tx,
           textY: ty,
-          x: tx - text.length * 5.8,
-          y: ty - 13,
-          width: text.length * 11.6,
-          height: 26,
+          x: tx - text.length * 5.8 * typeScale,
+          y: ty - 13 * typeScale,
+          width: text.length * 11.6 * typeScale,
+          height: 26 * typeScale,
         };
       });
   });
@@ -133,7 +133,8 @@ export function Board({
         key: `${i}-${p.label}`,
         text: p.label,
         point: p,
-        fontSize: 26,
+        // Reserve Spectral's full ascender/descender box, not just its glyph.
+        fontSize: 30 * typeScale,
         preferred: { x: p.x - mid.x, y: p.y - mid.y },
       }));
     }),
@@ -212,7 +213,34 @@ export function Board({
     );
   }
   return (
-    <div className={styles.board} ref={wrapper}>
+    <div className={styles.board}>
+      <div className={styles.boardLegend} aria-hidden="true">
+        {round.triangles.map((t, i) => (
+          <span key={i}>
+            <i>△{t.names.join("")}</i>
+            <span>{i === 0 ? c.referenceTriangle : c.compareTriangle}</span>
+          </span>
+        ))}
+      </div>
+      <div className={styles.drawing} ref={viewport}>
+        <svg
+          ref={svg}
+          className={styles.canvas}
+          data-testid="game-board"
+          role="img"
+          aria-label={c.board}
+          viewBox={`${(width * (1 - 1 / zoom)) / 2} ${(height * (1 - 1 / zoom)) / 2} ${width / zoom} ${height / zoom}`}
+          onPointerMove={move}
+          onPointerUp={() => {
+            drag.current = null;
+          }}
+          onPointerCancel={() => {
+            drag.current = null;
+          }}
+        >
+          {renderTriangles()}
+        </svg>
+      </div>
       <div
         className={styles.boardTools}
         role="group"
@@ -259,276 +287,262 @@ export function Board({
           {c.resetView}
         </button>
       </div>
-      <p className={styles.boardHint}>{c.boardHint}</p>
-      <svg
-        ref={svg}
-        className={styles.canvas}
-        data-testid="game-board"
-        data-narrow={narrow}
-        role="img"
-        aria-label={c.board}
-        viewBox={`${(width * (1 - 1 / zoom)) / 2} ${(height * (1 - 1 / zoom)) / 2} ${width / zoom} ${height / zoom}`}
-        onPointerMove={move}
-        onPointerUp={() => {
-          drag.current = null;
-        }}
-        onPointerCancel={() => {
-          drag.current = null;
-        }}
-      >
-        {polygons.map((ps, member) => {
-          const memberEvidence =
-            focusMembers && !focusMembers.includes(member) ? [] : evidence;
-          const angles = placeAngleLabels(
-            memberEvidence
-              .filter((e) => e.kind === "angle")
-              .map((e) => ({
-                key: e.id,
-                vertex: ps[e.index],
-                first: ps[(e.index + 2) % 3],
-                last: ps[(e.index + 1) % 3],
-                text: `${pretty(e.values[member])}°`,
-                arcCount:
-                  Math.abs(e.values[0] - e.values[1]) < 1e-9 ? e.index + 1 : 1,
-                right: Math.abs(e.values[member] - 90) < 1e-6,
-              })),
-            {
-              fontSize: 22,
-              vertices: ps,
-              polygons: [ps],
-              reserved: [...vertices.values(), ...sideLabels],
-            },
-          );
-          return (
-            <g
-              key={member}
-              data-testid={`game-triangle-${member}`}
-              data-angle={poses[member].angle}
-              data-scale={poses[member].scale}
-              data-x={poses[member].x}
-            >
-              <g
-                role="button"
-                tabIndex={0}
-                aria-label={`${c.moveTriangle} ${round.triangles[member].names.join("")}`}
-                className={styles.dragTriangle}
-                onPointerDown={(e) => begin(e, member, "move")}
-                onKeyDown={(e) => {
-                  const p = poses[member];
-                  const patch =
-                    e.key === "ArrowLeft"
-                      ? { x: p.x - 8 }
-                      : e.key === "ArrowRight"
-                        ? { x: p.x + 8 }
-                        : e.key === "ArrowUp"
-                          ? { y: p.y - 8 }
-                          : e.key === "ArrowDown"
-                            ? { y: p.y + 8 }
-                            : e.key.toLowerCase() === "r"
-                              ? { angle: p.angle + 15 }
-                              : e.key.toLowerCase() === "h"
-                                ? { flipX: -p.flipX }
-                                : null;
-                  if (patch) {
-                    e.preventDefault();
-                    setActive(member);
-                    change(patch, member);
-                  }
-                }}
-              >
-                <polygon
-                  points={ps.map((p) => `${p.x},${p.y}`).join(" ")}
-                  fill={colours[member]}
-                  fillOpacity=".1"
-                  stroke={colours[member]}
-                  strokeWidth={3}
-                />
-              </g>
-              {memberEvidence.map((e) => {
-                const lit = focus !== null || selected.includes(e.id);
-                const stroke = lit
-                  ? "var(--color-crimson)"
-                  : "var(--color-navy)";
-                const event = () => {
-                  if (focus === null) onSelect(e.id);
-                };
-                if (e.kind === "side") {
-                  const a = ps[e.index],
-                    b = ps[(e.index + 1) % 3];
-                  return (
-                    <g
-                      key={e.id}
-                      data-game-mark={e.id}
-                      data-lit={lit}
-                      onClick={event}
-                      className={styles.clueMark}
-                    >
-                      <line
-                        x1={a.x}
-                        y1={a.y}
-                        x2={b.x}
-                        y2={b.y}
-                        stroke="transparent"
-                        strokeWidth="22"
-                      />
-                      <line
-                        x1={a.x}
-                        y1={a.y}
-                        x2={b.x}
-                        y2={b.y}
-                        stroke={stroke}
-                        strokeWidth={lit ? 7 : 3}
-                        strokeDasharray={e.index === 1 ? "9 4" : undefined}
-                        pointerEvents="none"
-                      />
-                    </g>
-                  );
-                }
-                const label = angles.get(e.id)!;
-                const vertex = ps[e.index],
-                  r = label.radius;
-                const at = (a: number) => [
-                  vertex.x + r * Math.cos(a),
-                  vertex.y + r * Math.sin(a),
-                ];
-                const a = at(label.start),
-                  b = at(label.start + label.turn);
-                const right = Math.abs(e.values[member] - 90) < 1e-6;
-                const equal = Math.abs(e.values[0] - e.values[1]) < 1e-9;
-                const path = right
-                  ? `M${a} L${a[0] + b[0] - vertex.x},${a[1] + b[1] - vertex.y} L${b}`
-                  : Array.from({ length: equal ? e.index + 1 : 1 }, (_, i) => {
-                      const radius = r + i * label.arcGap;
-                      const start = [
-                        vertex.x + radius * Math.cos(label.start),
-                        vertex.y + radius * Math.sin(label.start),
-                      ];
-                      const end = [
-                        vertex.x + radius * Math.cos(label.start + label.turn),
-                        vertex.y + radius * Math.sin(label.start + label.turn),
-                      ];
-                      return `M${start} A${radius},${radius} 0 ${Math.abs(label.turn) > Math.PI ? 1 : 0} ${label.turn > 0 ? 1 : 0} ${end}`;
-                    }).join(" ");
-                return (
-                  <g
-                    key={e.id}
-                    data-game-mark={e.id}
-                    data-lit={lit}
-                    onClick={event}
-                    className={styles.clueMark}
-                  >
-                    <path
-                      d={path}
-                      stroke="transparent"
-                      strokeWidth="20"
-                      fill="none"
-                    />
-                    <path
-                      data-testid={
-                        equal ? "equality-angle-mark" : "measurement-angle-mark"
-                      }
-                      d={path}
-                      stroke={equal ? stroke : "var(--color-pencil)"}
-                      strokeWidth={equal && lit ? 3 : 2}
-                      strokeDasharray={equal ? undefined : "3 4"}
-                      fill="none"
-                    />
-                    {label.leader && (
-                      <line
-                        x1={label.leader.from.x}
-                        y1={label.leader.from.y}
-                        x2={label.leader.to.x}
-                        y2={label.leader.to.y}
-                        stroke={stroke}
-                      />
-                    )}
-                    <text
-                      data-testid="game-angle-label"
-                      x={label.textX}
-                      y={label.textY}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      fontSize="22"
-                      fill={stroke}
-                      className={styles.mathLabel}
-                    >
-                      {pretty(e.values[member])}°
-                    </text>
-                  </g>
-                );
-              })}
-              {sideLabels
-                .filter((l) => l.member === member)
-                .map((l) => (
-                  <text
-                    key={l.id}
-                    x={l.textX}
-                    y={l.textY}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fontSize="20"
-                    className={styles.mathLabel}
-                    fill={colours[member]}
-                    onClick={() => focus === null && onSelect(l.id)}
-                  >
-                    {l.text}
-                  </text>
-                ))}
-              {ps.map((p) => {
-                const label = vertices.get(`${member}-${p.label}`)!;
-                return (
-                  <g key={p.label}>
-                    <circle
-                      cx={p.x}
-                      cy={p.y}
-                      r={8}
-                      fill="var(--color-paper)"
-                      stroke={colours[member]}
-                      strokeWidth="2.5"
-                      role="button"
-                      tabIndex={0}
-                      aria-label={`${c.handle} ${p.label}`}
-                      className={styles.vertexHandle}
-                      onPointerDown={(e) => begin(e, member, "turn")}
-                      onKeyDown={(e) => {
-                        const pose = poses[member];
-                        const patch =
-                          e.key === "ArrowLeft"
-                            ? { angle: pose.angle - 5 }
-                            : e.key === "ArrowRight"
-                              ? { angle: pose.angle + 5 }
-                              : e.key === "ArrowUp"
-                                ? { scale: Math.min(1.4, pose.scale + 0.05) }
-                                : e.key === "ArrowDown"
-                                  ? { scale: Math.max(0.55, pose.scale - 0.05) }
-                                  : null;
-                        if (patch) {
-                          e.preventDefault();
-                          change(patch, member);
-                        }
-                      }}
-                    />
-                    <text
-                      data-testid="game-vertex-label"
-                      x={label.textX}
-                      y={label.textY}
-                      fontSize="26"
-                      textAnchor="middle"
-                      fill={colours[member]}
-                      className={styles.vertexName}
-                    >
-                      {p.label}
-                    </text>
-                  </g>
-                );
-              })}
-            </g>
-          );
-        })}
-      </svg>
-      <p className={styles.boardHint}>
-        {c.schematic} {c.originalLengths}
-      </p>
+      <details className={styles.boardHelp}>
+        <summary>{c.boardHelp}</summary>
+        <p>
+          {c.boardHint} {c.schematic} {c.originalLengths}
+        </p>
+      </details>
     </div>
   );
+
+  function renderTriangles() {
+    return polygons.map((ps, member) => {
+      const memberEvidence =
+        focusMembers && !focusMembers.includes(member) ? [] : evidence;
+      const angles = placeAngleLabels(
+        memberEvidence
+          .filter((e) => e.kind === "angle")
+          .map((e) => ({
+            key: e.id,
+            vertex: ps[e.index],
+            first: ps[(e.index + 2) % 3],
+            last: ps[(e.index + 1) % 3],
+            text: `${pretty(e.values[member])}°`,
+            arcCount:
+              Math.abs(e.values[0] - e.values[1]) < 1e-9 ? e.index + 1 : 1,
+            right: Math.abs(e.values[member] - 90) < 1e-6,
+          })),
+        {
+          fontSize: 22 * typeScale,
+          vertices: ps,
+          polygons: [ps],
+          reserved: [...vertices.values(), ...sideLabels],
+        },
+      );
+      return (
+        <g
+          key={member}
+          data-testid={`game-triangle-${member}`}
+          data-angle={poses[member].angle}
+          data-scale={poses[member].scale}
+          data-x={poses[member].x}
+        >
+          <g
+            role="button"
+            tabIndex={0}
+            aria-label={`${c.moveTriangle} ${round.triangles[member].names.join("")}`}
+            className={styles.dragTriangle}
+            onPointerDown={(e) => begin(e, member, "move")}
+            onKeyDown={(e) => {
+              const p = poses[member];
+              const patch =
+                e.key === "ArrowLeft"
+                  ? { x: p.x - 8 }
+                  : e.key === "ArrowRight"
+                    ? { x: p.x + 8 }
+                    : e.key === "ArrowUp"
+                      ? { y: p.y - 8 }
+                      : e.key === "ArrowDown"
+                        ? { y: p.y + 8 }
+                        : e.key.toLowerCase() === "r"
+                          ? { angle: p.angle + 15 }
+                          : e.key.toLowerCase() === "h"
+                            ? { flipX: -p.flipX }
+                            : null;
+              if (patch) {
+                e.preventDefault();
+                setActive(member);
+                change(patch, member);
+              }
+            }}
+          >
+            <polygon
+              points={ps.map((p) => `${p.x},${p.y}`).join(" ")}
+              fill={colours[member]}
+              fillOpacity=".1"
+              stroke={colours[member]}
+              strokeWidth={3}
+            />
+          </g>
+          {memberEvidence.map((e) => {
+            const lit = focus !== null || selected.includes(e.id);
+            const stroke = lit ? "var(--color-crimson)" : "var(--color-navy)";
+            const event = () => {
+              if (focus === null) onSelect(e.id);
+            };
+            if (e.kind === "side") {
+              const a = ps[e.index],
+                b = ps[(e.index + 1) % 3];
+              return (
+                <g
+                  key={e.id}
+                  data-game-mark={e.id}
+                  data-lit={lit}
+                  onClick={event}
+                  className={styles.clueMark}
+                >
+                  <line
+                    x1={a.x}
+                    y1={a.y}
+                    x2={b.x}
+                    y2={b.y}
+                    stroke="transparent"
+                    strokeWidth="22"
+                  />
+                  <line
+                    x1={a.x}
+                    y1={a.y}
+                    x2={b.x}
+                    y2={b.y}
+                    stroke={stroke}
+                    strokeWidth={lit ? 7 : 3}
+                    strokeDasharray={e.index === 1 ? "9 4" : undefined}
+                    pointerEvents="none"
+                  />
+                </g>
+              );
+            }
+            const label = angles.get(e.id)!;
+            const vertex = ps[e.index],
+              r = label.radius;
+            const at = (a: number) => [
+              vertex.x + r * Math.cos(a),
+              vertex.y + r * Math.sin(a),
+            ];
+            const a = at(label.start),
+              b = at(label.start + label.turn);
+            const right = Math.abs(e.values[member] - 90) < 1e-6;
+            const equal = Math.abs(e.values[0] - e.values[1]) < 1e-9;
+            const path = right
+              ? `M${a} L${a[0] + b[0] - vertex.x},${a[1] + b[1] - vertex.y} L${b}`
+              : Array.from({ length: equal ? e.index + 1 : 1 }, (_, i) => {
+                  const radius = r + i * label.arcGap;
+                  const start = [
+                    vertex.x + radius * Math.cos(label.start),
+                    vertex.y + radius * Math.sin(label.start),
+                  ];
+                  const end = [
+                    vertex.x + radius * Math.cos(label.start + label.turn),
+                    vertex.y + radius * Math.sin(label.start + label.turn),
+                  ];
+                  return `M${start} A${radius},${radius} 0 ${Math.abs(label.turn) > Math.PI ? 1 : 0} ${label.turn > 0 ? 1 : 0} ${end}`;
+                }).join(" ");
+            return (
+              <g
+                key={e.id}
+                data-game-mark={e.id}
+                data-lit={lit}
+                onClick={event}
+                className={styles.clueMark}
+              >
+                <path
+                  d={path}
+                  stroke="transparent"
+                  strokeWidth="20"
+                  fill="none"
+                />
+                <path
+                  data-testid={
+                    equal ? "equality-angle-mark" : "measurement-angle-mark"
+                  }
+                  d={path}
+                  stroke={equal ? stroke : "var(--color-pencil)"}
+                  strokeWidth={equal && lit ? 3 : 2}
+                  strokeDasharray={equal ? undefined : "3 4"}
+                  fill="none"
+                />
+                {label.leader && (
+                  <line
+                    x1={label.leader.from.x}
+                    y1={label.leader.from.y}
+                    x2={label.leader.to.x}
+                    y2={label.leader.to.y}
+                    stroke={stroke}
+                  />
+                )}
+                <text
+                  data-testid="game-angle-label"
+                  x={label.textX}
+                  y={label.textY}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize={22 * typeScale}
+                  fill={stroke}
+                  className={styles.mathLabel}
+                >
+                  {pretty(e.values[member])}°
+                </text>
+              </g>
+            );
+          })}
+          {sideLabels
+            .filter((l) => l.member === member)
+            .map((l) => (
+              <text
+                key={l.id}
+                x={l.textX}
+                y={l.textY}
+                textAnchor="middle"
+                dominantBaseline="middle"
+                fontSize={20 * typeScale}
+                className={styles.mathLabel}
+                fill={colours[member]}
+                onClick={() => focus === null && onSelect(l.id)}
+              >
+                {l.text}
+              </text>
+            ))}
+          {ps.map((p) => {
+            const label = vertices.get(`${member}-${p.label}`)!;
+            return (
+              <g key={p.label}>
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={8}
+                  fill="var(--color-paper)"
+                  stroke={colours[member]}
+                  strokeWidth="2.5"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${c.handle} ${p.label}`}
+                  className={styles.vertexHandle}
+                  onPointerDown={(e) => begin(e, member, "turn")}
+                  onKeyDown={(e) => {
+                    const pose = poses[member];
+                    const patch =
+                      e.key === "ArrowLeft"
+                        ? { angle: pose.angle - 5 }
+                        : e.key === "ArrowRight"
+                          ? { angle: pose.angle + 5 }
+                          : e.key === "ArrowUp"
+                            ? { scale: Math.min(1.4, pose.scale + 0.05) }
+                            : e.key === "ArrowDown"
+                              ? { scale: Math.max(0.55, pose.scale - 0.05) }
+                              : null;
+                    if (patch) {
+                      e.preventDefault();
+                      change(patch, member);
+                    }
+                  }}
+                />
+                <text
+                  data-testid="game-vertex-label"
+                  x={label.textX}
+                  y={label.textY}
+                  fontSize={26 * typeScale}
+                  textAnchor="middle"
+                  fill={colours[member]}
+                  className={styles.vertexName}
+                >
+                  {p.label}
+                </text>
+              </g>
+            );
+          })}
+        </g>
+      );
+    });
+  }
 }
