@@ -62,6 +62,7 @@ emulator-data/
 
 # Local source PDFs and rendering scratch files for Similarity
 /tmp/similarity-source/
+/tmp/congruence/
 
 .vercel
 .env*

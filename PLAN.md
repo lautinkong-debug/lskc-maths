@@ -2,6 +2,20 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Chapter 5 congruent-triangle practice (20/10/2026)
+
+- [x] Owner approved integration and publication to GitHub and Vercel. Target the existing `lautinkong-debug/lskc-maths` production branch `main` and Vercel project `lautinkong-4501/lskc-maths`, route `/apps/congruence`.
+- [x] Owner requested the Similarity practice format for Chapter 5 and confirmed triangle practice only. Cover Quick Practice 5.1–5.17; Exercise 5A Q15–27, 5B Q19–30, 5C Q12–20; Revision 5 Q22–35 and Q38: **66 questions**. Exclude the polygon sections and revision polygon questions.
+- [x] Register **Congruent Triangles** under F2 / 2A05 at `/apps/congruence`. Reuse the full-window practice classroom with the source diagram, extracted triangles, searchable bank, teacher-controlled statement/reason steps and phone layout. Keep separate diagram-control and question tabs.
+- [x] Preserve size during dragging, turning, reflection and vertex alignment. Apply camera zoom to the whole comparison. Custom triangles and selection changes retain existing sizes and poses; later printed comparisons select their relevant shapes. Use the stated givens and proofs because source figures are not to scale.
+- [x] Visually check the supplied questions and solution pages, transcribe intermediate working and reasons, and validate all geometry references and KaTeX expressions. Keep source PDFs in ignored `tmp/congruence/`; publish only selected question crops. Redraw the board figures for 5A Q27 and 5C Q12 to clear the publisher footer; retain their untouched question crops. Record the solution's Quick Practice 5.1 page-reference typo separately.
+- [x] All 986 unit tests, scoped ESLint, TypeScript and production compilation pass. All 15 browser scenarios pass against the local production build: library entry, all 66 question assets/reveals, current-step marks, mouse/touch/keyboard transforms, stable custom geometry, proof-pair changes, saved view state, and 1366/1920px desktop plus 360/390px portrait and 844px landscape layouts. Visually inspect the source redraws and desktop/phone screenshots in ignored `out/congruence-preview/`.
+- [x] Owner requested removal of the diagonal school watermark. Regenerate all 66 crops from a derivative PDF with only the native `STFALSKC` watermark Form cleared. Verify the other drawing streams on all 80 pages and the original PDF hash are unchanged; retain mathematical content and publisher footer. The regeneration script now preserves this setting. Reload the owner's local browser and visually verify Quick Practice 5.14 in both the original-diagram and full-question views; evidence: ignored `out/congruence-preview/no-watermark.png`.
+- [x] Keep each reason on one horizontal line beside its statement: let the reason column take its content width instead of constraining it to 32%. Verify Revision Q34 step 14 on desktop and phone. Fresh release checks pass: 986 unit tests, all 15 browser scenarios, scoped ESLint, formatting and production build.
+- [ ] Push the reviewed implementation to GitHub `main`, verify Vercel is Ready for that commit, and check the official site and lesson flows.
+
+Local review: open `http://localhost:3001/apps/congruence#qp5-14` while the local development server and demo Firebase emulators are running. Use **Next step**, switch to **Extracted triangles**, then drag or turn a triangle; **Question bank** exposes section/search filters. To restart, run `npm.cmd run emulators` and `npm.cmd run dev -- --port 3001` in separate terminals. No sign-in is needed for this practice tool. The owner has approved publication.
+
 ## Textbook practice classroom layout (20/10/2026)
 
 - [x] Apply the approved games layout to all 72 textbook questions: a full-window classroom with larger original/extracted diagrams, the current printed solution line and its reason alongside, and persistent Previous/Next/Reset controls. Keep earlier lines available on request.
@@ -839,6 +853,10 @@ The join page explains the three steps before a large code field; loading and di
 **Scope:** Local design and interaction refinement only. No new packages, production data changes or deployment. The temporary populated-board fixtures were confined to the demo emulator. Stage G's launch and privacy checks remain applicable.
 
 ## Decision log
+
+- 20/10/2026 — The owner approved publishing Chapter 5 practice, including watermark removal and single-line proof reasons, through the existing GitHub/Vercel website. Keep production Firebase data, rules and configuration unchanged.
+
+- 20/10/2026 — Chapter 5 uses the existing Similarity practice classroom, restricted to congruent-triangle Quick Practice and Level 2 questions. Transformations cannot resize individual triangles. Keep this addition local for owner review; publication of earlier Similarity work does not authorise a new release.
 
 - 2026-10-11: Boundary teaching distinguishes recorded limits from continuous measurements before rounding. Its positive examples use round-half-up and lower-inclusive/upper-exclusive classes, so 35.5 enters 36–40 and 40.5 enters 41–45 exactly once. The exploration uses separate examples and does not alter the main dataset.
 

@@ -3,6 +3,49 @@
  * can be changed in one place. UI language is English - see CLAUDE.md.
  */
 export const copy = {
+  congruence: {
+    title: "Congruent Triangles",
+    topic: "2A05 · Congruence",
+    summary:
+      "Explore the textbook diagrams, move congruent triangles and reveal each line of the proof.",
+    classroom: "Congruent triangles classroom",
+    coverage: "Quick Practice and Level 2 · Triangle questions",
+    searchPlaceholder: "Q19, 5.29, common side…",
+    hint: "Drag a triangle to move it. Drag a vertex ring to turn it.",
+    keyboardHint:
+      "Keyboard: arrow keys move; R turns; H flips. A vertex ring turns with the arrow keys.",
+    rigid: "Moving, turning and flipping keep the same size and shape.",
+    tracing:
+      "Diagrams are not to scale. Use the givens and the proof to establish congruence.",
+    sourceCredit: "Question from the supplied Chapter 5 textbook.",
+    choose: "Choose up to three triangles",
+    selected: "Active triangle",
+    vertexHandle: "Turn at vertex",
+    flip: "Flip",
+    align: "Align vertex order",
+    alignHint:
+      "Alignment uses the selected vertex order. It is a visual comparison, not a proof of congruence.",
+    sizeLocked: "Size stays fixed",
+    cameraZoom: "Zoom both triangles",
+    restore: "Restore positions",
+    start: "Which parts correspond?",
+    startHint:
+      "Explore the diagram, then use Next step to reveal the solution.",
+    back: "Question bank",
+    source: "Textbook question",
+    marks: "Show current-step marks",
+    constructed:
+      "Illustrative teaching diagram. This question has no printed figure; use its stated measurements.",
+    noSelection: "Choose a triangle in Diagram controls to move it.",
+    create: "Make another triangle",
+    createHint: "Choose three vertices in boundary order.",
+    invalidTriangle: "Choose three different, non-collinear vertices.",
+    add: "Add triangle",
+    firstVertex: "First vertex",
+    secondVertex: "Second vertex",
+    thirdVertex: "Third vertex",
+    comparison: "Selected vertex order",
+  },
   similarityGames: {
     title: "Similarity Detective",
     classroom: "Similarity Detective classroom",

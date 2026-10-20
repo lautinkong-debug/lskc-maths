@@ -7,6 +7,7 @@ import InequalityThumbnail from "./inequality-number-line/Thumbnail";
 import DirectedNumbersThumbnail from "./directed-numbers/Thumbnail";
 import StatisticalChartsThumbnail from "./statistical-charts/Thumbnail";
 import SimilarityThumbnail from "./similarity/Thumbnail";
+import CongruenceThumbnail from "./congruence/Thumbnail";
 
 export interface AppEntry {
   slug: string;
@@ -23,6 +24,17 @@ export interface AppEntry {
 
 /** The index and detail route both use this list. New apps register here. */
 export const appRegistry: readonly AppEntry[] = [
+  {
+    slug: "congruence",
+    topicCodes: ["2A05"],
+    title: copy.congruence.title,
+    topic: copy.congruence.topic,
+    levels: ["F2"],
+    strand: "measures-shape-space",
+    summary: copy.congruence.summary,
+    thumbnail: CongruenceThumbnail,
+    load: () => import("./congruence"),
+  },
   {
     slug: "similarity",
     topicCodes: ["2B08"],
