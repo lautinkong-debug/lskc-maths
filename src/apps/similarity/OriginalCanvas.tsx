@@ -19,7 +19,7 @@ import type { Point, Shape, SourceQuestion } from "./types";
 import styles from "./similarity.module.css";
 import { GeometryName } from "./Notation";
 import { VertexHandles } from "./VertexHandles";
-import { ReasonMarks } from "./ReasonMarks";
+import { layoutReasonAngles, ReasonMarks } from "./ReasonMarks";
 import { PairedVertexLabels } from "./PairedVertexLabels";
 import { PairedSideLabels } from "./PairedSideLabels";
 import { pairedSideLabels, sideLabelPoints } from "./pairedSides";
@@ -167,6 +167,18 @@ export function OriginalCanvas({
     [...referencePolygons, ...placedShapes.map((s) => s.points)],
     sideLabels,
   );
+  const markObstacles = [
+    ...referenceLabels.values(),
+    ...movedLabels.values(),
+    ...sideLabels,
+  ];
+  const angleLabelPoints = placedShapes
+    .filter((s) => reasonPair?.shapes.includes(s.id))
+    .flatMap((s) =>
+      vertexLabelPoints(
+        layoutReasonAngles(s.points, reasonRows, unit / 12, markObstacles),
+      ),
+    );
   const view = useDiagramView(
     box,
     [
@@ -175,6 +187,7 @@ export function OriginalCanvas({
       ...placedShapes.flatMap((s) => s.points),
       ...sideLabelPoints(sideLabels),
       ...vertexLabelPoints(movedLabels),
+      ...angleLabelPoints,
     ],
     unit * 3.5,
     svg,
@@ -526,6 +539,7 @@ export function OriginalCanvas({
                   rows={reasonRows}
                   member={reasonPair.shapes.indexOf(i)}
                   size={unit / 12}
+                  reserved={markObstacles}
                   showSideLabels={
                     !sideLabels.length &&
                     (!!poses[i] || expanded || !!plainReference)

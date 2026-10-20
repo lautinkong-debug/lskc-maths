@@ -2,6 +2,14 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Similarity one-line reveals and clear angle symbols (20/10/2026)
+
+- [x] Start every solution with no revealed lines or matching marks. Next step reveals one printed line and highlights only its geometry; Previous step and selecting an earlier line rewind the reveal, and Reset solution returns to the blank start. Keep the literal textbook equations, stacked fractions and reason column unchanged. Move the optional Show all steps control into Diagram marks.
+- [x] Narrow a final angle answer or named side ratio to the references on that line. Preserve the angles used as numerical substitutions in an angle-sum calculation. Keep all-marks exploration available explicitly, separate from the current step.
+- [x] Lay out angle symbols together, reduce arc spacing on small triangles, and use external leader lines when text cannot fit clearly inside. Reserve actual vertex/paired-side label boxes, preserve upright text and mark interactions, and include external labels in Fit triangles.
+- [x] All 42 similarity unit checks, scoped ESLint, TypeScript and production build pass. Inspect Q17 original and moved angle symbols: no label overlaps, and enlarged-view labels remain within the frame.
+- [x] All 28 browser scenarios pass against the production build, including the 72-question source-order/reason audit, sequential reveals, current-line geometry, transformed symbols, phone controls and existing snapping. Release through the existing approved GitHub/Vercel project. Evidence: ignored `out/similarity-preview/q17-angle-spacing.png`, `q17-angle-copies.png` and `textbook-step-desktop.png`.
+
 ## Literal similarity solutions and step highlights (20/10/2026)
 
 - [x] Replace generated proof summaries with visually checked transcriptions of all 72 Level 2 / Quick Practice solutions from the supplied PDF. Preserve printed reading order, ratio direction, intermediate calculation lines, alternative solutions and blank reason cells; use stacked KaTeX fractions. Keep the original solutions PDF outside the published repository.

@@ -81,8 +81,8 @@ export const copy = {
     proofTitle: "Similarity proof",
     textbookSolution: "Textbook solution",
     textbookStepHint:
-      "Select a printed step to highlight its angles, sides or figures on both boards. Gold marks follow the triangles as you move them.",
-    selectSolutionStep: "Select a step, or start with Next step.",
+      "Next step reveals one new line. Only the geometry used in the current line is highlighted. Select an earlier line to return to it.",
+    selectSolutionStep: "Click Next step to reveal the next line.",
     previousStep: "Previous step",
     nextStep: "Next step",
     showAllSteps: "Show all steps",

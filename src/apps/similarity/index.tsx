@@ -30,7 +30,7 @@ import styles from "./similarity.module.css";
 import { OriginalCanvas } from "./OriginalCanvas";
 import { GeometryName, GeometryText } from "./Notation";
 import { VertexHandles } from "./VertexHandles";
-import { ReasonMarks } from "./ReasonMarks";
+import { layoutReasonAngles, ReasonMarks } from "./ReasonMarks";
 import { PairedVertexLabels } from "./PairedVertexLabels";
 import { PairedSideLabels } from "./PairedSideLabels";
 import { pairedSideLabels, sideLabelPoints } from "./pairedSides";
@@ -42,6 +42,7 @@ import { reasonPairs, conditions, type ReasonView } from "./reasons";
 import { textbookSolutions } from "./textbook";
 import { StepHighlights } from "./StepHighlights";
 import { vertexNames, knownRightAngles } from "./stepGeometry";
+import { focusPrintedLine } from "./stepFocus";
 
 const c = copy.similarity;
 const colours = [
@@ -197,10 +198,12 @@ function Lesson({ question }: { question: SourceQuestion }) {
   const [opacity, setOpacity] = useState(0.2);
   const [order, setOrder] = useState(false);
   const solution = textbookSolutions[question.id];
-  const [visibleSteps, setVisibleSteps] = useState(solution.initialVisible);
+  const [visibleSteps, setVisibleSteps] = useState(0);
   const [focusedStep, setFocusedStep] = useState<number | null>(null);
   const focused =
-    focusedStep === null ? undefined : solution.steps[focusedStep];
+    focusedStep === null
+      ? undefined
+      : focusPrintedLine(solution.steps[focusedStep]);
 
   const [tracing, setTracing] = useState(false);
   const [vertices, setVertices] = useState<string[]>([]);
@@ -209,6 +212,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
   const [vertexMode, setVertexMode] = useState<VertexDragMode>("both");
   const [showReasons, setShowReasons] = useState(true);
   const [showMarks, setShowMarks] = useState(true);
+  const [exploreMarks, setExploreMarks] = useState(false);
   const [showAngles, setShowAngles] = useState(true);
   const [showLengths, setShowLengths] = useState(true);
   const [hiddenMarks, setHiddenMarks] = useState<string[]>([]);
@@ -239,18 +243,18 @@ function Lesson({ question }: { question: SourceQuestion }) {
     showAngles &&
     (focused
       ? !!focused.highlights.angles?.length
-      : rows.some((r) => r.kind === "angle"));
+      : exploreMarks && rows.some((r) => r.kind === "angle"));
   const lengthsVisible =
     showMarks &&
     showLengths &&
     (focused
       ? !!focused.highlights.sides?.length
-      : rows.some((r) => r.kind === "side"));
+      : exploreMarks && rows.some((r) => r.kind === "side"));
   const hiddenForPair = hiddenMarks
     .filter((id) => id.startsWith(`${pairIndex}:`))
     .map((id) => id.split(":")[1]);
   const visibleRows =
-    showMarks && focusedStep === null
+    showMarks && focusedStep === null && exploreMarks
       ? rows.filter(
           (r) =>
             (!conditionFocus || r.id === conditionFocus) &&
@@ -302,12 +306,21 @@ function Lesson({ question }: { question: SourceQuestion }) {
     placedShapes.map((s) => s.points),
     sideLabels,
   );
+  const markObstacles = [...vertexLabels.values(), ...sideLabels];
+  const angleLabelPoints = placedShapes
+    .filter((s) => pair?.shapes.includes(s.id))
+    .flatMap((s) =>
+      vertexLabelPoints(
+        layoutReasonAngles(s.points, visibleRows, 1, markObstacles),
+      ),
+    );
   const view = useDiagramView(
     { x: 0, y: 0, width: 840, height: 470 },
     [
       ...placedShapes.flatMap((s) => s.points),
       ...sideLabelPoints(sideLabels),
       ...vertexLabelPoints(vertexLabels),
+      ...angleLabelPoints,
     ],
     45,
     svg,
@@ -338,7 +351,8 @@ function Lesson({ question }: { question: SourceQuestion }) {
     setSelected(question.shapes.slice(0, 2).map((_, i) => i));
     setPoses(separatePoses(Math.min(2, question.shapes.length)));
     setActive(0);
-    setVisibleSteps(solution.initialVisible);
+    setVisibleSteps(0);
+    setExploreMarks(false);
     setFocusedStep(null);
     setOrder(false);
     setOpacity(0.2);
@@ -361,7 +375,8 @@ function Lesson({ question }: { question: SourceQuestion }) {
     setShowMarks(true);
     setShowAngles(true);
     setShowLengths(true);
-    setVisibleSteps((n) => Math.max(n, index + 1));
+    setVisibleSteps(index + 1);
+    setExploreMarks(false);
     // Use the most recent printed introduction to expose the relevant copies.
     const context =
       solution.steps
@@ -621,17 +636,26 @@ function Lesson({ question }: { question: SourceQuestion }) {
             {pairs.length > 0 && (
               <>
                 <button
-                  onClick={() => setShowMarks(!showMarks)}
-                  aria-pressed={showMarks}
+                  onClick={() => {
+                    if (!focused && !exploreMarks) {
+                      setExploreMarks(true);
+                      setShowMarks(true);
+                    } else setShowMarks(!showMarks);
+                  }}
+                  aria-pressed={showMarks && (!!focused || exploreMarks)}
                 >
-                  {showMarks ? c.hideMarks : c.showMarks}
+                  {showMarks && (!!focused || exploreMarks)
+                    ? c.hideMarks
+                    : c.showMarks}
                 </button>
                 <button
                   onClick={() => {
                     setShowAngles(!anglesVisible);
                     setConditionFocus(null);
-                    if (!focused?.highlights.angles?.length)
+                    if (!focused?.highlights.angles?.length) {
                       setFocusedStep(null);
+                      setExploreMarks(true);
+                    }
                     if (!rows.some((r) => r.kind === "angle"))
                       setReasonView("both");
                     setShowMarks(true);
@@ -644,8 +668,10 @@ function Lesson({ question }: { question: SourceQuestion }) {
                   onClick={() => {
                     setShowLengths(!lengthsVisible);
                     setConditionFocus(null);
-                    if (!focused?.highlights.sides?.length)
+                    if (!focused?.highlights.sides?.length) {
                       setFocusedStep(null);
+                      setExploreMarks(true);
+                    }
                     if (!rows.some((r) => r.kind === "side"))
                       setReasonView("both");
                     setShowMarks(true);
@@ -724,7 +750,11 @@ function Lesson({ question }: { question: SourceQuestion }) {
                     reasonRows={visibleRows}
                     highlightStep={highlightStep}
                     rightAngles={rightAngles}
-                    proofOnly={focusedStep !== null || reasonView !== "both"}
+                    proofOnly={
+                      !exploreMarks ||
+                      focusedStep !== null ||
+                      reasonView !== "both"
+                    }
                     showAngles={showMarks && showAngles}
                     showLengths={showMarks && showLengths}
                     hiddenMarks={hiddenForPair}
@@ -952,6 +982,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
                                   points={transformed}
                                   rows={visibleRows}
                                   member={pair.shapes.indexOf(selected[i])}
+                                  reserved={markObstacles}
                                   showSideLabels={!sideLabels.length}
                                   onHide={hideMark}
                                   onMoveStart={(event) => startDrag(event, i)}
@@ -1192,6 +1223,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
                   pairIndex={pairIndex}
                   onPair={(i) => {
                     setPairIndex(i);
+                    setExploreMarks(true);
                     setReasonView(
                       pairs[i].criterion === "given" ? "both" : "proof",
                     );
@@ -1203,6 +1235,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
                   view={reasonView}
                   onView={(v) => {
                     setReasonView(v);
+                    setExploreMarks(true);
                     setConditionFocus(null);
                     setFocusedStep(null);
                     setShowMarks(true);
@@ -1212,6 +1245,11 @@ function Lesson({ question }: { question: SourceQuestion }) {
                   solution={solution}
                   visible={visibleSteps}
                   onVisible={setVisibleSteps}
+                  onReset={() => {
+                    setVisibleSteps(0);
+                    setFocusedStep(null);
+                    setExploreMarks(false);
+                  }}
                   focus={focusedStep}
                   onFocus={focusSolution}
                   selected={selected}

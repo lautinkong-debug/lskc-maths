@@ -9,7 +9,11 @@ import styles from "./similarity.module.css";
 
 const c = copy.similarity;
 // Dragging shapes must not re-typeset the entire textbook solution.
-const PrintedEquation = memo(function PrintedEquation({ tex }: { tex: string }) {
+const PrintedEquation = memo(function PrintedEquation({
+  tex,
+}: {
+  tex: string;
+}) {
   return <MathText>{`\\displaystyle ${tex}`}</MathText>;
 });
 export function ReasonsPanel({
@@ -22,6 +26,7 @@ export function ReasonsPanel({
   solution,
   visible,
   onVisible,
+  onReset,
   focus,
   onFocus,
   selected,
@@ -35,6 +40,7 @@ export function ReasonsPanel({
   solution: TextbookSolution;
   visible: number;
   onVisible: (n: number) => void;
+  onReset: () => void;
   focus: number | null;
   onFocus: (n: number | null) => void;
   selected: number[];
@@ -53,8 +59,8 @@ export function ReasonsPanel({
   }, [focus]);
   const pair = pairs[pairIndex];
   function next() {
-    const index = Math.min((focus ?? -1) + 1, solution.steps.length - 1);
-    onVisible(Math.max(visible, index + 1));
+    const index = Math.min(visible, solution.steps.length - 1);
+    onVisible(index + 1);
     onFocus(index);
   }
   return (
@@ -68,27 +74,19 @@ export function ReasonsPanel({
       <p>{c.textbookStepHint}</p>
       <div className={styles.solutionControls}>
         <button
-          onClick={() => onFocus(Math.max(0, (focus ?? 0) - 1))}
-          disabled={focus === null || focus === 0}
+          onClick={() => {
+            const count = Math.max(0, visible - 1);
+            onVisible(count);
+            onFocus(count ? count - 1 : null);
+          }}
+          disabled={visible === 0}
         >
           {c.previousStep}
         </button>
-        <button onClick={next} disabled={focus === solution.steps.length - 1}>
+        <button onClick={next} disabled={visible === solution.steps.length}>
           {c.nextStep}
         </button>
-        <button
-          onClick={() => onVisible(solution.steps.length)}
-          disabled={visible === solution.steps.length}
-        >
-          {c.showAllSteps}
-        </button>
-        <button
-          onClick={() => {
-            onVisible(solution.initialVisible);
-            onFocus(null);
-          }}
-          disabled={visible === solution.initialVisible && focus === null}
-        >
+        <button onClick={onReset} disabled={visible === 0 && focus === null}>
           {c.resetSolution}
         </button>
         {focus !== null && (
@@ -153,17 +151,6 @@ export function ReasonsPanel({
           ))}
         </tbody>
       </table>
-      {visible < solution.steps.length && (
-        <button
-          className={styles.clearCondition}
-          onClick={() => {
-            onFocus(visible);
-            onVisible(visible + 1);
-          }}
-        >
-          {c.reveal}
-        </button>
-      )}
       {solution.sourceNote && (
         <p className={styles.sourceNote}>
           <strong>{c.sourceNote}</strong>{" "}
@@ -176,6 +163,15 @@ export function ReasonsPanel({
       <details className={styles.markSettings}>
         <summary>{c.markOptions}</summary>
         <div className={styles.reasonHeading}>
+          <button
+            onClick={() => {
+              onFocus(null);
+              onVisible(solution.steps.length);
+            }}
+            disabled={visible === solution.steps.length}
+          >
+            {c.showAllSteps}
+          </button>
           {pair && <strong>{criterionNames[pair.criterion]}</strong>}
           {pairs.length > 1 && (
             <label>
