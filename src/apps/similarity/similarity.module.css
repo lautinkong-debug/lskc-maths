@@ -415,6 +415,8 @@
   min-width: 0;
   order: -1;
   background: var(--color-navy-wash);
+  max-height: 65dvh;
+  overflow-y: auto;
 }
 .reasonPanel h3 {
   font: 600 1.3rem/1.25 var(--font-display);
@@ -449,7 +451,7 @@
   border-collapse: collapse;
   margin-top: 16px;
   background: var(--color-paper);
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 .proofTable caption {
   text-align: left;
@@ -486,6 +488,52 @@
   font-size: inherit;
   line-height: 1.9;
   background: transparent;
+}
+.solutionControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  position: sticky;
+  top: -16px;
+  z-index: 2;
+  background: var(--color-navy-wash);
+  padding: 8px 0;
+}
+.solutionControls button {
+  font-size: 0.78rem;
+  min-height: 44px;
+}
+.printedLine,
+.printedMath {
+  display: block;
+  max-width: 100%;
+}
+.printedMath {
+  overflow-x: auto;
+  padding: 4px 0;
+}
+.printedMath :global(.katex) {
+  font-size: 1em;
+}
+.proofTable tr[data-active="true"] td {
+  background: #fff0cf;
+}
+.proofTable tr[data-active="true"] button {
+  border-color: #a65d00;
+  background: #fff0cf;
+}
+.sourceNote {
+  border-left: 3px solid #a65d00;
+  padding: 8px;
+  background: #fff0cf;
+}
+.markSettings {
+  margin-top: 14px;
+}
+.markSettings summary {
+  min-height: 44px;
+  cursor: pointer;
+  color: var(--color-navy);
 }
 .proofTable button:hover,
 .proofTable button[aria-pressed="true"] {

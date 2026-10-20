@@ -2,6 +2,71 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { questions } from "../../src/apps/similarity/data";
 import { reasonPairs, conditions } from "../../src/apps/similarity/reasons";
+import { textbookSolutions } from "../../src/apps/similarity/textbook";
+
+async function openDiagramMarks(page: Page) {
+  const details = page
+    .getByTestId("diagram-reasons")
+    .locator("details")
+    .filter({ has: page.locator("summary", { hasText: "Diagram marks" }) });
+  if ((await details.getAttribute("open")) === null)
+    await details.locator("summary").click();
+}
+
+async function chooseDiagramMarks(page: Page, name = "Angles & sides") {
+  await openDiagramMarks(page);
+  await page.getByRole("button", { name, exact: true }).click();
+}
+
+const solutionRows = (page: Page) =>
+  page
+    .getByRole("table", { name: "Textbook solution", exact: true })
+    .locator("tbody tr");
+
+async function showAllSolutionSteps(page: Page) {
+  const showAll = page.getByRole("button", {
+    name: "Show all steps",
+    exact: true,
+  });
+  if (await showAll.isEnabled()) await showAll.click();
+}
+
+async function expectStepHighlights(page: Page, index: number) {
+  const button = page.getByRole("button", {
+    name: `Highlight step ${index + 1}`,
+    exact: true,
+  });
+  await expect(button).toHaveAttribute("data-testid", `solution-step-${index}`);
+  await button.click();
+  await expect(button).toHaveAttribute("aria-pressed", "true");
+  const highlights = page
+    .getByTestId("original-board")
+    .locator(
+      '[data-testid="step-highlights"][data-context="source"] [data-highlight-angle], ' +
+        '[data-testid="step-highlights"][data-context="source"] [data-highlight-side], ' +
+        '[data-testid="step-highlights"][data-context="source"] [data-highlight-figure], ' +
+        '[data-testid="step-highlights"][data-context="source"] [data-highlight-point]',
+    );
+  await expect(page.getByTestId("original-board")).toBeVisible();
+  // A horizontal/vertical SVG side can have a zero-height/width DOM box even
+  // though its nonzero stroke is drawn. Check attachment and geometric extent.
+  await expect(highlights.first()).toBeAttached();
+  expect(
+    await highlights.evaluateAll((elements) =>
+      elements.every((element) => {
+        const box = (element as SVGGraphicsElement).getBBox();
+        const style = getComputedStyle(element);
+        return (
+          Number.isFinite(box.x) &&
+          Number.isFinite(box.y) &&
+          (box.width > 0 || box.height > 0) &&
+          style.display !== "none" &&
+          style.visibility !== "hidden"
+        );
+      }),
+    ),
+  ).toBe(true);
+}
 
 test("department app library opens Similarity Studio under F2 and 2B08", async ({
   page,
@@ -86,9 +151,7 @@ test("angles and lengths hide independently and individual matching marks can be
     "ex8c-19",
   ]) {
     await page.goto(`/apps/similarity#${id}`);
-    await page
-      .getByRole("button", { name: "Angles & sides", exact: true })
-      .click();
+    await chooseDiagramMarks(page);
     await page
       .getByRole("button", { name: "Hide angles", exact: true })
       .click();
@@ -140,9 +203,7 @@ test("nearby triangles snap position, rotation and size on both boards and can b
   await page.setViewportSize({ width: 1500, height: 1100 });
   for (const original of [false, true]) {
     await page.goto("/apps/similarity#ex8c-19");
-    await page
-      .getByRole("button", { name: "Angles & sides", exact: true })
-      .click();
+    await chooseDiagramMarks(page);
     await page
       .getByRole("checkbox", { name: "Snap matching triangles", exact: true })
       .check();
@@ -239,7 +300,7 @@ test("touch snapping and independent marks work on a phone", async ({
   });
   const page = await context.newPage();
   await page.goto("/apps/similarity#ex8c-19");
-  await page.getByRole("button", { name: "Angles & sides", exact: true }).tap();
+  await chooseDiagramMarks(page);
   await page
     .getByRole("button", { name: "Match first side length", exact: true })
     .tap();
@@ -307,9 +368,7 @@ test("zoom, fit and pan enlarge both diagrams without changing shapes or origina
     await page
       .getByRole("button", { name: "Reset question", exact: false })
       .click();
-    await page
-      .getByRole("button", { name: "Angles & sides", exact: true })
-      .click();
+    await chooseDiagramMarks(page);
     const title = original ? "Original diagram" : "Move the shapes";
     const board = page.getByTestId(
       original ? "original-board" : "manipulation-board",
@@ -476,9 +535,7 @@ test("matching angles, right angles and revealed side ratios follow extracted tr
   await page.setViewportSize({ width: 1500, height: 1100 });
   await page.goto("/apps/similarity#ex8c-19");
   await expect(page.getByTestId("diagram-reasons")).toBeVisible();
-  await page
-    .getByRole("button", { name: "Angles & sides", exact: true })
-    .click();
+  await chooseDiagramMarks(page);
   await expect(page.getByTestId("similarity-studio")).toContainText("//");
   await expect(page.getByTestId("similarity-studio")).not.toContainText("∥");
   for (const board of ["original-board", "manipulation-board"]) {
@@ -560,7 +617,7 @@ test("diagram reasons mark the textbook criteria, givens and counterexamples wit
 }) => {
   await page.setViewportSize({ width: 1500, height: 1200 });
   for (const [id, title, angles, sides] of [
-    ["ex8c-19", "AAA — three equal angle pairs", 3, 0],
+    ["ex8c-19", "AAA", 3, 0],
     ["qp8-6", "3 sides prop.", 0, 3],
     ["qp8-8", "ratio of 2 sides, inc. ∠", 1, 2],
     ["qp8-3", "Similarity given", 3, 0],
@@ -569,9 +626,7 @@ test("diagram reasons mark the textbook criteria, givens and counterexamples wit
     await page.goto(`/apps/similarity#${id}`);
     await expect(page.getByTestId("diagram-reasons")).toBeVisible();
     await expect(page.getByTestId("diagram-reasons")).toContainText(title);
-    await page
-      .getByRole("button", { name: "Proof conditions", exact: true })
-      .click();
+    await chooseDiagramMarks(page, "Proof conditions");
     for (const board of ["original-board", "manipulation-board"]) {
       await expect(
         page.getByTestId(board).locator('[data-condition^="angle-"]'),
@@ -580,14 +635,10 @@ test("diagram reasons mark the textbook criteria, givens and counterexamples wit
         page.getByTestId(board).locator('[data-condition^="side-"]'),
       ).toHaveCount(sides * 2);
     }
-    const condition = page
-      .getByTestId("diagram-reasons")
-      .locator('[data-testid^="condition-"]')
-      .first();
-    await condition.click();
+    await expectStepHighlights(page, 0);
     await expect(
       page.getByTestId("manipulation-board").locator("[data-condition]"),
-    ).toHaveCount(2);
+    ).toHaveCount(0);
     await page
       .getByRole("button", { name: "Clear step highlight", exact: true })
       .click();
@@ -608,6 +659,7 @@ test("diagram reasons mark the textbook criteria, givens and counterexamples wit
       .screenshot({ path: `out/similarity-preview/reasons-${id}.png` });
   }
   await page.goto("/apps/similarity#rev8-35");
+  await openDiagramMarks(page);
   await page
     .getByRole("combobox", { name: "Compare this pair", exact: true })
     .selectOption("1");
@@ -629,9 +681,7 @@ test("clean source diagrams retain givens without printed footer images", async 
     ["ex8b-23", ["3 cm", "5 cm", "4 cm", "2 cm"]],
   ] as const) {
     await page.goto(`/apps/similarity#${id}`);
-    await page
-      .getByRole("button", { name: "Angles & sides", exact: true })
-      .click();
+    await chooseDiagramMarks(page);
     const original = page.getByTestId("original-board");
     await expect(original.getByTestId("clean-source")).toBeVisible();
     await expect(original.locator("image")).toHaveCount(0);
@@ -655,7 +705,7 @@ test("touch vertex gestures and proof overlays fit a phone", async ({
   });
   const page = await context.newPage();
   await page.goto("/apps/similarity#ex8c-19");
-  await page.getByRole("button", { name: "Angles & sides", exact: true }).tap();
+  await chooseDiagramMarks(page);
   const cdp = await context.newCDPSession(page);
   for (const prefix of ["original-shape-0", "shape-0"]) {
     const shape = page.getByTestId(prefix),
@@ -720,9 +770,7 @@ test("sidebar controls sit on the rail and preserve Similarity state when hidden
 }) => {
   await page.setViewportSize({ width: 1500, height: 1100 });
   await page.goto("/apps/similarity#ex8c-19");
-  await page
-    .getByRole("button", { name: "Angles & sides", exact: true })
-    .click();
+  await chooseDiagramMarks(page);
   const shape = page.getByTestId("shape-0");
   await shape.focus();
   await shape.press("ArrowRight");
@@ -758,7 +806,11 @@ test("Q19 pilot: move, turn, reflect, match, reveal and reset", async ({
   await page.goto("/apps/similarity#ex8c-19");
   const studio = page.getByTestId("similarity-studio");
   await expect(studio).toBeVisible();
-  await expect(page.getByTestId("question-result")).toHaveCount(0);
+  const solution = textbookSolutions["ex8c-19"];
+  await expect(solutionRows(page)).toHaveCount(solution.initialVisible);
+  await expect(
+    page.getByTestId(`solution-step-${solution.steps.length - 1}`),
+  ).toHaveCount(0);
   const first = page.getByTestId("shape-0");
   await first.focus();
   await first.press("ArrowRight");
@@ -797,15 +849,37 @@ test("Q19 pilot: move, turn, reflect, match, reveal and reset", async ({
     expect(p[0]).toBeCloseTo(overlays[1][i][0]);
     expect(p[1]).toBeCloseTo(overlays[1][i][1]);
   });
-  for (let i = 0; i < 6; i++)
-    await page
-      .getByRole("button", { name: "Reveal next step", exact: true })
-      .click();
-  await expect(page.getByTestId("question-result")).toContainText("13.5 cm²");
+  await page.getByRole("button", { name: "Next step", exact: true }).click();
+  await expect(page.getByTestId("solution-step-0")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.getByRole("button", { name: "Next step", exact: true }).click();
+  await expect(page.getByTestId("solution-step-1")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await showAllSolutionSteps(page);
+  await expect(solutionRows(page)).toHaveCount(solution.steps.length);
+  const finalStep = page.getByTestId(
+    `solution-step-${solution.steps.length - 1}`,
+  );
+  await expect(finalStep.getByRole("math")).toHaveAttribute(
+    "aria-label",
+    `\\displaystyle ${solution.steps.at(-1)!.math![0]}`,
+  );
+  await expectStepHighlights(page, solution.steps.length - 1);
+  await page
+    .getByRole("button", { name: "Reset solution", exact: true })
+    .click();
+  await expect(solutionRows(page)).toHaveCount(solution.initialVisible);
+  await expect(page.getByTestId("step-highlights")).toHaveCount(0);
+  await expect(first).toHaveAttribute("data-angle", "90");
+  expect(Number(await first.getAttribute("data-scale"))).toBeCloseTo(1.5);
   await page
     .getByRole("button", { name: "Reset question", exact: false })
     .click();
-  await expect(page.getByTestId("question-result")).toHaveCount(0);
+  await expect(solutionRows(page)).toHaveCount(solution.initialVisible);
   await expect(first).toHaveAttribute("data-angle", "0");
   // Drag a point well inside the first triangle using actual rendered geometry.
   await first.scrollIntoViewIfNeeded();
@@ -969,10 +1043,10 @@ test("original diagram supports real touch dragging", async ({ browser }) => {
   await context.close();
 });
 
-test("all 72 source questions, figures and hidden explanations load", async ({
+test("all 72 source questions, literal solution lines and clickable diagram highlights load", async ({
   page,
 }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(300_000);
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -988,7 +1062,11 @@ test("all 72 source questions, figures and hidden explanations load", async ({
         exact: true,
       }),
     ).toBeVisible();
-    await expect(page.getByTestId("question-result")).toHaveCount(0);
+    const solution = textbookSolutions[q.id];
+    await expect(solutionRows(page)).toHaveCount(solution.initialVisible);
+    await expect(page.getByTestId("diagram-reasons")).toContainText(
+      `Supplied textbook solutions · PDF pages ${solution.pages.join(", ")}`,
+    );
     await expect(
       page.getByTestId("manipulation-board").locator("polygon"),
     ).toHaveCount(Math.min(2, q.shapes.length));
@@ -1032,22 +1110,36 @@ test("all 72 source questions, figures and hidden explanations load", async ({
         q.id,
       ).toBe(true);
     }
-    for (let i = 0; i < q.proof.length; i++)
-      await page
-        .getByRole("button", { name: "Reveal next step", exact: true })
-        .click();
-    const result = await page
-      .getByTestId("question-result")
-      .evaluate((element) => {
-        const copy = element.cloneNode(true) as HTMLElement;
-        copy
-          .querySelectorAll('[role="math"]')
-          .forEach((math) =>
-            math.replaceWith(math.getAttribute("aria-label")!),
-          );
-        return copy.textContent;
-      });
-    expect(result).toBe(q.result.replace(/[∥‖]/g, "//"));
+    await showAllSolutionSteps(page);
+    await expect(solutionRows(page)).toHaveCount(solution.steps.length);
+    const table = page.getByRole("table", {
+      name: "Textbook solution",
+      exact: true,
+    });
+    await expect(table.locator(".katex-error")).toHaveCount(0);
+    const renderedMath = await table
+      .getByRole("math")
+      .evaluateAll((elements) =>
+        elements
+          .map((element) => element.getAttribute("aria-label")!)
+          .filter((label) => label.startsWith("\\displaystyle ")),
+      );
+    expect(renderedMath, q.id).toEqual(
+      solution.steps
+        .flatMap((step) => step.math ?? [])
+        .map((line) => `\\displaystyle ${line}`),
+    );
+    await expect(page.getByTestId("proof-reason")).toHaveCount(
+      solution.steps.length,
+    );
+    await expectStepHighlights(page, 0);
+    if (solution.steps.length > 1)
+      await expectStepHighlights(page, solution.steps.length - 1);
+    await page
+      .getByRole("button", { name: "Reset solution", exact: true })
+      .click();
+    await expect(solutionRows(page)).toHaveCount(solution.initialVisible);
+    await expect(page.getByTestId("step-highlights")).toHaveCount(0);
     const image = await page.request.get(`/similarity/questions/${q.id}.webp`);
     expect(image.status(), q.id).toBe(200);
     expect(image.headers()["content-type"]).toContain("image/webp");

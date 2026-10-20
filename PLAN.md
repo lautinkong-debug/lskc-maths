@@ -2,6 +2,14 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Literal similarity solutions and step highlights (20/10/2026)
+
+- [x] Replace generated proof summaries with visually checked transcriptions of all 72 Level 2 / Quick Practice solutions from the supplied PDF. Preserve printed reading order, ratio direction, intermediate calculation lines, alternative solutions and blank reason cells; use stacked KaTeX fractions. Keep the original solutions PDF outside the published repository.
+- [x] Make every printed line selectable. Highlight source angles, sides, figures and points on the original diagram and relevant movable copies, including known right angles and equivalent angle names on the same ray. Keep existing transforms when highlighting or exposing another comparison; add previous/next, reveal, show-all and reset controls, with calculation reveals controlled by the teacher.
+- [x] Preserve the printed Revision Q25(b) angle-label typo and explain separately that ∠ACE should read ∠DCE. The transcription itself remains unchanged.
+- [x] Independent source checks, all 72 source records, strict KaTeX parsing, valid geometry references, literal Q19 / QP8.8 regression checks, TypeScript and production build pass. Browser checks verify source order, fractions/reasons, focus overlays, right-angle marks, later comparison selection and phone fit.
+- [x] All 29 unit checks and 25 Chrome scenarios pass against the production build, including the full 72-question sweep, transformed highlights, source order, mobile layout and existing drag/snap controls. Prepared for release through the approved GitHub/Vercel project. Evidence: ignored `out/similarity-preview/textbook-step-desktop.png` and `literal-proof-390.png`.
+
 ## Similarity textbook proof layout and vertex spacing (20/10/2026)
 
 - [x] Use the supplied textbook solutions as the layout reference. The resupplied PDF has the same SHA-256 as the source already used for the question bank. Render each similarity proof in a statement/reason table, with stacked mathematical fractions, equal-ratio deductions and the textbook criterion beside the conclusion. Keep each condition clickable and distinguish conclusions drawn from given similarity. Apply fraction rendering to prompts and revealed working as well.

@@ -1,20 +1,17 @@
 import { copy } from "@/lib/copy";
+import { memo, useEffect, useRef } from "react";
+import { Math as MathText } from "@/components/Math";
 import { GeometryText } from "./Notation";
 import type { SourceQuestion } from "./types";
-import {
-  criterionNames,
-  type Condition,
-  type ReasonPair,
-  type ReasonView,
-} from "./reasons";
-import { markColours } from "./ReasonMarks";
+import { criterionNames, type ReasonPair, type ReasonView } from "./reasons";
+import type { TextbookSolution } from "./textbook-types";
 import styles from "./similarity.module.css";
 
 const c = copy.similarity;
-const titles = {
-  ...criterionNames,
-  AAA: c.aaaReason,
-};
+// Dragging shapes must not re-typeset the entire textbook solution.
+const PrintedEquation = memo(function PrintedEquation({ tex }: { tex: string }) {
+  return <MathText>{`\\displaystyle ${tex}`}</MathText>;
+});
 export function ReasonsPanel({
   question,
   pairs,
@@ -22,7 +19,9 @@ export function ReasonsPanel({
   onPair,
   view,
   onView,
-  rows,
+  solution,
+  visible,
+  onVisible,
   focus,
   onFocus,
   selected,
@@ -33,124 +32,78 @@ export function ReasonsPanel({
   onPair: (i: number) => void;
   view: ReasonView;
   onView: (v: ReasonView) => void;
-  rows: Condition[];
-  focus: string | null;
-  onFocus: (id: string | null) => void;
+  solution: TextbookSolution;
+  visible: number;
+  onVisible: (n: number) => void;
+  focus: number | null;
+  onFocus: (n: number | null) => void;
   selected: number[];
 }) {
+  const panel = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const container = panel.current;
+    const row = container?.querySelector(`[data-step-index="${focus}"]`);
+    if (!container || !row) return;
+    const box = container.getBoundingClientRect(),
+      line = row.getBoundingClientRect();
+    if (line.bottom > box.bottom - 12)
+      container.scrollTop += line.bottom - box.bottom + 12;
+    else if (line.top < box.top + 140)
+      container.scrollTop -= box.top + 140 - line.top;
+  }, [focus]);
   const pair = pairs[pairIndex];
-  if (!pair) return null;
-  const [a, b] = pair.shapes.map((i) => question.shapes[i]);
-  const conclusion = `${a.name} ${pair.criterion === "not-similar" ? "≁" : "∼"} ${b.name}`;
-  const establishing = rows
-    .filter((r) => !r.consequence && pair.criterion !== "given")
-    .sort((a, b) =>
-      pair.criterion === "SAS"
-        ? Number(a.kind === "angle") - Number(b.kind === "angle")
-        : 0,
-    );
-  const consequences = rows.filter(
-    (r) => r.consequence || pair.criterion === "given",
-  );
-  const sideSteps = establishing.filter((r) => r.kind === "side");
-  const ratioSummary = sideSteps
-    .map((r) => r.text.split(" = ")[0])
-    .join(pair.criterion === "not-similar" ? " ≠ " : " = ");
-  function proofRow(r: Condition) {
-    return (
-      <tr key={r.id}>
-        <td>
-          <button
-            aria-pressed={focus === r.id}
-            onClick={() => onFocus(focus === r.id ? null : r.id)}
-            data-testid={`condition-${r.id}`}
-            style={{ color: markColours[r.index % 3] }}
-          >
-            <GeometryText>{r.text}</GeometryText>
-          </button>
-        </td>
-        <td data-testid="proof-reason">
-          <GeometryText>{r.note}</GeometryText>
-        </td>
-      </tr>
-    );
+  function next() {
+    const index = Math.min((focus ?? -1) + 1, solution.steps.length - 1);
+    onVisible(Math.max(visible, index + 1));
+    onFocus(index);
   }
   return (
     <section
+      ref={panel}
       className={styles.reasonPanel}
       data-testid="diagram-reasons"
-      aria-label={c.proofTitle}
+      aria-label={c.textbookSolution}
     >
-      <h3>
-        {pair.criterion === "given"
-          ? c.proofGiven
-          : pair.criterion === "not-similar"
-            ? c.proofCounterexample
-            : c.proofTitle}
-      </h3>
-      <div className={styles.reasonHeading}>
-        <strong>{titles[pair.criterion]}</strong>
-        {pairs.length > 1 ? (
-          <label>
-            {c.reasonPair}{" "}
-            <select
-              value={pairIndex}
-              onChange={(e) => onPair(Number(e.target.value))}
-            >
-              {pairs.map((p, i) => (
-                <option key={i} value={i}>
-                  {p.shapes.map((j) => question.shapes[j].name).join(" & ")}
-                </option>
-              ))}
-            </select>
-          </label>
-        ) : null}
-        <div className={styles.tools} role="group" aria-label={c.markOptions}>
-          <>
-            <button
-              onClick={() => onView("both")}
-              aria-pressed={view === "both"}
-            >
-              {c.bothMarks}
-            </button>
-            <button
-              onClick={() => onView("proof")}
-              aria-pressed={view === "proof"}
-            >
-              {c.proofMarks}
-            </button>
-            <button
-              onClick={() => onView("angles")}
-              aria-pressed={view === "angles"}
-            >
-              {c.angleMarks}
-            </button>
-            <button
-              onClick={() => onView("sides")}
-              aria-pressed={view === "sides"}
-            >
-              {c.sideMarks}
-            </button>
-          </>
-        </div>
+      <h3>{c.textbookSolution}</h3>
+      <p>{c.textbookStepHint}</p>
+      <div className={styles.solutionControls}>
+        <button
+          onClick={() => onFocus(Math.max(0, (focus ?? 0) - 1))}
+          disabled={focus === null || focus === 0}
+        >
+          {c.previousStep}
+        </button>
+        <button onClick={next} disabled={focus === solution.steps.length - 1}>
+          {c.nextStep}
+        </button>
+        <button
+          onClick={() => onVisible(solution.steps.length)}
+          disabled={visible === solution.steps.length}
+        >
+          {c.showAllSteps}
+        </button>
+        <button
+          onClick={() => {
+            onVisible(solution.initialVisible);
+            onFocus(null);
+          }}
+          disabled={visible === solution.initialVisible && focus === null}
+        >
+          {c.resetSolution}
+        </button>
+        {focus !== null && (
+          <button onClick={() => onFocus(null)}>{c.allMarks}</button>
+        )}
       </div>
-      <p>
-        {pair.criterion === "given"
-          ? c.givenHint
-          : view === "proof"
-            ? c.proofOnlyHint
-            : c.reasonHint}
+      <p role="status">
+        {focus === null
+          ? c.selectSolutionStep
+          : `${c.stepLabel} ${focus + 1} / ${solution.steps.length}`}
       </p>
-      {!pair.shapes.every((i) => selected.includes(i)) && (
-        <p role="status">{c.missingPair}</p>
-      )}
-      <table className={styles.proofTable} aria-label={c.proofTitle}>
-        <caption>
-          <GeometryText>{`${c.proofIn} ${a.name} ${c.proofAnd} ${b.name},`}</GeometryText>
-        </caption>
+      <table className={styles.proofTable} aria-label={c.textbookSolution}>
         <colgroup>
-          <col style={{ width: "56%" }} />
-          <col style={{ width: "44%" }} />
+          <col style={{ width: "64%" }} />
+          <col style={{ width: "36%" }} />
         </colgroup>
         <thead>
           <tr>
@@ -159,51 +112,109 @@ export function ReasonsPanel({
           </tr>
         </thead>
         <tbody>
-          {establishing
-            .filter((r) => pair.criterion !== "SAS" || r.kind === "side")
-            .map(proofRow)}
-          {sideSteps.length > 1 && (
-            <tr data-testid="proof-ratio-summary">
+          {solution.steps.slice(0, visible).map((step, i) => (
+            <tr
+              key={i}
+              data-testid={
+                step.conclusion ? "similarity-conclusion" : "textbook-step"
+              }
+              data-step-index={i}
+              data-active={focus === i}
+              className={step.conclusion ? styles.proofConclusion : undefined}
+            >
               <td>
-                ∴ <GeometryText>{ratioSummary}</GeometryText>
+                <button
+                  data-testid={`solution-step-${i}`}
+                  aria-label={`${c.highlightStep} ${i + 1}`}
+                  aria-pressed={focus === i}
+                  onClick={() => onFocus(focus === i ? null : i)}
+                >
+                  {step.heading && (
+                    <span className={styles.printedLine}>
+                      <GeometryText>{step.heading}</GeometryText>
+                    </span>
+                  )}
+                  {step.math?.map((math, j) => (
+                    <span className={styles.printedMath} key={j}>
+                      <PrintedEquation tex={math} />
+                    </span>
+                  ))}
+                  {step.text && (
+                    <span className={styles.printedLine}>
+                      <GeometryText>{step.text}</GeometryText>
+                    </span>
+                  )}
+                </button>
               </td>
-              <td>
-                {pair.criterion === "not-similar"
-                  ? c.unequalRatios
-                  : c.equalRatios}
+              <td data-testid="proof-reason">
+                {step.reason && <GeometryText>{step.reason}</GeometryText>}
               </td>
             </tr>
-          )}
-          {pair.criterion === "SAS" &&
-            establishing.filter((r) => r.kind === "angle").map(proofRow)}
-          <tr
-            className={styles.proofConclusion}
-            data-testid="similarity-conclusion"
-          >
-            <td>
-              {pair.criterion !== "given" && "∴ "}
-              <GeometryText>{conclusion}</GeometryText>
-            </td>
-            <td>{criterionNames[pair.criterion]}</td>
-          </tr>
-          {consequences.length > 0 && (
-            <tr>
-              <th className={styles.afterProof} colSpan={2}>
-                {pair.criterion === "given"
-                  ? c.givenConsequences
-                  : c.afterSimilarity}
-              </th>
-            </tr>
-          )}
-          {consequences.map(proofRow)}
+          ))}
         </tbody>
       </table>
-      {focus !== null && (
-        <button className={styles.clearCondition} onClick={() => onFocus(null)}>
-          {c.allMarks}
+      {visible < solution.steps.length && (
+        <button
+          className={styles.clearCondition}
+          onClick={() => {
+            onFocus(visible);
+            onVisible(visible + 1);
+          }}
+        >
+          {c.reveal}
         </button>
       )}
-      {rows.some((r) => r.kind === "side") && <p>{c.originalLengths}</p>}
+      {solution.sourceNote && (
+        <p className={styles.sourceNote}>
+          <strong>{c.sourceNote}</strong>{" "}
+          <GeometryText>{solution.sourceNote}</GeometryText>
+        </p>
+      )}
+      <p>
+        {c.solutionSource} {solution.pages.join(", ")}
+      </p>
+      <details className={styles.markSettings}>
+        <summary>{c.markOptions}</summary>
+        <div className={styles.reasonHeading}>
+          {pair && <strong>{criterionNames[pair.criterion]}</strong>}
+          {pairs.length > 1 && (
+            <label>
+              {c.reasonPair}{" "}
+              <select
+                value={pairIndex}
+                onChange={(e) => onPair(Number(e.target.value))}
+              >
+                {pairs.map((p, i) => (
+                  <option key={i} value={i}>
+                    {p.shapes.map((j) => question.shapes[j].name).join(" & ")}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <div className={styles.tools} role="group" aria-label={c.markOptions}>
+            {(
+              [
+                ["both", c.bothMarks],
+                ["proof", c.proofMarks],
+                ["angles", c.angleMarks],
+                ["sides", c.sideMarks],
+              ] as const
+            ).map(([v, label]) => (
+              <button
+                key={v}
+                onClick={() => onView(v)}
+                aria-pressed={view === v}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {pair && !pair.shapes.every((i) => selected.includes(i)) && (
+            <p role="status">{c.missingPair}</p>
+          )}
+        </div>
+      </details>
     </section>
   );
 }

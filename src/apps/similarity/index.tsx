@@ -39,6 +39,9 @@ import { ReasonsPanel } from "./ReasonsPanel";
 import { ComparisonKey } from "./ComparisonKey";
 import { placeVertexLabels, vertexLabelPoints } from "./vertexLabels";
 import { reasonPairs, conditions, type ReasonView } from "./reasons";
+import { textbookSolutions } from "./textbook";
+import { StepHighlights } from "./StepHighlights";
+import { vertexNames, knownRightAngles } from "./stepGeometry";
 
 const c = copy.similarity;
 const colours = [
@@ -193,7 +196,12 @@ function Lesson({ question }: { question: SourceQuestion }) {
   const [poses, setPoses] = useState<Pose[]>(separatePoses(selected.length));
   const [opacity, setOpacity] = useState(0.2);
   const [order, setOrder] = useState(false);
-  const [step, setStep] = useState(0);
+  const solution = textbookSolutions[question.id];
+  const [visibleSteps, setVisibleSteps] = useState(solution.initialVisible);
+  const [focusedStep, setFocusedStep] = useState<number | null>(null);
+  const focused =
+    focusedStep === null ? undefined : solution.steps[focusedStep];
+
   const [tracing, setTracing] = useState(false);
   const [vertices, setVertices] = useState<string[]>([]);
   const [originalExpanded, setOriginalExpanded] = useState(false);
@@ -211,24 +219,45 @@ function Lesson({ question }: { question: SourceQuestion }) {
     reasonPairs(question)[0]?.criterion === "given" ? "both" : "proof",
   );
   const [conditionFocus, setConditionFocus] = useState<string | null>(null);
+  const highlightStep =
+    focused && showMarks
+      ? {
+          ...focused,
+          highlights: {
+            ...focused.highlights,
+            angles: showAngles ? focused.highlights.angles : [],
+            sides: showLengths ? focused.highlights.sides : [],
+          },
+        }
+      : undefined;
+  const rightAngles = knownRightAngles(question);
   const pairs = reasonPairs(question);
   const pair = pairs[pairIndex];
   const rows = pair ? conditions(question, pair, reasonView) : [];
   const anglesVisible =
-    showMarks && showAngles && rows.some((r) => r.kind === "angle");
+    showMarks &&
+    showAngles &&
+    (focused
+      ? !!focused.highlights.angles?.length
+      : rows.some((r) => r.kind === "angle"));
   const lengthsVisible =
-    showMarks && showLengths && rows.some((r) => r.kind === "side");
+    showMarks &&
+    showLengths &&
+    (focused
+      ? !!focused.highlights.sides?.length
+      : rows.some((r) => r.kind === "side"));
   const hiddenForPair = hiddenMarks
     .filter((id) => id.startsWith(`${pairIndex}:`))
     .map((id) => id.split(":")[1]);
-  const visibleRows = showMarks
-    ? rows.filter(
-        (r) =>
-          (!conditionFocus || r.id === conditionFocus) &&
-          (r.kind === "angle" ? showAngles : showLengths) &&
-          !hiddenForPair.includes(r.id),
-      )
-    : [];
+  const visibleRows =
+    showMarks && focusedStep === null
+      ? rows.filter(
+          (r) =>
+            (!conditionFocus || r.id === conditionFocus) &&
+            (r.kind === "angle" ? showAngles : showLengths) &&
+            !hiddenForPair.includes(r.id),
+        )
+      : [];
   function hideMark(id: string) {
     setHiddenMarks((prev) => [...new Set([...prev, `${pairIndex}:${id}`])]);
   }
@@ -309,7 +338,8 @@ function Lesson({ question }: { question: SourceQuestion }) {
     setSelected(question.shapes.slice(0, 2).map((_, i) => i));
     setPoses(separatePoses(Math.min(2, question.shapes.length)));
     setActive(0);
-    setStep(0);
+    setVisibleSteps(solution.initialVisible);
+    setFocusedStep(null);
     setOrder(false);
     setOpacity(0.2);
     setTracing(false);
@@ -323,6 +353,63 @@ function Lesson({ question }: { question: SourceQuestion }) {
     setReasonView(pairs[0]?.criterion === "given" ? "both" : "proof");
     setPairIndex(0);
     setConditionFocus(null);
+    setFocusedStep(null);
+  }
+  function focusSolution(index: number | null) {
+    setFocusedStep(index);
+    if (index === null) return;
+    setShowMarks(true);
+    setShowAngles(true);
+    setShowLengths(true);
+    setVisibleSteps((n) => Math.max(n, index + 1));
+    // Use the most recent printed introduction to expose the relevant copies.
+    const context =
+      solution.steps
+        .slice(0, index + 1)
+        .reverse()
+        .find((s) => (s.highlights.figures?.length ?? 0) >= 2)?.highlights
+        .figures ?? [];
+    const desired = context
+      .map((f) =>
+        question.shapes.findIndex((s) => {
+          const names = vertexNames(f);
+          return (
+            s.vertices.length === names.length &&
+            s.vertices.every((v) => names.includes(v))
+          );
+        }),
+      )
+      .filter((i) => i >= 0)
+      .filter((n, i, all) => all.indexOf(n) === i)
+      .slice(0, 3);
+    if (desired.length && !desired.every((i) => selected.includes(i))) {
+      const next = [
+        ...desired,
+        ...selected.filter((i) => !desired.includes(i)),
+      ].slice(0, 3);
+      const defaults = separatePoses(next.length);
+      const nextSets = boardShapes(
+        next.map((id) => shapes[id]),
+        points,
+      );
+      setPoses(
+        next.map((id, i) => {
+          const oldIndex = selected.indexOf(id);
+          if (oldIndex < 0) return defaults[i];
+          const old = sets[oldIndex],
+            fresh = nextSets[i];
+          const scaleFactor =
+            Math.hypot(old[1].x - old[0].x, old[1].y - old[0].y) /
+            Math.hypot(fresh[1].x - fresh[0].x, fresh[1].y - fresh[0].y);
+          return {
+            ...poses[oldIndex],
+            scale: poses[oldIndex].scale * scaleFactor,
+          };
+        }),
+      );
+      setSelected(next);
+      setActive(0);
+    }
   }
   function select(index: number) {
     view.reset();
@@ -355,6 +442,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
     if (matching >= 0) {
       setPairIndex(matching);
       setConditionFocus(null);
+      setFocusedStep(null);
     }
   }
   function update(patch: Partial<Pose>, index = active) {
@@ -542,6 +630,8 @@ function Lesson({ question }: { question: SourceQuestion }) {
                   onClick={() => {
                     setShowAngles(!anglesVisible);
                     setConditionFocus(null);
+                    if (!focused?.highlights.angles?.length)
+                      setFocusedStep(null);
                     if (!rows.some((r) => r.kind === "angle"))
                       setReasonView("both");
                     setShowMarks(true);
@@ -554,6 +644,8 @@ function Lesson({ question }: { question: SourceQuestion }) {
                   onClick={() => {
                     setShowLengths(!lengthsVisible);
                     setConditionFocus(null);
+                    if (!focused?.highlights.sides?.length)
+                      setFocusedStep(null);
                     if (!rows.some((r) => r.kind === "side"))
                       setReasonView("both");
                     setShowMarks(true);
@@ -630,7 +722,9 @@ function Lesson({ question }: { question: SourceQuestion }) {
                     vertexMode={vertexMode}
                     reasonPair={showMarks ? pair : undefined}
                     reasonRows={visibleRows}
-                    proofOnly={reasonView !== "both"}
+                    highlightStep={highlightStep}
+                    rightAngles={rightAngles}
+                    proofOnly={focusedStep !== null || reasonView !== "both"}
                     showAngles={showMarks && showAngles}
                     showLengths={showMarks && showLengths}
                     hiddenMarks={hiddenForPair}
@@ -845,6 +939,12 @@ function Lesson({ question }: { question: SourceQuestion }) {
                               strokeDasharray={
                                 i === 1 ? "10 4" : i === 2 ? "3 3" : undefined
                               }
+                            />
+                            <StepHighlights
+                              step={highlightStep}
+                              rightAngles={rightAngles}
+                              source={points}
+                              placed={transformed}
                             />
                             {showMarks &&
                               pair?.shapes.includes(selected[i]) && (
@@ -1096,6 +1196,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
                       pairs[i].criterion === "given" ? "both" : "proof",
                     );
                     setConditionFocus(null);
+                    setFocusedStep(null);
                     setShowAngles(true);
                     setShowLengths(true);
                   }}
@@ -1103,23 +1204,16 @@ function Lesson({ question }: { question: SourceQuestion }) {
                   onView={(v) => {
                     setReasonView(v);
                     setConditionFocus(null);
+                    setFocusedStep(null);
                     setShowMarks(true);
                     setShowAngles(true);
                     setShowLengths(true);
                   }}
-                  rows={rows}
-                  focus={conditionFocus}
-                  onFocus={(id) => {
-                    setConditionFocus(id);
-                    if (id) {
-                      setShowMarks(true);
-                      setShowAngles(true);
-                      setShowLengths(true);
-                      setHiddenMarks((prev) =>
-                        prev.filter((key) => key !== `${pairIndex}:${id}`),
-                      );
-                    }
-                  }}
+                  solution={solution}
+                  visible={visibleSteps}
+                  onVisible={setVisibleSteps}
+                  focus={focusedStep}
+                  onFocus={focusSolution}
                   selected={selected}
                 />
               )}
@@ -1151,36 +1245,6 @@ function Lesson({ question }: { question: SourceQuestion }) {
       ) : (
         <p className={styles.empty}>{c.noShape}</p>
       )}
-      <section className={styles.explanation} aria-label={c.teaching}>
-        <div className={styles.panelTitle}>
-          <span>03</span>
-          <h3>{c.teaching}</h3>
-          <div className={styles.tools}>
-            <button
-              disabled={step >= question.proof.length}
-              onClick={() => setStep((s) => s + 1)}
-            >
-              {step >= question.proof.length ? c.complete : c.reveal}
-            </button>
-            <button disabled={!step} onClick={() => setStep(0)}>
-              {c.hide}
-            </button>
-          </div>
-        </div>
-        {!step && <p>{c.proofHint}</p>}
-        <ol aria-live="polite">
-          {question.proof.slice(0, step).map((s, i) => (
-            <li key={i}>
-              <GeometryText>{s}</GeometryText>
-            </li>
-          ))}
-        </ol>
-        {step === question.proof.length && step > 0 && (
-          <p className={styles.result} data-testid="question-result">
-            <GeometryText>{question.result}</GeometryText>
-          </p>
-        )}
-      </section>
       <details className={styles.source}>
         <summary>
           {c.source} · p. 8.{question.page}

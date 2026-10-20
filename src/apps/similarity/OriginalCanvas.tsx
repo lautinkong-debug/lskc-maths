@@ -29,6 +29,8 @@ import type { Condition, ReasonPair } from "./reasons";
 import { CleanSource, cleanSourceIds } from "./CleanSource";
 import { placeVertexLabels, vertexLabelPoints } from "./vertexLabels";
 
+import { StepHighlights } from "./StepHighlights";
+import type { TextbookStep } from "./textbook-types";
 const c = copy.similarity;
 const colours = [
   "var(--color-navy)",
@@ -58,6 +60,8 @@ export function OriginalCanvas({
   vertexMode,
   reasonPair,
   reasonRows,
+  highlightStep,
+  rightAngles,
   proofOnly,
   showAngles,
   showLengths,
@@ -81,6 +85,8 @@ export function OriginalCanvas({
   vertexMode: VertexDragMode;
   reasonPair?: ReasonPair;
   reasonRows: Condition[];
+  highlightStep?: TextbookStep;
+  rightAngles: string[];
   proofOnly: boolean;
   showAngles: boolean;
   showLengths: boolean;
@@ -445,6 +451,13 @@ export function OriginalCanvas({
             </>
           )}
         </g>
+        <StepHighlights
+          step={highlightStep}
+          rightAngles={rightAngles}
+          source={points}
+          size={unit / 12}
+          context="source"
+        />
         {order.map((i) => {
           const s = shapes[i],
             selectedIndex = selected.indexOf(i),
@@ -498,6 +511,15 @@ export function OriginalCanvas({
                 strokeWidth={i === index ? 2.8 : 2}
                 strokeDasharray={selectedIndex === 1 ? "7 3" : undefined}
               />
+              {selectedIndex >= 0 && poses[i] && (
+                <StepHighlights
+                  step={highlightStep}
+                  rightAngles={rightAngles}
+                  source={points}
+                  placed={ps}
+                  size={unit / 12}
+                />
+              )}
               {selectedIndex >= 0 && reasonPair?.shapes.includes(i) && (
                 <ReasonMarks
                   points={ps}
