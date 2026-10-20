@@ -2,6 +2,16 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Approved Similarity Detective games (20/10/2026)
+
+The owner approved all three games and a mixed challenge, integration into Similarity Studio, and publication to GitHub/Vercel. Reference: gMath's three interactive similarity-condition activities, inspected in-browser. Build original activities with the existing school palette and large mathematical diagrams.
+
+- [x] Add a Games mode alongside the retained textbook practice. Include Angle Match (AAA), Ratio Repair (3 sides prop.), Find the Hinge (ratio of 2 sides, inc. ∠), and a 12-round mixed evidence challenge.
+- [x] Use Explore → Solve → Explain: manipulate accurate triangles, select the supporting angle/side evidence and condition, receive specific feedback, then reveal a statement/reason proof one step at a time. Include insufficient-information cases and the non-included-angle misconception.
+- [x] Preserve direct triangle movement, rotation/reflection, clear labels, mouse/touch/keyboard access and projection readability. Show stacked fractions. Keep progress local with no timer or new backend. Separate temporary number-input drafts from valid geometry; show equality markings only when corresponding angles are equal.
+- [x] Verify the model with 35 new unit tests; all 880 unit tests pass. Check all nine guided missions and twelve mixed rounds, partial/incorrect evidence, typed answers, real touch/mouse/keyboard transforms, saved completion and member-specific proof highlights. Inspect desktop and 390px phone diagrams and statement/reason tables. The 28 existing browser scenarios also pass, including the 72-question source audit.
+- [ ] Publish the exact tested production build through the existing GitHub/Vercel project and verify the deployed games. Release is explicitly approved; no Firebase data, rules, environment or dependency changes.
+
 ## Similarity one-line reveals and clear angle symbols (20/10/2026)
 
 - [x] Start every solution with no revealed lines or matching marks. Next step reveals one printed line and highlights only its geometry; Previous step and selecting an earlier line rewind the reveal, and Reset solution returns to the blank start. Keep the literal textbook equations, stacked fractions and reason column unchanged. Move the optional Show all steps control into Diagram marks.

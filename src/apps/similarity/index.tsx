@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import {
   useEffect,
   useRef,
@@ -45,6 +46,7 @@ import { vertexNames, knownRightAngles } from "./stepGeometry";
 import { focusPrintedLine } from "./stepFocus";
 
 const c = copy.similarity;
+const SimilarityGames = dynamic(() => import("./games"), { ssr: false });
 const colours = [
   "var(--color-navy)",
   "var(--color-crimson)",
@@ -58,6 +60,8 @@ export default function SimilarityStudio() {
   const [id, setId] = useState("ex8c-19");
   const [group, setGroup] = useState("");
   const [query, setQuery] = useState("");
+  const [mode, setMode] = useState<"practice" | "games">("practice");
+  const [gamesOpened, setGamesOpened] = useState(false);
   const presenting = usePresentation();
   useEffect(() => {
     const read = () => {
@@ -68,7 +72,13 @@ export default function SimilarityStudio() {
         /* Storage may be disabled. */
       }
       const next = window.location.hash.slice(1) || saved;
-      if (questions.some((q) => q.id === next)) setId(next);
+      if (next === "games") {
+        setMode("games");
+        setGamesOpened(true);
+      } else if (questions.some((q) => q.id === next)) {
+        setId(next);
+        setMode("practice");
+      }
     };
     read();
     window.addEventListener("hashchange", read);
@@ -82,6 +92,15 @@ export default function SimilarityStudio() {
     } catch {
       /* Optional. */
     }
+  }
+  function chooseMode(next: "practice" | "games") {
+    setMode(next);
+    if (next === "games") setGamesOpened(true);
+    window.history.replaceState(
+      null,
+      "",
+      `#${next === "games" ? "games" : id}`,
+    );
   }
   const question = questions.find((q) => q.id === id) ?? questions[0];
   const visible = questions.filter(
@@ -98,90 +117,112 @@ export default function SimilarityStudio() {
       data-testid="similarity-studio"
       data-projecting={presenting}
     >
-      <LessonWorkspace
-        subject={c.title}
-        symbol="△"
-        active={name(question)}
-        presenting={presenting}
-        navigation={
-          <nav className={styles.bank} aria-label={c.questionBank}>
-            <h2>
-              {c.questionBank} <span>{questions.length}</span>
-            </h2>
-            <label>
-              {c.search}
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Q19, 8.32, parallel…"
-              />
-            </label>
-            <label>
-              {c.all}
-              <select value={group} onChange={(e) => setGroup(e.target.value)}>
-                <option value="">{c.all}</option>
-                {groups.map((g) => (
-                  <option key={g}>{g}</option>
-                ))}
-              </select>
-            </label>
-            <button
-              type="button"
-              className={styles.pilot}
-              onClick={() => choose("ex8c-19")}
-            >
-              {c.jump} ↗
-            </button>
-            <p className={styles.count}>
-              {visible.length} / {questions.length} {c.questions}
-            </p>
-            <div className={styles.questionList}>
-              {visible.map((q) => (
-                <button
-                  type="button"
-                  key={q.id}
-                  aria-current={q.id === id ? "page" : undefined}
-                  onClick={() => choose(q.id)}
+      <nav className={styles.modeTabs} aria-label={copy.similarityGames.modes}>
+        <button
+          aria-pressed={mode === "practice"}
+          onClick={() => chooseMode("practice")}
+        >
+          {copy.similarityGames.practice}
+        </button>
+        <button
+          aria-pressed={mode === "games"}
+          onClick={() => chooseMode("games")}
+        >
+          {copy.similarityGames.games}
+        </button>
+      </nav>
+      <div hidden={mode !== "games"}>
+        {gamesOpened && <SimilarityGames presenting={presenting} />}
+      </div>
+      <div hidden={mode !== "practice"}>
+        <LessonWorkspace
+          subject={c.title}
+          symbol="△"
+          active={name(question)}
+          presenting={presenting}
+          navigation={
+            <nav className={styles.bank} aria-label={c.questionBank}>
+              <h2>
+                {c.questionBank} <span>{questions.length}</span>
+              </h2>
+              <label>
+                {c.search}
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Q19, 8.32, parallel…"
+                />
+              </label>
+              <label>
+                {c.all}
+                <select
+                  value={group}
+                  onChange={(e) => setGroup(e.target.value)}
                 >
-                  <span>{name(q)}</span>
-                  <small>p. 8.{q.page}</small>
-                </button>
-              ))}
-              {!visible.length && <p>{c.noResults}</p>}
+                  <option value="">{c.all}</option>
+                  {groups.map((g) => (
+                    <option key={g}>{g}</option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                className={styles.pilot}
+                onClick={() => choose("ex8c-19")}
+              >
+                {c.jump} ↗
+              </button>
+              <p className={styles.count}>
+                {visible.length} / {questions.length} {c.questions}
+              </p>
+              <div className={styles.questionList}>
+                {visible.map((q) => (
+                  <button
+                    type="button"
+                    key={q.id}
+                    aria-current={q.id === id ? "page" : undefined}
+                    onClick={() => choose(q.id)}
+                  >
+                    <span>{name(q)}</span>
+                    <small>p. 8.{q.page}</small>
+                  </button>
+                ))}
+                {!visible.length && <p>{c.noResults}</p>}
+              </div>
+            </nav>
+          }
+        >
+          <div className={styles.questionHeader}>
+            <div>
+              <p className={styles.reference}>
+                {question.group === "Quick Practice"
+                  ? "Quick Practice"
+                  : "Level 2"}{" "}
+                · p. 8.{question.page}
+              </p>
+              <h2>{name(question)}</h2>
             </div>
-          </nav>
-        }
-      >
-        <div className={styles.questionHeader}>
-          <div>
-            <p className={styles.reference}>
-              {question.group === "Quick Practice"
-                ? "Quick Practice"
-                : "Level 2"}{" "}
-              · p. 8.{question.page}
-            </p>
-            <h2>{name(question)}</h2>
+            <div className={styles.pager}>
+              <button
+                aria-label={c.previous}
+                disabled={currentIndex === 0}
+                onClick={() => choose(questions[currentIndex - 1].id)}
+              >
+                ←
+              </button>
+              <button
+                aria-label={c.next}
+                disabled={currentIndex === questions.length - 1}
+                onClick={() => choose(questions[currentIndex + 1].id)}
+              >
+                →
+              </button>
+            </div>
           </div>
-          <div className={styles.pager}>
-            <button
-              aria-label={c.previous}
-              disabled={currentIndex === 0}
-              onClick={() => choose(questions[currentIndex - 1].id)}
-            >
-              ←
-            </button>
-            <button
-              aria-label={c.next}
-              disabled={currentIndex === questions.length - 1}
-              onClick={() => choose(questions[currentIndex + 1].id)}
-            >
-              →
-            </button>
-          </div>
-        </div>
-        <Lesson key={question.id} question={question} />
-      </LessonWorkspace>
+          <Lesson key={question.id} question={question} />
+        </LessonWorkspace>
+      </div>
     </div>
   );
 }

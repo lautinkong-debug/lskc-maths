@@ -858,3 +858,22 @@
     scroll-behavior: auto;
   }
 }
+.modeTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--stroke);
+  padding-bottom: 10px;
+}
+.modeTabs button {
+  padding: 12px 20px;
+  min-height: 44px;
+  color: var(--color-navy);
+  border: 1px solid var(--stroke);
+  border-radius: 6px;
+  font-weight: 600;
+}
+.modeTabs button[aria-pressed="true"] {
+  background: var(--color-navy);
+  color: var(--color-paper);
+}

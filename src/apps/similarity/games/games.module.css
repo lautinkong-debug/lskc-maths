@@ -1,0 +1,644 @@
+.games {
+  color: var(--color-graphite);
+  container-type: inline-size;
+}
+.games button {
+  cursor: pointer;
+  min-height: 44px;
+  border: 1px solid var(--color-grid);
+  border-radius: 6px;
+  background: var(--color-paper);
+  color: var(--color-navy);
+  padding: 10px 14px;
+  font-weight: 600;
+}
+.games button:hover {
+  border-color: var(--color-navy);
+}
+.games button:focus-visible,
+.games input:focus-visible {
+  outline: 3px solid var(--color-navy);
+  outline-offset: 3px;
+}
+.games button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.games button[aria-pressed="true"] {
+  border-color: var(--color-navy);
+  background: var(--color-navy-wash);
+  box-shadow: inset 0 -3px var(--color-navy);
+}
+.games h2,
+.games h3 {
+  font-family: var(--font-display);
+  color: var(--color-navy);
+}
+.games h2 {
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1.2;
+}
+.games h3 {
+  font-size: 1.35rem;
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+.games p {
+  line-height: 1.6;
+}
+.lobbyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 0 32px;
+}
+.lead {
+  font-size: 1.3rem;
+  margin: 12px 0 6px;
+  color: var(--color-navy);
+}
+.progress {
+  min-width: 140px;
+  border-left: 2px solid var(--color-grid);
+  padding-left: 24px;
+  display: grid;
+  gap: 8px;
+}
+.progress strong {
+  font: 600 2.6rem var(--font-display);
+  color: var(--color-navy);
+}
+.progress strong span {
+  font-size: 1.2rem;
+}
+.progress > span {
+  font-size: 0.85rem;
+}
+.missions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.games .mission {
+  text-align: left;
+  padding: 22px;
+  border-top: 4px solid var(--color-navy);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  font-weight: 400;
+}
+.mission p {
+  font-size: 0.95rem;
+  margin-top: 10px;
+}
+.mission strong {
+  min-height: 40px;
+  font-size: 0.95rem;
+}
+.missionTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--color-pencil);
+  font-size: 0.85rem;
+}
+.number {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-navy);
+  color: var(--color-paper);
+  font-weight: 600;
+}
+.symbol {
+  width: 100%;
+  height: 160px;
+  margin: 8px 0 15px;
+}
+.games .mixedCard {
+  margin: 22px 0 16px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  text-align: left;
+  padding: 22px 28px;
+  background: var(--color-navy);
+  color: var(--color-paper);
+}
+.mixedCard h3 {
+  color: var(--color-paper);
+}
+.mixedCard p {
+  font-weight: 400;
+}
+.mixedCard > strong {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+.mixedCard > strong span {
+  margin-left: 18px;
+}
+.footnote {
+  font-size: 0.85rem;
+  margin-top: 8px;
+  color: var(--color-pencil);
+}
+.footnote a {
+  text-decoration: underline;
+  color: var(--color-navy);
+}
+.gameHeader {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0 20px;
+}
+.gameHeader > div {
+  flex: 1;
+}
+.gameHeader p {
+  font-size: 0.95rem;
+  margin-top: 4px;
+}
+.gameHeader > span {
+  color: var(--color-pencil);
+}
+.rounds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 0 15px;
+}
+.rounds button {
+  width: 44px;
+  padding: 6px;
+}
+.rounds button[data-done="true"] {
+  color: var(--color-crimson);
+}
+.flow {
+  display: flex;
+  gap: 22px;
+  counter-reset: steps;
+  list-style: none;
+  border-top: 1px solid var(--color-grid);
+  padding: 16px 0 0;
+  color: var(--color-pencil);
+}
+.flow li {
+  counter-increment: steps;
+}
+.flow li::before {
+  content: counter(steps) ". ";
+}
+.flow li[data-current="true"] {
+  color: var(--color-navy);
+  font-weight: 600;
+}
+.task {
+  font-size: 1.05rem;
+  margin: 12px 0 20px;
+  max-width: 76ch;
+}
+.playLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 20px;
+  align-items: start;
+}
+.diagramColumn {
+  min-width: 0;
+}
+.playLayout[data-explaining="true"] {
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 0.85fr);
+}
+.board {
+  border: 1px solid var(--color-grid);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.boardTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  border-bottom: 1px solid var(--color-grid);
+}
+.boardTools button {
+  font-size: 0.8rem;
+  padding: 8px 10px;
+}
+.boardHint {
+  font-size: 0.8rem;
+  color: var(--color-pencil);
+  padding: 10px 14px;
+}
+.canvas {
+  width: 100%;
+  height: auto;
+  min-height: 320px;
+  display: block;
+  touch-action: none;
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.canvas[data-narrow="true"] {
+  min-height: 0;
+}
+.dragTriangle {
+  cursor: grab;
+}
+.dragTriangle:active {
+  cursor: grabbing;
+}
+.dragTriangle:focus-visible polygon {
+  stroke-width: 6;
+}
+.vertexHandle {
+  cursor: crosshair;
+}
+.vertexHandle:focus-visible {
+  outline: none;
+  stroke-width: 5;
+}
+.vertexName {
+  font-family: var(--font-display);
+  font-style: italic;
+  paint-order: stroke;
+  stroke: var(--color-paper);
+  stroke-width: 5;
+  pointer-events: none;
+}
+.mathLabel {
+  font-family: var(--font-display);
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--color-paper);
+  stroke-width: 5;
+  stroke-linejoin: round;
+}
+.clueMark {
+  cursor: pointer;
+}
+.desk {
+  padding: 20px;
+  border-left: 3px solid var(--color-navy);
+  background: var(--color-navy-wash);
+  border-radius: 6px;
+  min-width: 0;
+}
+.control {
+  display: grid;
+  grid-template-columns: 1fr 76px;
+  gap: 10px;
+  margin-top: 15px;
+  align-items: center;
+  color: var(--color-navy);
+  font-weight: 600;
+}
+.control input[type="range"],
+.control small {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+.control input[type="number"] {
+  min-width: 0;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--color-grid);
+  background: var(--color-paper);
+  border-radius: 4px;
+  text-align: center;
+  color: var(--color-navy);
+}
+.control small {
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+.small {
+  font-size: 0.78rem;
+  margin-top: 14px;
+  color: var(--color-pencil);
+}
+.conditions {
+  margin: 22px 0 14px;
+  display: grid;
+  gap: 8px;
+}
+.conditions legend {
+  padding: 0 0 12px;
+  color: var(--color-navy);
+  font-weight: 600;
+}
+.conditions button {
+  text-align: left;
+  line-height: 1.5;
+}
+.games .check {
+  width: 100%;
+  color: var(--color-paper);
+  background: var(--color-navy);
+  border-color: var(--color-navy);
+  font-size: 1rem;
+}
+.feedback {
+  margin: 10px 0;
+  color: var(--color-crimson);
+  font-weight: 500;
+}
+.feedback:empty {
+  display: none;
+}
+.games .hintButton {
+  font-size: 0.85rem;
+  padding: 8px 0;
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+}
+.hint {
+  font-size: 0.9rem;
+  border-left: 2px solid var(--color-crimson);
+  padding-left: 12px;
+}
+.evidenceSection {
+  padding: 20px 0;
+}
+.evidenceSection > p {
+  font-size: 0.9rem;
+  color: var(--color-pencil);
+  margin-bottom: 12px;
+}
+.evidenceList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px;
+}
+.evidenceList button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  min-height: 76px;
+  font-weight: 400;
+  overflow-x: auto;
+}
+.evidenceList :global(.katex) {
+  font-size: 1.05em;
+}
+.tick {
+  border: 1px solid var(--color-grid);
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+.proof > p {
+  font-size: 0.9rem;
+  margin-bottom: 14px;
+}
+.success {
+  color: var(--color-navy);
+  font-weight: 600;
+}
+.proofControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 15px 0;
+}
+.proofControls button {
+  font-size: 0.85rem;
+}
+.proof table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: var(--color-paper);
+}
+.proof th {
+  font-size: 0.72rem;
+  color: var(--color-pencil);
+  text-align: left;
+}
+.proof td,
+.proof th {
+  padding: 12px 8px;
+}
+.proof th:first-child,
+.proof td:first-child {
+  width: 62%;
+}
+.proof th + th,
+.proof td + td {
+  border-left: 1px solid var(--color-grid);
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+.proof td > span {
+  display: block;
+  overflow-x: auto;
+  padding: 6px 0;
+}
+.proof :global(.katex) {
+  font-size: 0.95em;
+}
+.proof tr[data-current="true"] {
+  box-shadow: inset 3px 0 var(--color-crimson);
+  background: var(--color-navy-wash);
+}
+.explanation {
+  border-top: 1px solid var(--color-grid);
+  padding-top: 16px;
+  margin-top: 16px;
+}
+.finished {
+  text-align: center;
+  max-width: 640px;
+  margin: 40px auto;
+  padding: 40px 20px;
+  border: 1px solid var(--color-grid);
+  border-radius: 8px;
+}
+.finished h3 {
+  font-size: 2rem;
+  margin-top: 20px;
+}
+.finished p {
+  margin: 14px 0 24px;
+}
+.finished button {
+  margin: 4px;
+}
+.seal {
+  display: inline-grid;
+  place-items: center;
+  border: 3px solid var(--color-navy);
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  font-size: 2.5rem;
+  color: var(--color-navy);
+}
+.games[data-projecting="true"] {
+  font-size: 1.15rem;
+}
+.games[data-projecting="true"] .playLayout {
+  grid-template-columns: minmax(0, 1fr) 390px;
+}
+@container (max-width: 960px) {
+  .playLayout,
+  .playLayout[data-explaining="true"],
+  .games[data-projecting="true"] .playLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .desk,
+  .diagramColumn {
+    display: contents;
+  }
+  .board {
+    order: 1;
+  }
+  .evidenceSection {
+    order: 2;
+  }
+  .conditions {
+    order: 3;
+  }
+  .desk > .check {
+    order: 4;
+  }
+  .feedback {
+    order: 5;
+  }
+  .hintButton {
+    order: 6;
+  }
+  .hint {
+    order: 7;
+  }
+  .proof {
+    order: 2;
+  }
+  .construction,
+  .proof {
+    background: var(--color-navy-wash);
+    border-left: 3px solid var(--color-navy);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .construction {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 24px;
+  }
+  .construction h3,
+  .construction .small {
+    grid-column: 1 / -1;
+  }
+  .conditions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .conditions legend {
+    grid-column: 1 / -1;
+  }
+}
+@container (max-width: 640px) {
+  .lobbyHeader {
+    align-items: flex-start;
+  }
+  .progress {
+    min-width: 85px;
+    padding-left: 12px;
+  }
+  .progress strong {
+    font-size: 2rem;
+  }
+  .progress > span {
+    font-size: 0.75rem;
+  }
+  .missions {
+    grid-template-columns: 1fr;
+  }
+  .games .mission {
+    display: grid;
+    grid-template-columns: 95px minmax(0, 1fr);
+    gap: 0 15px;
+    padding: 16px;
+  }
+  .missionTop {
+    grid-column: 1 / -1;
+    margin-bottom: 12px;
+  }
+  .symbol {
+    grid-row: 2 / 5;
+    height: 100px;
+  }
+  .mission h3 {
+    font-size: 1.25rem;
+  }
+  .mission strong {
+    min-height: 0;
+    font-size: 0.85rem;
+  }
+  .mission p {
+    font-size: 0.85rem;
+  }
+  .games .mixedCard {
+    padding: 18px;
+  }
+  .mixedCard > strong {
+    font-size: 1rem;
+  }
+  .mixedCard > strong span {
+    display: none;
+  }
+  .gameHeader {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .gameHeader > div {
+    flex-basis: 60%;
+  }
+  .gameHeader h2 {
+    font-size: 1.5rem;
+  }
+  .gameHeader > span {
+    width: 100%;
+    font-size: 0.85rem;
+  }
+  .construction {
+    display: block;
+  }
+  .conditions {
+    grid-template-columns: 1fr;
+  }
+  .desk {
+    padding: 16px;
+  }
+  .evidenceList {
+    grid-template-columns: 1fr;
+  }
+  .flow {
+    gap: 16px;
+    font-size: 0.9rem;
+  }
+  .boardTools {
+    gap: 5px;
+  }
+  .boardTools button {
+    padding: 8px;
+  }
+}

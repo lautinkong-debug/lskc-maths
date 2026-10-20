@@ -3,6 +3,149 @@
  * can be changed in one place. UI language is English - see CLAUDE.md.
  */
 export const copy = {
+  similarityGames: {
+    title: "Similarity Detective",
+    games: "Games",
+    practice: "Textbook practice",
+    modes: "Similarity Studio modes",
+    intro: "Change the triangles. Collect the evidence. Prove the match.",
+    description: "Three ways to prove similarity, one condition at a time.",
+    saved:
+      "Progress is saved on this device. Take your time—there is no timer.",
+    progress: "Your discoveries",
+    completed: "Completed",
+    rounds: "rounds",
+    missions: {
+      aaa: {
+        title: "Angle Match",
+        rule: "AAA",
+        description:
+          "Match the angles, discover the third, and recognise a triangle in any orientation.",
+        task: "Change ∠D and ∠E to match the first triangle. Calculate ∠F, then select all three angle pairs.",
+      },
+      sides: {
+        title: "Ratio Repair",
+        rule: "3 sides prop.",
+        description:
+          "Repair one side so every corresponding side has the same ratio.",
+        task: "Repair FD. Select the three corresponding side pairs and check that their ratios agree.",
+      },
+      included: {
+        title: "Find the Hinge",
+        rule: "ratio of 2 sides, inc. ∠",
+        description:
+          "Find the angle between the two sides and close the proof.",
+        task: "The two side ratios already agree. Adjust the hinge at E, then select the two side pairs and their included angle.",
+      },
+    },
+    mixed: "Mixed challenge",
+    mixedDescription:
+      "12 cases. Choose a condition—or explain why the evidence is not enough.",
+    mixedTask:
+      "Use only the marked information. Select the supporting evidence and choose the correct conclusion.",
+    insufficient: "Not enough information",
+    back: "All games",
+    level: "Mission",
+    round: "Round",
+    explore: "Explore",
+    solve: "Solve",
+    explain: "Explain",
+    construction: "Build the match",
+    constructionHint:
+      "These controls change the mathematical triangle. Moving, turning and zooming only change its display.",
+    angleD: "Angle D",
+    angleE: "Angle E",
+    thirdAngle: "Your value of angle F",
+    thirdSide: "Third side FD",
+    hinge: "Hinge angle E",
+    thirdHint: "Use the angle sum of a triangle.",
+    evidence: "Collect your evidence",
+    evidenceHint: "Select a matching pair on the graph or below.",
+    condition: "Which condition proves it?",
+    check: "Check proof",
+    next: "Next mission",
+    nextRound: "Next round",
+    finish: "Finish",
+    nextStep: "Next step",
+    restartProof: "Restart proof",
+    proof: "Explain your proof",
+    proofHint:
+      "Reveal one line at a time. Its evidence lights up on both triangles.",
+    statement: "Statement",
+    reason: "Reason",
+    success: "Evidence checked. Now explain why it works.",
+    choose: "Choose a condition and the supporting evidence first.",
+    feedback: {
+      condition:
+        "Check the condition. It must follow from the marked information.",
+      evidence:
+        "Check your evidence. Select exactly the angle or side pairs needed for this condition.",
+      repair:
+        "The match is not ready. Check the angle values or compare all the required side ratios.",
+      included:
+        "The equal angle must lie between the two proportional sides. Check where those sides meet.",
+      third:
+        "Check the third angle: the three angles of a triangle add up to 180°.",
+    },
+    reasons: {
+      givenAngles: "given",
+      angleSum: "angle sum of a triangle",
+      givenLengths: "given",
+      equalRatios: "equal corresponding side ratios",
+      aaa: "AAA",
+      sides: "3 sides prop.",
+      included: "ratio of 2 sides, inc. ∠",
+      insufficient: "insufficient information",
+    },
+    explanations: {
+      aaa: "All three corresponding angles are equal. Changing the size or orientation does not change this condition.",
+      sides:
+        "All three corresponding side ratios are equal. Two matching ratios alone do not establish this condition.",
+      included:
+        "The two corresponding side ratios are equal, and the equal angle lies between those sides in each triangle.",
+      oneAngle:
+        "One equal angle pair leaves the other angles free to change. Similarity has not been established.",
+      twoSides:
+        "Two equal side ratios leave the angle between the sides free to change. More information is needed.",
+      nonIncluded:
+        "The marked equal angle is not between the two known sides. These givens do not guarantee similarity.",
+    },
+    hint: "Show a hint",
+    hints: {
+      aaa: "Match D with A and E with B. Then use 180° − D − E to find F.",
+      sides:
+        "Use the same scale factor for all three sides. Check FD ÷ CA against DE ÷ AB.",
+      included:
+        "DE and EF meet at E. AB and BC meet at B. Those are the included angles.",
+      mixed:
+        "Count the marked angle pairs and side ratios. If you have two side ratios, check which angle lies between the sides.",
+    },
+    board: "Triangle evidence board",
+    boardHint:
+      "Drag a triangle to move it. Drag a vertex ring to turn and resize. Use the controls or arrow keys for precise changes. Matching angle marks appear when the angles are equal.",
+    schematic:
+      "Use the marked values as evidence. A visual fit alone is not a proof.",
+    chooseTriangle: "Select a triangle",
+    moveTriangle: "Move triangle",
+    handle: "Turn or resize at",
+    turnLeft: "Turn −15°",
+    turnRight: "Turn +15°",
+    flip: "Flip",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    resetView: "Reset view",
+    retry: "Try again",
+    correct: "Proof complete",
+    resultTitle: "Case closed",
+    resultText:
+      "You used the evidence to decide which similarity condition applies.",
+    playAgain: "Play again",
+    source: "Inspired by gMath’s interactive similarity demonstrations.",
+    sourceLink: "View the reference",
+    selected: "Selected",
+    pair: "Matching pair",
+    originalLengths: "Side labels show the original lengths.",
+  },
   similarity: {
     title: "Similarity Studio",
     topic: "2B08 · Similarity",

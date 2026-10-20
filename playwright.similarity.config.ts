@@ -4,6 +4,7 @@ export default defineConfig({
   testMatch: [
     "similarity.spec.ts",
     "similarity-proof.spec.ts",
+    "similarity-games.spec.ts",
     "lesson-layout.spec.ts",
   ],
   workers: 1,
