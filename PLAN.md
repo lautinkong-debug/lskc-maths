@@ -2,6 +2,13 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Similarity textbook proof layout and vertex spacing (20/10/2026)
+
+- [x] Use the supplied textbook solutions as the layout reference. The resupplied PDF has the same SHA-256 as the source already used for the question bank. Render each similarity proof in a statement/reason table, with stacked mathematical fractions, equal-ratio deductions and the textbook criterion beside the conclusion. Keep each condition clickable and distinguish conclusions drawn from given similarity. Apply fraction rendering to prompts and revealed working as well.
+- [x] Place vertex names in clear space around graph edges on the original and manipulation boards, including rotated, reflected and overlapping copies. Preserve paired names and reserve space for paired side callouts. Fit the original diagram with its complete reference figure and labels so the outer Q17 triangle is retained.
+- [x] Sixteen mathematics/formatting checks, scoped ESLint and the production build pass. Fraction coverage includes all 72 questions, numbered vertices, radicals, grouped denominators and fractions of fractions; `//` remains the parallel sign. Inspect desktop and phone proof tables and Q17 label positions.
+- [x] All 25 final local Chrome scenarios pass, including loading all 72 questions, paired labels, snapping, touch gestures, Q17 edge clearance, complete source-diagram fitting and desktop/phone proof columns. Evidence: ignored `out/similarity-release/format-*.log` and `out/similarity-preview/textbook-proof-*.png`, `q17-vertex-spacing.png`. Release through the previously approved GitHub/Vercel workflow.
+
 ## Similarity textbook proof terminology (19/10/2026)
 
 - [x] Owner supplied the textbook's conditions and corrected the displayed terminology. Use **AAA**, **3 sides prop.**, and **ratio of 2 sides, inc. ∠** in proof headings, conclusions and explanatory notes. Internal criterion keys continue to control the same required marks; no SSS/SAS abbreviations are shown to students.

@@ -808,6 +808,7 @@ test("Q19 pilot: move, turn, reflect, match, reveal and reset", async ({
   await expect(page.getByTestId("question-result")).toHaveCount(0);
   await expect(first).toHaveAttribute("data-angle", "0");
   // Drag a point well inside the first triangle using actual rendered geometry.
+  await first.scrollIntoViewIfNeeded();
   const centre = await first.locator("polygon").evaluate((p) => {
     const poly = p as SVGPolygonElement;
     const pts = Array.from(poly.points);
@@ -1035,9 +1036,18 @@ test("all 72 source questions, figures and hidden explanations load", async ({
       await page
         .getByRole("button", { name: "Reveal next step", exact: true })
         .click();
-    await expect(page.getByTestId("question-result")).toHaveText(
-      q.result.replace(/[∥‖]/g, "//"),
-    );
+    const result = await page
+      .getByTestId("question-result")
+      .evaluate((element) => {
+        const copy = element.cloneNode(true) as HTMLElement;
+        copy
+          .querySelectorAll('[role="math"]')
+          .forEach((math) =>
+            math.replaceWith(math.getAttribute("aria-label")!),
+          );
+        return copy.textContent;
+      });
+    expect(result).toBe(q.result.replace(/[∥‖]/g, "//"));
     const image = await page.request.get(`/similarity/questions/${q.id}.webp`);
     expect(image.status(), q.id).toBe(200);
     expect(image.headers()["content-type"]).toContain("image/webp");

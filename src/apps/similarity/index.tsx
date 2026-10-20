@@ -37,6 +37,7 @@ import { pairedSideLabels, sideLabelPoints } from "./pairedSides";
 import { DiagramViewControls, useDiagramView } from "./DiagramView";
 import { ReasonsPanel } from "./ReasonsPanel";
 import { ComparisonKey } from "./ComparisonKey";
+import { placeVertexLabels, vertexLabelPoints } from "./vertexLabels";
 import { reasonPairs, conditions, type ReasonView } from "./reasons";
 
 const c = copy.similarity;
@@ -256,9 +257,29 @@ function Lesson({ question }: { question: SourceQuestion }) {
     showMarks ? pair : undefined,
     visibleRows,
   );
+  const vertexLabels = placeVertexLabels(
+    placedShapes
+      .filter((s) => !pairedShapes.has(s.id))
+      .flatMap((s) => {
+        const mid = centre(s.points);
+        return s.points.map((p) => ({
+          key: `${s.id}-${p.label}`,
+          point: p,
+          text: p.label + (order ? "1" : ""),
+          fontSize: 30,
+          preferred: { x: p.x - mid.x, y: p.y - mid.y },
+        }));
+      }),
+    placedShapes.map((s) => s.points),
+    sideLabels,
+  );
   const view = useDiagramView(
     { x: 0, y: 0, width: 840, height: 470 },
-    [...placedShapes.flatMap((s) => s.points), ...sideLabelPoints(sideLabels)],
+    [
+      ...placedShapes.flatMap((s) => s.points),
+      ...sideLabelPoints(sideLabels),
+      ...vertexLabelPoints(vertexLabels),
+    ],
     45,
     svg,
   );
@@ -762,8 +783,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
                         (a, b) => Number(a === active) - Number(b === active),
                       )
                       .map((i) => {
-                        const transformed = placedShapes[i].points,
-                          mid = centre(transformed);
+                        const transformed = placedShapes[i].points;
                         return (
                           <g
                             key={`${chosen[i].name}-${i}`}
@@ -838,9 +858,9 @@ function Lesson({ question }: { question: SourceQuestion }) {
                                 />
                               )}
                             {transformed.map((p, j) => {
-                              const dx = p.x - mid.x,
-                                dy = p.y - mid.y,
-                                length = Math.hypot(dx, dy) || 1;
+                              const label = vertexLabels.get(
+                                `${selected[i]}-${p.label}`,
+                              );
                               return (
                                 <g key={p.label}>
                                   <circle
@@ -852,8 +872,8 @@ function Lesson({ question }: { question: SourceQuestion }) {
                                   {!pairedShapes.has(selected[i]) && (
                                     <text
                                       data-testid="vertex-name"
-                                      x={p.x + (22 * dx) / length}
-                                      y={p.y + (22 * dy) / length + 7}
+                                      x={label!.textX}
+                                      y={label!.textY}
                                       textAnchor="middle"
                                       className={styles.vertexLabel}
                                       fill={colours[i]}
@@ -912,6 +932,7 @@ function Lesson({ question }: { question: SourceQuestion }) {
                       shapes={placedShapes}
                       frame={view.frame}
                       showOrder={order}
+                      obstacles={sideLabels}
                     />
                   </svg>
                   {showMarks &&

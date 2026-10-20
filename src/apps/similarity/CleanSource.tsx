@@ -1,6 +1,7 @@
-import { bounds, centre } from "./geometry";
+import { bounds, shapePoints } from "./geometry";
 import type { Point, Shape } from "./types";
 import styles from "./similarity.module.css";
+import { placeVertexLabels } from "./vertexLabels";
 
 /** These source diagrams overlap the printed footer. Rebuild their geometry and givens. */
 export const cleanSourceIds = new Set(["qp8-2", "qp8-5", "ex8b-23"]);
@@ -13,9 +14,17 @@ export function CleanSource({
   points: Point[];
   shapes: Shape[];
 }) {
-  const mid = centre(points),
-    box = bounds(points),
+  const box = bounds(points),
     size = Math.max(box.width, box.height) / 25;
+  const labels = placeVertexLabels(
+    points.map((p) => ({
+      key: p.label,
+      text: p.label,
+      point: p,
+      fontSize: size * 1.5,
+    })),
+    shapes.map((s) => shapePoints(s, points)),
+  );
   const at = (label: string) => points.find((p) => p.label === label)!;
   const edges = new Map<string, [Point, Point]>();
   for (const s of shapes)
@@ -82,15 +91,12 @@ export function CleanSource({
         />
       ))}
       {points.map((p) => {
-        const dx = p.x - mid.x,
-          dy = p.y - mid.y,
-          d = Math.hypot(dx, dy) || 1;
+        const label = labels.get(p.label)!;
         return (
           <text
             key={p.label}
-            x={p.x + (dx / d) * size * 1.5}
-            y={p.y + (dy / d) * size * 1.5}
-            dy=".3em"
+            x={label.textX}
+            y={label.textY}
             textAnchor="middle"
             fontSize={size * 1.5}
             className={styles.cleanLetter}

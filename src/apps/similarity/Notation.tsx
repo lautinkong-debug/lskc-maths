@@ -1,4 +1,5 @@
 import { Math } from "@/components/Math";
+import { fractionTokens, fractionTermTex } from "./fractions";
 
 /** Geometric point names use mathematical italic; symbols and prose stay upright. */
 export function GeometryName({ children }: { children: string }) {
@@ -20,6 +21,18 @@ export function GeometryName({ children }: { children: string }) {
 }
 
 export function GeometryText({ children }: { children: string }) {
+  return fractionTokens(children.replace(/[∥‖]/g, "//")).map((part, i) =>
+    part.numerator !== undefined ? (
+      <Math key={i} label={part.text}>
+        {`\\dfrac{${fractionTermTex(part.numerator)}}{${fractionTermTex(part.denominator!)}}`}
+      </Math>
+    ) : (
+      <GeometryProse key={i}>{part.text}</GeometryProse>
+    ),
+  );
+}
+
+function GeometryProse({ children }: { children: string }) {
   return (
     <>
       {children

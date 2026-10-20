@@ -41,7 +41,40 @@ export function ReasonsPanel({
   const pair = pairs[pairIndex];
   if (!pair) return null;
   const [a, b] = pair.shapes.map((i) => question.shapes[i]);
-  const conclusion = `${a.name} ${pair.criterion === "not-similar" ? "≁" : "∼"} ${b.name}${["AAA", "SSS", "SAS"].includes(pair.criterion) ? ` (${criterionNames[pair.criterion]})` : ""}`;
+  const conclusion = `${a.name} ${pair.criterion === "not-similar" ? "≁" : "∼"} ${b.name}`;
+  const establishing = rows
+    .filter((r) => !r.consequence && pair.criterion !== "given")
+    .sort((a, b) =>
+      pair.criterion === "SAS"
+        ? Number(a.kind === "angle") - Number(b.kind === "angle")
+        : 0,
+    );
+  const consequences = rows.filter(
+    (r) => r.consequence || pair.criterion === "given",
+  );
+  const sideSteps = establishing.filter((r) => r.kind === "side");
+  const ratioSummary = sideSteps
+    .map((r) => r.text.split(" = ")[0])
+    .join(pair.criterion === "not-similar" ? " ≠ " : " = ");
+  function proofRow(r: Condition) {
+    return (
+      <tr key={r.id}>
+        <td>
+          <button
+            aria-pressed={focus === r.id}
+            onClick={() => onFocus(focus === r.id ? null : r.id)}
+            data-testid={`condition-${r.id}`}
+            style={{ color: markColours[r.index % 3] }}
+          >
+            <GeometryText>{r.text}</GeometryText>
+          </button>
+        </td>
+        <td data-testid="proof-reason">
+          <GeometryText>{r.note}</GeometryText>
+        </td>
+      </tr>
+    );
+  }
   return (
     <section
       className={styles.reasonPanel}
@@ -66,18 +99,12 @@ export function ReasonsPanel({
             >
               {pairs.map((p, i) => (
                 <option key={i} value={i}>
-                  {p.shapes.map((j) => question.shapes[j].name).join(" / ")}
+                  {p.shapes.map((j) => question.shapes[j].name).join(" & ")}
                 </option>
               ))}
             </select>
           </label>
-        ) : (
-          <span>
-            <GeometryText>
-              {pair.shapes.map((i) => question.shapes[i].name).join(" / ")}
-            </GeometryText>
-          </span>
-        )}
+        ) : null}
         <div className={styles.tools} role="group" aria-label={c.markOptions}>
           <>
             <button
@@ -117,62 +144,65 @@ export function ReasonsPanel({
       {!pair.shapes.every((i) => selected.includes(i)) && (
         <p role="status">{c.missingPair}</p>
       )}
-      <div className={styles.reasonRows}>
-        {rows.map((r) => (
-          <button
-            key={r.id}
-            aria-pressed={focus === r.id}
-            onClick={() => onFocus(focus === r.id ? null : r.id)}
-            data-testid={`condition-${r.id}`}
+      <table className={styles.proofTable} aria-label={c.proofTitle}>
+        <caption>
+          <GeometryText>{`${c.proofIn} ${a.name} ${c.proofAnd} ${b.name},`}</GeometryText>
+        </caption>
+        <colgroup>
+          <col style={{ width: "56%" }} />
+          <col style={{ width: "44%" }} />
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col">{c.proofStatement}</th>
+            <th scope="col">{c.proofReason}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {establishing
+            .filter((r) => pair.criterion !== "SAS" || r.kind === "side")
+            .map(proofRow)}
+          {sideSteps.length > 1 && (
+            <tr data-testid="proof-ratio-summary">
+              <td>
+                ∴ <GeometryText>{ratioSummary}</GeometryText>
+              </td>
+              <td>
+                {pair.criterion === "not-similar"
+                  ? c.unequalRatios
+                  : c.equalRatios}
+              </td>
+            </tr>
+          )}
+          {pair.criterion === "SAS" &&
+            establishing.filter((r) => r.kind === "angle").map(proofRow)}
+          <tr
+            className={styles.proofConclusion}
+            data-testid="similarity-conclusion"
           >
-            <span
-              className={styles.conditionSymbol}
-              style={{ color: markColours[r.index % 3] }}
-            >
-              {r.kind === "angle"
-                ? r.degrees !== undefined
-                  ? `${r.degrees}°`
-                  : [
-                      "α",
-                      "β",
-                      "γ",
-                      "δ",
-                      "ε",
-                      "ζ",
-                      "η",
-                      "θ",
-                      "ι",
-                      "κ",
-                      "λ",
-                      "μ",
-                    ][r.index]
-                : r.index + 1}
-            </span>
-            <span>
-              <GeometryText>{r.text}</GeometryText>
-              {r.consequence && (
-                <small className={styles.consequence}>
-                  {c.afterSimilarity}
-                </small>
-              )}
-              <small>
-                <GeometryText>{r.note}</GeometryText>
-              </small>
-            </span>
-          </button>
-        ))}
-      </div>
+            <td>
+              {pair.criterion !== "given" && "∴ "}
+              <GeometryText>{conclusion}</GeometryText>
+            </td>
+            <td>{criterionNames[pair.criterion]}</td>
+          </tr>
+          {consequences.length > 0 && (
+            <tr>
+              <th className={styles.afterProof} colSpan={2}>
+                {pair.criterion === "given"
+                  ? c.givenConsequences
+                  : c.afterSimilarity}
+              </th>
+            </tr>
+          )}
+          {consequences.map(proofRow)}
+        </tbody>
+      </table>
       {focus !== null && (
         <button className={styles.clearCondition} onClick={() => onFocus(null)}>
           {c.allMarks}
         </button>
       )}
-      <p className={styles.proofConclusion} data-testid="similarity-conclusion">
-        <span>
-          {pair.criterion === "given" ? c.proofGiven : c.proofConclusion}
-        </span>
-        <GeometryText>{conclusion}</GeometryText>
-      </p>
       {rows.some((r) => r.kind === "side") && <p>{c.originalLengths}</p>}
     </section>
   );

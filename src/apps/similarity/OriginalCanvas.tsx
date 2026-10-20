@@ -27,6 +27,7 @@ import { DiagramViewControls, useDiagramView } from "./DiagramView";
 import { ComparisonKey } from "./ComparisonKey";
 import type { Condition, ReasonPair } from "./reasons";
 import { CleanSource, cleanSourceIds } from "./CleanSource";
+import { placeVertexLabels, vertexLabelPoints } from "./vertexLabels";
 
 const c = copy.similarity;
 const colours = [
@@ -126,9 +127,49 @@ export function OriginalCanvas({
     reasonRows,
     unit / 12,
   );
+  const referencePolygons = question.shapes.map((s) => shapePoints(s, points));
+  if (contextOutlines[question.id]) {
+    referencePolygons.push(
+      shapePoints(
+        { name: "", vertices: [...contextOutlines[question.id]] },
+        points,
+      ),
+    );
+  }
+  const referenceLabels = placeVertexLabels(
+    points.map((p) => ({
+      key: p.label,
+      point: p,
+      text: p.label,
+      fontSize: 20,
+    })),
+    referencePolygons,
+  );
+  const movedLabels = placeVertexLabels(
+    placedShapes
+      .filter((s) => poses[s.id] && !pairedShapes.has(s.id))
+      .flatMap((s) => {
+        const mid = centre(s.points);
+        return s.points.map((p) => ({
+          key: `${s.id}-${p.label}`,
+          point: p,
+          text: p.label,
+          fontSize: unit * 1.5,
+          preferred: { x: p.x - mid.x, y: p.y - mid.y },
+        }));
+      }),
+    [...referencePolygons, ...placedShapes.map((s) => s.points)],
+    sideLabels,
+  );
   const view = useDiagramView(
     box,
-    [...placedShapes.flatMap((s) => s.points), ...sideLabelPoints(sideLabels)],
+    [
+      ...points,
+      ...vertexLabelPoints(referenceLabels),
+      ...placedShapes.flatMap((s) => s.points),
+      ...sideLabelPoints(sideLabels),
+      ...vertexLabelPoints(movedLabels),
+    ],
     unit * 3.5,
     svg,
   );
@@ -227,6 +268,8 @@ export function OriginalCanvas({
         unit / 12,
       );
       view.fit([
+        ...points,
+        ...vertexLabelPoints(referenceLabels),
         ...nextShapes.flatMap((s) => s.points),
         ...sideLabelPoints(labels),
       ]);
@@ -318,22 +361,10 @@ export function OriginalCanvas({
               {points.map((p) => (
                 <text
                   key={p.label}
-                  x={
-                    p.x +
-                    (pilot
-                      ? p.label === "A" || p.label === "B"
-                        ? -19
-                        : 7
-                      : unit * 0.6)
-                  }
-                  y={
-                    p.y +
-                    (pilot
-                      ? p.label === "C" || p.label === "F"
-                        ? 19
-                        : -8
-                      : -unit * 0.7)
-                  }
+                  x={referenceLabels.get(p.label)!.textX}
+                  y={referenceLabels.get(p.label)!.textY}
+                  textAnchor="middle"
+                  data-testid="reference-vertex-name"
                   className={styles.sourceLabel}
                 >
                   {p.label}
@@ -402,8 +433,10 @@ export function OriginalCanvas({
               {points.map((p) => (
                 <text
                   key={p.label}
-                  x={p.x + (p.label === "A" || p.label === "B" ? -19 : 7)}
-                  y={p.y + (p.label === "C" || p.label === "F" ? 19 : -8)}
+                  x={referenceLabels.get(p.label)!.textX}
+                  y={referenceLabels.get(p.label)!.textY}
+                  textAnchor="middle"
+                  data-testid="reference-vertex-name"
                   className={styles.sourceLabel}
                 >
                   {p.label}
@@ -415,8 +448,7 @@ export function OriginalCanvas({
         {order.map((i) => {
           const s = shapes[i],
             selectedIndex = selected.indexOf(i),
-            ps = transform(shapePoints(s, points), poseAt(i)),
-            mid = centre(ps);
+            ps = transform(shapePoints(s, points), poseAt(i));
           const colour =
             selectedIndex >= 0 ? colours[selectedIndex] : "transparent";
           return (
@@ -484,15 +516,13 @@ export function OriginalCanvas({
                 selectedIndex >= 0 &&
                 !pairedShapes.has(i) &&
                 ps.map((p) => {
-                  const dx = p.x - mid.x,
-                    dy = p.y - mid.y,
-                    l = Math.hypot(dx, dy) || 1;
+                  const label = movedLabels.get(`${i}-${p.label}`)!;
                   return (
                     <text
                       key={p.label}
                       data-testid="vertex-name"
-                      x={p.x + (unit * 1.5 * dx) / l}
-                      y={p.y + (unit * 1.5 * dy) / l + unit * 0.4}
+                      x={label.textX}
+                      y={label.textY}
                       textAnchor="middle"
                       fill={colour}
                       className={styles.movedLabel}
@@ -533,6 +563,7 @@ export function OriginalCanvas({
           shapes={placedShapes}
           frame={view.frame}
           fontSize={unit * 1.5}
+          obstacles={sideLabels}
         />
         {tracing &&
           points.map((p) => (

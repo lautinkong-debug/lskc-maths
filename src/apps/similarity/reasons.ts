@@ -687,7 +687,8 @@ export function conditions(
       const edge: [number, number] = [i, (i + 1) % n];
       const av = pair.lengths?.[0][i],
         bv = pair.lengths?.[1][i];
-      const fraction = av && bv ? ` = ${av}/${bv}` : "";
+      const ratioTerm = (s: string) => (s.includes("/") ? `(${s})` : s);
+      const fraction = av && bv ? ` = ${ratioTerm(av)}/${ratioTerm(bv)}` : "";
       const consequence =
         pair.criterion === "AAA" ||
         (pair.criterion === "SAS" &&
@@ -707,7 +708,7 @@ export function conditions(
             ? "The same ratio k for all corresponding sides follows from the given similarity."
             : pair.criterion === "polygon"
               ? "All sides within each square are equal, so every corresponding-side ratio is the same."
-              : "Ratio of original lengths, using the given lengths and any sums on a straight line.",
+              : "From the given lengths.",
       });
     }
   }

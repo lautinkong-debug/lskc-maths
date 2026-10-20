@@ -2,6 +2,7 @@ import { Fragment } from "react";
 import { centre } from "./geometry";
 import type { Point } from "./types";
 import styles from "./similarity.module.css";
+import { placeVertexLabels, type LabelBox } from "./vertexLabels";
 
 /** One readable label above all overlapping copies, with each name in its shape's colour. */
 export function PairedVertexLabels({
@@ -10,12 +11,14 @@ export function PairedVertexLabels({
   frame,
   fontSize = 24,
   showOrder = false,
+  obstacles = [],
 }: {
   groups: number[][];
   shapes: { id: number; points: Point[]; colour: string }[];
   frame: { x: number; y: number; width: number; height: number };
   fontSize?: number;
   showOrder?: boolean;
+  obstacles?: LabelBox[];
 }) {
   return groups.map((group) => {
     const members = group.map((id) => shapes.find((shape) => shape.id === id)!);
@@ -24,41 +27,31 @@ export function PairedVertexLabels({
       label: "",
     }));
     const mid = centre(vertices);
+    const labels = placeVertexLabels(
+      vertices.map((p, i) => ({
+        key: String(i),
+        point: p,
+        text:
+          members.map((member) => member.points[i].label).join(" ↔ ") +
+          (showOrder ? "1" : ""),
+        fontSize,
+        preferred: { x: p.x - mid.x, y: p.y - mid.y },
+      })),
+      shapes.map((s) => s.points),
+      obstacles,
+      frame,
+    );
     return (
       <g key={group.join("-")} className={styles.pairedVertexLabels}>
         {vertices.map((p, i) => {
-          const dx = p.x - mid.x,
-            dy = p.y - mid.y;
-          const length = Math.hypot(dx, dy) || 1;
           const names = members.map((member) => member.points[i].label);
-          // Anchor the entire label outside the vertex, then keep it inside the board.
-          const width =
-            fontSize * (names.join(" ↔ ").length * 0.7 + (showOrder ? 0.5 : 0));
-          const anchor =
-            dx / length < -0.3 ? "end" : dx / length > 0.3 ? "start" : "middle";
-          const left =
-            anchor === "end" ? width : anchor === "middle" ? width / 2 : 0;
-          const right = width - left;
-          const x = Math.max(
-            frame.x + left + 4,
-            Math.min(
-              frame.x + frame.width - right - 4,
-              p.x + (fontSize * dx) / length,
-            ),
-          );
-          const y = Math.max(
-            frame.y + fontSize,
-            Math.min(
-              frame.y + frame.height - fontSize * 0.3,
-              p.y + (fontSize * dy) / length + fontSize * 0.3,
-            ),
-          );
+          const label = labels.get(String(i))!;
           return (
             <text
               key={i}
-              x={x}
-              y={y}
-              textAnchor={anchor}
+              x={label.textX}
+              y={label.textY}
+              textAnchor="middle"
               fontSize={fontSize}
               strokeWidth={fontSize / 5}
               data-testid="paired-vertex-label"
