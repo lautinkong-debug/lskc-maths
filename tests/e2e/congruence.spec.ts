@@ -35,9 +35,11 @@ test("redrawn diagrams retain all givens and the source question remains availab
     await page.getByRole("button", { name: "Question", exact: true }).click();
     const source = page.getByRole("img", { name: /^Exercise 5[AC] · Q/ });
     await expect(source).toBeVisible();
-    expect(
-      await source.evaluate((img) => (img as HTMLImageElement).naturalWidth),
-    ).toBeGreaterThan(0);
+    await expect
+      .poll(() =>
+        source.evaluate((img) => (img as HTMLImageElement).naturalWidth),
+      )
+      .toBeGreaterThan(0);
   }
 });
 
