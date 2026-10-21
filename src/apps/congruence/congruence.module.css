@@ -15,6 +15,20 @@
 .app button {
   touch-action: manipulation;
 }
+.modeTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 18px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--stroke);
+}
+.evidenceControls {
+  display: grid;
+  gap: 10px;
+  padding: 14px 0;
+  border-block: 1px solid var(--stroke);
+}
 .studioHeader {
   display: flex;
   align-items: center;

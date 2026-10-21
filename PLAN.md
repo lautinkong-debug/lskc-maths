@@ -2,6 +2,15 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Congruence teaching interactions and games (21/10/2026)
+
+- [x] Owner supplied the consolidated Similarity Studio brief and asked to apply it, including games and publication. Preserve the approved 66 triangle-only Quick Practice / Level 2 questions and literal textbook solutions.
+- [x] Design: retain the paper/navy classroom and shared collapsible lesson menu. Use Quick Practice 5.14 (AAS, overlapping triangles) as the interaction pilot. Add transformation-aware evidence with angle/side visibility and pair dismissal, rigid magnetic alignment, horizontal/vertical reflection and merged corresponding vertex labels. Keep camera zoom separate from lengths.
+- [x] Verify Quick Practice 5.14, then apply the data-driven evidence layer to all 66 questions. Retain source wording, clean diagrams and current-step statement/reason layout. Marks follow rigid transforms; hide/restore pairs, right-angle squares, merged labels and snap alignment pass the pilot browser checks.
+- [x] Add five three-round condition activities (SSS, SAS, ASA, AAS, RHS) and a twelve-round mixed challenge containing unequal AAA and ambiguous SSA examples, with large diagrams, corrective feedback and focused proof reveals. Keep camera Fit/Reset independent of triangle poses and sizes.
+- [x] All 1,042 unit tests, scoped ESLint, formatting and the production build pass. All 27 browser scenarios pass against the local production build, including every source question, all five games and mixed rounds, real touch, rigid transforms, camera controls, current-step evidence, hidden pairs and 360/390px portrait, 844px landscape and 1366/1920px desktop layouts. Three shared-menu browser checks also pass. Visually inspect the screenshots in ignored `out/congruence-improvements/`.
+- [ ] Push the reviewed changes to the existing GitHub `main` / Vercel project and verify the live practice and games.
+
 ## Chapter 5 congruent-triangle practice (20/10/2026)
 
 - [x] Owner approved integration and publication to GitHub and Vercel. Target the existing `lautinkong-debug/lskc-maths` production branch `main` and Vercel project `lautinkong-4501/lskc-maths`, route `/apps/congruence`.

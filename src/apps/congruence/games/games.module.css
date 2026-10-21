@@ -1,0 +1,1063 @@
+.games,
+.classroom {
+  color: var(--color-graphite);
+  font-family: var(--font-body), sans-serif;
+}
+.games button,
+.classroom button,
+.classroom select {
+  cursor: pointer;
+  min-height: 44px;
+  border: 1px solid var(--color-grid);
+  border-radius: 7px;
+  padding: 9px 13px;
+  background: var(--color-paper);
+  color: var(--color-navy);
+  font-weight: 600;
+  line-height: 1.35;
+}
+.games button:hover,
+.classroom button:hover {
+  border-color: var(--color-navy);
+}
+.games button:focus-visible,
+.classroom :is(button, input, select, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-navy);
+  outline-offset: 3px;
+}
+.games button[aria-pressed="true"],
+.classroom button[aria-pressed="true"] {
+  border-color: var(--color-navy);
+  background: var(--color-navy-wash);
+  box-shadow: inset 0 -3px var(--color-navy);
+}
+.classroom button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.games h2,
+.games h3,
+.classroom h2,
+.classroom h3 {
+  font-family: var(--font-display), serif;
+  color: var(--color-navy);
+  line-height: 1.2;
+}
+.games h2 {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+}
+.games p,
+.classroom p {
+  line-height: 1.5;
+}
+.lobbyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 26px 0 30px;
+}
+.lead {
+  margin: 12px 0 6px;
+  color: var(--color-navy);
+  font-size: 1.3rem;
+}
+.progress {
+  display: grid;
+  min-width: 145px;
+  gap: 4px;
+  border-left: 2px solid var(--color-grid);
+  padding-left: 24px;
+}
+.progress strong {
+  font-size: 2.6rem;
+  color: var(--color-navy);
+}
+.progress strong span {
+  font-size: 1.1rem;
+}
+.progress > span,
+.saved {
+  color: var(--color-pencil);
+  font-size: 0.85rem;
+}
+.missions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.games .mission {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  padding: 22px;
+  border-top: 4px solid var(--color-navy);
+  font-weight: 400;
+}
+.mission h3 {
+  font-size: 1.45rem;
+  margin-bottom: 10px;
+}
+.mission strong {
+  font-size: 0.93rem;
+}
+.mission p {
+  font-size: 0.95rem;
+  margin-top: 9px;
+}
+.missionTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-pencil);
+  font-size: 0.9rem;
+}
+.number {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--color-paper);
+  background: var(--color-navy);
+  font-weight: 700;
+}
+.symbol {
+  width: 100%;
+  height: 145px;
+  margin: 8px 0 12px;
+}
+.games .mixedCard {
+  margin: 22px 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  padding: 24px;
+  color: var(--color-paper);
+  background: var(--color-navy);
+  text-align: left;
+}
+.mixedCard h3 {
+  color: var(--color-paper);
+  font-size: 1.55rem;
+  margin-bottom: 7px;
+}
+.mixedCard p {
+  font-weight: 400;
+}
+.mixedCard > strong {
+  white-space: nowrap;
+  font-size: 1.5rem;
+}
+:global(body):has(.classroom[open]) {
+  overflow: hidden;
+}
+.classroom[open] {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  background: var(--color-paper);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 16px;
+}
+.classroom::backdrop {
+  background: var(--color-navy);
+}
+.gameHeader {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 24px;
+  background: var(--color-navy);
+  color: var(--color-paper);
+  border-bottom: 3px solid var(--color-crimson);
+  flex: 0 0 auto;
+}
+.gameTitle {
+  flex: 1;
+  min-width: 0;
+}
+.gameHeader h2 {
+  color: var(--color-paper);
+  font-size: clamp(1.4rem, 2vw, 2rem);
+}
+.gameHeader p {
+  font-size: 0.9rem;
+  margin-top: 5px;
+}
+.preferences {
+  display: flex;
+  gap: 8px;
+}
+.preferences button {
+  font-size: 0.8rem;
+}
+.roundSelect {
+  display: grid;
+  gap: 3px;
+  font-size: 0.8rem;
+}
+.roundSelect select {
+  min-width: 80px;
+  font-size: 1rem;
+}
+.workspace {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.task {
+  padding: 14px 24px;
+  margin: 0;
+  font-size: clamp(1rem, 1.3vw, 1.22rem);
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-grid);
+  flex-shrink: 0;
+}
+.playLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(365px, 1fr);
+  flex: 1;
+  min-height: 0;
+}
+.board {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 14px 18px;
+  background-image: radial-gradient(var(--color-grid) 0.7px, transparent 0.7px);
+  background-size: 20px 20px;
+}
+.legend {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+.legend span:last-child {
+  color: var(--color-crimson);
+}
+.drawing {
+  flex: 1;
+  min-height: 260px;
+  width: 100%;
+  position: relative;
+}
+.canvas {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  overflow: visible;
+  touch-action: none;
+}
+.draggable {
+  cursor: grab;
+}
+.draggable:active {
+  cursor: grabbing;
+}
+.turnHandle {
+  cursor: crosshair;
+}
+.clue {
+  cursor: pointer;
+}
+.mathLabel,
+.vertexLabel {
+  paint-order: stroke;
+  stroke: var(--color-paper);
+  stroke-width: 6px;
+  stroke-linejoin: round;
+  font-family: var(--font-body), sans-serif;
+  font-weight: 600;
+}
+.mathLabel {
+  cursor: pointer;
+}
+.vertexLabel {
+  font-family: var(--font-display), serif;
+  font-style: italic;
+}
+.diagramNote {
+  color: var(--color-pencil);
+  font-size: 0.83rem;
+  text-align: center;
+  padding: 8px 0;
+}
+.boardTools {
+  display: grid;
+  gap: 8px;
+  align-content: end;
+}
+.trianglePicker,
+.transformTools,
+.moveTools,
+.cameraTools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+.cameraTools {
+  padding: 4px 0;
+}
+.cameraTools button {
+  min-height: 38px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+.boardTools button {
+  font-size: 0.85rem;
+  padding: 7px 10px;
+}
+.boardHelp {
+  padding: 9px 0 0;
+  color: var(--color-pencil);
+  font-size: 0.79rem;
+  text-align: center;
+}
+.boardHelp summary,
+.constructionHelp summary {
+  cursor: pointer;
+}
+.boardHelp p {
+  margin: 8px 0;
+}
+.desk {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  border-left: 1px solid var(--color-grid);
+  padding: 22px 24px;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+  background: var(--color-paper);
+}
+.desk h3,
+.conditions legend {
+  font-size: 1.22rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.small {
+  color: var(--color-pencil);
+  font-size: 0.87rem;
+  margin-bottom: 12px;
+}
+.construction,
+.evidenceSection {
+  margin-bottom: 23px;
+}
+.measurement {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-crimson);
+  font-weight: 600;
+}
+.valueInput {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+}
+.valueInput input {
+  width: 82px;
+  min-height: 44px;
+  border: 1px solid var(--color-grid);
+  border-radius: 6px;
+  padding: 6px 9px;
+  background: var(--color-paper);
+  color: var(--color-crimson);
+  font-size: 1.3rem;
+  text-align: center;
+}
+.measurement input[type="range"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-height: 30px;
+  accent-color: var(--color-crimson);
+  cursor: pointer;
+}
+.constructionHelp {
+  font-size: 0.79rem;
+  color: var(--color-pencil);
+  margin-top: 7px;
+}
+.constructionHelp p {
+  margin: 10px 0;
+}
+.evidenceList {
+  display: grid;
+  gap: 8px;
+}
+.evidenceList button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: clamp(0.91rem, 1.2vw, 1.15rem);
+  min-width: 0;
+}
+.tick {
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  font-size: 1rem;
+}
+.conditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+}
+.conditions legend {
+  float: left;
+  width: 100%;
+  margin-bottom: 12px;
+  color: var(--color-navy);
+  font-family: var(--font-display), serif;
+}
+.conditions button {
+  flex: 1 0 27%;
+}
+.actions {
+  border-top: 1px solid var(--color-grid);
+  padding-top: 16px;
+}
+.actionRow,
+.proofControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.classroom .primary {
+  background: var(--color-navy);
+  border-color: var(--color-navy);
+  color: var(--color-paper);
+  font-size: 1rem;
+}
+.actionRow .primary {
+  flex: 1;
+}
+.feedback:empty {
+  display: none;
+}
+.feedback[data-visible="true"] {
+  padding: 13px 15px;
+  border-left: 3px solid var(--color-crimson);
+  background: var(--color-navy-wash);
+  line-height: 1.5;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+.retry {
+  margin-bottom: 12px;
+}
+.hint {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--color-navy-wash);
+  font-size: 0.9rem;
+}
+.success {
+  padding: 14px 16px;
+  border-left: 4px solid var(--color-navy);
+  background: var(--color-navy-wash);
+  color: var(--color-navy);
+  margin-bottom: 22px;
+  font-weight: 600;
+}
+.proofTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.proofTitle h3 {
+  font-size: 1.6rem;
+}
+.proofTitle span {
+  font-size: 0.9rem;
+  color: var(--color-pencil);
+}
+.proofPaper {
+  margin: 20px 0 12px;
+  padding: 15px 0;
+  min-height: 140px;
+  border-top: 1px solid var(--color-grid);
+  border-bottom: 1px solid var(--color-grid);
+}
+.proofPaper > p {
+  padding: 18px 6px;
+  color: var(--color-pencil);
+}
+.proofStep {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr) minmax(72px, 0.45fr);
+  align-items: center;
+  gap: 9px;
+  padding: 18px 4px;
+  font-size: clamp(1rem, 1.3vw, 1.3rem);
+}
+.proofColumns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(72px, 0.45fr);
+  gap: 9px;
+  padding: 0 4px 10px 38px;
+  color: var(--color-pencil);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-grid);
+}
+.proofStatement {
+  min-width: 0;
+}
+.proofStep[hidden] {
+  display: none;
+}
+.proofStep[data-current="true"] {
+  animation: step-appear 220ms ease-out;
+}
+.stepNumber {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  background: var(--color-navy);
+  color: var(--color-paper);
+  border-radius: 50%;
+  font-size: 0.85rem;
+}
+.proofStep p {
+  color: var(--color-pencil);
+  margin-top: 0;
+  font-size: 0.83rem;
+}
+.proofReason {
+  white-space: nowrap;
+}
+.diagramControls {
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--color-grid);
+  padding-bottom: 12px;
+}
+.diagramControls > summary {
+  color: var(--color-navy);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.88rem;
+  min-height: 28px;
+}
+.diagramControls[open] > summary {
+  margin-bottom: 12px;
+}
+.diagramControls .boardTools {
+  display: grid;
+}
+.diagramControls .transformTools {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.diagramControls .boardHelp {
+  display: block;
+  text-align: left;
+}
+.diagramControls .boardTools button {
+  font-size: 0.78rem;
+}
+.diagramControls .trianglePicker {
+  justify-content: flex-start;
+}
+.explanation {
+  margin: 20px 0;
+  padding: 16px;
+  border-left: 4px solid var(--color-crimson);
+  background: var(--color-navy-wash);
+}
+.finished {
+  margin: auto;
+  padding: 50px 25px;
+  max-width: 650px;
+  text-align: center;
+}
+.finished h2 {
+  font-size: 2.3rem;
+  margin: 20px 0 12px;
+}
+.finished p {
+  margin-bottom: 25px;
+}
+.finished button {
+  margin: 5px;
+}
+.seal {
+  display: inline-grid;
+  place-items: center;
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  border: 4px double var(--color-navy);
+  font-size: 3.5rem;
+  color: var(--color-navy);
+  animation: step-appear 350ms ease-out;
+}
+@keyframes step-appear {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.classroom[data-reduced="true"] *,
+.classroom[data-reduced="true"] *::before,
+.classroom[data-reduced="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .classroom * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+@media (min-width: 1600px) {
+  .desk {
+    padding: 30px 36px;
+  }
+  .desk h3,
+  .conditions legend {
+    font-size: 1.45rem;
+  }
+  .small {
+    font-size: 1rem;
+  }
+  .construction,
+  .evidenceSection {
+    margin-bottom: 28px;
+  }
+  .boardTools button {
+    font-size: 1rem;
+  }
+  .legend {
+    font-size: 1.2rem;
+  }
+  .proofStep {
+    font-size: 1.2rem;
+  }
+}
+@media (max-width: 1100px) {
+  .gameHeader {
+    gap: 12px;
+    padding: 12px 16px;
+  }
+  .preferences {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .preferences button {
+    min-height: 34px;
+    padding: 5px 8px;
+  }
+  .playLayout {
+    grid-template-columns: minmax(0, 1fr) 365px;
+  }
+  .desk {
+    padding: 18px 16px;
+  }
+  .board {
+    padding: 12px;
+  }
+  .boardTools button {
+    font-size: 0.76rem;
+  }
+}
+@media (max-width: 800px) {
+  .missions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .classroom[open] {
+    overflow-y: auto;
+  }
+  .gameHeader {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+  }
+  .gameTitle {
+    grid-row: 1;
+    grid-column: 1 / -1;
+  }
+  .gameHeader > button {
+    grid-column: 1;
+  }
+  .preferences {
+    flex-direction: row;
+    justify-content: center;
+  }
+  .preferences button {
+    min-height: 44px;
+  }
+  .roundSelect {
+    grid-column: 3;
+  }
+  .roundSelect select {
+    min-width: 67px;
+  }
+  .workspace {
+    flex: 0 0 auto;
+    min-height: auto;
+  }
+  .playLayout {
+    display: flex;
+    flex-direction: column;
+  }
+  .task {
+    padding: 14px 16px;
+  }
+  .board {
+    min-height: 0;
+  }
+  .drawing {
+    height: 580px;
+    min-height: 580px;
+    flex: none;
+  }
+  .boardTools button {
+    font-size: 0.83rem;
+  }
+  .desk {
+    border-left: 0;
+    border-top: 2px solid var(--color-grid);
+    padding: 24px 20px;
+    overflow: visible;
+    scrollbar-gutter: auto;
+  }
+  .evidenceList button {
+    font-size: 1.1rem;
+  }
+  .proofStep {
+    font-size: 1.15rem;
+  }
+  .finished {
+    margin: auto;
+  }
+}
+@media (max-width: 480px) {
+  .lobbyHeader {
+    display: block;
+  }
+  .progress {
+    margin-top: 20px;
+    border-left: 0;
+    padding-left: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .progress strong {
+    font-size: 1.7rem;
+  }
+  .missions {
+    grid-template-columns: 1fr;
+  }
+  .games .mission {
+    padding: 20px;
+  }
+  .symbol {
+    height: 135px;
+  }
+  .games .mixedCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 22px;
+  }
+  .gameHeader {
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+  }
+  .gameTitle h2 {
+    font-size: 1.55rem;
+  }
+  .gameHeader > button {
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: start;
+  }
+  .roundSelect {
+    grid-row: 2;
+    grid-column: 2;
+  }
+  .preferences {
+    grid-row: 3;
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+  .gameHeader p {
+    font-size: 0.85rem;
+  }
+  .task {
+    font-size: 1rem;
+  }
+  .drawing {
+    height: 550px;
+    min-height: 550px;
+  }
+  .legend {
+    font-size: 0.9rem;
+  }
+  .desk {
+    padding: 22px 16px;
+  }
+  .evidenceList button {
+    font-size: 0.96rem;
+    padding: 11px 10px;
+    gap: 8px;
+  }
+  .measurement {
+    gap: 7px;
+    font-size: 0.95rem;
+  }
+  .valueInput input {
+    width: 74px;
+  }
+  .proofStep {
+    font-size: 0.88rem;
+    gap: 6px;
+    grid-template-columns: 22px minmax(0, 1fr) 78px;
+  }
+  .proofColumns {
+    grid-template-columns: minmax(0, 1fr) 78px;
+    gap: 6px;
+    padding-left: 32px;
+  }
+  .proofStep p {
+    font-size: 0.75rem;
+  }
+  .transformTools {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .transformTools button {
+    padding: 6px 7px;
+    font-size: 0.78rem;
+  }
+  .proofStep :global(.katex) {
+    white-space: normal;
+  }
+  .proofStep .stepNumber {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* A phone keeps the diagram above a separately scrolling evidence/proof desk. */
+@media (max-width: 800px) {
+  .classroom[open] {
+    overflow: hidden;
+  }
+  .gameHeader {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    padding: 9px 12px;
+  }
+  .gameTitle {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .gameTitle h2 {
+    font-size: 1.3rem;
+  }
+  .gameTitle p {
+    font-size: 0.75rem;
+    margin-top: 3px;
+  }
+  .roundSelect {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .roundSelect select {
+    min-height: 38px;
+    padding: 5px 8px;
+  }
+  .gameHeader > button {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+    min-height: 36px;
+    padding: 6px 9px;
+    font-size: 0.82rem;
+  }
+  .preferences {
+    grid-column: 2;
+    grid-row: 2;
+    gap: 5px;
+    justify-content: flex-end;
+  }
+  .preferences button {
+    min-height: 36px;
+    padding: 5px 7px;
+    font-size: 0.7rem;
+  }
+  .task {
+    display: none;
+  }
+  .workspace {
+    flex: 1;
+    min-height: 0;
+  }
+  .playLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(245px, 46%) minmax(0, 1fr);
+    min-height: 0;
+  }
+  .board {
+    min-height: 0;
+    padding: 8px 10px 5px;
+    overflow: hidden;
+  }
+  .legend {
+    font-size: 0.82rem;
+    flex: 0 0 20px;
+  }
+  .drawing {
+    flex: 1;
+    min-height: 160px;
+    height: auto;
+  }
+  .controlsStrip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 48px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 2px 0;
+  }
+  .controlsStrip
+    :is(.cameraTools, .boardTools, .trianglePicker, .transformTools) {
+    display: contents;
+  }
+  .controlsStrip button {
+    min-height: 40px;
+    flex-shrink: 0;
+    padding: 6px 9px;
+    font-size: 0.77rem;
+    white-space: nowrap;
+  }
+  .diagramNote,
+  .boardHelp {
+    display: none;
+  }
+  .desk {
+    padding: 18px 16px;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-top: 2px solid var(--color-grid);
+  }
+}
+@media (max-height: 500px) and (min-width: 801px) {
+  .gameHeader {
+    padding: 8px 12px;
+    gap: 12px;
+  }
+  .gameTitle h2 {
+    font-size: 1.2rem;
+  }
+  .gameTitle p {
+    font-size: 0.72rem;
+    margin-top: 2px;
+  }
+  .preferences {
+    flex-direction: row;
+  }
+  .preferences button {
+    min-height: 36px;
+    font-size: 0.68rem;
+  }
+  .roundSelect {
+    gap: 1px;
+    font-size: 0.7rem;
+  }
+  .roundSelect select {
+    min-height: 35px;
+    font-size: 0.8rem;
+  }
+  .task {
+    display: none;
+  }
+  .playLayout {
+    grid-template-columns: minmax(0, 1fr) 315px;
+  }
+  .board {
+    padding: 6px 9px;
+    overflow: hidden;
+  }
+  .legend {
+    font-size: 0.8rem;
+  }
+  .drawing {
+    min-height: 160px;
+  }
+  .controlsStrip {
+    display: flex;
+    gap: 6px;
+    flex: 0 0 46px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    align-items: center;
+  }
+  .controlsStrip
+    :is(.cameraTools, .boardTools, .trianglePicker, .transformTools) {
+    display: contents;
+  }
+  .controlsStrip button {
+    min-height: 38px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    font-size: 0.72rem;
+    padding: 5px 8px;
+  }
+  .diagramNote,
+  .boardHelp {
+    display: none;
+  }
+  .desk {
+    padding: 14px;
+  }
+  .evidenceList button {
+    font-size: 0.85rem;
+  }
+}

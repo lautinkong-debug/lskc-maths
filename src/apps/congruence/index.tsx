@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { copy } from "@/lib/copy";
 import { LessonWorkspace } from "@/components/LessonWorkspace";
 import { usePresentation } from "@/components/PresentationFrame";
@@ -11,6 +12,7 @@ import type { Shape } from "../similarity/types";
 import { Board } from "./Board";
 import { Solution } from "./Solution";
 import { usableTriangle } from "./geometry";
+import { extractEvidence } from "./evidence";
 import { groups, questions, questionName, filterQuestions } from "./data";
 import type { CongruenceQuestion } from "./types";
 import styles from "./congruence.module.css";
@@ -18,11 +20,13 @@ import sharedStyles from "../similarity/similarity.module.css";
 
 const c = copy.congruence,
   shared = copy.similarity;
+const CongruenceGames = dynamic(() => import("./games"));
 export default function CongruencePractice() {
   const [id, setId] = useState("qp5-14");
   const [group, setGroup] = useState("");
   const [query, setQuery] = useState("");
   const [classroom, setClassroom] = useState(true);
+  const [mode, setMode] = useState<"practice" | "games">("practice");
   const opener = useRef<HTMLButtonElement>(null);
   const presenting = usePresentation();
   useEffect(() => {
@@ -34,7 +38,13 @@ export default function CongruencePractice() {
         /* Optional. */
       }
       const next = window.location.hash.slice(1) || saved;
-      if (questions.some((q) => q.id === next)) setId(next);
+      if (next === "games") {
+        setMode("games");
+        setClassroom(false);
+      } else if (questions.some((q) => q.id === next)) {
+        setId(next);
+        setMode("practice");
+      }
     }
     read();
     window.addEventListener("hashchange", read);
@@ -42,12 +52,22 @@ export default function CongruencePractice() {
   }, []);
   function choose(next: string) {
     setId(next);
+    setMode("practice");
     window.history.replaceState(null, "", `#${next}`);
     try {
       localStorage.setItem("congruence-question", next);
     } catch {
       /* Optional. */
     }
+  }
+  function changeMode(next: "practice" | "games") {
+    setMode(next);
+    setClassroom(next === "practice");
+    window.history.replaceState(
+      null,
+      "",
+      `#${next === "games" ? "games" : id}`,
+    );
   }
   function exit() {
     setClassroom(false);
@@ -83,94 +103,124 @@ export default function CongruencePractice() {
       <LessonWorkspace
         subject={c.title}
         symbol="≅"
-        active={questionName(question)}
+        active={mode === "games" ? c.games : questionName(question)}
         presenting={presenting}
         navigation={
-          <nav className={sharedStyles.bank} aria-label={shared.questionBank}>
-            <h2>
-              {shared.questionBank}
-              <span>{questions.length}</span>
-            </h2>
-            <p className={styles.micro}>{c.coverage}</p>
-            <label>
-              {shared.search}
-              <input
-                type="search"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={c.searchPlaceholder}
-              />
-            </label>
-            <label>
-              {shared.all}
-              <select value={group} onChange={(e) => setGroup(e.target.value)}>
-                <option value="">{shared.all}</option>
-                {groups.map((g) => (
-                  <option key={g}>{g}</option>
-                ))}
-              </select>
-            </label>
-            <p className={styles.micro}>
-              {visible.length} / {questions.length} {shared.questions}
-            </p>
-            <div className={sharedStyles.questionList}>
-              {visible.map((q) => (
-                <button
-                  key={q.id}
-                  aria-current={id === q.id ? "page" : undefined}
-                  onClick={() => choose(q.id)}
-                >
-                  <span>{questionName(q)}</span>
-                  <small>p. 5.{q.page}</small>
-                </button>
-              ))}
+          <>
+            <div className={styles.modeTabs} role="group" aria-label={c.modes}>
+              <button
+                aria-pressed={mode === "practice"}
+                onClick={() => changeMode("practice")}
+              >
+                {c.practice}
+              </button>
+              <button
+                aria-pressed={mode === "games"}
+                onClick={() => changeMode("games")}
+              >
+                {c.games}
+              </button>
             </div>
-            {!visible.length && <p>{shared.noResults}</p>}
-          </nav>
+            <nav className={sharedStyles.bank} aria-label={shared.questionBank}>
+              <h2>
+                {shared.questionBank}
+                <span>{questions.length}</span>
+              </h2>
+              <p className={styles.micro}>{c.coverage}</p>
+              <label>
+                {shared.search}
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={c.searchPlaceholder}
+                />
+              </label>
+              <label>
+                {shared.all}
+                <select
+                  value={group}
+                  onChange={(e) => setGroup(e.target.value)}
+                >
+                  <option value="">{shared.all}</option>
+                  {groups.map((g) => (
+                    <option key={g}>{g}</option>
+                  ))}
+                </select>
+              </label>
+              <p className={styles.micro}>
+                {visible.length} / {questions.length} {shared.questions}
+              </p>
+              <div className={sharedStyles.questionList}>
+                {visible.map((q) => (
+                  <button
+                    key={q.id}
+                    aria-current={id === q.id ? "page" : undefined}
+                    onClick={() => choose(q.id)}
+                  >
+                    <span>{questionName(q)}</span>
+                    <small>p. 5.{q.page}</small>
+                  </button>
+                ))}
+              </div>
+              {!visible.length && <p>{shared.noResults}</p>}
+            </nav>
+          </>
         }
       >
-        <div className={styles.studioHeader}>
-          <div>
-            <p>{c.coverage}</p>
-            <h2>{questionName(question)}</h2>
-          </div>
-          <button ref={opener} onClick={() => setClassroom(true)}>
-            {shared.enterClassroom}
-          </button>
+        <div hidden={mode !== "games"}>
+          {mode === "games" && <CongruenceGames presenting={presenting} />}
         </div>
-        <PracticeFrame
-          classroom={classroom}
-          active
-          onExit={exit}
-          header={
-            <header className={styles.header}>
-              <button onClick={exit}>{c.back}</button>
-              <div className={styles.identity}>
-                <span>{c.title}</span>
-                <strong>{questionName(question)}</strong>
-              </div>
-              <div className={styles.picker}>{picker}</div>
-              <div className={styles.pager}>
-                <button
-                  aria-label={shared.previous}
-                  disabled={index === 0}
-                  onClick={() => choose(questions[index - 1].id)}
-                >
-                  ←
-                </button>
-                <button
-                  aria-label={shared.next}
-                  disabled={index === questions.length - 1}
-                  onClick={() => choose(questions[index + 1].id)}
-                >
-                  →
-                </button>
-              </div>
-            </header>
-          }
-        >
-          <Lesson key={question.id} question={question} classroom={classroom} />
-        </PracticeFrame>
+        <div hidden={mode !== "practice"}>
+          <div className={styles.studioHeader}>
+            <div>
+              <p>{c.coverage}</p>
+              <h2>{questionName(question)}</h2>
+            </div>
+            <button ref={opener} onClick={() => setClassroom(true)}>
+              {shared.enterClassroom}
+            </button>
+          </div>
+          <PracticeFrame
+            label={c.classroom}
+            classroom={classroom}
+            active={mode === "practice"}
+            onExit={exit}
+            header={
+              <header className={styles.header}>
+                <button onClick={exit}>{c.back}</button>
+                <button onClick={() => changeMode("games")}>{c.games}</button>
+                <div className={styles.identity}>
+                  <span>{c.title}</span>
+                  <strong>{questionName(question)}</strong>
+                </div>
+                <div className={styles.picker}>{picker}</div>
+                <div className={styles.pager}>
+                  <button
+                    aria-label={shared.previous}
+                    disabled={index === 0}
+                    onClick={() => choose(questions[index - 1].id)}
+                  >
+                    ←
+                  </button>
+                  <button
+                    aria-label={shared.next}
+                    disabled={index === questions.length - 1}
+                    onClick={() => choose(questions[index + 1].id)}
+                  >
+                    →
+                  </button>
+                </div>
+              </header>
+            }
+          >
+            <Lesson
+              key={question.id}
+              question={question}
+              classroom={classroom}
+            />
+          </PracticeFrame>
+        </div>
       </LessonWorkspace>
     </div>
   );
@@ -191,6 +241,25 @@ function Lesson({
   );
   const [step, setStep] = useState(-1);
   const [marks, setMarks] = useState(true);
+  const [showAngles, setShowAngles] = useState(true);
+  const [showSides, setShowSides] = useState(true);
+  const [keepEvidence, setKeepEvidence] = useState(false);
+  const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
+  const evidence = useMemo(
+    () => extractEvidence(question, step, keepEvidence ? "all" : "current"),
+    [question, step, keepEvidence],
+  );
+  const currentKeys = useMemo(
+    () => new Set(extractEvidence(question, step).map((row) => row.key)),
+    [question, step],
+  );
+  const knownEvidence = useMemo(
+    () => extractEvidence(question, step, "all"),
+    [question, step],
+  );
+  function hideEvidence(key: string) {
+    setHiddenEvidence((previous) => new Set([...previous, key]));
+  }
   const [selected, setSelected] = useState(
     [0, 1].slice(0, question.shapes.length),
   );
@@ -201,6 +270,7 @@ function Lesson({
   const shapes = [...question.shapes, ...custom];
   function changeStep(next: number) {
     setStep(next);
+    if (next < 0) setHiddenEvidence(new Set());
     // Keep the pair introduced by the most recent printed comparison visible.
     // Board poses are keyed by shape ID, so revealing a new pair never resets one.
     for (let i = next; i >= 0; i--) {
@@ -287,6 +357,13 @@ function Lesson({
               visible={board === (source ? "source" : "copies")}
               step={step >= 0 ? question.steps[step] : undefined}
               marks={marks}
+              evidence={evidence}
+              knownEvidence={knownEvidence}
+              currentKeys={currentKeys}
+              showAngles={showAngles}
+              showSides={showSides}
+              hiddenEvidence={hiddenEvidence}
+              onHideEvidence={hideEvidence}
               controlsHost={host}
             />
           ))}
@@ -334,6 +411,39 @@ function Lesson({
               />
               {c.marks}
             </label>
+            <div className={styles.evidenceControls}>
+              <label className={styles.markToggle}>
+                <input
+                  type="checkbox"
+                  checked={showAngles}
+                  onChange={(e) => setShowAngles(e.target.checked)}
+                />
+                {c.showAngles}
+              </label>
+              <label className={styles.markToggle}>
+                <input
+                  type="checkbox"
+                  checked={showSides}
+                  onChange={(e) => setShowSides(e.target.checked)}
+                />
+                {c.showSides}
+              </label>
+              <label className={styles.markToggle}>
+                <input
+                  type="checkbox"
+                  checked={keepEvidence}
+                  onChange={(e) => setKeepEvidence(e.target.checked)}
+                />
+                {c.allEvidence}
+              </label>
+              <button
+                disabled={!hiddenEvidence.size}
+                onClick={() => setHiddenEvidence(new Set())}
+              >
+                {c.restoreEvidence}
+              </button>
+              <p className={styles.micro}>{c.evidenceHint}</p>
+            </div>
             <div ref={setHost} />
             <details className={styles.custom}>
               <summary>{c.create}</summary>

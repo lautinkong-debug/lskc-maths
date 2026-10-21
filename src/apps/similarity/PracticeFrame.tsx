@@ -11,12 +11,14 @@ export function PracticeFrame({
   onExit,
   header,
   children,
+  label = copy.similarity.classroom,
 }: {
   classroom: boolean;
   active: boolean;
   onExit: () => void;
   header: ReactNode;
   children: ReactNode;
+  label?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -32,7 +34,7 @@ export function PracticeFrame({
       className={styles.practiceFrame}
       data-classroom={classroom && active}
       data-testid="practice-classroom"
-      aria-label={copy.similarity.classroom}
+      aria-label={label}
       onCancel={(event) => {
         event.preventDefault();
         onExit();

@@ -8,6 +8,7 @@ import { bounds, centre } from "../similarity/geometry";
 import { useDiagramView } from "../similarity/DiagramView";
 import { placeVertexLabels } from "../similarity/vertexLabels";
 import { StepHighlights } from "../similarity/StepHighlights";
+import { PairedVertexLabels } from "../similarity/PairedVertexLabels";
 import type { Shape, Point } from "../similarity/types";
 import type { TextbookStep } from "../similarity/textbook-types";
 import {
@@ -16,11 +17,20 @@ import {
   rigidTransform,
   separatePoses,
   turnAtVertex,
+  reflectPose,
+  snapPose,
+  overlappingGroups,
   type RigidPose,
 } from "./geometry";
 import type { CongruenceQuestion } from "./types";
 import styles from "./congruence.module.css";
 import { CleanDiagram, cleanDiagramIds } from "./CleanDiagram";
+import { EvidenceMarks, layoutEvidenceMarks } from "./EvidenceMarks";
+import {
+  filterStepEvidence,
+  withoutEvidenceHighlights,
+  type EvidenceRow,
+} from "./evidence";
 
 const c = copy.congruence,
   shared = copy.similarity;
@@ -41,6 +51,13 @@ export function Board({
   step,
   marks,
   controlsHost,
+  evidence,
+  knownEvidence,
+  currentKeys,
+  hiddenEvidence,
+  showAngles,
+  showSides,
+  onHideEvidence,
 }: {
   question: CongruenceQuestion;
   shapes: Shape[];
@@ -50,10 +67,19 @@ export function Board({
   step?: TextbookStep;
   marks: boolean;
   controlsHost: HTMLElement | null;
+  evidence: EvidenceRow[];
+  knownEvidence: EvidenceRow[];
+  currentKeys: ReadonlySet<string>;
+  hiddenEvidence: ReadonlySet<string>;
+  showAngles: boolean;
+  showSides: boolean;
+  onHideEvidence: (key: string) => void;
 }) {
   const [poses, setPoses] = useState<Record<number, RigidPose>>({});
   const [activeChoice, setActive] = useState(0);
   const [opacity, setOpacity] = useState(0.14);
+  const [snapping, setSnapping] = useState(true);
+  const [snapped, setSnapped] = useState(false);
   const svg = useRef<SVGSVGElement>(null);
   const drag = useRef<{
     id: number;
@@ -92,11 +118,49 @@ export function Board({
   const frame = source
     ? bounds(question.points, 70)
     : { x: 0, y: 0, width: 840, height: 460 };
-  const content = source
-    ? [...question.points, ...placed.flatMap((s) => s.points)]
-    : placed.flatMap((s) => s.points);
-  const view = useDiagramView(frame, content, 65, svg);
   const fontSize = source ? Math.min(23, Math.max(11, frame.width / 32)) : 23;
+  const visibleEvidence = marks
+    ? evidence.filter(
+        (row) =>
+          !hiddenEvidence.has(row.key) &&
+          (row.kind === "angle" ? showAngles : showSides),
+      )
+    : [];
+  const evidencePlacements = source
+    ? [{ id: -1, points: question.points, sourceOnly: true }, ...placed]
+    : placed;
+  const evidenceLayout = layoutEvidenceMarks(
+    visibleEvidence,
+    question.points,
+    evidencePlacements,
+    fontSize / 23,
+  );
+  const annotationBounds = evidenceLayout.boxes.flatMap((box) => [
+    { label: "", x: box.x, y: box.y },
+    { label: "", x: box.x + box.width, y: box.y + box.height },
+  ]);
+  const focusStep = withoutEvidenceHighlights(
+    filterStepEvidence(
+      step,
+      knownEvidence,
+      hiddenEvidence,
+      showAngles,
+      showSides,
+      question.points,
+    ),
+    visibleEvidence,
+    question.points,
+  );
+  const content = source
+    ? [
+        ...question.points,
+        ...placed.flatMap((s) => s.points),
+        ...annotationBounds,
+      ]
+    : [...placed.flatMap((s) => s.points), ...annotationBounds];
+  const view = useDiagramView(frame, content, 65, svg);
+  const overlap = overlappingGroups(placed, fontSize * 0.75);
+  const merged = new Set(overlap.flat());
   const labels = placeVertexLabels(
     placed.flatMap((shape) => {
       const middle = centre(shape.points);
@@ -109,6 +173,8 @@ export function Board({
       }));
     }),
     placed.map((s) => s.points),
+    evidenceLayout.boxes,
+    view.frame,
   );
   const active = selected.includes(activeChoice) ? activeChoice : selected[0];
   const pose = active === undefined ? undefined : getPose(active);
@@ -130,6 +196,7 @@ export function Board({
     event.currentTarget.setPointerCapture(event.pointerId);
     event.currentTarget.focus();
     setActive(id);
+    setSnapped(false);
     drag.current = {
       id,
       pointer: event.pointerId,
@@ -163,7 +230,23 @@ export function Board({
           },
     );
   }
-  function stop() {
+  function stop(trySnap = false) {
+    const d = drag.current;
+    if (trySnap && d && snapping) {
+      for (const target of placed.filter((shape) => shape.id !== d.id)) {
+        const fit = snapPose(
+          allSets[d.id],
+          target.points,
+          getPose(d.id),
+          fontSize * 1.5,
+        );
+        if (fit) {
+          update(d.id, fit);
+          setSnapped(true);
+          break;
+        }
+      }
+    }
     drag.current = null;
     view.endPan();
   }
@@ -205,11 +288,14 @@ export function Board({
               {shared.rotateRight}
             </button>
             <button
-              onClick={() =>
-                update(active, { ...pose, reflected: !pose.reflected })
-              }
+              onClick={() => update(active, reflectPose(pose, "horizontal"))}
             >
-              {c.flip}
+              {c.flipHorizontal}
+            </button>
+            <button
+              onClick={() => update(active, reflectPose(pose, "vertical"))}
+            >
+              {c.flipVertical}
             </button>
           </div>
           <label className={styles.slider}>
@@ -278,9 +364,19 @@ export function Board({
           onChange={(e) => setOpacity(Number(e.target.value))}
         />
       </label>
+      <label className={styles.markToggle}>
+        <input
+          type="checkbox"
+          checked={snapping}
+          onChange={(e) => setSnapping(e.target.checked)}
+        />
+        {c.snap}
+      </label>
+      <p className={styles.micro}>{c.snapHint}</p>
       <button
         onClick={() => {
           setPoses({});
+          setSnapped(false);
           view.reset();
         }}
       >
@@ -302,9 +398,9 @@ export function Board({
           }
           onPointerDown={view.startPan}
           onPointerMove={move}
-          onPointerUp={stop}
-          onPointerCancel={stop}
-          onLostPointerCapture={stop}
+          onPointerUp={() => stop(true)}
+          onPointerCancel={() => stop()}
+          onLostPointerCapture={() => stop()}
         >
           <title>{title}</title>
           <rect
@@ -331,7 +427,7 @@ export function Board({
           {source && <CleanDiagram question={question} />}
           {source && marks && (
             <StepHighlights
-              step={step}
+              step={focusStep}
               source={question.points}
               size={fontSize / 23}
               rightAngles={question.rightAngles}
@@ -422,7 +518,7 @@ export function Board({
                 />
                 {marks && (
                   <StepHighlights
-                    step={step}
+                    step={focusStep}
                     source={question.points}
                     placed={points}
                     rightAngles={question.rightAngles}
@@ -433,7 +529,7 @@ export function Board({
                   const label = labels.get(`${id}-${p.label}`)!;
                   return (
                     <g key={p.label}>
-                      {!unchangedSource && (
+                      {!unchangedSource && !merged.has(id) && (
                         <text
                           x={label.textX}
                           y={label.textY}
@@ -488,6 +584,28 @@ export function Board({
               </g>
             );
           })}
+          <EvidenceMarks
+            rows={visibleEvidence}
+            source={question.points}
+            placements={evidencePlacements}
+            layout={evidenceLayout}
+            size={fontSize / 23}
+            currentKeys={currentKeys}
+            onToggle={onHideEvidence}
+            hideLabel={(row) =>
+              `${c.hideEvidence}: ${row.members.map((member) => `${row.kind === "angle" ? "∠" : ""}${member.name}`).join(" = ")}`
+            }
+          />
+          <PairedVertexLabels
+            groups={overlap}
+            shapes={placed.map((shape, i) => ({
+              ...shape,
+              colour: colours[i],
+            }))}
+            frame={view.frame}
+            fontSize={fontSize}
+            obstacles={evidenceLayout.boxes}
+          />
         </svg>
         <div className={styles.camera}>
           <button
@@ -509,7 +627,7 @@ export function Board({
           </button>
           <button onClick={() => view.fit()}>{shared.fitTriangles}</button>
           <button onClick={view.reset}>{shared.resetView}</button>
-          <span>{c.sizeLocked}</span>
+          <span role="status">{snapped ? c.snapped : c.sizeLocked}</span>
         </div>
       </section>
       {controlsHost && createPortal(toolbar, controlsHost)}

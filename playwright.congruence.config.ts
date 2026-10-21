@@ -1,7 +1,7 @@
 import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
-  testMatch: "congruence.spec.ts",
+  testMatch: "congruence*.spec.ts",
   workers: 1,
   reporter: "list",
   use: {

@@ -118,3 +118,74 @@ export function alignPose(
     angle: (Math.atan2(cross, dot) * 180) / Math.PI,
   };
 }
+
+/** Reflect in a screen-horizontal/vertical direction, retaining every length. */
+export function reflectPose(
+  pose: RigidPose,
+  axis: "horizontal" | "vertical",
+): RigidPose {
+  return {
+    ...pose,
+    reflected: !pose.reflected,
+    angle: (axis === "vertical" ? 180 : 0) - pose.angle,
+  };
+}
+
+/** Magnetic alignment is a rigid fit, never a size correction. Pixel tracings
+ * may differ slightly; reject distinctly unequal or differently shaped copies. */
+export function snapPose(
+  source: Point[],
+  target: Point[],
+  pose: RigidPose,
+  reach: number,
+): RigidPose | null {
+  if (source.length !== 3 || target.length !== 3) return null;
+  const targetCentre = centre(target);
+  if (Math.hypot(pose.x - targetCentre.x, pose.y - targetCentre.y) > reach)
+    return null;
+  const diameter = Math.max(
+    ...target.map((p, i) =>
+      Math.hypot(p.x - target[(i + 1) % 3].x, p.y - target[(i + 1) % 3].y),
+    ),
+  );
+  const candidates = [pose.reflected, !pose.reflected]
+    .map((reflected) => {
+      const fit = alignPose(source, target, { ...pose, reflected });
+      const points = rigidTransform(source, fit);
+      const error = Math.max(
+        ...points.map((p, i) =>
+          Math.hypot(p.x - target[i].x, p.y - target[i].y),
+        ),
+      );
+      return { fit, error };
+    })
+    .sort((a, b) => a.error - b.error);
+  return candidates[0].error <= diameter * 0.045 ? candidates[0].fit : null;
+}
+
+/** Merge only whole corresponding triangles, not incidental crossing vertices. */
+export function overlappingGroups(
+  shapes: { id: number; points: Point[] }[],
+  tolerance: number,
+): number[][] {
+  const groups: number[][] = [];
+  const used = new Set<number>();
+  for (const shape of shapes) {
+    if (used.has(shape.id)) continue;
+    const group = shapes
+      .filter(
+        (other) =>
+          !used.has(other.id) &&
+          other.points.length === shape.points.length &&
+          shape.points.every(
+            (p, i) =>
+              Math.hypot(p.x - other.points[i].x, p.y - other.points[i].y) <=
+              tolerance,
+          ),
+      )
+      .map((s) => s.id);
+    group.forEach((id) => used.add(id));
+    if (group.length > 1) groups.push(group);
+  }
+  return groups;
+}

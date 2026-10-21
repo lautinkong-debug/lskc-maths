@@ -32,6 +32,14 @@ At the owner's request, question crops omit the separate diagonal `STFALSKC` wat
 
 Solutions retain printed intermediate steps, reasons, alternatives and correspondence. Answers start hidden. Source notes appear after the last step. Extra valid conditions for Exercise 5B Q29 are explained separately from the printed example.
 
+## Teaching interactions and games
+
+The 21/10 update uses Quick Practice 5.14 as the AAS pilot. The same evidence layer supports all 66 questions. It reads explicit equalities and evaluated values from revealed solution lines, never measures the pixel drawings or invents facts from arithmetic operands. Marks follow each displayed triangle. Right angles use squares with 90° labels. Teachers can separately hide angles or sides, retain earlier evidence, dismiss a corresponding pair, and restore hidden evidence. Earlier evidence remains unhighlighted while only the current line is emphasised.
+
+Horizontal and vertical reflection, turning, dragging and automatic alignment are rigid transformations. Snapping rejects distinctly different sizes/shapes. Corresponding vertex names and equal side labels combine on overlap. Camera zoom and Fit include annotation bounds. The question bank and games share the existing department-wide collapsible `LessonWorkspace` menu.
+
+The Games tab (`/apps/congruence#games`) contains three rounds each for SSS, SAS, ASA, AAS and RHS, plus a 12-round mixed challenge. These are generated teaching activities separate from the transcribed textbook solutions. A labelled measurement control rebuilds the red triangle; movement controls always preserve its current lengths. The mixed challenge contains concrete unequal AAA and ambiguous SSA counterexamples, two-fact insufficiency, and a similar-but-unequal side set. The grader uses marked facts and checks the included angle/side and hypotenuse. Proof steps, feedback, optional sound (off initially), reduced motion and progress stored locally support classroom use without Firebase score writes.
+
 ## Regenerating question images
 
 Keep the supplied PDFs outside version control, for example in ignored `tmp/congruence/`.
