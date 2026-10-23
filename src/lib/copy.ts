@@ -411,6 +411,7 @@ export const copy = {
       "Move the triangles to explore. Then reveal the textbook solution one line at a time.",
     classroomHint:
       "Drag inside a triangle to move it. Drag a vertex to turn and resize.",
+    givenConditions: "Given conditions",
     showOriginal: "Original diagram",
     showExtracted: "Extracted triangles",
     title: "Similarity Studio",

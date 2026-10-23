@@ -49,14 +49,14 @@ test("Next reveals one line, replaces its highlights, and Reset hides the soluti
   await expect(board.locator('[data-highlight-side="RQ"]')).toHaveCount(0);
   await expect(board.locator('[data-highlight-side="AB"]')).toHaveCount(0);
   await proof.getByTestId("solution-step-0").click();
-  await expect(proof.locator("tbody tr")).toHaveCount(1);
+  await expect(proof.locator("tbody tr")).toHaveCount(2);
   await expect(board.locator('[data-highlight-side="RQ"]')).toHaveCount(1);
   await proof.getByRole("button", { name: "Next step", exact: true }).click();
-  await expect(proof.locator("tbody tr")).toHaveCount(2);
+  await expect(proof.locator("tbody tr")).toHaveCount(3);
   await proof
     .getByRole("button", { name: "Previous step", exact: true })
     .click();
-  await expect(proof.locator("tbody tr")).toHaveCount(1);
+  await expect(proof.locator("tbody tr")).toHaveCount(2);
   await proof
     .getByRole("button", { name: "Reset solution", exact: true })
     .click();

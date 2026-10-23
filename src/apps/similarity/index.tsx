@@ -33,6 +33,7 @@ import {
 import type { Point, Shape, SourceQuestion } from "./types";
 import styles from "./similarity.module.css";
 import { OriginalCanvas } from "./OriginalCanvas";
+import { GivenConditions } from "./GivenConditions";
 import { GeometryName, GeometryText } from "./Notation";
 import { VertexHandles } from "./VertexHandles";
 import { layoutReasonAngles, ReasonMarks } from "./ReasonMarks";
@@ -590,7 +591,6 @@ function Lesson({
     setShowMarks(true);
     setShowAngles(true);
     setShowLengths(true);
-    setVisibleSteps(index + 1);
     setExploreMarks(false);
     // Use the most recent printed introduction to expose the relevant copies.
     const context =
@@ -1243,211 +1243,216 @@ function Lesson({
                     </div>
                   </div>
                   <DiagramViewControls title={c.workspace} view={view} />
-                  <svg
-                    ref={svg}
-                    viewBox={`${view.frame.x} ${view.frame.y} ${view.frame.width} ${view.frame.height}`}
-                    className={styles.board}
-                    onPointerDown={view.startPan}
-                    onPointerMove={moveDrag}
-                    onPointerUp={finishDrag}
-                    onPointerCancel={() => {
-                      view.endPan();
-                      drag.current = null;
-                    }}
-                    onLostPointerCapture={() => {
-                      view.endPan();
-                      drag.current = null;
-                    }}
-                    aria-label={c.workspace}
-                    data-testid="manipulation-board"
-                  >
-                    <defs>
-                      <pattern
-                        id={`grid-${question.id}`}
-                        width="30"
-                        height="30"
-                        patternUnits="userSpaceOnUse"
-                      >
-                        <path
-                          d="M30 0H0V30"
-                          fill="none"
-                          stroke="var(--color-grid)"
-                          strokeWidth=".7"
-                        />
-                      </pattern>
-                    </defs>
-                    <rect
-                      {...view.frame}
-                      data-pan-background="true"
-                      fill={`url(#grid-${question.id})`}
-                    />
-                    {sets
-                      .map((_, i) => i)
-                      .sort(
-                        (a, b) => Number(a === active) - Number(b === active),
-                      )
-                      .map((i) => {
-                        const transformed = placedShapes[i].points;
-                        return (
-                          <g
-                            key={`${chosen[i].name}-${i}`}
-                            tabIndex={0}
-                            role="button"
-                            aria-label={`${c.move} ${chosen[i].name}`}
-                            aria-pressed={active === i}
-                            onPointerDown={(e) => startDrag(e, i)}
-                            onFocus={() => setActive(i)}
-                            onKeyDown={(e) => {
-                              const p = poses[i];
-                              const delta = e.shiftKey ? 20 : 5;
-                              const movement: Record<string, [number, number]> =
-                                {
+                  <div className={styles.diagramStage}>
+                    {classroom && <GivenConditions question={question} />}
+                    <svg
+                      ref={svg}
+                      viewBox={`${view.frame.x} ${view.frame.y} ${view.frame.width} ${view.frame.height}`}
+                      className={styles.board}
+                      onPointerDown={view.startPan}
+                      onPointerMove={moveDrag}
+                      onPointerUp={finishDrag}
+                      onPointerCancel={() => {
+                        view.endPan();
+                        drag.current = null;
+                      }}
+                      onLostPointerCapture={() => {
+                        view.endPan();
+                        drag.current = null;
+                      }}
+                      aria-label={c.workspace}
+                      data-testid="manipulation-board"
+                    >
+                      <defs>
+                        <pattern
+                          id={`grid-${question.id}`}
+                          width="30"
+                          height="30"
+                          patternUnits="userSpaceOnUse"
+                        >
+                          <path
+                            d="M30 0H0V30"
+                            fill="none"
+                            stroke="var(--color-grid)"
+                            strokeWidth=".7"
+                          />
+                        </pattern>
+                      </defs>
+                      <rect
+                        {...view.frame}
+                        data-pan-background="true"
+                        fill={`url(#grid-${question.id})`}
+                      />
+                      {sets
+                        .map((_, i) => i)
+                        .sort(
+                          (a, b) => Number(a === active) - Number(b === active),
+                        )
+                        .map((i) => {
+                          const transformed = placedShapes[i].points;
+                          return (
+                            <g
+                              key={`${chosen[i].name}-${i}`}
+                              tabIndex={0}
+                              role="button"
+                              aria-label={`${c.move} ${chosen[i].name}`}
+                              aria-pressed={active === i}
+                              onPointerDown={(e) => startDrag(e, i)}
+                              onFocus={() => setActive(i)}
+                              onKeyDown={(e) => {
+                                const p = poses[i];
+                                const delta = e.shiftKey ? 20 : 5;
+                                const movement: Record<
+                                  string,
+                                  [number, number]
+                                > = {
                                   ArrowLeft: [-delta, 0],
                                   ArrowRight: [delta, 0],
                                   ArrowUp: [0, -delta],
                                   ArrowDown: [0, delta],
                                 };
-                              if (movement[e.key]) {
-                                e.preventDefault();
-                                const [x, y] = movement[e.key];
-                                update(
-                                  {
-                                    x: Math.min(780, Math.max(60, p.x + x)),
-                                    y: Math.min(400, Math.max(65, p.y + y)),
-                                  },
-                                  i,
-                                );
-                              }
-                              if (e.key.toLowerCase() === "r") {
-                                e.preventDefault();
-                                update({ angle: p.angle + 15 }, i);
-                              }
-                              if (e.key.toLowerCase() === "h") {
-                                e.preventDefault();
-                                update({ flipX: -p.flipX }, i);
-                              }
-                              if (e.key.toLowerCase() === "v") {
-                                e.preventDefault();
-                                update({ flipY: -p.flipY }, i);
-                              }
-                            }}
-                            className={styles.movable}
-                            data-testid={`shape-${i}`}
-                            data-angle={poses[i].angle}
-                            data-scale={poses[i].scale}
-                            data-x={poses[i].x}
-                            data-y={poses[i].y}
-                            data-flip-x={poses[i].flipX}
-                            data-flip-y={poses[i].flipY}
-                          >
-                            <polygon
-                              points={path(transformed)}
-                              fill={colours[i]}
-                              fillOpacity={opacity}
-                              stroke={colours[i]}
-                              strokeWidth={active === i ? 4 : 2.5}
-                              strokeDasharray={
-                                i === 1 ? "10 4" : i === 2 ? "3 3" : undefined
-                              }
-                            />
-                            <StepHighlights
-                              step={highlightStep}
-                              correspondencePair={activeCorrespondence}
-                              angleLabels={correspondenceLabels}
-                              rightAngles={rightAngles}
-                              source={points}
-                              placed={transformed}
-                            />
-                            {showMarks &&
-                              pair?.shapes.includes(selected[i]) && (
-                                <ReasonMarks
-                                  points={transformed}
-                                  rows={visibleRows}
-                                  member={pair.shapes.indexOf(selected[i])}
-                                  reserved={markObstacles}
-                                  showSideLabels={!sideLabels.length}
-                                  onHide={hideMark}
-                                  onMoveStart={(event) => startDrag(event, i)}
-                                />
-                              )}
-                            {transformed.map((p, j) => {
-                              const label = vertexLabels.get(
-                                `${selected[i]}-${p.label}`,
-                              );
-                              return (
-                                <g key={p.label}>
-                                  <circle
-                                    cx={p.x}
-                                    cy={p.y}
-                                    r="4"
-                                    fill={colours[i]}
-                                  />
-                                  {!pairedShapes.has(selected[i]) && (
-                                    <text
-                                      data-testid="vertex-name"
-                                      x={label!.textX}
-                                      y={label!.textY}
-                                      textAnchor="middle"
-                                      className={styles.vertexLabel}
-                                      fill={colours[i]}
-                                    >
-                                      {p.label}
-                                      {order ? (
-                                        <tspan fontSize="13" dy="-9">
-                                          {j + 1}
-                                        </tspan>
-                                      ) : null}
-                                    </text>
-                                  )}
-                                </g>
-                              );
-                            })}
-                            {active === i && (
-                              <VertexHandles
-                                points={transformed}
-                                colour={colours[i]}
-                                prefix={`shape-${i}`}
-                                onStart={(event, point) =>
-                                  startDrag(event, i, point)
-                                }
-                                pose={poses[i]}
-                                onChange={(patch) =>
+                                if (movement[e.key]) {
+                                  e.preventDefault();
+                                  const [x, y] = movement[e.key];
                                   update(
-                                    fitPose(
-                                      sets[i],
-                                      { ...poses[i], ...patch },
-                                      { x: 0, y: 0, width: 840, height: 470 },
-                                      30,
-                                      patch.scale === undefined,
-                                    ),
+                                    {
+                                      x: Math.min(780, Math.max(60, p.x + x)),
+                                      y: Math.min(400, Math.max(65, p.y + y)),
+                                    },
                                     i,
-                                  )
+                                  );
+                                }
+                                if (e.key.toLowerCase() === "r") {
+                                  e.preventDefault();
+                                  update({ angle: p.angle + 15 }, i);
+                                }
+                                if (e.key.toLowerCase() === "h") {
+                                  e.preventDefault();
+                                  update({ flipX: -p.flipX }, i);
+                                }
+                                if (e.key.toLowerCase() === "v") {
+                                  e.preventDefault();
+                                  update({ flipY: -p.flipY }, i);
+                                }
+                              }}
+                              className={styles.movable}
+                              data-testid={`shape-${i}`}
+                              data-angle={poses[i].angle}
+                              data-scale={poses[i].scale}
+                              data-x={poses[i].x}
+                              data-y={poses[i].y}
+                              data-flip-x={poses[i].flipX}
+                              data-flip-y={poses[i].flipY}
+                            >
+                              <polygon
+                                points={path(transformed)}
+                                fill={colours[i]}
+                                fillOpacity={opacity}
+                                stroke={colours[i]}
+                                strokeWidth={active === i ? 4 : 2.5}
+                                strokeDasharray={
+                                  i === 1 ? "10 4" : i === 2 ? "3 3" : undefined
                                 }
                               />
-                            )}
-                          </g>
-                        );
-                      })}
-                    <PairedSideLabels
-                      labels={sideLabels}
-                      onHide={hideMark}
-                      onMoveStart={(event) =>
-                        startDrag(
-                          event,
-                          pair!.shapes.includes(selected[active])
-                            ? active
-                            : selected.indexOf(pair!.shapes[0]),
-                        )
-                      }
-                    />
-                    <PairedVertexLabels
-                      groups={labelGroups}
-                      shapes={placedShapes}
-                      frame={view.frame}
-                      showOrder={order}
-                      obstacles={sideLabels}
-                    />
-                  </svg>
+                              <StepHighlights
+                                step={highlightStep}
+                                correspondencePair={activeCorrespondence}
+                                angleLabels={correspondenceLabels}
+                                rightAngles={rightAngles}
+                                source={points}
+                                placed={transformed}
+                              />
+                              {showMarks &&
+                                pair?.shapes.includes(selected[i]) && (
+                                  <ReasonMarks
+                                    points={transformed}
+                                    rows={visibleRows}
+                                    member={pair.shapes.indexOf(selected[i])}
+                                    reserved={markObstacles}
+                                    showSideLabels={!sideLabels.length}
+                                    onHide={hideMark}
+                                    onMoveStart={(event) => startDrag(event, i)}
+                                  />
+                                )}
+                              {transformed.map((p, j) => {
+                                const label = vertexLabels.get(
+                                  `${selected[i]}-${p.label}`,
+                                );
+                                return (
+                                  <g key={p.label}>
+                                    <circle
+                                      cx={p.x}
+                                      cy={p.y}
+                                      r="4"
+                                      fill={colours[i]}
+                                    />
+                                    {!pairedShapes.has(selected[i]) && (
+                                      <text
+                                        data-testid="vertex-name"
+                                        x={label!.textX}
+                                        y={label!.textY}
+                                        textAnchor="middle"
+                                        className={styles.vertexLabel}
+                                        fill={colours[i]}
+                                      >
+                                        {p.label}
+                                        {order ? (
+                                          <tspan fontSize="13" dy="-9">
+                                            {j + 1}
+                                          </tspan>
+                                        ) : null}
+                                      </text>
+                                    )}
+                                  </g>
+                                );
+                              })}
+                              {active === i && (
+                                <VertexHandles
+                                  points={transformed}
+                                  colour={colours[i]}
+                                  prefix={`shape-${i}`}
+                                  onStart={(event, point) =>
+                                    startDrag(event, i, point)
+                                  }
+                                  pose={poses[i]}
+                                  onChange={(patch) =>
+                                    update(
+                                      fitPose(
+                                        sets[i],
+                                        { ...poses[i], ...patch },
+                                        { x: 0, y: 0, width: 840, height: 470 },
+                                        30,
+                                        patch.scale === undefined,
+                                      ),
+                                      i,
+                                    )
+                                  }
+                                />
+                              )}
+                            </g>
+                          );
+                        })}
+                      <PairedSideLabels
+                        labels={sideLabels}
+                        onHide={hideMark}
+                        onMoveStart={(event) =>
+                          startDrag(
+                            event,
+                            pair!.shapes.includes(selected[active])
+                              ? active
+                              : selected.indexOf(pair!.shapes[0]),
+                          )
+                        }
+                      />
+                      <PairedVertexLabels
+                        groups={labelGroups}
+                        shapes={placedShapes}
+                        frame={view.frame}
+                        showOrder={order}
+                        obstacles={sideLabels}
+                      />
+                    </svg>
+                  </div>
                   {classroom && controlHost
                     ? createPortal(
                         <div data-control-board="extracted">

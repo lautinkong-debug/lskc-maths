@@ -2,6 +2,13 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+
+## Similarity question conditions and persistent proof history (23/10/2026)
+
+- [x] Add a fixed top-left Given conditions panel to both classroom boards for all 72 questions. Use question premises rather than proof deductions; check diagram-only entries against the printed question crops. Retain mathematical italics and // notation. Keep it collapsible, initially compact on phones and short screens.
+- [x] Keep Show earlier steps enabled through selecting a line, Next, Previous and Reset. Selecting an older line retains all previously revealed rows and highlights only the selected step. Scroll within the proof panel to keep the active line visible.
+- [x] Verify the isolated production build and TypeScript, scoped ESLint, 25 focused unit tests, desktop/phone/landscape layouts and all 72 question choices. Preserve concurrent Polynomial and Surface Area work outside this release. Browser and release evidence: ignored out/similarity-givens/.
+
 ## Similarity complete proof rows (23/10/2026)
 
 - [x] Reproduce the owner's missing Q19 continuation on the live site and a failing regression. Invisible textbook alignment boxes pushed the remainder of an equation out of view; the classroom solution rail was limited to 470px.

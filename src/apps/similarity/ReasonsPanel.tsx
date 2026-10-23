@@ -59,7 +59,16 @@ export function ReasonsPanel({
   const [history, setHistory] = useState(false);
   useEffect(() => {
     if (classroom) {
-      panel.current?.querySelector(`.${styles.proofBody}`)?.scrollTo(0, 0);
+      const body = panel.current?.querySelector(`.${styles.proofBody}`);
+      const row = body?.querySelector(`[data-step-index="${focus}"]`);
+      if (history && body && row) {
+        const viewport = body.getBoundingClientRect();
+        const line = row.getBoundingClientRect();
+        if (line.bottom > viewport.bottom)
+          body.scrollTop += line.bottom - viewport.bottom;
+        else if (line.top < viewport.top)
+          body.scrollTop -= viewport.top - line.top;
+      } else body?.scrollTo(0, 0);
       return;
     }
     const container = panel.current;
@@ -71,10 +80,9 @@ export function ReasonsPanel({
       container.scrollTop += line.bottom - box.bottom + 12;
     else if (line.top < box.top + 140)
       container.scrollTop -= box.top + 140 - line.top;
-  }, [focus, visible, classroom]);
+  }, [focus, visible, classroom, history]);
   const pair = pairs[pairIndex];
   function next() {
-    setHistory(false);
     const index = Math.min(visible, solution.steps.length - 1);
     onVisible(index + 1);
     onFocus(index);
@@ -91,7 +99,6 @@ export function ReasonsPanel({
       <div className={styles.solutionControls}>
         <button
           onClick={() => {
-            setHistory(false);
             const count = Math.max(0, visible - 1);
             onVisible(count);
             onFocus(count ? count - 1 : null);
@@ -105,7 +112,6 @@ export function ReasonsPanel({
         </button>
         <button
           onClick={() => {
-            setHistory(false);
             onReset();
           }}
           disabled={visible === 0 && focus === null}
@@ -170,8 +176,7 @@ export function ReasonsPanel({
                     aria-label={`${c.highlightStep} ${i + 1}`}
                     aria-pressed={focus === i}
                     onClick={() => {
-                      setHistory(false);
-                      onFocus(focus === i ? null : i);
+                      onFocus(i);
                     }}
                   >
                     {step.heading && (

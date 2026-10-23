@@ -18,6 +18,7 @@ import {
 } from "./geometry";
 import type { Point, Shape, SourceQuestion } from "./types";
 import styles from "./similarity.module.css";
+import { GivenConditions } from "./GivenConditions";
 import { GeometryName } from "./Notation";
 import { VertexHandles } from "./VertexHandles";
 import { layoutReasonAngles, ReasonMarks } from "./ReasonMarks";
@@ -447,47 +448,110 @@ export function OriginalCanvas({
         </button>
       </div>
       <DiagramViewControls title={c.original} view={view} />
-      <svg
-        ref={svg}
-        viewBox={`${view.frame.x} ${view.frame.y} ${view.frame.width} ${view.frame.height}`}
-        className={styles.sourceSvg}
-        aria-label={`${c.original}: ${question.group} ${question.number}`}
-        data-testid="original-board"
-        onPointerDown={view.startPan}
-        onPointerMove={move}
-        onPointerUp={finish}
-        onPointerCancel={() => {
-          view.endPan();
-          drag.current = null;
-        }}
-        onLostPointerCapture={() => {
-          view.endPan();
-          drag.current = null;
-        }}
-      >
-        <rect
-          {...view.frame}
-          fill="var(--color-paper)"
-          data-pan-background="true"
-        />
-        <defs>
-          <clipPath id={`source-clip-${question.id}`}>
-            <rect {...originalBox} />
-          </clipPath>
-        </defs>
-        <g
-          className={styles.referenceDiagram}
-          opacity={moved ? 0.27 : 1}
-          pointerEvents="none"
+      <div className={styles.diagramStage}>
+        {classroom && <GivenConditions question={question} />}
+        <svg
+          ref={svg}
+          viewBox={`${view.frame.x} ${view.frame.y} ${view.frame.width} ${view.frame.height}`}
+          className={styles.sourceSvg}
+          aria-label={`${c.original}: ${question.group} ${question.number}`}
+          data-testid="original-board"
+          onPointerDown={view.startPan}
+          onPointerMove={move}
+          onPointerUp={finish}
+          onPointerCancel={() => {
+            view.endPan();
+            drag.current = null;
+          }}
+          onLostPointerCapture={() => {
+            view.endPan();
+            drag.current = null;
+          }}
         >
-          {plainReference && (
-            <>
-              {contextOutlines[question.id] && (
+          <rect
+            {...view.frame}
+            fill="var(--color-paper)"
+            data-pan-background="true"
+          />
+          <defs>
+            <clipPath id={`source-clip-${question.id}`}>
+              <rect {...originalBox} />
+            </clipPath>
+          </defs>
+          <g
+            className={styles.referenceDiagram}
+            opacity={moved ? 0.27 : 1}
+            pointerEvents="none"
+          >
+            {plainReference && (
+              <>
+                {contextOutlines[question.id] && (
+                  <polyline
+                    data-testid="reference-context"
+                    points={outline(
+                      shapePoints(
+                        {
+                          name: "",
+                          vertices: [...contextOutlines[question.id]],
+                        },
+                        points,
+                      ),
+                    )}
+                    fill="none"
+                    stroke="var(--color-graphite)"
+                    strokeWidth="2"
+                  />
+                )}
+                {question.shapes.map((shape, i) => (
+                  <polygon
+                    key={i}
+                    points={outline(shapePoints(shape, points))}
+                    fill="none"
+                    stroke="var(--color-graphite)"
+                    strokeWidth="2"
+                  />
+                ))}
+                {points.map((p) => (
+                  <text
+                    key={p.label}
+                    x={referenceLabels.get(p.label)!.textX}
+                    y={referenceLabels.get(p.label)!.textY}
+                    textAnchor="middle"
+                    data-testid="reference-vertex-name"
+                    className={styles.sourceLabel}
+                  >
+                    {p.label}
+                  </text>
+                ))}
+              </>
+            )}
+            {!plainReference && !pilot && !cleanSourceIds.has(question.id) && (
+              <image
+                clipPath={`url(#source-clip-${question.id})`}
+                href={`/similarity/questions/${question.id}.webp`}
+                x={question.crop[0] * 1000}
+                y={question.crop[1] * 1320}
+                width={(question.crop[2] - question.crop[0]) * 1000}
+                height={(question.crop[3] - question.crop[1]) * 1320}
+                preserveAspectRatio="none"
+              />
+            )}
+            {!plainReference && cleanSourceIds.has(question.id) && (
+              <CleanSource
+                id={question.id}
+                points={points}
+                shapes={question.shapes}
+              />
+            )}
+            {!plainReference && pilot && (
+              <>
                 <polyline
-                  data-testid="reference-context"
                   points={outline(
                     shapePoints(
-                      { name: "", vertices: [...contextOutlines[question.id]] },
+                      {
+                        name: "",
+                        vertices: ["A", "C", "D", "E", "A", "B", "C"],
+                      },
                       points,
                     ),
                   )}
@@ -495,288 +559,234 @@ export function OriginalCanvas({
                   stroke="var(--color-graphite)"
                   strokeWidth="2"
                 />
-              )}
-              {question.shapes.map((shape, i) => (
                 <polygon
-                  key={i}
-                  points={outline(shapePoints(shape, points))}
+                  points={outline(shapePoints(shapes[0], points))}
                   fill="none"
                   stroke="var(--color-graphite)"
                   strokeWidth="2"
                 />
-              ))}
-              {points.map((p) => (
-                <text
-                  key={p.label}
-                  x={referenceLabels.get(p.label)!.textX}
-                  y={referenceLabels.get(p.label)!.textY}
-                  textAnchor="middle"
-                  data-testid="reference-vertex-name"
-                  className={styles.sourceLabel}
-                >
-                  {p.label}
-                </text>
-              ))}
-            </>
-          )}
-          {!plainReference && !pilot && !cleanSourceIds.has(question.id) && (
-            <image
-              clipPath={`url(#source-clip-${question.id})`}
-              href={`/similarity/questions/${question.id}.webp`}
-              x={question.crop[0] * 1000}
-              y={question.crop[1] * 1320}
-              width={(question.crop[2] - question.crop[0]) * 1000}
-              height={(question.crop[3] - question.crop[1]) * 1320}
-              preserveAspectRatio="none"
-            />
-          )}
-          {!plainReference && cleanSourceIds.has(question.id) && (
-            <CleanSource
-              id={question.id}
-              points={points}
-              shapes={question.shapes}
-            />
-          )}
-          {!plainReference && pilot && (
-            <>
-              <polyline
-                points={outline(
-                  shapePoints(
-                    { name: "", vertices: ["A", "C", "D", "E", "A", "B", "C"] },
-                    points,
-                  ),
-                )}
-                fill="none"
-                stroke="var(--color-graphite)"
-                strokeWidth="2"
-              />
-              <polygon
-                points={outline(shapePoints(shapes[0], points))}
-                fill="none"
-                stroke="var(--color-graphite)"
-                strokeWidth="2"
-              />
-              <path
-                d="M262 180v-12h12 M140 369h12v12 M140 192h12v-12"
-                stroke="var(--color-pencil)"
-                fill="none"
-                strokeWidth="1.5"
-              />
-              <text x="195" y="402" className={styles.given}>
-                3 cm
-              </text>
-              <text x="286" y="130" className={styles.given}>
-                2 cm
-              </text>
-              <text x="370" y="345" className={styles.given}>
-                3 cm
-              </text>
-              <path
-                d="m192 176 8 4-8 4m-5 193 8 4-8 4"
-                fill="none"
-                stroke="var(--color-navy)"
-                strokeWidth="2"
-              />
-              {points.map((p) => (
-                <text
-                  key={p.label}
-                  x={referenceLabels.get(p.label)!.textX}
-                  y={referenceLabels.get(p.label)!.textY}
-                  textAnchor="middle"
-                  data-testid="reference-vertex-name"
-                  className={styles.sourceLabel}
-                >
-                  {p.label}
-                </text>
-              ))}
-            </>
-          )}
-        </g>
-        {!correspondencePair && (
-          <StepHighlights
-            step={highlightStep}
-            rightAngles={rightAngles}
-            source={points}
-            size={unit / 12}
-            context="source"
-          />
-        )}
-        {order.map((i) => {
-          const s = shapes[i],
-            selectedIndex = selected.indexOf(i),
-            ps = transform(shapePoints(s, points), poseAt(i));
-          const colour =
-            selectedIndex >= 0 ? colours[selectedIndex] : "transparent";
-          return (
-            <g
-              key={`${s.name}-${i}`}
-              role="button"
-              tabIndex={tracing ? -1 : 0}
-              aria-label={`${c.originalMove} ${s.name}`}
-              aria-pressed={i === index}
-              onPointerDown={(e) => start(e, i)}
-              onFocus={() => {
-                if (!tracing) onActivate(i);
-              }}
-              onKeyDown={(e) => {
-                if (tracing) return;
-                const p = poseAt(i),
-                  d = unit * (e.shiftKey ? 2 : 0.5);
-                const keys: Record<string, Partial<Pose>> = {
-                  ArrowLeft: { x: p.x - d },
-                  ArrowRight: { x: p.x + d },
-                  ArrowUp: { y: p.y - d },
-                  ArrowDown: { y: p.y + d },
-                  r: { angle: p.angle + 15 },
-                  h: { flipX: -p.flipX },
-                  v: { flipY: -p.flipY },
-                };
-                const change = keys[e.key] ?? keys[e.key.toLowerCase()];
-                if (change) {
-                  e.preventDefault();
-                  update(i, change);
-                }
-              }}
-              className={styles.movable}
-              data-testid={`original-shape-${i}`}
-              data-x={poseAt(i).x}
-              data-y={poseAt(i).y}
-              data-angle={poseAt(i).angle}
-              data-flip-x={poseAt(i).flipX}
-              data-flip-y={poseAt(i).flipY}
-              data-scale={poseAt(i).scale}
-            >
-              <polygon
-                points={outline(ps)}
-                fill={colour}
-                fillOpacity={0.16}
-                stroke={colour}
-                strokeWidth={i === index ? 2.8 : 2}
-                strokeDasharray={selectedIndex === 1 ? "7 3" : undefined}
-              />
-              {selectedIndex >= 0 && poses[i] && (
-                <StepHighlights
-                  step={highlightStep}
-                  correspondencePair={correspondencePair}
-                  angleLabels={correspondenceLabels}
-                  rightAngles={rightAngles}
-                  source={points}
-                  placed={ps}
-                  size={unit / 12}
+                <path
+                  d="M262 180v-12h12 M140 369h12v12 M140 192h12v-12"
+                  stroke="var(--color-pencil)"
+                  fill="none"
+                  strokeWidth="1.5"
                 />
-              )}
-              {selectedIndex >= 0 && reasonPair?.shapes.includes(i) && (
-                <ReasonMarks
-                  points={ps}
-                  rows={reasonRows}
-                  member={reasonPair.shapes.indexOf(i)}
-                  size={unit / 12}
-                  reserved={markObstacles}
-                  showSideLabels={
-                    !sideLabels.length &&
-                    (!!poses[i] || expanded || !!plainReference)
+                <text x="195" y="402" className={styles.given}>
+                  3 cm
+                </text>
+                <text x="286" y="130" className={styles.given}>
+                  2 cm
+                </text>
+                <text x="370" y="345" className={styles.given}>
+                  3 cm
+                </text>
+                <path
+                  d="m192 176 8 4-8 4m-5 193 8 4-8 4"
+                  fill="none"
+                  stroke="var(--color-navy)"
+                  strokeWidth="2"
+                />
+                {points.map((p) => (
+                  <text
+                    key={p.label}
+                    x={referenceLabels.get(p.label)!.textX}
+                    y={referenceLabels.get(p.label)!.textY}
+                    textAnchor="middle"
+                    data-testid="reference-vertex-name"
+                    className={styles.sourceLabel}
+                  >
+                    {p.label}
+                  </text>
+                ))}
+              </>
+            )}
+          </g>
+          {!correspondencePair && (
+            <StepHighlights
+              step={highlightStep}
+              rightAngles={rightAngles}
+              source={points}
+              size={unit / 12}
+              context="source"
+            />
+          )}
+          {order.map((i) => {
+            const s = shapes[i],
+              selectedIndex = selected.indexOf(i),
+              ps = transform(shapePoints(s, points), poseAt(i));
+            const colour =
+              selectedIndex >= 0 ? colours[selectedIndex] : "transparent";
+            return (
+              <g
+                key={`${s.name}-${i}`}
+                role="button"
+                tabIndex={tracing ? -1 : 0}
+                aria-label={`${c.originalMove} ${s.name}`}
+                aria-pressed={i === index}
+                onPointerDown={(e) => start(e, i)}
+                onFocus={() => {
+                  if (!tracing) onActivate(i);
+                }}
+                onKeyDown={(e) => {
+                  if (tracing) return;
+                  const p = poseAt(i),
+                    d = unit * (e.shiftKey ? 2 : 0.5);
+                  const keys: Record<string, Partial<Pose>> = {
+                    ArrowLeft: { x: p.x - d },
+                    ArrowRight: { x: p.x + d },
+                    ArrowUp: { y: p.y - d },
+                    ArrowDown: { y: p.y + d },
+                    r: { angle: p.angle + 15 },
+                    h: { flipX: -p.flipX },
+                    v: { flipY: -p.flipY },
+                  };
+                  const change = keys[e.key] ?? keys[e.key.toLowerCase()];
+                  if (change) {
+                    e.preventDefault();
+                    update(i, change);
                   }
-                  onHide={onHideMark}
-                  onMoveStart={(event) => start(event, i)}
-                />
-              )}
-              {poses[i] &&
-                selectedIndex >= 0 &&
-                !pairedShapes.has(i) &&
-                ps.map((p) => {
-                  const label = movedLabels.get(`${i}-${p.label}`)!;
-                  return (
-                    <text
-                      key={p.label}
-                      data-testid="vertex-name"
-                      x={label.textX}
-                      y={label.textY}
-                      textAnchor="middle"
-                      fill={colour}
-                      className={styles.movedLabel}
-                      fontSize={unit * 1.5}
-                    >
-                      {p.label}
-                    </text>
-                  );
-                })}
-              {i === index && !tracing && (
-                <VertexHandles
-                  points={ps}
-                  colour={colour}
-                  size={unit / 10}
-                  prefix={`original-shape-${i}`}
-                  onStart={(event, point) => start(event, i, point)}
-                  pose={poseAt(i)}
-                  onChange={(patch) => update(i, patch)}
-                />
-              )}
-            </g>
-          );
-        })}
-        {correspondencePair && (
-          <StepHighlights
-            step={highlightStep}
-            correspondencePair={correspondencePair}
-            hiddenTriangles={Object.keys(poses)
-              .filter((id) => selected.includes(Number(id)))
-              .map((id) => shapes[Number(id)].vertices.join(""))}
-            angleLabels={correspondenceLabels}
-            rightAngles={rightAngles}
-            source={points}
-            size={unit / 12}
-            context="source"
-          />
-        )}
-        <PairedSideLabels
-          labels={sideLabels}
-          onHide={onHideMark}
-          onMoveStart={(event) =>
-            start(
-              event,
-              reasonPair!.shapes.includes(index)
-                ? index
-                : reasonPair!.shapes[0],
-            )
-          }
-        />
-        <PairedVertexLabels
-          groups={labelGroups}
-          shapes={placedShapes}
-          frame={view.frame}
-          fontSize={unit * 1.5}
-          obstacles={sideLabels}
-        />
-        {tracing &&
-          points.map((p) => (
-            <g
-              key={p.label}
-              className={styles.vertex}
-              onClick={() => onVertex(p.label)}
-            >
-              <circle
-                cx={p.x}
-                cy={p.y}
-                r={unit * 0.9}
-                fill={
-                  vertices.includes(p.label)
-                    ? "var(--color-highlight)"
-                    : "var(--color-paper)"
-                }
-                stroke="var(--color-navy)"
-                strokeWidth="2"
-              />
-              <text
-                x={p.x}
-                y={p.y + unit * 0.4}
-                textAnchor="middle"
-                fontSize={unit * 1.2}
+                }}
+                className={styles.movable}
+                data-testid={`original-shape-${i}`}
+                data-x={poseAt(i).x}
+                data-y={poseAt(i).y}
+                data-angle={poseAt(i).angle}
+                data-flip-x={poseAt(i).flipX}
+                data-flip-y={poseAt(i).flipY}
+                data-scale={poseAt(i).scale}
               >
-                {p.label}
-              </text>
-            </g>
-          ))}
-      </svg>
+                <polygon
+                  points={outline(ps)}
+                  fill={colour}
+                  fillOpacity={0.16}
+                  stroke={colour}
+                  strokeWidth={i === index ? 2.8 : 2}
+                  strokeDasharray={selectedIndex === 1 ? "7 3" : undefined}
+                />
+                {selectedIndex >= 0 && poses[i] && (
+                  <StepHighlights
+                    step={highlightStep}
+                    correspondencePair={correspondencePair}
+                    angleLabels={correspondenceLabels}
+                    rightAngles={rightAngles}
+                    source={points}
+                    placed={ps}
+                    size={unit / 12}
+                  />
+                )}
+                {selectedIndex >= 0 && reasonPair?.shapes.includes(i) && (
+                  <ReasonMarks
+                    points={ps}
+                    rows={reasonRows}
+                    member={reasonPair.shapes.indexOf(i)}
+                    size={unit / 12}
+                    reserved={markObstacles}
+                    showSideLabels={
+                      !sideLabels.length &&
+                      (!!poses[i] || expanded || !!plainReference)
+                    }
+                    onHide={onHideMark}
+                    onMoveStart={(event) => start(event, i)}
+                  />
+                )}
+                {poses[i] &&
+                  selectedIndex >= 0 &&
+                  !pairedShapes.has(i) &&
+                  ps.map((p) => {
+                    const label = movedLabels.get(`${i}-${p.label}`)!;
+                    return (
+                      <text
+                        key={p.label}
+                        data-testid="vertex-name"
+                        x={label.textX}
+                        y={label.textY}
+                        textAnchor="middle"
+                        fill={colour}
+                        className={styles.movedLabel}
+                        fontSize={unit * 1.5}
+                      >
+                        {p.label}
+                      </text>
+                    );
+                  })}
+                {i === index && !tracing && (
+                  <VertexHandles
+                    points={ps}
+                    colour={colour}
+                    size={unit / 10}
+                    prefix={`original-shape-${i}`}
+                    onStart={(event, point) => start(event, i, point)}
+                    pose={poseAt(i)}
+                    onChange={(patch) => update(i, patch)}
+                  />
+                )}
+              </g>
+            );
+          })}
+          {correspondencePair && (
+            <StepHighlights
+              step={highlightStep}
+              correspondencePair={correspondencePair}
+              hiddenTriangles={Object.keys(poses)
+                .filter((id) => selected.includes(Number(id)))
+                .map((id) => shapes[Number(id)].vertices.join(""))}
+              angleLabels={correspondenceLabels}
+              rightAngles={rightAngles}
+              source={points}
+              size={unit / 12}
+              context="source"
+            />
+          )}
+          <PairedSideLabels
+            labels={sideLabels}
+            onHide={onHideMark}
+            onMoveStart={(event) =>
+              start(
+                event,
+                reasonPair!.shapes.includes(index)
+                  ? index
+                  : reasonPair!.shapes[0],
+              )
+            }
+          />
+          <PairedVertexLabels
+            groups={labelGroups}
+            shapes={placedShapes}
+            frame={view.frame}
+            fontSize={unit * 1.5}
+            obstacles={sideLabels}
+          />
+          {tracing &&
+            points.map((p) => (
+              <g
+                key={p.label}
+                className={styles.vertex}
+                onClick={() => onVertex(p.label)}
+              >
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={unit * 0.9}
+                  fill={
+                    vertices.includes(p.label)
+                      ? "var(--color-highlight)"
+                      : "var(--color-paper)"
+                  }
+                  stroke="var(--color-navy)"
+                  strokeWidth="2"
+                />
+                <text
+                  x={p.x}
+                  y={p.y + unit * 0.4}
+                  textAnchor="middle"
+                  fontSize={unit * 1.2}
+                >
+                  {p.label}
+                </text>
+              </g>
+            ))}
+        </svg>
+      </div>
       {classroom && controlsHost
         ? createPortal(
             <div data-control-board="original">{controls}</div>,

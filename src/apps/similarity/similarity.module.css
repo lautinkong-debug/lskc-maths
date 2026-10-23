@@ -22,6 +22,72 @@
 .classroomOpener {
   margin-bottom: 14px;
 }
+.diagramStage {
+  display: contents;
+}
+.practiceFrame[data-classroom="true"] .diagramStage {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.givenConditions {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  left: 12px;
+  width: min(280px, 30%);
+  max-height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--stroke);
+  border-left: 3px solid var(--color-navy);
+  border-radius: 6px;
+  background: var(--color-paper);
+  color: var(--color-navy);
+  font-size: clamp(14px, 1.1vw, 19px);
+  line-height: 1.5;
+}
+.app .givenConditions > button {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  border: 0;
+  text-align: left;
+  padding: 6px 10px;
+  min-height: 36px;
+  font-size: inherit;
+}
+.givenConditions > div {
+  overflow: auto;
+  padding: 0 12px 10px;
+}
+.givenConditions > div[hidden] {
+  display: none;
+}
+.givenConditions[data-open="false"] {
+  width: auto;
+}
+.givenConditions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.givenConditions li + li {
+  margin-top: 5px;
+}
+@media (max-width: 759px), (max-height: 550px) {
+  .givenConditions {
+    top: 5px;
+    left: 5px;
+    width: min(240px, 48%);
+    max-height: 55%;
+    font-size: 12px;
+  }
+}
 .app button,
 .app input,
 .app select {
