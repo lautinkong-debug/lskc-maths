@@ -34,6 +34,10 @@ Solutions retain printed intermediate steps, reasons, alternatives and correspon
 
 ## Teaching interactions and games
 
+The 23/10 clarity update renders the original native PDF artwork at four times the previous width and height (16 times the pixels), with lossless WebP encoding. The board still uses the original 1225-pixel coordinate system, so the overlays and rigid movements remain aligned. Q35's teaching view clips away adjacent question prose; its full question crop remains available in the Question tab.
+
+At an explicit congruence statement, **Match the corresponding parts** follows the order of the two printed triangle names. Teachers select one of three side pairs or three angle pairs. Only that pair is emphasised in amber; navy/red retain triangle identity and earlier evidence uses neutral marks. The original artwork displays in greyscale on the teaching board; the Question tab retains its printed colours. The conclusion and its reason stay pinned above a compact selector on phones. No new numerical values are inferred from the illustration, and the literal printed solution is unchanged.
+
 The 21/10 update uses Quick Practice 5.14 as the AAS pilot. The same evidence layer supports all 66 questions. It reads explicit equalities and evaluated values from revealed solution lines, never measures the pixel drawings or invents facts from arithmetic operands. Marks follow each displayed triangle. Right angles use squares with 90° labels. Teachers can separately hide angles or sides, retain earlier evidence, dismiss a corresponding pair, and restore hidden evidence. Earlier evidence remains unhighlighted while only the current line is emphasised.
 
 Horizontal and vertical reflection, turning, dragging and automatic alignment are rigid transformations. Snapping rejects distinctly different sizes/shapes. Corresponding vertex names and equal side labels combine on overlap. Camera zoom and Fit include annotation bounds. The question bank and games share the existing department-wide collapsible `LessonWorkspace` menu.
@@ -49,6 +53,6 @@ npm.cmd exec tsx -- scripts/export-congruence-catalogue.ts tmp/congruence/catalo
 python scripts/prepare-congruence-assets.py tmp/congruence/textbook.pdf tmp/congruence/catalogue.json public/congruence/questions
 ```
 
-The Python runtime needs `pypdf`, `pypdfium2` and Pillow. The script identifies the native PDF Form tagged `/Watermark` containing `(STFALSKC) Tj`, clears only its drawing stream in an intermediate PDF beside the source, and generates the 66 selected WebP question crops. It checks all 80 saved PDF pages: the page drawing streams and every other image/Form stream must match the original, and the original PDF's hash must remain unchanged. Both PDFs stay outside the website assets and version control.
+The Python runtime needs `pypdf`, `pypdfium2` and Pillow. The script identifies the native PDF Form tagged `/Watermark` containing `(STFALSKC) Tj`, clears only its drawing stream in an intermediate PDF beside the source, and generates the 66 selected lossless WebP question crops at 4× sampling density. An optional final argument changes that density from 1 to 8. Rendering retains only one page in memory. It checks all 80 saved PDF pages: the page drawing streams and every other image/Form stream must match the original, and the original PDF's hash must remain unchanged. Both PDFs stay outside the website assets and version control.
 
 Focused browser checks use `npm.cmd exec playwright -- test --config playwright.congruence.config.ts`, defaulting to localhost port 3001. Set `PLAYWRIGHT_BASE_URL` to test a different local server. Unit checks are included in `npm.cmd test`.

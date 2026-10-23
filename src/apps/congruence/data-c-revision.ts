@@ -825,6 +825,7 @@ export const exerciseCRevisionQuestions: CongruenceQuestion[] = [
     number: "35",
     page: 68,
     crop: [82, 386, 1100, 624],
+    diagramCrop: [835, 390, 1080, 624],
     points: [
       point("A", 859, 405),
       point("B", 1032, 432),

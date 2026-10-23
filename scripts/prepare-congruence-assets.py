@@ -1,8 +1,9 @@
 """Render selected question crops without the separate STFALSKC watermark.
 
-Usage: python scripts/prepare-congruence-assets.py PDF CATALOGUE_JSON OUTPUT_DIR
+Usage: python scripts/prepare-congruence-assets.py PDF CATALOGUE_JSON OUTPUT_DIR [SCALE]
 The catalogue is created by scripts/export-congruence-catalogue.ts.
-Coordinates use 1225 x 1617 page-pixel renderings.
+Coordinates use a 1225-pixel-wide page; output defaults to four times that
+sampling density without changing the coordinate system used by the board.
 The source is read-only. An intermediate PDF is saved beside it; keep both PDFs
 outside public/ and version control. Native question drawing commands and the
 publisher footer are preserved.
@@ -15,6 +16,9 @@ import pypdfium2 as pdfium
 from pypdf import PdfReader, PdfWriter
 
 source, catalogue, output = map(Path, sys.argv[1:4])
+resolution = float(sys.argv[4]) if len(sys.argv) > 4 else 4
+if not 1 <= resolution <= 8:
+    raise ValueError("Resolution scale must be between 1 and 8.")
 output.mkdir(parents=True, exist_ok=True)
 questions = json.loads(catalogue.read_text(encoding="utf-8"))
 source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
@@ -59,17 +63,29 @@ for original, cleaned in zip(reader.pages, clean_reader.pages):
 assert hashlib.sha256(source.read_bytes()).hexdigest() == source_hash
 
 pdf = pdfium.PdfDocument(clean_source)
-pages = {}
-for question in questions:
+page_number = None
+page_image = None
+for question in sorted(questions, key=lambda q: q["page"]):
     number = question["page"]
-    if number not in pages:
+    if number != page_number:
+        if page_image is not None:
+            page_image.close()
         page = pdf[number - 1]
-        pages[number] = page.render(scale=1225 / page.get_width()).to_pil()
+        bitmap = page.render(scale=1225 * resolution / page.get_width())
+        page_image = bitmap.to_pil().copy()
+        bitmap.close()
+        page.close()
+        page_number = number
     crop = question["crop"]
-    image = pages[number].crop(tuple(round(v) for v in crop))
-    image.save(output / f'{question["id"]}.webp', "WEBP", quality=94)
+    image = page_image.crop(tuple(round(v * resolution) for v in crop))
+    image.save(output / f'{question["id"]}.webp', "WEBP", lossless=True, method=6)
+    image.close()
+if page_image is not None:
+    page_image.close()
+pdf.close()
 print(
-    f"Prepared {len(questions)} question images without the STFALSKC watermark. "
+    f"Prepared {len(questions)} lossless question images at {resolution:g}x resolution "
+    "without the STFALSKC watermark. "
     f"Verified all {len(reader.pages)} pages retain their other drawing streams "
     "and the original PDF is unchanged."
 )

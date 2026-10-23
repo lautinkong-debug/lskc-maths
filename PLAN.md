@@ -2,6 +2,29 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Surface Area Studio — design review (23/10/2026)
+
+- [x] Inspect the owner's `1A09_Area and Volumes.pdf`: screen all 52 pages, OCR the full chapter, inspect relevant diagrams and answer pages, and catalogue 54 surface-area practice/exercise entries plus five worked examples and Activity 9.3. Record inclusions, exceptions and independently recalculated teaching cases in `docs/surface-area-source-audit.md`.
+- [x] Owner chose an integrated LSKC Maths app with textbook presets and image export. Prepare `docs/superpowers/specs/2026-10-23-surface-area-studio-design.md`, including perimeter-to-strip unfolding, separate base-area reveals, clean PNG/SVG exports, local Example 9.11 pilot and subsequent chapter rollout. Fresh builder review found no material open choices.
+- [ ] Obtain approval of the written design, then build and verify the Example 9.11 pilot locally at `/apps/surface-area`. Stop for owner review before the full question bank. No publication requested.
+
+## F1 Level 2 polynomial demonstrations — source/design review (23/10/2026)
+
+- [x] Read the supplied `1A10_Manipulation of Simple Polynomials.pdf`: survey all 53 pages, then inspect every Level 2 question page and the answer pages. Coverage: 10A Q21–32, 10B Q19–30, 10C Q20–35, 10D Q26–42 and Revision 10 Q33–56 — 81 numbered questions / 158 parts or table rows. Full inventory and verification limits: `docs/polynomials-level2-source-audit.md`.
+- [x] Owner confirmed step-by-step demonstrations only, like Directed Numbers. Prepare the proposed integrated app, teacher-controlled working/visuals and Q34(b) square-expansion/sign-reversal pilot in `docs/superpowers/specs/2026-10-23-polynomials-level2-design.md`.
+- [ ] Owner reviews the proposed design; then implement and verify the local 10D Q34(b) pilot before expanding the bank. No polynomial app code or deployment is included in the source/design phase.
+- [ ] After pilot review, transcribe and independently verify all 158 entries and their authored intermediate steps; cover tables, vertical operations, word problems and diagrams as well as routine expressions. Validate phone/projector layouts and playback locally.
+
+Decision: the textbook provides final-answer keys, not full worked solutions for every Level 2 question. Author and verify intermediate working using the chapter's demonstrated methods. Keep the source PDF/renders in ignored `out/polynomials-source/`; preserve unrelated Congruence work. Publication remains a later owner decision.
+
+## Clear diagrams and conclusion correspondence (23/10/2026)
+
+- [x] Owner requests sharper original diagrams and visible side/angle correspondence at each congruence conclusion, with restrained colours. Pilot Revision Exercise 5 Q35, part (a). Preserve literal solution lines and reasons.
+- [x] Render all 66 native textbook crops at four times the previous width and height, with lossless WebP output (3.38 MB in total). Verify every image dimension, all 80 PDF drawing streams and the unchanged original PDF hash. Retain source coordinates and all givens. Clip adjacent prose from Q35's teaching diagram and display the background in greyscale; its full Question tab keeps the original colours.
+- [x] At each recognised congruence statement, use its vertex order to offer three side pairs and three angle pairs. Show one pair at a time, with the same amber focus on both members; keep triangle identity navy/red and earlier evidence neutral. Preserve literal solutions. Use large angle labels, pin the current statement/reason, and provide a compact pair selector on phones and short screens.
+- [x] Verify the Q35 pilot and shared E vertex before applying the pattern across the bank. All 1,047 unit tests and all 31 production-build browser scenarios pass, including every question and the existing games. Scoped ESLint, formatting and compilation pass; repeat the four correspondence layout checks after the final background-colour change. Evidence: ignored `out/congruence-improvements/clarity-local-browser.log`, `resolution-audit.json` and `correspondence-*.png`.
+- [ ] Publish and check the live update through the existing approved GitHub/Vercel release.
+
 ## Congruence teaching interactions and games (21/10/2026)
 
 - [x] Owner supplied the consolidated Similarity Studio brief and asked to apply it, including games and publication. Preserve the approved 66 triangle-only Quick Practice / Level 2 questions and literal textbook solutions.

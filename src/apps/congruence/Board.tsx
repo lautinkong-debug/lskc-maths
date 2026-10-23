@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, type PointerEvent } from "react";
+import { useId, useMemo, useRef, useState, type PointerEvent } from "react";
 import { createPortal } from "react-dom";
 import { copy } from "@/lib/copy";
 import { GeometryName } from "../similarity/Notation";
@@ -49,6 +49,7 @@ export function Board({
   source,
   visible,
   step,
+  comparing = false,
   marks,
   controlsHost,
   evidence,
@@ -65,6 +66,7 @@ export function Board({
   source: boolean;
   visible: boolean;
   step?: TextbookStep;
+  comparing?: boolean;
   marks: boolean;
   controlsHost: HTMLElement | null;
   evidence: EvidenceRow[];
@@ -81,6 +83,7 @@ export function Board({
   const [snapping, setSnapping] = useState(true);
   const [snapped, setSnapped] = useState(false);
   const svg = useRef<SVGSVGElement>(null);
+  const diagramClip = useId();
   const drag = useRef<{
     id: number;
     pointer: number;
@@ -118,7 +121,9 @@ export function Board({
   const frame = source
     ? bounds(question.points, 70)
     : { x: 0, y: 0, width: 840, height: 460 };
-  const fontSize = source ? Math.min(23, Math.max(11, frame.width / 32)) : 23;
+  const fontSize = source
+    ? Math.min(28, Math.max(comparing ? 20 : 11, frame.width / 32))
+    : 23;
   const visibleEvidence = marks
     ? evidence.filter(
         (row) =>
@@ -134,6 +139,8 @@ export function Board({
     question.points,
     evidencePlacements,
     fontSize / 23,
+    [],
+    comparing,
   );
   const annotationBounds = evidenceLayout.boxes.flatMap((box) => [
     { label: "", x: box.x, y: box.y },
@@ -141,7 +148,7 @@ export function Board({
   ]);
   const focusStep = withoutEvidenceHighlights(
     filterStepEvidence(
-      step,
+      comparing && step ? { ...step, highlights: {} } : step,
       knownEvidence,
       hiddenEvidence,
       showAngles,
@@ -403,6 +410,18 @@ export function Board({
           onLostPointerCapture={() => stop()}
         >
           <title>{title}</title>
+          {question.diagramCrop && (
+            <defs>
+              <clipPath id={diagramClip}>
+                <rect
+                  x={question.diagramCrop[0]}
+                  y={question.diagramCrop[1]}
+                  width={question.diagramCrop[2] - question.diagramCrop[0]}
+                  height={question.diagramCrop[3] - question.diagramCrop[1]}
+                />
+              </clipPath>
+            </defs>
+          )}
           <rect
             data-pan-background
             x={view.frame.x}
@@ -415,13 +434,17 @@ export function Board({
             !question.constructed &&
             !cleanDiagramIds.has(question.id) && (
               <image
+                className={styles.sourceDiagram}
                 href={`/congruence/questions/${question.id}.webp`}
                 x={question.crop[0]}
                 y={question.crop[1]}
                 width={question.crop[2] - question.crop[0]}
                 height={question.crop[3] - question.crop[1]}
                 pointerEvents="none"
-                opacity=".72"
+                opacity="1"
+                clipPath={
+                  question.diagramCrop ? `url(#${diagramClip})` : undefined
+                }
               />
             )}
           {source && <CleanDiagram question={question} />}

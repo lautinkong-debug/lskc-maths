@@ -50,6 +50,7 @@ export function layoutEvidenceMarks(
   placements: readonly EvidencePlacement[],
   size = 1,
   reserved: LabelBox[] = [],
+  angleNames = false,
 ): EvidenceLayout {
   const marks: EvidenceLayoutMark[] = [];
   for (const placement of placements)
@@ -84,7 +85,8 @@ export function layoutEvidenceMarks(
         names: [mark.name],
         text:
           mark.kind === "angle"
-            ? (mark.value ?? evidenceSymbol(mark))
+            ? (mark.value ??
+              (angleNames ? `∠${mark.name}` : evidenceSymbol(mark)))
             : sideLabel([mark.name], mark.value),
         shape: placement.points,
       });
@@ -179,12 +181,6 @@ export function layoutEvidenceMarks(
   };
 }
 
-const colours = [
-  "var(--color-navy)",
-  "var(--color-crimson)",
-  "var(--color-graphite)",
-];
-
 /** Marks are computed from the placed points, so they follow rigid transforms;
  * SVG text remains upright. Pass a shared layout to include its boxes in Fit. */
 export function EvidenceMarks({
@@ -239,7 +235,7 @@ export function EvidenceMarks({
         .filter((mark) => visibleKeys.has(mark.key))
         .map((mark) => {
           const highlighted = currentKeys ? currentKeys.has(mark.key) : current;
-          const colour = colours[(mark.marker - 1) % colours.length];
+          const colour = highlighted ? "#a65d00" : "var(--color-graphite)";
           const row = visibleRows.find((row) => row.key === mark.key)!;
           const action = onToggle
             ? {

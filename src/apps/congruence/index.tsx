@@ -13,6 +13,7 @@ import { Board } from "./Board";
 import { Solution } from "./Solution";
 import { usableTriangle } from "./geometry";
 import { extractEvidence } from "./evidence";
+import { conclusionCorrespondence } from "./correspondence";
 import { groups, questions, questionName, filterQuestions } from "./data";
 import type { CongruenceQuestion } from "./types";
 import styles from "./congruence.module.css";
@@ -245,13 +246,29 @@ function Lesson({
   const [showSides, setShowSides] = useState(true);
   const [keepEvidence, setKeepEvidence] = useState(false);
   const [hiddenEvidence, setHiddenEvidence] = useState<Set<string>>(new Set());
+  const [pairKey, setPairKey] = useState<string | null>(null);
+  const correspondence = useMemo(
+    () => conclusionCorrespondence(question, step),
+    [question, step],
+  );
+  const pair =
+    correspondence?.pairs.find((row) => row.key === pairKey) ??
+    correspondence?.pairs[0];
   const evidence = useMemo(
-    () => extractEvidence(question, step, keepEvidence ? "all" : "current"),
-    [question, step, keepEvidence],
+    () =>
+      pair
+        ? [pair]
+        : extractEvidence(question, step, keepEvidence ? "all" : "current"),
+    [question, step, keepEvidence, pair],
   );
   const currentKeys = useMemo(
-    () => new Set(extractEvidence(question, step).map((row) => row.key)),
-    [question, step],
+    () =>
+      new Set(
+        pair
+          ? [pair.key]
+          : extractEvidence(question, step).map((row) => row.key),
+      ),
+    [question, step, pair],
   );
   const knownEvidence = useMemo(
     () => extractEvidence(question, step, "all"),
@@ -270,6 +287,7 @@ function Lesson({
   const shapes = [...question.shapes, ...custom];
   function changeStep(next: number) {
     setStep(next);
+    setPairKey(null);
     if (next < 0) setHiddenEvidence(new Set());
     // Keep the pair introduced by the most recent printed comparison visible.
     // Board poses are keyed by shape ID, so revealing a new pair never resets one.
@@ -297,6 +315,18 @@ function Lesson({
         break;
       }
     }
+  }
+  function comparePair(key: string) {
+    setPairKey(key);
+    setMarks(true);
+    const chosen = correspondence?.pairs.find((row) => row.key === key);
+    if (chosen?.kind === "angle") setShowAngles(true);
+    else setShowSides(true);
+    setHiddenEvidence((previous) => {
+      const next = new Set(previous);
+      next.delete(key);
+      return next;
+    });
   }
   function select(id: number) {
     setSelected((prev) =>
@@ -356,6 +386,7 @@ function Lesson({
               source={source}
               visible={board === (source ? "source" : "copies")}
               step={step >= 0 ? question.steps[step] : undefined}
+              comparing={!!correspondence}
               marks={marks}
               evidence={evidence}
               knownEvidence={knownEvidence}
@@ -387,7 +418,14 @@ function Lesson({
             ))}
           </div>
           <div className={styles.solutionPane} hidden={tab !== "solution"}>
-            <Solution question={question} current={step} onStep={changeStep} />
+            <Solution
+              question={question}
+              current={step}
+              onStep={changeStep}
+              correspondence={correspondence}
+              pair={pair}
+              onCompare={comparePair}
+            />
           </div>
           <div className={styles.deskBody} hidden={tab !== "controls"}>
             <fieldset className={styles.choices}>

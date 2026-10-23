@@ -5,6 +5,8 @@ import { Math as MathText } from "@/components/Math";
 import { copy } from "@/lib/copy";
 import { GeometryText } from "../similarity/Notation";
 import type { CongruenceQuestion } from "./types";
+import type { Correspondence } from "./correspondence";
+import type { EvidenceRow } from "./evidence";
 import styles from "./congruence.module.css";
 
 const c = copy.similarity;
@@ -16,10 +18,16 @@ export function Solution({
   question,
   current,
   onStep,
+  correspondence,
+  pair,
+  onCompare,
 }: {
   question: CongruenceQuestion;
   current: number;
   onStep: (step: number) => void;
+  correspondence?: Correspondence;
+  pair?: EvidenceRow;
+  onCompare: (key: string) => void;
 }) {
   const [history, setHistory] = useState(false);
   const body = useRef<HTMLDivElement>(null);
@@ -65,7 +73,11 @@ export function Solution({
           {history ? c.hidePreviousLines : c.previousLines}
         </button>
       )}
-      <div ref={body} className={styles.solutionBody}>
+      <div
+        ref={body}
+        className={styles.solutionBody}
+        data-comparing={!!correspondence && !history}
+      >
         {current < 0 ? (
           <div className={styles.start}>
             <span aria-hidden="true">△ ≅ △</span>
@@ -123,6 +135,98 @@ export function Solution({
               ))}
             </tbody>
           </table>
+        )}
+        {correspondence && pair && (
+          <div
+            className={styles.correspondence}
+            data-testid="conclusion-correspondence"
+          >
+            <h3>{copy.congruence.correspondenceTitle}</h3>
+            <p className={styles.vertexOrder}>
+              <GeometryText>
+                {correspondence.vertices
+                  .map(([a, b]) => `${a} ↔ ${b}`)
+                  .join(" · ")}
+              </GeometryText>
+            </p>
+            <div
+              className={styles.pairKinds}
+              role="group"
+              aria-label={copy.congruence.correspondingParts}
+            >
+              {(["side", "angle"] as const).map((kind) => (
+                <button
+                  key={kind}
+                  aria-pressed={pair.kind === kind}
+                  onClick={() =>
+                    onCompare(
+                      correspondence.pairs.find((row) => row.kind === kind)!
+                        .key,
+                    )
+                  }
+                >
+                  {kind === "side"
+                    ? copy.congruence.correspondingSides
+                    : copy.congruence.correspondingAngles}
+                </button>
+              ))}
+            </div>
+            <div
+              className={styles.pairChoices}
+              role="group"
+              aria-label={copy.congruence.choosePair}
+            >
+              {correspondence.pairs
+                .filter((row) => row.kind === pair.kind)
+                .map((row) => (
+                  <button
+                    key={row.key}
+                    aria-pressed={pair.key === row.key}
+                    onClick={() => onCompare(row.key)}
+                  >
+                    <GeometryText>
+                      {row.members
+                        .map(
+                          (member) =>
+                            `${row.kind === "angle" ? "∠" : ""}${member.name}`,
+                        )
+                        .join(" = ")}
+                    </GeometryText>
+                  </button>
+                ))}
+            </div>
+            <p className={styles.pairHint}>{copy.congruence.pairHint}</p>
+            <select
+              className={styles.pairSelect}
+              aria-label={copy.congruence.choosePair}
+              value={pair.key}
+              onChange={(event) => onCompare(event.target.value)}
+            >
+              {(["side", "angle"] as const).map((kind) => (
+                <optgroup
+                  key={kind}
+                  label={
+                    kind === "side"
+                      ? copy.congruence.correspondingSides
+                      : copy.congruence.correspondingAngles
+                  }
+                >
+                  {correspondence.pairs
+                    .filter((row) => row.kind === kind)
+                    .map((row) => (
+                      <option key={row.key} value={row.key}>
+                        {row.members
+                          .map(
+                            (member) =>
+                              `${row.kind === "angle" ? "∠" : ""}${member.name}`,
+                          )
+                          .join(" = ")}
+                      </option>
+                    ))}
+                </optgroup>
+              ))}
+            </select>
+          </div>
         )}
         {question.sourceNote && current === question.steps.length - 1 && (
           <p className={styles.note}>

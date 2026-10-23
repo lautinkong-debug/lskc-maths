@@ -168,6 +168,9 @@
   stroke-width: 4px;
   stroke-linejoin: round;
 }
+.sourceDiagram {
+  filter: grayscale(1);
+}
 .camera {
   display: flex;
   align-items: center;
@@ -231,6 +234,70 @@
   font-size: 13px;
   color: var(--color-pencil);
   margin: 0 0 14px;
+}
+.correspondence {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--stroke);
+}
+.pairSelect {
+  display: none;
+}
+.solutionBody[data-comparing="true"] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.solutionBody[data-comparing="true"] .proofTable {
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+.solutionBody[data-comparing="true"] .correspondence {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+.solutionBody[data-comparing="true"] .credit {
+  flex-shrink: 0;
+}
+.correspondence h3 {
+  margin: 0 0 8px;
+  font: 600 19px/1.35 var(--font-display);
+  color: var(--color-navy);
+}
+.vertexOrder {
+  margin: 0 0 12px;
+  font-size: 17px;
+  color: var(--color-graphite);
+}
+.pairKinds,
+.pairChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+.app .pairKinds button {
+  min-height: 36px;
+  padding: 5px 16px;
+}
+.app .pairChoices button {
+  min-height: 42px;
+  padding: 8px 10px;
+  color: var(--color-graphite);
+  font-size: 15px;
+}
+.app .pairChoices button[aria-pressed="true"] {
+  color: #874c00;
+  border-color: #a65d00;
+  background: #fff5df;
+  box-shadow: inset 0 -2px #a65d00;
+}
+.pairHint {
+  margin: 8px 0 0;
+  color: var(--color-pencil);
+  font-size: 13px;
+  line-height: 1.5;
 }
 .prompt {
   font: 20px/1.7 var(--font-display);
@@ -647,4 +714,37 @@
 }
 .printedLine {
   display: block;
+}
+@media (max-width: 599px), (max-height: 550px) {
+  .correspondence {
+    margin-top: 6px;
+    padding-top: 5px;
+  }
+  .correspondence h3,
+  .pairKinds,
+  .pairChoices,
+  .pairHint,
+  .solutionBody[data-comparing="true"] .credit {
+    display: none;
+  }
+  .vertexOrder {
+    font-size: 14px;
+    margin-bottom: 5px;
+  }
+  .pairSelect {
+    display: block;
+    width: 100%;
+    min-height: 38px;
+    padding: 5px 8px;
+    border: 1px solid #a65d00;
+    border-radius: 6px;
+    background: #fff5df;
+    color: #874c00;
+    font-size: 16px;
+  }
+}
+@media (max-height: 550px) {
+  .correspondence .vertexOrder {
+    display: none;
+  }
 }

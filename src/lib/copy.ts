@@ -168,6 +168,13 @@ export const copy = {
     units: "units",
   },
   congruence: {
+    correspondenceTitle: "Match the corresponding parts",
+    correspondingParts: "Corresponding parts",
+    correspondingSides: "Sides",
+    correspondingAngles: "Angles",
+    choosePair: "Choose a corresponding pair",
+    pairHint:
+      "Choose one pair. The same amber mark highlights both equal parts.",
     title: "Congruent Triangles",
     topic: "2A05 · Congruence",
     summary:

@@ -17,6 +17,8 @@ export type CongruenceQuestion = {
   number: string;
   page: number;
   crop: [number, number, number, number];
+  /** Optional teaching-diagram bounds; the full question crop stays available. */
+  diagramCrop?: [number, number, number, number];
   points: Point[];
   shapes: Shape[];
   prompt: string;
