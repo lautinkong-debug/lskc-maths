@@ -2,6 +2,12 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Similarity complete proof rows (23/10/2026)
+
+- [x] Reproduce the owner's missing Q19 continuation on the live site and a failing regression. Invisible textbook alignment boxes pushed the remainder of an equation out of view; the classroom solution rail was limited to 470px.
+- [x] Owner requests equal graph/solution halves and each calculation in one row. Use equal columns on wide classroom screens, prevent equation wrapping, and join the five invisible-alignment continuations to their complete equations without changing the raw source, visible symbols, reasons or order. Q19 now has 26 complete rows; its similarity conclusion is row 16.
+- [x] Verify 1,055 unit tests, scoped lint/formatting and the isolated production build. The initial ten focused preview checks pass, including Q19 at 1366/1920px, phone/landscape layouts and correspondence interactions.
+- [x] Verify all 22 production-build classroom/proof/correspondence scenarios: 21 pass initially; replace the navigation test's obsolete hard-coded step number with its actual calculation and confirm its recheck passes. Every Q19 equation fits at 1366/1920px; all 72 question choices, phone/landscape layouts, history, reset and corresponding parts pass. The correction is authorised for the existing GitHub main/Vercel production site; retain exact-commit live verification in ignored `out/similarity-proof-layout/live-audit.json`.
 ## Similarity diagram clarity and correspondence (23/10/2026)
 
 - [x] Owner explicitly requests the published Congruent Triangles pattern for Similarity Studio and authorises GitHub/Vercel publication. Preserve all 72 source questions, literal solutions and existing games. Use Q19 as the representative pilot.

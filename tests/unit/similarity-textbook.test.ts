@@ -159,16 +159,26 @@ describe("Literal similarity textbook solutions", () => {
     }
   });
 
-  it("expands every printed line without changing order, source metadata or reveal boundaries", () => {
+  it("preserves visible source symbols, reasons and order while joining typeset continuations", () => {
     for (const [id, raw] of Object.entries(rawSolutions)) {
       const expanded = textbookSolutions[id];
       const lineCount = (steps: TextbookStep[]) =>
         steps.reduce(
-          (sum, step) => sum + Math.max(1, step.math?.length ?? 0),
+          (sum, step) =>
+            sum +
+            Math.max(
+              1,
+              (step.math ?? []).filter((line) => !line.startsWith("\\phantom{"))
+                .length,
+            ),
           0,
         );
       expect(expanded.steps, id).toHaveLength(lineCount(raw.steps));
-      expect(mathLines(expanded), id).toEqual(mathLines(raw));
+      const visibleSymbols = (lines: string[]) =>
+        compact(lines.join("").replace(/\\phantom\{[^{}]*\}/g, ""));
+      expect(visibleSymbols(mathLines(expanded)), id).toEqual(
+        visibleSymbols(mathLines(raw)),
+      );
       expect(expanded.initialVisible, id).toBe(
         lineCount(raw.steps.slice(0, raw.initialVisible)),
       );
@@ -272,10 +282,8 @@ describe("Literal similarity textbook solutions", () => {
         tex`\angle BAC+\angle CAF=90^\circ`,
         tex`\angle BAC=90^\circ-\angle CAF`,
         tex`\therefore \angle EAF=\angle BAC`,
-        tex`\because \angle AEF=180^\circ-\angle AFE`,
-        tex`\phantom{\because\quad\angle AEF=180^\circ}\ -\angle EAF`,
-        tex`\angle ACB=180^\circ-\angle ABC`,
-        tex`\phantom{\angle ACB=180^\circ}\ -\angle BAC`,
+        tex`\because \angle AEF=180^\circ-\angle AFE-\angle EAF`,
+        tex`\angle ACB=180^\circ-\angle ABC-\angle BAC`,
         tex`\therefore \angle AEF=\angle ACB`,
         tex`\therefore \triangle AFE\sim\triangle ABC`,
       ].map(compact),

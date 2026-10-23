@@ -16,7 +16,7 @@ test("textbook classroom keeps large geometry and the current proof line in one 
   const graph = await board.boundingBox();
   const panel = await proof.boundingBox();
   expect(graph!.height).toBeGreaterThan(480);
-  expect(graph!.width).toBeGreaterThan(750);
+  expect(Math.abs(graph!.width - 1366 / 2)).toBeLessThan(2);
   expect(panel!.x).toBeGreaterThanOrEqual(graph!.x + graph!.width);
   expect(graph!.y + graph!.height).toBeLessThanOrEqual(768);
   for (let i = 0; i < 7; i++) {
@@ -44,6 +44,57 @@ test("textbook classroom keeps large geometry and the current proof line in one 
     "6",
   );
 });
+
+for (const width of [1366, 1920]) {
+  test(`complete Q19 equations fit one row in equal classroom halves at ${width}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 1080 });
+    await page.goto("/apps/similarity#ex8c-19");
+    const board = page.getByTestId("original-board");
+    const proof = page.getByTestId("diagram-reasons");
+    expect(
+      Math.abs((await board.boundingBox())!.width - width / 2),
+    ).toBeLessThan(2);
+    const next = proof.getByRole("button", { name: "Next step", exact: true });
+    let checkedAngleSum = false;
+    for (const [index, step] of textbookSolutions["ex8c-19"].steps.entries()) {
+      await next.click();
+      const current = proof.getByTestId(`solution-step-${index}`);
+      for (const math of await current.getByRole("math").all()) {
+        const tex = await math.getAttribute("aria-label");
+        expect(tex).not.toContain("\\phantom");
+        const size = await math.evaluate((el) => {
+          const wrapper = el.parentElement!;
+          const typeset = el.querySelector(".katex-html")!;
+          return {
+            available: wrapper.clientWidth,
+            actual: typeset.getBoundingClientRect().width,
+          };
+        });
+        expect(size.actual, tex!).toBeLessThanOrEqual(size.available + 1);
+        if (tex?.includes("\\angle AEF=180")) {
+          expect(tex).toContain("-\\angle AFE -\\angle EAF");
+          checkedAngleSum = true;
+          await page.screenshot({
+            path: `out/similarity-proof-layout/complete-angle-sum-${width}.png`,
+          });
+        }
+      }
+      if (step.reason)
+        await expect(
+          current.locator("xpath=ancestor::tr").getByTestId("proof-reason"),
+        ).toHaveText(step.reason);
+    }
+    expect(checkedAngleSum).toBe(true);
+    await proof
+      .getByRole("button", { name: "Show earlier steps", exact: true })
+      .click();
+    await page.screenshot({
+      path: `out/similarity-proof-layout/history-${width}.png`,
+    });
+  });
+}
 
 test("phone pins the textbook diagram above a step panel and keeps Next visible", async ({
   page,
@@ -183,7 +234,10 @@ test("Previous and Reset return a scrolled solution panel to the current line", 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/apps/similarity#ex8c-19");
   const proof = page.getByTestId("diagram-reasons");
-  for (let i = 0; i < 20; i++)
+  const calculation = textbookSolutions["ex8c-19"].steps.findIndex((step) =>
+    step.math?.some((line) => line.includes("AE=CD")),
+  );
+  for (let i = 0; i <= calculation; i++)
     await proof.getByRole("button", { name: "Next step", exact: true }).click();
   await proof.locator("summary").click();
   const body = proof.locator("table").locator("..");

@@ -534,6 +534,7 @@
 }
 .printedMath :global(.katex) {
   font-size: 1em;
+  white-space: nowrap;
 }
 .proofTable tr[data-active="true"] td {
   background: #fff0cf;
@@ -1003,7 +1004,7 @@
 }
 .practiceFrame[data-classroom="true"] .diagramLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(380px, 31vw, 470px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0;
   height: 100%;
   align-items: stretch;
