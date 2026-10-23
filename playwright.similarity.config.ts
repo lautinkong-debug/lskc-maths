@@ -2,6 +2,7 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
   testMatch: [
+    "similarity-correspondence.spec.ts",
     "similarity-classroom.spec.ts",
     "similarity.spec.ts",
     "similarity-proof.spec.ts",

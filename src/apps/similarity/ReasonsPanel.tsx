@@ -5,6 +5,8 @@ import { GeometryText } from "./Notation";
 import type { SourceQuestion } from "./types";
 import { criterionNames, type ReasonPair, type ReasonView } from "./reasons";
 import type { TextbookSolution } from "./textbook-types";
+import type { Correspondence, CorrespondencePair } from "./correspondence";
+import { CorrespondencePanel } from "./CorrespondencePanel";
 import styles from "./similarity.module.css";
 
 const c = copy.similarity;
@@ -31,6 +33,9 @@ export function ReasonsPanel({
   focus,
   onFocus,
   selected,
+  correspondence,
+  correspondingPair,
+  onCompare,
 }: {
   classroom?: boolean;
   question: SourceQuestion;
@@ -46,6 +51,9 @@ export function ReasonsPanel({
   focus: number | null;
   onFocus: (n: number | null) => void;
   selected: number[];
+  correspondence?: Correspondence;
+  correspondingPair?: CorrespondencePair;
+  onCompare: (key: string) => void;
 }) {
   const panel = useRef<HTMLElement>(null);
   const [history, setHistory] = useState(false);
@@ -122,7 +130,10 @@ export function ReasonsPanel({
           {history ? c.hidePreviousLines : c.previousLines}
         </button>
       )}
-      <div className={styles.proofBody}>
+      <div
+        className={styles.proofBody}
+        data-comparing={classroom && !!correspondence && !history}
+      >
         {classroom && visible === 0 && (
           <div className={styles.proofStart}>
             <span aria-hidden="true">△ ∼ △</span>
@@ -187,6 +198,13 @@ export function ReasonsPanel({
             ))}
           </tbody>
         </table>
+        {correspondence && correspondingPair && (
+          <CorrespondencePanel
+            correspondence={correspondence}
+            pair={correspondingPair}
+            onCompare={onCompare}
+          />
+        )}
         {solution.sourceNote && (
           <p className={styles.sourceNote}>
             <strong>{c.sourceNote}</strong>{" "}

@@ -387,6 +387,16 @@ export const copy = {
     originalLengths: "Side labels show the original lengths.",
   },
   similarity: {
+    correspondenceTitle: "Match the corresponding parts",
+    correspondingParts: "Corresponding parts",
+    correspondingSides: "Sides",
+    correspondingAngles: "Angles",
+    chooseCorrespondingPair: "Choose a corresponding pair",
+    selectedSideRatio: "Side ratio:",
+    sidePairHint:
+      "One amber pair at a time. Corresponding sides have equal ratios; their lengths may differ.",
+    anglePairHint:
+      "One amber pair at a time. Matching arcs show equal corresponding angles.",
     classroom: "Textbook classroom",
     enterClassroom: "Classroom view",
     exitClassroom: "Back to studio",

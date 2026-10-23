@@ -48,6 +48,11 @@ import { textbookSolutions } from "./textbook";
 import { StepHighlights } from "./StepHighlights";
 import { vertexNames, knownRightAngles } from "./stepGeometry";
 import { focusPrintedLine } from "./stepFocus";
+import {
+  conclusionCorrespondence,
+  correspondenceHighlights,
+  layoutCorrespondenceLabels,
+} from "./correspondence";
 
 const c = copy.similarity;
 const SimilarityGames = dynamic(() => import("./games"), { ssr: false });
@@ -353,10 +358,22 @@ function Lesson({
   const solution = textbookSolutions[question.id];
   const [visibleSteps, setVisibleSteps] = useState(0);
   const [focusedStep, setFocusedStep] = useState<number | null>(null);
-  const focused =
+  const [correspondingPairKey, setCorrespondingPairKey] = useState("");
+  const printedFocus =
     focusedStep === null
       ? undefined
       : focusPrintedLine(solution.steps[focusedStep]);
+  const correspondence = conclusionCorrespondence(question, printedFocus);
+  const correspondingPair =
+    correspondence?.pairs.find((p) => p.key === correspondingPairKey) ??
+    correspondence?.pairs[0];
+  const focused =
+    printedFocus && correspondingPair
+      ? {
+          ...printedFocus,
+          highlights: correspondenceHighlights(correspondingPair),
+        }
+      : printedFocus;
 
   const [tracing, setTracing] = useState(false);
   const [vertices, setVertices] = useState<string[]>([]);
@@ -376,6 +393,12 @@ function Lesson({
     reasonPairs(question)[0]?.criterion === "given" ? "both" : "proof",
   );
   const [conditionFocus, setConditionFocus] = useState<string | null>(null);
+  const activeCorrespondence =
+    showMarks &&
+    correspondingPair &&
+    (correspondingPair.kind === "side" ? showLengths : showAngles)
+      ? correspondingPair
+      : undefined;
   const highlightStep =
     focused && showMarks
       ? {
@@ -460,6 +483,25 @@ function Lesson({
     sideLabels,
   );
   const markObstacles = [...vertexLabels.values(), ...sideLabels];
+  const correspondenceLabels = layoutCorrespondenceLabels(
+    activeCorrespondence,
+    points,
+    placedShapes.map((s) => s.points),
+    1,
+    markObstacles,
+    rightAngles,
+  );
+  const initialShapes = sets.map((set, i) =>
+    transform(set, separatePoses(sets.length)[i]),
+  );
+  const initialCorrespondenceLabels = layoutCorrespondenceLabels(
+    activeCorrespondence,
+    points,
+    initialShapes,
+    1,
+    undefined,
+    rightAngles,
+  );
   const angleLabelPoints = placedShapes
     .filter((s) => pair?.shapes.includes(s.id))
     .flatMap((s) =>
@@ -470,9 +512,10 @@ function Lesson({
   const view = useDiagramView(
     classroom && sets.length
       ? bounds(
-          sets.flatMap((set, i) =>
-            transform(set, separatePoses(sets.length)[i]),
-          ),
+          [
+            ...initialShapes.flat(),
+            ...vertexLabelPoints(initialCorrespondenceLabels),
+          ],
           55,
         )
       : { x: 0, y: 0, width: 840, height: 470 },
@@ -481,6 +524,7 @@ function Lesson({
       ...sideLabelPoints(sideLabels),
       ...vertexLabelPoints(vertexLabels),
       ...angleLabelPoints,
+      ...vertexLabelPoints(correspondenceLabels),
     ],
     45,
     svg,
@@ -501,6 +545,16 @@ function Lesson({
     view.fit([
       ...nextShapes.flatMap((s) => s.points),
       ...sideLabelPoints(labels),
+      ...vertexLabelPoints(
+        layoutCorrespondenceLabels(
+          activeCorrespondence,
+          points,
+          nextShapes.map((s) => s.points),
+          1,
+          undefined,
+          rightAngles,
+        ),
+      ),
     ]);
   }
   function reset() {
@@ -530,6 +584,7 @@ function Lesson({
     setFocusedStep(null);
   }
   function focusSolution(index: number | null) {
+    setCorrespondingPairKey("");
     setFocusedStep(index);
     if (index === null) return;
     setShowMarks(true);
@@ -1142,6 +1197,7 @@ function Lesson({
                     reasonPair={showMarks ? pair : undefined}
                     reasonRows={visibleRows}
                     highlightStep={highlightStep}
+                    correspondencePair={activeCorrespondence}
                     rightAngles={rightAngles}
                     proofOnly={
                       !exploreMarks ||
@@ -1296,6 +1352,8 @@ function Lesson({
                             />
                             <StepHighlights
                               step={highlightStep}
+                              correspondencePair={activeCorrespondence}
+                              angleLabels={correspondenceLabels}
                               rightAngles={rightAngles}
                               source={points}
                               placed={transformed}
@@ -1466,6 +1524,14 @@ function Lesson({
                       focus={focusedStep}
                       onFocus={focusSolution}
                       selected={selected}
+                      correspondence={correspondence}
+                      correspondingPair={correspondingPair}
+                      onCompare={(key) => {
+                        setCorrespondingPairKey(key);
+                        setShowMarks(true);
+                        setShowAngles(true);
+                        setShowLengths(true);
+                      }}
                     />
                   )}
                 </div>

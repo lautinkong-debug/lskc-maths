@@ -2,6 +2,15 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Similarity diagram clarity and correspondence (23/10/2026)
+
+- [x] Owner explicitly requests the published Congruent Triangles pattern for Similarity Studio and authorises GitHub/Vercel publication. Preserve all 72 source questions, literal solutions and existing games. Use Q19 as the representative pilot.
+- [x] Regenerate the 72 source crops at four times their previous width and height using lossless WebP. Keep original PDF, crops, givens and geometry unchanged; keep the teaching background neutral.
+- [x] At a printed triangle-similarity statement, derive correspondence from vertex order. Offer one side or angle pair at a time: amber focus, navy/red triangle identities, equal-angle arcs, and corresponding-side arrows/ratios without equal-length ticks. Retain readable current statement/reason and a compact phone selector; highlights follow moved/rotated/reflected copies.
+- [x] Verify the Q19 pilot, shared vertices, no premature conclusions and the full source bank. All 1,054 unit tests and all 56 browser scenarios pass against the isolated production build, including the existing games and all 72 literal solutions. Scoped ESLint, formatting and the production build pass. Fresh review also verifies coincident angle labels and deselected moved copies; inspect 1920px projection, 390px portrait and 844px landscape screenshots. Evidence: ignored `out/similarity-clarity/production-browser.log`, `unit.log`, `resolution-audit.json` and correspondence screenshots.
+- [ ] Publish only the Similarity changes to the existing GitHub `main` / Vercel project and verify the official live route and focused browser flows.
+
+
 ## Surface Area Studio — design review (23/10/2026)
 
 - [x] Inspect the owner's `1A09_Area and Volumes.pdf`: screen all 52 pages, OCR the full chapter, inspect relevant diagrams and answer pages, and catalogue 54 surface-area practice/exercise entries plus five worked examples and Activity 9.3. Record inclusions, exceptions and independently recalculated teaching cases in `docs/surface-area-source-audit.md`.

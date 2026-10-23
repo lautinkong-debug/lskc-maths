@@ -32,6 +32,10 @@ import { placeVertexLabels, vertexLabelPoints } from "./vertexLabels";
 
 import { StepHighlights } from "./StepHighlights";
 import type { TextbookStep } from "./textbook-types";
+import {
+  layoutCorrespondenceLabels,
+  type CorrespondencePair,
+} from "./correspondence";
 const c = copy.similarity;
 const colours = [
   "var(--color-navy)",
@@ -64,6 +68,7 @@ export function OriginalCanvas({
   reasonPair,
   reasonRows,
   highlightStep,
+  correspondencePair,
   rightAngles,
   proofOnly,
   showAngles,
@@ -91,6 +96,7 @@ export function OriginalCanvas({
   reasonPair?: ReasonPair;
   reasonRows: Condition[];
   highlightStep?: TextbookStep;
+  correspondencePair?: CorrespondencePair;
   rightAngles: string[];
   proofOnly: boolean;
   showAngles: boolean;
@@ -177,6 +183,27 @@ export function OriginalCanvas({
     ...movedLabels.values(),
     ...sideLabels,
   ];
+  const displayedShapes = shapes.map((shape, i) =>
+    selected.includes(i)
+      ? transform(shapePoints(shape, points), poseAt(i))
+      : shapePoints(shape, points),
+  );
+  const correspondenceLabels = layoutCorrespondenceLabels(
+    correspondencePair,
+    points,
+    displayedShapes,
+    unit / 12,
+    markObstacles,
+    rightAngles,
+  );
+  const initialCorrespondenceLabels = layoutCorrespondenceLabels(
+    correspondencePair,
+    points,
+    shapes.map((shape) => shapePoints(shape, points)),
+    unit / 12,
+    [...referenceLabels.values()],
+    rightAngles,
+  );
   const angleLabelPoints = placedShapes
     .filter((s) => reasonPair?.shapes.includes(s.id))
     .flatMap((s) =>
@@ -186,7 +213,14 @@ export function OriginalCanvas({
     );
   const view = useDiagramView(
     classroom
-      ? bounds([...points, ...vertexLabelPoints(referenceLabels)], unit * 2.5)
+      ? bounds(
+          [
+            ...points,
+            ...vertexLabelPoints(referenceLabels),
+            ...vertexLabelPoints(initialCorrespondenceLabels),
+          ],
+          unit * 2.5,
+        )
       : box,
     [
       ...points,
@@ -195,6 +229,7 @@ export function OriginalCanvas({
       ...sideLabelPoints(sideLabels),
       ...vertexLabelPoints(movedLabels),
       ...angleLabelPoints,
+      ...vertexLabelPoints(correspondenceLabels),
     ],
     unit * 3.5,
     svg,
@@ -298,6 +333,20 @@ export function OriginalCanvas({
         ...vertexLabelPoints(referenceLabels),
         ...nextShapes.flatMap((s) => s.points),
         ...sideLabelPoints(labels),
+        ...vertexLabelPoints(
+          layoutCorrespondenceLabels(
+            correspondencePair,
+            points,
+            shapes.map(
+              (shape, i) =>
+                nextShapes.find((s) => s.id === i)?.points ??
+                shapePoints(shape, points),
+            ),
+            unit / 12,
+            undefined,
+            rightAngles,
+          ),
+        ),
       ]);
       onSnap();
     }
@@ -426,7 +475,11 @@ export function OriginalCanvas({
             <rect {...originalBox} />
           </clipPath>
         </defs>
-        <g opacity={moved ? 0.27 : 1} pointerEvents="none">
+        <g
+          className={styles.referenceDiagram}
+          opacity={moved ? 0.27 : 1}
+          pointerEvents="none"
+        >
           {plainReference && (
             <>
               {contextOutlines[question.id] && (
@@ -539,13 +592,15 @@ export function OriginalCanvas({
             </>
           )}
         </g>
-        <StepHighlights
-          step={highlightStep}
-          rightAngles={rightAngles}
-          source={points}
-          size={unit / 12}
-          context="source"
-        />
+        {!correspondencePair && (
+          <StepHighlights
+            step={highlightStep}
+            rightAngles={rightAngles}
+            source={points}
+            size={unit / 12}
+            context="source"
+          />
+        )}
         {order.map((i) => {
           const s = shapes[i],
             selectedIndex = selected.indexOf(i),
@@ -602,6 +657,8 @@ export function OriginalCanvas({
               {selectedIndex >= 0 && poses[i] && (
                 <StepHighlights
                   step={highlightStep}
+                  correspondencePair={correspondencePair}
+                  angleLabels={correspondenceLabels}
                   rightAngles={rightAngles}
                   source={points}
                   placed={ps}
@@ -657,6 +714,20 @@ export function OriginalCanvas({
             </g>
           );
         })}
+        {correspondencePair && (
+          <StepHighlights
+            step={highlightStep}
+            correspondencePair={correspondencePair}
+            hiddenTriangles={Object.keys(poses)
+              .filter((id) => selected.includes(Number(id)))
+              .map((id) => shapes[Number(id)].vertices.join(""))}
+            angleLabels={correspondenceLabels}
+            rightAngles={rightAngles}
+            source={points}
+            size={unit / 12}
+            context="source"
+          />
+        )}
         <PairedSideLabels
           labels={sideLabels}
           onHide={onHideMark}

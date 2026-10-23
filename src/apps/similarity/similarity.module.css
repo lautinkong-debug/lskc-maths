@@ -1008,6 +1008,115 @@
   height: 100%;
   align-items: stretch;
 }
+.referenceDiagram {
+  filter: grayscale(1);
+}
+.conclusionCorrespondence {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--stroke);
+}
+.conclusionCorrespondence h3 {
+  margin: 0 0 8px;
+  font: 600 19px/1.35 var(--font-display);
+  color: var(--color-navy);
+}
+.vertexOrder {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+.pairKinds,
+.pairChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 9px;
+}
+.app .pairKinds button {
+  min-height: 36px;
+  padding: 5px 16px;
+}
+.app .pairChoices button {
+  min-height: 42px;
+  padding: 8px 10px;
+  font-size: 15px;
+  color: var(--color-graphite);
+}
+.app .pairChoices button[aria-pressed="true"] {
+  color: #874c00;
+  border-color: #a65d00;
+  background: #fff5df;
+  box-shadow: inset 0 -2px #a65d00;
+}
+.pairRatio {
+  margin: 8px 0;
+  color: #874c00;
+  font-size: 16px;
+}
+.pairHint {
+  margin: 8px 0;
+  color: var(--color-pencil);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.pairSelect {
+  display: none;
+}
+.practiceFrame[data-classroom="true"] .proofBody[data-comparing="true"] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.proofBody[data-comparing="true"] .proofTable {
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+.proofBody[data-comparing="true"] .conclusionCorrespondence {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.proofBody[data-comparing="true"] > p {
+  flex-shrink: 0;
+}
+.proofBody[data-comparing="true"] .markSettings {
+  display: none;
+}
+@media (max-width: 759px), (max-height: 550px) {
+  .conclusionCorrespondence {
+    margin-top: 5px;
+    padding-top: 5px;
+  }
+  .conclusionCorrespondence h3,
+  .pairKinds,
+  .pairChoices,
+  .pairHint,
+  .pairRatio,
+  .proofBody[data-comparing="true"] > p {
+    display: none;
+  }
+  .vertexOrder {
+    margin: 0 0 5px;
+    font-size: 14px;
+  }
+  .pairSelect {
+    display: block;
+    width: 100%;
+    min-height: 38px;
+    padding: 5px 8px;
+    border: 1px solid #a65d00;
+    border-radius: 6px;
+    background: #fff5df;
+    color: #874c00;
+    font-size: 16px;
+  }
+}
+@media (max-height: 550px) {
+  .vertexOrder {
+    display: none;
+  }
+}
+
 .practiceFrame[data-classroom="true"] .boards {
   display: flex;
   min-height: 0;
