@@ -460,6 +460,10 @@
   color: var(--color-paper);
   font-size: 1rem;
 }
+.classroom .primary:hover:not(:disabled) {
+  background: var(--color-navy);
+  color: var(--color-paper);
+}
 .actionRow .primary {
   flex: 1;
 }
