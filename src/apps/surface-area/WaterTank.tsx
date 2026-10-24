@@ -12,6 +12,7 @@ type Props = {
   box: Box;
   dimensions: boolean;
   solved: boolean;
+  revealWaterDepth?: boolean;
   selected: number | null;
   labels?: boolean;
   onSelect?: (index: number) => void;
@@ -23,6 +24,7 @@ export function WaterTank({
   box,
   dimensions,
   solved,
+  revealWaterDepth = false,
   selected,
   onSelect,
 }: Props) {
@@ -128,10 +130,10 @@ export function WaterTank({
   const bottomY = frontRight.y;
   const captionX = box.x + box.w / 2;
   const dimensionValue = increasing
-    ? solved
+    ? solved || revealWaterDepth
       ? `Δd = ${number(g.height)} ${variant.unit}`
       : "Δd"
-    : solved
+    : solved || revealWaterDepth
       ? `d = ${number(g.height)} ${variant.unit}`
       : "d";
   return (

@@ -219,6 +219,8 @@ export const copy = {
     increaseHint: "Only the new band of wetted walls contributes to the increase. The bottom area is unchanged.",
     wettedPrompt: "Which surfaces are in contact with the water?",
     waterDepth: "Water depth",
+    showWaterDepth: "Show water depth",
+    showWaterRise: "Show water-level rise",
     waterRise: "Rise",
     tankHeight: "Tank height",
     waterSurface: "Water surface: not counted",

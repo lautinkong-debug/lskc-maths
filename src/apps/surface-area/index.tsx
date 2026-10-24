@@ -59,6 +59,7 @@ function SurfaceLesson({
   const [showDimensions, setShowDimensions] = useState(true);
   const [showFaces, setShowFaces] = useState(true);
   const [showWorking, setShowWorking] = useState(false);
+  const [showWaterDepth, setShowWaterDepth] = useState(false);
   const [clean, setClean] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [comparison, setComparison] = useState(false);
@@ -112,6 +113,7 @@ function SurfaceLesson({
     setZoom(100);
     setShowDimensions(true);
     setShowFaces(true);
+    setShowWaterDepth(false);
     setComparison(false);
   }
   async function save(format: "svg" | "png") {
@@ -139,6 +141,7 @@ function SurfaceLesson({
     selectedFace,
     showDimensions,
     showFaces,
+    revealWaterDepth: showWaterDepth,
   };
   return (
     <div
@@ -240,7 +243,7 @@ function SurfaceLesson({
         {steps.map((step, i) => (
           <button
             type="button"
-            key={step.title}
+            key={i}
             aria-current={stage === i ? "step" : undefined}
             onClick={() => go(i)}
           >
@@ -296,6 +299,19 @@ function SurfaceLesson({
                 />
                 {c.faceLabels}
               </label>
+              {geometry.kind === "prism" && geometry.water && (
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={showWaterDepth}
+                    disabled={!showDimensions}
+                    onChange={(e) => setShowWaterDepth(e.target.checked)}
+                  />
+                  {variant.target === "increase"
+                    ? c.showWaterRise
+                    : c.showWaterDepth}
+                </label>
+              )}
             </div>
             <button
               ref={cleanTrigger}

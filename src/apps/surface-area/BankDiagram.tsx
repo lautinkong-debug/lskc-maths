@@ -41,6 +41,7 @@ type ShapeProps = {
   labels: boolean;
   caps: boolean;
   solved: boolean;
+  revealWaterDepth?: boolean;
   labelBounds?: Box;
   onSelect?: (i: number) => void;
 };
@@ -185,6 +186,7 @@ function Prism({
   labels,
   caps,
   solved,
+  revealWaterDepth = false,
   labelBounds,
   onSelect,
 }: ShapeProps) {
@@ -304,12 +306,13 @@ function Prism({
     : (g.heightName?.length ?? 0) <= 3
       ? (g.heightName ?? "H")
       : "H";
+  const revealHeight = solved || Boolean(g.water && revealWaterDepth);
   const heightValue =
-    !solved && g.water
+    !revealHeight && g.water
       ? variant.target === "increase"
         ? "Δd"
         : "d"
-      : !solved && g.heightLabel
+      : !revealHeight && g.heightLabel
         ? g.heightLabel
         : `${number(g.height)} ${variant.unit}`;
   const heightText =
@@ -1140,6 +1143,7 @@ export type BankDiagramProps = {
   showFaces: boolean;
   showWorking?: boolean;
   revealDimensions?: boolean;
+  revealWaterDepth?: boolean;
   comparison?: boolean;
   compact?: boolean;
   onSelectFace?: (i: number) => void;
@@ -1171,6 +1175,7 @@ export default function BankDiagram({
   showFaces,
   showWorking = false,
   revealDimensions = false,
+  revealWaterDepth = false,
   comparison = false,
   compact = false,
   onSelectFace,
@@ -1240,6 +1245,7 @@ export default function BankDiagram({
     dimensions: showDimensions,
     labels: showFaces,
     solved,
+    revealWaterDepth,
   };
   const title = stepsFor(variant)[stage].title;
   return (

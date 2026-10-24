@@ -4,6 +4,170 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 const output = "out/surface-area-release/water";
 mkdirSync(output, { recursive: true });
 
+test("water depth can be shown independently of working throughout the lesson", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  for (const width of [390, 1920]) {
+    await page.setViewportSize({ width, height: 1080 });
+    for (const [id, value, area] of [
+      ["ex9b-35", "7.5", "612"],
+      ["revision-31", "7.8", "999"],
+      ["mc-11", "3", "192"],
+    ]) {
+      await page.goto(`/apps/surface-area#${id}`);
+      const lesson = page.getByTestId("surface-area-lesson");
+      await expect(lesson).toHaveAttribute("data-preset", id);
+      const diagram = lesson.getByTestId("surface-diagram").first();
+      const toggle = lesson.getByRole("checkbox", {
+        name: id === "mc-11" ? "Show water-level rise" : "Show water depth",
+        exact: true,
+      });
+      await expect(toggle).not.toBeChecked();
+      const next = lesson.getByRole("button", {
+        name: "Next step",
+        exact: true,
+      });
+      await next.scrollIntoViewIfNeeded();
+      const before = await next.boundingBox();
+      await toggle.check();
+      expect(await next.boundingBox()).toEqual(before);
+      await expect(diagram.locator("[data-depth-value]")).toHaveText(
+        `${id === "mc-11" ? "Δd" : "d"} = ${value} cm`,
+      );
+      await expect(lesson.getByTestId("surface-working")).toHaveCount(0);
+      await expect(diagram).not.toHaveAttribute("data-solved", "true");
+      const outside = await diagram.evaluate((svg) => {
+        const frame = svg.getBoundingClientRect();
+        return [...svg.querySelectorAll("[data-water-annotations] text")]
+          .filter((t) => {
+            const b = t.getBoundingClientRect();
+            return (
+              b.left < frame.left - 1 ||
+              b.right > frame.right + 1 ||
+              b.top < frame.top - 1 ||
+              b.bottom > frame.bottom + 1
+            );
+          })
+          .map((t) => t.textContent);
+      });
+      expect(outside).toEqual([]);
+      await diagram.screenshot({
+        path: `${output}/depth-only-${id}-${width}.png`,
+      });
+      await lesson
+        .getByRole("button", { name: "Clean diagram", exact: true })
+        .click();
+      await expect(
+        page.getByRole("dialog").locator("[data-depth-value]"),
+      ).toContainText(`${value} cm`);
+      await expect(page.getByRole("dialog")).not.toContainText(`${area} cm²`);
+      await page
+        .getByRole("button", { name: "Back to controls", exact: true })
+        .click();
+      for (const stage of [1, 2, 3, 4]) {
+        await lesson
+          .getByRole("navigation")
+          .getByRole("button")
+          .nth(stage)
+          .click();
+        if (stage === 2) await lesson.locator("#surface-unfold").fill("100");
+        await expect(toggle).toBeChecked();
+        await expect(diagram).toContainText(
+          stage === 1 ? `d = ${value} cm` : `H = ${value} cm`,
+        );
+        await expect(lesson.getByTestId("surface-working")).toHaveCount(0);
+        await expect(diagram).not.toContainText(`${area} cm²`);
+        await expect(diagram).not.toHaveAttribute("data-solved", "true");
+      }
+      await lesson
+        .getByRole("button", { name: "Show working", exact: true })
+        .click();
+      await expect(lesson.getByTestId("surface-working")).toContainText(
+        `${area} cm²`,
+      );
+      await lesson
+        .getByRole("button", { name: "Hide working", exact: true })
+        .click();
+      await expect(diagram).toContainText(`H = ${value} cm`);
+      await toggle.uncheck();
+      await expect(diagram).toContainText(id === "mc-11" ? "H = Δd" : "H = d");
+      await toggle.check();
+      await lesson
+        .getByRole("button", { name: "Reset lesson", exact: true })
+        .click();
+      await expect(toggle).not.toBeChecked();
+      await expect(diagram.locator("[data-depth-value]")).toHaveText(
+        id === "mc-11" ? "Δd" : "d",
+      );
+      await toggle.check(); // A different preset must not inherit the revealed value.
+    }
+  }
+  await page.goto("/apps/surface-area#revision-29");
+  await expect(page.getByTestId("surface-area-lesson")).toHaveAttribute(
+    "data-preset",
+    "revision-29",
+  );
+  await expect(page.getByRole("checkbox", { name: /Show water/ })).toHaveCount(
+    0,
+  );
+});
+
+test("depth-only image exports include the value but no area working or answer", async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 1366, height: 1080 });
+  for (const [id, value, area] of [
+    ["ex9b-35", "7.5", "612"],
+    ["revision-31", "7.8", "999"],
+    ["mc-11", "3", "192"],
+  ]) {
+    await page.goto(`/apps/surface-area#${id}`);
+    const lesson = page.getByTestId("surface-area-lesson");
+    await expect(lesson).toHaveAttribute("data-preset", id);
+    await lesson.getByRole("checkbox", { name: /Show water/ }).check();
+    for (const layout of ["current", "comparison"]) {
+      if (layout === "comparison") {
+        await lesson.getByRole("navigation").getByRole("button").nth(2).click();
+        await lesson.locator("#surface-unfold").fill("100");
+      }
+      await lesson.getByLabel("Image layout").selectOption(layout);
+      for (const format of ["SVG", "PNG"]) {
+        const pending = page.waitForEvent("download");
+        await lesson
+          .getByRole("button", { name: `Download ${format}`, exact: true })
+          .click();
+        const download = await pending;
+        expect(await download.failure()).toBeNull();
+        const data = readFileSync((await download.path())!);
+        writeFileSync(
+          `${output}/depth-only-${id}-${layout}.${format.toLowerCase()}`,
+          data,
+        );
+        if (format === "SVG") {
+          const reopened = await page.context().newPage();
+          await reopened.setContent(data.toString());
+          const svg = reopened.locator("svg");
+          await expect(svg).toContainText(`d = ${value} cm`);
+          if (layout === "comparison")
+            await expect(svg).toContainText(`H = ${value} cm`);
+          await expect(svg).not.toContainText(`${area} cm²`);
+          await expect(svg).not.toContainText("Working");
+          await expect(svg).not.toHaveAttribute("data-solved", "true");
+          await svg.screenshot({
+            path: `${output}/depth-only-${id}-${layout}-reopened.png`,
+          });
+          await reopened.close();
+        } else
+          expect(data.subarray(0, 8)).toEqual(
+            Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+          );
+      }
+    }
+  }
+});
+
 test("water is visible inside the full tank and only the required tank material is counted", async ({
   page,
 }) => {
