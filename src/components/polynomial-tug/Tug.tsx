@@ -156,8 +156,14 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
     });
     setOffline(false);
   }, []);
+  // Only accepted state may terminate polling; a mixed-revision response can be rejected.
+  const terminal =
+    state?.status === "closed" ||
+    Boolean(
+      state?.role === "student" && state.match && state.match.winner !== null,
+    );
   useEffect(() => {
-    if (!code || loading) return;
+    if (!code || loading || terminal) return;
     let cancelled = false,
       failures = 0,
       timer: ReturnType<typeof setTimeout>;
@@ -170,13 +176,6 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
             accept(next);
             setError("");
             failures = 0;
-            if (
-              next.status === "closed" ||
-              (next.role === "student" &&
-                next.match &&
-                next.match.winner !== null)
-            )
-              return;
             if (next.status === "lobby") delay = 5000;
           }
         } catch (cause) {
@@ -199,7 +198,7 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [code, loading, accept]);
+  }, [code, loading, accept, terminal]);
   const command = async (
     action: string,
     extra: Record<string, unknown> = {},

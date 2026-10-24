@@ -439,3 +439,58 @@ test("one student can start, a late partner waits safely, and an opponent can jo
     await Promise.all(contexts.map((c) => c.close()));
   }
 });
+
+test("a stale match in an end-class response does not freeze a student in live play", async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(90000);
+  await page.goto("/login");
+  await page.getByRole("button", { name: /^Teacher:/ }).click();
+  await expect(page.getByText("Teacher access is active.")).toBeVisible();
+  await page.goto("/polynomial-tug");
+  await page.getByLabel("Number of groups").selectOption("1");
+  await page
+    .getByRole("button", { name: "Create class room", exact: true })
+    .click();
+  const code = await page.getByTestId("tug-code").innerText();
+  const context = await browser.newContext();
+  try {
+    const student = await context.newPage();
+    await student.goto(`/polynomial-tug?room=${code}`);
+    await student
+      .getByRole("button", { name: "Join Group 1 Pair A", exact: true })
+      .click();
+    await expect(
+      page.getByText("1 / 4 seats filled", { exact: true }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Start all matches", exact: true })
+      .click();
+    await answer(student);
+    await expect(
+      student.getByText("Together you pulled 1 unit!", { exact: true }),
+    ).toBeVisible();
+    let closedPolls = 0;
+    await student.route("**/api/polynomial-tug?*", async (route) => {
+      const response = await route.fetch();
+      const body = await response.json();
+      if (body.state?.status === "closed") {
+        closedPolls++;
+        if (closedPolls === 1) body.state.match.revision = 0;
+      }
+      await route.fulfill({ response, json: body });
+    });
+    await page.getByRole("button", { name: "End class", exact: true }).click();
+    await page
+      .getByRole("button", { name: "End matches", exact: true })
+      .click();
+    await expect.poll(() => closedPolls).toBeGreaterThan(0);
+    await expect(
+      student.getByRole("heading", { name: "Practice complete!", exact: true }),
+    ).toBeVisible({ timeout: 12000 });
+    expect(closedPolls).toBeGreaterThanOrEqual(2);
+  } finally {
+    await context.close();
+  }
+});
