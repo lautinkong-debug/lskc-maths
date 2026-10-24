@@ -1029,3 +1029,12 @@ Home, top to bottom:
 - Uploaded HTML rendered only in a sandboxed `srcdoc` iframe without `allow-same-origin`.
 - Teachers edit, students view: every browser-editable collection is teacher-write-only in the rules; students have no write path.
 - Hiding a Web App is a display choice, not a secret: the app code ships with the site, so hidden apps are simply removed from students' lists and pages.
+
+
+### Polynomial games release (24/10/2026)
+
+- Owner approved publication to the existing Vercel project.
+- Added multiple-choice Polynomial Quest and a 32-device class room with eight independent two-versus-two tug matches. Both partners must solve before a pull; four skill tiers increase pulling power.
+- Verified 32 identities, concurrent scoring and ownership in the demo emulator; teacher plus four browser contexts completed all levels, refresh, retries and pause/resume. The 32-token HTTP/eight-group projector test and 13 solo-game browser checks pass.
+- Fresh review corrected predictable option order and mismatched room-code alphabets. The projector overview fits all eight groups at 1920 by 1080; 360/390px student views were inspected.
+- Production verification and release evidence are recorded in docs/polynomial-tug-verification.md.
