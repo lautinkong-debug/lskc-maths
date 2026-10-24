@@ -1046,3 +1046,10 @@ Home, top to bottom:
 - Verified 32 identities, concurrent scoring and ownership in the demo emulator; teacher plus four browser contexts completed all levels, refresh, retries and pause/resume. The 32-token HTTP/eight-group projector test and 13 solo-game browser checks pass.
 - Fresh review corrected predictable option order and mismatched room-code alphabets. The projector overview fits all eight groups at 1920 by 1080; 360/390px student views were inspected.
 - Production verification and release evidence are recorded in docs/polynomial-tug-verification.md.
+
+### Polynomial Arcade and timed force (24/10/2026)
+
+- Colourful original tug crews and Quest guardians; flexible attendance; shared energy and three activatable skills.
+- Difficulty plus server-timed first-try completion determines force. Whole-pair time excludes teacher pauses; harder levels allow longer windows. New games use 48-unit goals, existing games retain untimed 24-unit rules.
+- Final local matrix: 1372 unit tests,5 demo integration tests,5 classroom browser flows (32 independent students, 384 correct answers through all four levels),13 solo browser checks, types/lint/build and rendered phone/projector QA pass.
+- Production Firebase still returns quota errors; final live 32-student completion is pending. Release evidence: docs/polynomial-arcade-verification.md.

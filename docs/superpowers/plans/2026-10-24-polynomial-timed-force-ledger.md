@@ -11,3 +11,5 @@ Final: Ruling: production quota/live completion remains externally blocked until
 Final: Ruling: winning-screen retention of question feedback is unchanged; the result screen presents the winner. Cost: the final pull's detailed arithmetic is not retained on that screen.
 Final: Ruling: final merged-source build/browser results are the parent's responsibility; failures block publication.
 No deferred minors in the timing review. The prior arcade minor (old shield feedback lingering into the next question) is superseded by the new resolved-only breakdown and reset on Next.
+
+Task4 local complete: final source 4294e36; unit 1372/1372, emulator 5/5, classroom 5/5 including 32 independent clients / 384 correct, solo 13/13, types/lint/build and rendered QA pass. Both review regressions RED then GREEN; complete final suite passes. Fresh production public read still 429; publication readiness established, live matrix pending quota.
