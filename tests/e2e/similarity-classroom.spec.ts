@@ -16,7 +16,7 @@ test("textbook classroom keeps large geometry and the current proof line in one 
   const graph = await board.boundingBox();
   const panel = await proof.boundingBox();
   expect(graph!.height).toBeGreaterThan(480);
-  expect(Math.abs(graph!.width - 1366 / 2)).toBeLessThan(2);
+  expect(Math.abs(graph!.width - (1366 * 2) / 3)).toBeLessThan(2);
   expect(panel!.x).toBeGreaterThanOrEqual(graph!.x + graph!.width);
   expect(graph!.y + graph!.height).toBeLessThanOrEqual(768);
   for (let i = 0; i < 7; i++) {
@@ -46,7 +46,7 @@ test("textbook classroom keeps large geometry and the current proof line in one 
 });
 
 for (const width of [1366, 1920]) {
-  test(`complete Q19 equations fit one row in equal classroom halves at ${width}`, async ({
+  test(`complete Q19 equations fit one row beside a double-width graph at ${width}`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 1080 });
@@ -54,7 +54,7 @@ for (const width of [1366, 1920]) {
     const board = page.getByTestId("original-board");
     const proof = page.getByTestId("diagram-reasons");
     expect(
-      Math.abs((await board.boundingBox())!.width - width / 2),
+      Math.abs((await board.boundingBox())!.width - (width * 2) / 3),
     ).toBeLessThan(2);
     const next = proof.getByRole("button", { name: "Next step", exact: true });
     let checkedAngleSum = false;

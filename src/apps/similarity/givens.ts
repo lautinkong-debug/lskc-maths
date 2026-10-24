@@ -1,6 +1,6 @@
 /** Question premises only, never deductions from the solution or measurements
  * of the schematic drawing. Diagram-only entries were checked against the source crops. */
-export const questionGivens: Record<string, string[]> = {
+const givenGroups: Record<string, string[]> = {
   "ex8a-12": ["△ABC ∼ △DEF", "∠B = 50°; ∠F = 70°"],
   "ex8a-13": ["△ABC ∼ △XYZ", "XY = 5 cm; YZ = 8 cm", "AB = XZ = 12 cm"],
   "ex8a-14": ["△ABC ∼ △QPR"],
@@ -160,7 +160,9 @@ export const questionGivens: Record<string, string[]> = {
     "AD = 4 cm; DC = 6 cm",
   ],
   "rev8-33": [
-    "C lies on BD; DE meets AB at F and AC at G.",
+    "C lies on BD.",
+    "DE meets AB at F.",
+    "DE meets AC at G.",
     "AF : BF = 2 : 1; AD = BD",
     "AC // EB; ∠DAG = ∠BDE; AC ⟂ DE",
   ],
@@ -188,3 +190,11 @@ export const questionGivens: Record<string, string[]> = {
     "ED = 8 cm; strip BFGH is wasted.",
   ],
 };
+
+/** Each independent condition gets its own bullet; equations stay intact. */
+export const questionGivens: Record<string, string[]> = Object.fromEntries(
+  Object.entries(givenGroups).map(([id, groups]) => [
+    id,
+    groups.flatMap((group) => group.split(/;\s*/)),
+  ]),
+);

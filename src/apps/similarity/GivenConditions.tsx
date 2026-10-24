@@ -14,13 +14,13 @@ const subscribe = (onChange: () => void) => {
 const screenSnapshot = () => window.matchMedia(spaciousScreen).matches;
 const serverSnapshot = () => false;
 
+export function useSpaciousScreen() {
+  return useSyncExternalStore(subscribe, screenSnapshot, serverSnapshot);
+}
+
 /** Screen-space reference: camera and triangle transformations never move it. */
 export function GivenConditions({ question }: { question: SourceQuestion }) {
-  const spacious = useSyncExternalStore(
-    subscribe,
-    screenSnapshot,
-    serverSnapshot,
-  );
+  const spacious = useSpaciousScreen();
   const [choice, setChoice] = useState<boolean | null>(null);
   const open = choice ?? spacious;
   const c = copy.similarity;

@@ -7,16 +7,57 @@ import { criterionNames, type ReasonPair, type ReasonView } from "./reasons";
 import type { TextbookSolution } from "./textbook-types";
 import type { Correspondence, CorrespondencePair } from "./correspondence";
 import { CorrespondencePanel } from "./CorrespondencePanel";
+import { proofSection } from "./proofSection";
 import styles from "./similarity.module.css";
 
 const c = copy.similarity;
 // Dragging shapes must not re-typeset the entire textbook solution.
 const PrintedEquation = memo(function PrintedEquation({
   tex,
+  fit,
 }: {
   tex: string;
+  fit: boolean;
 }) {
-  return <MathText>{`\\displaystyle ${tex}`}</MathText>;
+  const line = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const element = line.current;
+    if (!element) return;
+    if (!fit) {
+      element.style.removeProperty("font-size");
+      return;
+    }
+    const resize = () => {
+      const math = element.querySelector<HTMLElement>(".katex-html");
+      if (!math || !element.clientWidth) return;
+      const current = parseFloat(getComputedStyle(element).fontSize);
+      const normal = parseFloat(
+        getComputedStyle(element.parentElement!).fontSize,
+      );
+      const natural = math.getBoundingClientRect().width / current;
+      if (!natural) return;
+      const size =
+        Math.floor(
+          Math.min(normal, (element.clientWidth - 1) / natural) * 100,
+        ) / 100;
+      if (Math.abs(size - current) > 0.02) element.style.fontSize = `${size}px`;
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(element);
+    let mounted = true;
+    void document.fonts.ready.then(() => {
+      if (mounted) resize();
+    });
+    return () => {
+      mounted = false;
+      observer.disconnect();
+    };
+  }, [fit, tex]);
+  return (
+    <span ref={line} className={styles.printedMath}>
+      <MathText>{`\\displaystyle ${tex}`}</MathText>
+    </span>
+  );
 });
 export function ReasonsPanel({
   classroom = false,
@@ -57,6 +98,8 @@ export function ReasonsPanel({
 }) {
   const panel = useRef<HTMLElement>(null);
   const [history, setHistory] = useState(false);
+  const activeStep = focus ?? visible - 1;
+  const section = proofSection(solution.steps, activeStep);
   useEffect(() => {
     if (classroom) {
       const body = panel.current?.querySelector(`.${styles.proofBody}`);
@@ -162,7 +205,12 @@ export function ReasonsPanel({
             {solution.steps.slice(0, visible).map((step, i) => (
               <tr
                 key={i}
-                hidden={classroom && !history && i !== (focus ?? visible - 1)}
+                hidden={
+                  classroom &&
+                  (i < section.start ||
+                    i >= section.end ||
+                    (!history && i !== activeStep))
+                }
                 data-testid={
                   step.conclusion ? "similarity-conclusion" : "textbook-step"
                 }
@@ -185,9 +233,7 @@ export function ReasonsPanel({
                       </span>
                     )}
                     {step.math?.map((math, j) => (
-                      <span className={styles.printedMath} key={j}>
-                        <PrintedEquation tex={math} />
-                      </span>
+                      <PrintedEquation key={j} tex={math} fit={classroom} />
                     ))}
                     {step.text && (
                       <span className={styles.printedLine}>

@@ -18,7 +18,7 @@ import {
 } from "./geometry";
 import type { Point, Shape, SourceQuestion } from "./types";
 import styles from "./similarity.module.css";
-import { GivenConditions } from "./GivenConditions";
+import { GivenConditions, useSpaciousScreen } from "./GivenConditions";
 import { GeometryName } from "./Notation";
 import { VertexHandles } from "./VertexHandles";
 import { layoutReasonAngles, ReasonMarks } from "./ReasonMarks";
@@ -109,6 +109,7 @@ export function OriginalCanvas({
   onSnap: () => void;
 }) {
   const [poses, setPoses] = useState<Record<number, Pose>>({});
+  const spacious = useSpaciousScreen();
   const svg = useRef<SVGSVGElement>(null);
   const drag = useRef<{
     index: number;
@@ -131,6 +132,8 @@ export function OriginalCanvas({
   const poseAt = (i: number) => poses[i] ?? initial(i);
   const current = index === undefined ? null : poseAt(index);
   const unit = Math.max(originalBox.width, originalBox.height) / 32;
+  const referenceFontSize = classroom && spacious ? unit * 0.65 : 20;
+  const movedFontSize = unit * (classroom && spacious ? 0.8 : 1.5);
   const placedShapes = selected.map((id, i) => ({
     id,
     points: transform(shapePoints(shapes[id], points), poseAt(id)),
@@ -154,14 +157,25 @@ export function OriginalCanvas({
       ),
     );
   }
+  // Reserve the visible vertex rings as well as graph edges when naming points.
+  const vertexRings = [...points, ...placedShapes.flatMap((s) => s.points)].map(
+    (p) => ({
+      x: p.x - unit * 0.7,
+      y: p.y - unit * 0.7,
+      width: unit * 1.4,
+      height: unit * 1.4,
+    }),
+  );
   const referenceLabels = placeVertexLabels(
     points.map((p) => ({
       key: p.label,
       point: p,
       text: p.label,
-      fontSize: 20,
+      fontSize: referenceFontSize,
+      allowInterior: true,
     })),
     referencePolygons,
+    vertexRings,
   );
   const movedLabels = placeVertexLabels(
     placedShapes
@@ -172,12 +186,13 @@ export function OriginalCanvas({
           key: `${s.id}-${p.label}`,
           point: p,
           text: p.label,
-          fontSize: unit * 1.5,
+          fontSize: movedFontSize,
+          allowInterior: true,
           preferred: { x: p.x - mid.x, y: p.y - mid.y },
         }));
       }),
     [...referencePolygons, ...placedShapes.map((s) => s.points)],
-    sideLabels,
+    [...sideLabels, ...vertexRings],
   );
   const markObstacles = [
     ...referenceLabels.values(),
@@ -519,6 +534,10 @@ export function OriginalCanvas({
                     textAnchor="middle"
                     data-testid="reference-vertex-name"
                     className={styles.sourceLabel}
+                    style={{
+                      fontSize: referenceFontSize,
+                      strokeWidth: referenceFontSize * 0.18,
+                    }}
                   >
                     {p.label}
                   </text>
@@ -594,6 +613,10 @@ export function OriginalCanvas({
                     textAnchor="middle"
                     data-testid="reference-vertex-name"
                     className={styles.sourceLabel}
+                    style={{
+                      fontSize: referenceFontSize,
+                      strokeWidth: referenceFontSize * 0.18,
+                    }}
                   >
                     {p.label}
                   </text>
@@ -703,7 +726,7 @@ export function OriginalCanvas({
                         textAnchor="middle"
                         fill={colour}
                         className={styles.movedLabel}
-                        fontSize={unit * 1.5}
+                        fontSize={movedFontSize}
                       >
                         {p.label}
                       </text>
@@ -753,7 +776,7 @@ export function OriginalCanvas({
             groups={labelGroups}
             shapes={placedShapes}
             frame={view.frame}
-            fontSize={unit * 1.5}
+            fontSize={movedFontSize}
             obstacles={sideLabels}
           />
           {tracing &&

@@ -2,6 +2,14 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Similarity readable vertices and current proof parts (24/10/2026)
+
+- [x] Owner requests smaller, nearby vertex names, a 2:1 graph/solution split, and point-form givens in the top-left. Replace equal desktop halves with 2:1, retain phone layouts and larger phone labels, split independent givens into separate bullets, and keep internal vertex labels near their points while avoiding edges, other labels and drag rings. Reserve the actual italic font height; verify the reported Revision Q33 figure.
+- [x] Restrict classroom history to the current printed part/subpart or triangle comparison. Reaching part (b) hides part (a); going back restores its revealed rows. Retain the earlier-step toggle and exact textbook statements, reasons and order. Fit long complete equations to the narrower statement column.
+- [x] Reproduce the original history defect on production. Verify 21 focused unit checks, lint/formatting and production builds. The 31-scenario release run passes 30 and finds an italic F bounding-box collision; correct the bounds and pass all 17 affected proof/label/correspondence scenarios. Verify all 72 question choices and condition lists, Q19 equation widths at 1366/1920px, phone/landscape layouts, Q33 label-to-vertex proximity, ring/edge clearance and part navigation. Inspect projector and phone screenshots in ignored `out/similarity-parts/`.
+- [x] Prepare a scoped release on the current production branch, preserving concurrent Polynomial releases and unrelated local work. The owner previously authorised GitHub/Vercel publication; record the resulting commit, deployment readiness and live checks in ignored `out/similarity-parts/release.json`.
+
+
 ## Polynomial demonstrations publication (24/10/2026)
 
 - [x] Owner approved publication of the reviewed complete Level 2 bank: 81 numbered questions / 158 demonstrations across 10A–10D and Revision Exercise 10.

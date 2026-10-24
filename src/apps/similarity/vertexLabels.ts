@@ -7,6 +7,8 @@ export type VertexLabelRequest = {
   point: Point;
   fontSize: number;
   preferred?: { x: number; y: number };
+  /** Composite figures can have interior vertices; keep their names nearby. */
+  allowInterior?: boolean;
 };
 export type VertexLabel = LabelBox & {
   key: string;
@@ -72,7 +74,8 @@ export function placeVertexLabels(
   for (const request of requests) {
     const { point, fontSize: f, preferred } = request;
     const width = f * (request.text.length * 0.7 + 0.4),
-      height = f * 1.35;
+      // The display font's italic ascenders extend beyond its nominal em box.
+      height = f * 1.8;
     const ideal = preferred
       ? Math.atan2(preferred.y, preferred.x)
       : -Math.PI / 2;
@@ -110,7 +113,7 @@ export function placeVertexLabels(
             y + height > frame.y + frame.height);
         const score =
           crosses * 1000 +
-          Number(contained) * 1000 +
+          Number(contained) * (request.allowInterior ? 20 : 1000) +
           collisions * 2000 +
           Number(!!outside) * 5000 +
           gap * 3 +

@@ -33,7 +33,7 @@ import {
 import type { Point, Shape, SourceQuestion } from "./types";
 import styles from "./similarity.module.css";
 import { OriginalCanvas } from "./OriginalCanvas";
-import { GivenConditions } from "./GivenConditions";
+import { GivenConditions, useSpaciousScreen } from "./GivenConditions";
 import { GeometryName, GeometryText } from "./Notation";
 import { VertexHandles } from "./VertexHandles";
 import { layoutReasonAngles, ReasonMarks } from "./ReasonMarks";
@@ -344,6 +344,8 @@ function Lesson({
   const [deskTab, setDeskTab] = useState<"solution" | "controls" | "question">(
     "solution",
   );
+  const spacious = useSpaciousScreen();
+  const smallVertexNames = classroom && spacious;
   const [classroomBoard, setClassroomBoard] = useState("original");
   const [controlHost, setControlHost] = useState<HTMLDivElement | null>(null);
   const points = modelPoints(question);
@@ -476,7 +478,7 @@ function Lesson({
           key: `${s.id}-${p.label}`,
           point: p,
           text: p.label + (order ? "1" : ""),
-          fontSize: 30,
+          fontSize: smallVertexNames ? 20 : 30,
           preferred: { x: p.x - mid.x, y: p.y - mid.y },
         }));
       }),
@@ -1393,6 +1395,11 @@ function Lesson({
                                         y={label!.textY}
                                         textAnchor="middle"
                                         className={styles.vertexLabel}
+                                        style={
+                                          smallVertexNames
+                                            ? { fontSize: 20 }
+                                            : undefined
+                                        }
                                         fill={colours[i]}
                                       >
                                         {p.label}
@@ -1449,6 +1456,7 @@ function Lesson({
                         shapes={placedShapes}
                         frame={view.frame}
                         showOrder={order}
+                        fontSize={smallVertexNames ? 20 : 24}
                         obstacles={sideLabels}
                       />
                     </svg>
