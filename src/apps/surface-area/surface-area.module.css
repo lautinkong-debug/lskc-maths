@@ -1,0 +1,671 @@
+.studio {
+  color: var(--color-graphite);
+}
+.studio button,
+.studio select {
+  min-height: 44px;
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 6px;
+  padding: 8px 13px;
+  font-weight: 600;
+  color: var(--color-navy);
+  background: white;
+  cursor: pointer;
+}
+.studio button:hover {
+  background: var(--color-navy-wash);
+}
+.studio button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.studio .primary {
+  background: var(--color-navy);
+  color: white;
+  border-color: var(--color-navy);
+}
+.studio .primary:hover {
+  background: var(--color-navy-deep);
+  color: white;
+}
+.intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+.intro p {
+  margin: 5px 0 0;
+  font-size: 1.2rem;
+}
+.source {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+.bank {
+  position: relative;
+}
+.bank summary {
+  cursor: pointer;
+  color: var(--color-navy);
+  font-size: 1.05rem;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 8px 0;
+}
+.bank summary span {
+  margin-left: 8px;
+}
+.bankPanel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 20;
+  width: min(650px, calc(100vw - 60px));
+  padding: 20px;
+  background: var(--color-paper);
+  border: 2px solid var(--color-navy);
+  border-radius: 8px;
+  box-shadow: 0 12px 25px rgb(15 69 116 / 0.12);
+}
+.bankPanel label {
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 3px;
+  font-size: 0.9rem;
+}
+.bankPanel select,
+.bankPanel input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 5px;
+  background: white;
+  color: var(--color-navy);
+}
+.bankPanel option {
+  padding: 6px;
+}
+.bankPanel p {
+  font-size: 0.9rem;
+  margin: 0;
+}
+.questionControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  align-items: start;
+  margin: -6px 0 15px;
+  color: var(--color-navy);
+}
+.questionControls details {
+  flex: 1;
+  min-width: 200px;
+}
+.questionControls summary {
+  min-height: 30px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.questionControls p {
+  color: var(--color-graphite);
+  line-height: 1.6;
+  max-width: 900px;
+  padding: 10px 0;
+}
+.questionControls label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.steps button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-align: left;
+  line-height: 1.3;
+}
+.steps button span {
+  font-size: 1.3rem;
+  font-family: var(--font-display);
+}
+.steps button[aria-current] {
+  color: white;
+  background: var(--color-navy);
+  border-color: var(--color-navy);
+}
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 24px;
+  align-items: start;
+  overflow-anchor: none;
+}
+.boardColumn {
+  min-width: 0;
+}
+.boardTools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 0 12px;
+}
+.boardTools > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.boardTools label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.95rem;
+}
+.studio input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-navy);
+}
+.viewport {
+  overflow: auto;
+  background: white;
+  border: 1px solid var(--color-grid);
+  border-radius: 8px;
+  height: clamp(380px, 46vw, 570px);
+  overflow-anchor: none;
+}
+.viewport svg {
+  height: 100% !important;
+  width: 100%;
+}
+.zoom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  color: var(--color-navy);
+  font-size: 0.85rem;
+}
+.zoom input {
+  max-width: 140px;
+  min-width: 50px;
+}
+.zoom button {
+  margin-left: auto;
+}
+.studio input[type="range"] {
+  accent-color: var(--color-navy);
+  height: 30px;
+}
+.unfold {
+  background: var(--color-navy-wash);
+  border-top: 3px solid var(--color-navy);
+  padding: 10px 14px;
+  margin: 0 0 10px;
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(90px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+.unfold[data-enabled="false"] {
+  background: var(--color-paper);
+  border-color: var(--color-grid);
+}
+.unfold label {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  color: var(--color-navy);
+  gap: 10px;
+  font-size: 0.85rem;
+}
+.unfold input {
+  width: 100%;
+  margin: 10px 0;
+}
+.unfold > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.unfold button {
+  padding: 7px 10px;
+  font-size: 0.85rem;
+}
+.faces {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+  height: 112px;
+  overflow: auto;
+}
+.faces button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  padding: 8px 4px;
+}
+.faces button span {
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 50%;
+  width: 23px;
+  height: 23px;
+  line-height: 21px;
+  font-size: 0.8rem;
+}
+.faces button[aria-pressed="true"] {
+  background: var(--color-highlight);
+  border-color: var(--color-navy);
+}
+.diagramNotes {
+  color: var(--color-graphite);
+  font-size: 1rem;
+  line-height: 1.65;
+  margin-top: 12px;
+}
+.diagramNotes p + p {
+  margin-top: 6px;
+}
+.rail {
+  border-left: 1px solid var(--color-grid);
+  padding-left: 24px;
+  min-width: 0;
+}
+.reference {
+  margin: 0 0 18px;
+  background: white;
+  border: 1px solid var(--color-grid);
+  border-radius: 8px;
+  padding: 12px 10px 0;
+}
+.reference svg {
+  height: 180px;
+}
+.reference figcaption {
+  color: var(--color-navy);
+  font-weight: 600;
+}
+.stepNumber {
+  color: var(--color-pencil);
+  font-size: 0.9rem;
+}
+.explanation h2 {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--color-navy);
+  margin: 9px 0 14px;
+}
+.explanation p {
+  line-height: 1.6;
+}
+.explanation blockquote {
+  border-left: 3px solid var(--color-gold);
+  padding-left: 14px;
+  margin: 22px 0;
+  font-size: 1.08rem;
+  font-weight: 500;
+}
+.working {
+  padding: 16px 0 0;
+  font-size: 0.99rem;
+  overflow-x: auto;
+}
+.working ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.working li {
+  margin: 10px 0;
+  line-height: 1.55;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--color-grid);
+}
+.working .answer {
+  font-weight: 600;
+  color: var(--color-navy);
+}
+.working .teachingNote {
+  font-size: 0.87rem;
+  line-height: 1.5;
+}
+.working :global(.katex-display) {
+  text-align: left;
+  margin: 0.65em 0;
+}
+.navigation {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin: 0 0 14px;
+  padding: 8px 0;
+  background: var(--color-paper);
+  border-bottom: 1px solid var(--color-grid);
+  overflow-anchor: none;
+}
+.navigation button {
+  width: 160px;
+  flex: none;
+  font-size: 0.9rem;
+}
+.navigation .stepNumber {
+  min-width: 60px;
+  text-align: center;
+}
+.navigation .workingToggle {
+  margin-right: auto;
+}
+.export {
+  border-top: 1px solid var(--color-grid);
+  margin-top: 26px;
+  padding-top: 20px;
+}
+.export h3 {
+  color: var(--color-navy);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.export > label {
+  font-size: 0.85rem;
+  display: block;
+  margin-bottom: 4px;
+}
+.export select {
+  width: 100%;
+  margin-bottom: 10px;
+}
+.export > div {
+  display: flex;
+  gap: 8px;
+}
+.export button {
+  flex: 1;
+  font-size: 0.9rem;
+  padding: 8px;
+}
+.export p {
+  font-size: 0.83rem;
+  color: var(--color-pencil);
+  line-height: 1.5;
+  margin-top: 10px;
+}
+.export [role="status"] {
+  color: var(--color-navy);
+  min-height: 1.5em;
+}
+.clean {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: white;
+  overflow: auto;
+  padding: 70px 20px 20px;
+}
+.clean > button {
+  position: fixed;
+  right: 20px;
+  top: 15px;
+  z-index: 1;
+}
+.clean > div {
+  max-width: 1100px;
+  margin: auto;
+}
+.studio[data-presenting] .workspace {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+.studio[data-presenting] .explanation {
+  font-size: 1.15rem;
+}
+@media (min-width: 1600px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) 350px;
+    gap: 32px;
+  }
+}
+@media (max-width: 1000px) {
+  .workspace,
+  .studio[data-presenting] .workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rail {
+    border-left: 0;
+    padding-left: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 30px;
+  }
+  .explanation {
+    grid-row: span 2;
+  }
+  .navigation {
+    margin: 0;
+    align-self: start;
+  }
+  .export {
+    margin: 0;
+  }
+  .steps button {
+    flex-direction: column;
+    text-align: center;
+    font-size: 0.83rem;
+    padding: 8px 3px;
+  }
+}
+@media (max-width: 600px) {
+  .intro {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .intro p {
+    font-size: 1rem;
+  }
+  .intro button {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .steps {
+    display: flex;
+    overflow: auto;
+    padding-bottom: 5px;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .steps button {
+    min-width: 106px;
+    flex-direction: row;
+    text-align: left;
+  }
+  .boardTools {
+    align-items: flex-start;
+  }
+  .boardTools > div {
+    gap: 5px;
+    flex-direction: column;
+  }
+  .boardTools label {
+    font-size: 0.85rem;
+  }
+  .viewport {
+    margin: 0 -7px;
+    height: 480px;
+  }
+  .unfold {
+    grid-template-columns: 1fr auto;
+    gap: 4px 10px;
+  }
+  .unfold label {
+    grid-column: 1 / -1;
+  }
+  .zoom {
+    gap: 7px;
+  }
+  .zoom input {
+    max-width: 100px;
+  }
+  .zoom label {
+    font-size: 0.78rem;
+  }
+  .faces {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .faces button {
+    font-size: 0.95rem;
+  }
+  .rail {
+    display: block;
+  }
+  .reference {
+    max-width: 320px;
+    margin: 0 auto 20px;
+  }
+  .explanation h2 {
+    font-size: 1.5rem;
+  }
+  .explanation p,
+  .explanation blockquote {
+    font-size: 1.05rem;
+  }
+  .navigation {
+    margin: 0 0 12px;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .navigation button {
+    width: auto;
+    flex: 1;
+    padding: 8px;
+  }
+  .navigation .stepNumber {
+    display: none;
+  }
+  .export {
+    margin-top: 22px;
+  }
+  .clean {
+    padding: 70px 5px 10px;
+  }
+  .working {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 1001px) {
+  :global([data-presentation="true"] .studio-app-frame):has(.studio) {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  :global([data-presentation="true"] .studio-app-frame):has(.studio)
+    > div:first-child
+    h1 {
+    margin-top: 0;
+    font-size: 1.75rem;
+  }
+  :global([data-presentation="true"] .studio-app-frame):has(.studio)
+    > div:first-child
+    p {
+    display: none;
+  }
+  :global([data-presentation="true"] .studio-app-frame):has(.studio)
+    > div:nth-child(2) {
+    margin-top: 10px;
+  }
+  .studio[data-presenting] .intro {
+    margin-bottom: 10px;
+  }
+  .studio[data-presenting] .intro p {
+    display: none;
+  }
+  .studio[data-presenting] .steps {
+    margin-bottom: 12px;
+  }
+  .studio[data-presenting] .workspace {
+    height: calc(100dvh - 305px);
+    min-height: 450px;
+  }
+  .studio[data-presenting] .boardColumn {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .studio[data-presenting] .viewport {
+    flex: 1;
+    min-height: 230px;
+    flex-shrink: 0;
+  }
+  .studio[data-presenting] .faces {
+    height: 100px;
+    flex: 0 0 100px;
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .studio[data-presenting] .diagramNotes {
+    font-size: 1.1rem;
+  }
+  .studio[data-presenting] .rail {
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 8px;
+  }
+  .studio[data-presenting] .unfold {
+    display: grid;
+    grid-template-columns: minmax(130px, 1fr) minmax(80px, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    margin: 0 0 8px;
+    font-size: 0.85rem;
+  }
+  .studio[data-presenting] .unfold input {
+    margin: 0;
+  }
+  .studio[data-presenting] .unfold label {
+    gap: 10px;
+  }
+  .studio[data-presenting] .reference svg {
+    height: 160px;
+  }
+  .studio[data-presenting][data-working] .explanation p,
+  .studio[data-presenting][data-working] .explanation blockquote {
+    display: none;
+  }
+  .studio[data-presenting][data-working] .working p {
+    display: block;
+  }
+  .studio[data-presenting] .explanation .stepNumber {
+    display: none;
+  }
+  .studio[data-presenting] .working {
+    padding-top: 8px;
+  }
+  .studio[data-presenting] .explanation h2 {
+    font-size: 1.5rem;
+  }
+  .studio[data-presenting] .explanation p,
+  .studio[data-presenting] .explanation blockquote {
+    font-size: 1rem;
+    margin: 10px 0;
+  }
+}

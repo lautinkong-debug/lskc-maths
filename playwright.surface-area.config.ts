@@ -1,0 +1,23 @@
+import { defineConfig } from "@playwright/test";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+export default defineConfig({
+  testDir: "./tests/e2e",
+  testMatch: [
+    "surface-area.spec.ts",
+    "surface-area-bank.spec.ts",
+    "surface-area-classroom.spec.ts",
+  ],
+  // Chrome downloads complete in the Windows temporary folder. The protected
+  // repository artifact folder can report completion but deny file reads.
+  outputDir: join(tmpdir(), "lskc-surface-area-playwright"),
+  workers: 1,
+  reporter: "list",
+  timeout: 60_000,
+  expect: { timeout: 15_000 },
+  use: {
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3004",
+    channel: "chrome",
+    headless: true,
+  },
+});

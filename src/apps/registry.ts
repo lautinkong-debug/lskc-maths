@@ -8,6 +8,7 @@ import DirectedNumbersThumbnail from "./directed-numbers/Thumbnail";
 import StatisticalChartsThumbnail from "./statistical-charts/Thumbnail";
 import SimilarityThumbnail from "./similarity/Thumbnail";
 import CongruenceThumbnail from "./congruence/Thumbnail";
+import SurfaceAreaThumbnail from "./surface-area/Thumbnail";
 
 export interface AppEntry {
   slug: string;
@@ -24,6 +25,17 @@ export interface AppEntry {
 
 /** The index and detail route both use this list. New apps register here. */
 export const appRegistry: readonly AppEntry[] = [
+  {
+    slug: "surface-area",
+    topicCodes: ["1A09"],
+    title: copy.surfaceArea.title,
+    topic: copy.surfaceArea.topic,
+    levels: ["F1"],
+    strand: "measures-shape-space",
+    summary: copy.surfaceArea.summary,
+    thumbnail: SurfaceAreaThumbnail,
+    load: () => import("./surface-area"),
+  },
   {
     slug: "congruence",
     topicCodes: ["2A05"],
