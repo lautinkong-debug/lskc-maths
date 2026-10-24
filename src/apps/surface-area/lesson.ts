@@ -25,6 +25,22 @@ export function stepsFor(variant: SurfaceVariant) {
             prompt: c.openPrompt,
           };
         if (i === 1 && g.holes?.length) return { ...s, hint: c.hollowHint };
+        if (g.water && i === 2)
+          return {
+            ...s,
+            hint:
+              variant.target === "increase"
+                ? c.bandUnfoldHint
+                : c.wetUnfoldHint,
+          };
+        if (g.water && i === 3)
+          return {
+            ...s,
+            hint:
+              variant.target === "increase"
+                ? c.bandRectangleHint
+                : c.wetRectangleHint,
+          };
         if (i === 3 && (g.holes?.length || g.omittedEdges?.length))
           return {
             ...s,

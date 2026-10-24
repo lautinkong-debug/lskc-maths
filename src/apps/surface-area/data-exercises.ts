@@ -663,6 +663,7 @@ export const exerciseQuestions: SurfaceQuestion[] = [
           height: 7.5,
           heightLabel: "Water depth",
           heightName: "Water depth",
+          water: { tankHeight: 20, closed: true, afterRotation: true },
           baseArea: 192,
           baseCount: 1,
         },

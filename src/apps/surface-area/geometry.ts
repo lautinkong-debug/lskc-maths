@@ -222,7 +222,13 @@ export function givenFacts(v: SurfaceVariant): string[] {
       ? [`Given base perimeter P = ${number(g.perimeterGiven)} ${v.unit}`]
       : []),
     ...(g.kind === "prism" && g.heightName && g.heightName.length > 3
-      ? [`H represents ${g.heightName.toLowerCase()}.`]
+      ? [
+          g.water
+            ? v.target === "increase"
+              ? "Unfolded strip height H = rise Δd."
+              : "Unfolded strip height H = water depth d."
+            : `H represents ${g.heightName.toLowerCase()}.`,
+        ]
       : []),
   ];
 }

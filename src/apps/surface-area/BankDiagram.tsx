@@ -1,6 +1,7 @@
 import { useId, type Ref } from "react";
 import { copy } from "@/lib/copy";
 import { stepsFor } from "./lesson";
+import { WaterTank } from "./WaterTank";
 import {
   boundaries,
   boundaryEdges,
@@ -60,6 +61,25 @@ function labelBox({ p, text, size = 21, anchor = "middle" }: LabelSpec): Box {
 }
 const overlaps = (a: Box, b: Box) =>
   a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+type FlatWidthLabel = { face: number; x: number; text: string };
+function dimensionLanes(items: FlatWidthLabel[]) {
+  const ordered = [...items].sort((a, b) => a.x - b.x);
+  for (let rows = 1; rows <= Math.max(1, ordered.length); rows++) {
+    const ends = Array(rows).fill(-Infinity) as number[];
+    const placements = ordered.map((item, i) => ({ ...item, row: i % rows }));
+    const fits = placements.every((item) => {
+      const box = labelBox({ p: { x: item.x, y: 0 }, text: item.text });
+      if (box.x < ends[item.row] + 8) return false;
+      ends[item.row] = box.x + box.w;
+      return true;
+    });
+    if (fits) return { rows, placements };
+  }
+  return {
+    rows: ordered.length,
+    placements: ordered.map((item, row) => ({ ...item, row })),
+  };
+}
 const poly = (points: Point[]) => points.map((p) => `${p.x},${p.y}`).join(" ");
 export function needsLegend(variant: SurfaceVariant) {
   if (variant.geometry.kind === "cubes") return false;
@@ -213,13 +233,34 @@ function Prism({
     w: box.w + 150,
     h: box.h + 80,
   };
-  const flatPoints = loopsAt(1).flatMap((loop) => [...loop.b, ...loop.t]);
-  const fullFlatFit = fitter(flatPoints, box);
-  const flatBottom = Math.max(...flatPoints.map((p) => fullFlatFit(p).y));
-  const flatHeight =
-    fs.some((face) => face.label) && flatBottom > bounds.y + bounds.h - 90
-      ? Math.max(45, Math.min(box.h, bounds.y + bounds.h - box.y - 90))
-      : box.h;
+  const flatLoops = loopsAt(1);
+  const flatPoints = flatLoops.flatMap((loop) => [...loop.b, ...loop.t]);
+  const lanePlan = (at: (p: Point) => Point) =>
+    dimensionLanes(
+      fs
+        .filter((face) => face.label)
+        .map((face) => {
+          const loop = flatLoops[face.ring].b,
+            a = at(loop[face.edge]),
+            b = at(loop[face.edge + 1]);
+          return { face: face.index, x: (a.x + b.x) / 2, text: face.label };
+        }),
+    );
+  let flatHeight = box.h;
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const at = fitter(flatPoints, { ...box, h: flatHeight });
+    const rows = lanePlan(at).rows;
+    const bottom = Math.max(...flatPoints.map((p) => at(p).y));
+    const band = rows * 34 + 20;
+    if (!fs.some((face) => face.label) || bottom + band <= bounds.y + bounds.h)
+      break;
+    const next = Math.max(
+      45,
+      Math.min(flatHeight, bounds.y + bounds.h - box.y - band),
+    );
+    if (next === flatHeight) break;
+    flatHeight = next;
+  }
   const fit = fitter(
     loops.flatMap((loop) => [...loop.b, ...loop.t]),
     { ...box, h: box.h + (flatHeight - box.h) * progress },
@@ -258,12 +299,19 @@ function Prism({
     (best, edge) => (edge.b.x > best.b.x ? edge : best),
     all[0],
   );
-  const heightName =
-    (g.heightName?.length ?? 0) <= 3 ? (g.heightName ?? "H") : "H";
+  const heightName = g.water
+    ? "H"
+    : (g.heightName?.length ?? 0) <= 3
+      ? (g.heightName ?? "H")
+      : "H";
   const heightValue =
-    !solved && g.heightLabel
-      ? g.heightLabel
-      : `${number(g.height)} ${variant.unit}`;
+    !solved && g.water
+      ? variant.target === "increase"
+        ? "Δd"
+        : "d"
+      : !solved && g.heightLabel
+        ? g.heightLabel
+        : `${number(g.height)} ${variant.unit}`;
   const heightText =
     heightValue === heightName ? heightName : `${heightName} = ${heightValue}`;
   const occupied: Box[] = [];
@@ -396,7 +444,12 @@ function Prism({
     h: bounds.y + bounds.h - labelTop,
   };
   const annotationPoints = mapped.map((loop) => (flat ? loop.b : loop.t));
-  const annotations: { p: Point; from: Point; text: string }[] = [];
+  const annotations: { p: Point; from: Point; text: string; face: number }[] =
+    [];
+  const flatLanePlan = flat ? lanePlan(fit) : null;
+  const stripBottom = Math.max(
+    ...mapped.flatMap((loop) => loop.b.map((p) => p.y)),
+  );
   fs.forEach((face) => {
     if (!dimensions || !face.label) return;
     const loop = annotationPoints[face.ring],
@@ -406,6 +459,18 @@ function Prism({
       length = Math.hypot(d.x, d.y);
     if (length < 0.01) return;
     const from = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
+    if (flatLanePlan) {
+      const lane = flatLanePlan.placements.find(
+        (item) => item.face === face.index,
+      )!;
+      annotations.push({
+        from,
+        p: { x: from.x, y: stripBottom + 32 + lane.row * 34 },
+        text: face.label,
+        face: face.index,
+      });
+      return;
+    }
     const preferred = {
       x: from.x + (flat ? 0 : -d.y / length) * 28,
       y: from.y + (flat ? 1 : d.x / length) * 28 + 7,
@@ -443,7 +508,7 @@ function Prism({
         }
     }
     reserve({ p: position, text: face.label });
-    annotations.push({ p: position, from, text: face.label });
+    annotations.push({ p: position, from, text: face.label, face: face.index });
   });
   return (
     <g data-projection="parallel" data-unfold={progress}>
@@ -479,7 +544,11 @@ function Prism({
                   ? "none"
                   : active
                     ? gold
-                    : palette[face.index % palette.length]
+                    : g.water
+                      ? variant.target === "increase"
+                        ? "#f2ce50"
+                        : "#46a9d4"
+                      : palette[face.index % palette.length]
               }
               fillOpacity="1"
               stroke={face.omitted ? "var(--color-pencil)" : navy}
@@ -603,19 +672,51 @@ function Prism({
             </g>
           );
         })()}
-      {annotations.map((annotation, i) => (
-        <g key={`dimension-${i}`} data-dimension-label="true">
-          <line
-            x1={annotation.from.x}
-            y1={annotation.from.y}
-            x2={annotation.p.x}
-            y2={annotation.p.y - 7}
-            stroke="var(--color-pencil)"
-            strokeWidth="1"
-          />
-          <Label p={annotation.p} text={annotation.text} size={21} />
-        </g>
-      ))}
+      {annotations.map((annotation, i) => {
+        // Keep leaders vertical and leave gaps around text on earlier lanes.
+        const end = annotation.p.y - (flat ? 25 : 7);
+        const segments: [number, number][] = [];
+        if (flat) {
+          let cursor = annotation.from.y;
+          const blockers = annotations
+            .filter((other) => other !== annotation)
+            .map(labelBox)
+            .filter(
+              (rect) =>
+                annotation.from.x >= rect.x - 2 &&
+                annotation.from.x <= rect.x + rect.w + 2,
+            )
+            .sort((a, b) => a.y - b.y);
+          blockers.forEach((rect) => {
+            const top = Math.max(annotation.from.y, rect.y - 2),
+              bottom = Math.min(end, rect.y + rect.h + 2);
+            if (bottom <= cursor || top >= end) return;
+            if (top > cursor) segments.push([cursor, top]);
+            cursor = Math.max(cursor, bottom);
+          });
+          if (cursor < end) segments.push([cursor, end]);
+        } else segments.push([annotation.from.y, end]);
+        return (
+          <g
+            key={`dimension-${i}`}
+            data-dimension-label="true"
+            data-dimension-face={annotation.face}
+          >
+            {segments.map(([start, end], j) => (
+              <line
+                key={j}
+                x1={annotation.from.x}
+                y1={start}
+                x2={annotation.p.x}
+                y2={end}
+                stroke="var(--color-pencil)"
+                strokeWidth="1"
+              />
+            ))}
+            <Label p={annotation.p} text={annotation.text} size={21} />
+          </g>
+        );
+      })}
       {dimensions && (
         <g>
           <path
@@ -878,6 +979,13 @@ function Cubes({
   );
 }
 function Shape(props: ShapeProps) {
+  if (
+    props.variant.geometry.kind === "prism" &&
+    props.variant.geometry.water &&
+    props.progress < 0.001 &&
+    props.caps
+  )
+    return <WaterTank {...props} />;
   return props.variant.geometry.kind === "cubes" ? (
     <Cubes {...props} />
   ) : (
@@ -908,7 +1016,7 @@ function Base({
     <g>
       <path
         d={path}
-        fill={gold}
+        fill={g.water ? "#46a9d4" : gold}
         fillOpacity=".5"
         fillRule="evenodd"
         stroke={navy}

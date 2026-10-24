@@ -14,6 +14,15 @@ export type PrismGeometry = {
   height: number;
   heightLabel?: string;
   heightName?: string;
+  /** Full tank context; height above remains the wet depth (or new wet band). */
+  water?: {
+    tankHeight?: number;
+    initialDepth?: number;
+    initialLabel?: string;
+    contents?: "stones" | "balls";
+    closed?: boolean;
+    afterRotation?: boolean;
+  };
   /** Use when only P is supplied. Individual edge dimensions are not implied. */
   perimeterGiven?: number;
   schematic?: boolean;

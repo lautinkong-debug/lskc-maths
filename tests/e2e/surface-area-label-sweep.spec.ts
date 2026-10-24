@@ -28,20 +28,46 @@ test("every prism keeps dimension text inside the teaching canvas", async ({
           [4, 100],
         ]) {
           await steps.nth(stage).click();
-          if (stage === 2)
+          await expect(steps.nth(stage)).toHaveAttribute(
+            "aria-current",
+            "step",
+          );
+          if (stage === 2) {
+            await expect(lesson.locator("#surface-unfold")).toBeEnabled();
             await lesson.locator("#surface-unfold").fill(String(progress));
+          }
           const defects = await lesson
             .getByTestId("surface-diagram")
             .first()
             .evaluate((node) => {
               const svg = node as SVGSVGElement;
               const frame = svg.viewBox.baseVal;
+              const inSvg = (element: SVGGraphicsElement) => {
+                const box = element.getBBox(),
+                  root = svg.getScreenCTM()!,
+                  current = element.getScreenCTM()!;
+                const transform = root.inverse().multiply(current);
+                const corners = [
+                  new DOMPoint(box.x, box.y),
+                  new DOMPoint(box.x + box.width, box.y),
+                  new DOMPoint(box.x, box.y + box.height),
+                  new DOMPoint(box.x + box.width, box.y + box.height),
+                ].map((point) => point.matrixTransform(transform));
+                const xs = corners.map((p) => p.x),
+                  ys = corners.map((p) => p.y);
+                return {
+                  x: Math.min(...xs),
+                  y: Math.min(...ys),
+                  width: Math.max(...xs) - Math.min(...xs),
+                  height: Math.max(...ys) - Math.min(...ys),
+                };
+              };
               const texts = [
                 ...svg.querySelectorAll<SVGTextElement>("text"),
               ].filter((t) => t.textContent?.trim());
               const outside = texts
                 .filter((t) => {
-                  const b = t.getBBox();
+                  const b = inSvg(t);
                   return (
                     b.x < -1 ||
                     b.y < -1 ||
@@ -59,8 +85,8 @@ test("every prism keeps dimension text inside the teaching canvas", async ({
                 texts
                   .filter((other) => {
                     if (other === label) return false;
-                    const a = label.getBBox(),
-                      b = other.getBBox();
+                    const a = inSvg(label),
+                      b = inSvg(other);
                     return (
                       Math.min(a.x + a.width, b.x + b.width) -
                         Math.max(a.x, b.x) >
@@ -79,13 +105,13 @@ test("every prism keeps dimension text inside the teaching canvas", async ({
               ];
               const flatBottom = Math.max(
                 ...flatFaces.map((face) => {
-                  const b = face.getBBox();
+                  const b = inSvg(face);
                   return b.y + b.height;
                 }),
               );
               const aboveFlatStrip = flatFaces.length
                 ? labels
-                    .filter((label) => label.getBBox().y < flatBottom - 1)
+                    .filter((label) => inSvg(label).y < flatBottom - 1)
                     .map((label) => label.textContent)
                 : [];
               return { outside, clashes, aboveFlatStrip };

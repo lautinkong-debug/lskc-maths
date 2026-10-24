@@ -217,7 +217,25 @@ test("teaching labels remain inside the diagram across representative solids", a
                   getComputedStyle(node).visibility === "hidden"
                 )
                   return false;
-                const box = node.getBBox();
+                const local = node.getBBox();
+                const matrix = (svg as SVGSVGElement)
+                  .getScreenCTM()!
+                  .inverse()
+                  .multiply(node.getScreenCTM()!);
+                const corners = [
+                  new DOMPoint(local.x, local.y),
+                  new DOMPoint(local.x + local.width, local.y),
+                  new DOMPoint(local.x, local.y + local.height),
+                  new DOMPoint(local.x + local.width, local.y + local.height),
+                ].map((point) => point.matrixTransform(matrix));
+                const xs = corners.map((point) => point.x),
+                  ys = corners.map((point) => point.y);
+                const box = {
+                  x: Math.min(...xs),
+                  y: Math.min(...ys),
+                  width: Math.max(...xs) - Math.min(...xs),
+                  height: Math.max(...ys) - Math.min(...ys),
+                };
                 return (
                   box.width > 0 &&
                   (box.x < bounds.x - 1 ||
