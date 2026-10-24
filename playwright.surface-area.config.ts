@@ -7,6 +7,9 @@ export default defineConfig({
     "surface-area.spec.ts",
     "surface-area-bank.spec.ts",
     "surface-area-classroom.spec.ts",
+    "surface-area-thin-strip.spec.ts",
+    "surface-area-label-layout.spec.ts",
+    "surface-area-label-sweep.spec.ts",
   ],
   // Chrome downloads complete in the Windows temporary folder. The protected
   // repository artifact folder can report completion but deny file reads.

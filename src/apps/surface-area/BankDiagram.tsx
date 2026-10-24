@@ -40,8 +40,26 @@ type ShapeProps = {
   labels: boolean;
   caps: boolean;
   solved: boolean;
+  labelBounds?: Box;
   onSelect?: (i: number) => void;
 };
+type LabelSpec = {
+  p: Point;
+  text: string;
+  size?: number;
+  anchor?: "middle" | "start" | "end";
+};
+function labelBox({ p, text, size = 21, anchor = "middle" }: LabelSpec): Box {
+  const w = text.length * size * 0.66 + 6;
+  return {
+    x: p.x - (anchor === "start" ? 3 : anchor === "end" ? w - 3 : w / 2),
+    y: p.y - size - 3,
+    w,
+    h: size * 1.3 + 6,
+  };
+}
+const overlaps = (a: Box, b: Box) =>
+  a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 const poly = (points: Point[]) => points.map((p) => `${p.x},${p.y}`).join(" ");
 export function needsLegend(variant: SurfaceVariant) {
   if (variant.geometry.kind === "cubes") return false;
@@ -147,6 +165,7 @@ function Prism({
   labels,
   caps,
   solved,
+  labelBounds,
   onSelect,
 }: ShapeProps) {
   const g = variant.geometry as PrismGeometry;
@@ -186,9 +205,24 @@ function Prism({
       };
     });
   const loops = loopsAt(progress);
+  // Make room for individual widths below the strip, without changing its
+  // proportions or jumping in size at the final slider position.
+  const bounds = labelBounds ?? {
+    x: Math.max(10, box.x - 40),
+    y: Math.max(70, box.y - 35),
+    w: box.w + 150,
+    h: box.h + 80,
+  };
+  const flatPoints = loopsAt(1).flatMap((loop) => [...loop.b, ...loop.t]);
+  const fullFlatFit = fitter(flatPoints, box);
+  const flatBottom = Math.max(...flatPoints.map((p) => fullFlatFit(p).y));
+  const flatHeight =
+    fs.some((face) => face.label) && flatBottom > bounds.y + bounds.h - 90
+      ? Math.max(45, Math.min(box.h, bounds.y + bounds.h - box.y - 90))
+      : box.h;
   const fit = fitter(
     loops.flatMap((loop) => [...loop.b, ...loop.t]),
-    box,
+    { ...box, h: box.h + (flatHeight - box.h) * progress },
   );
   const mapped = loops.map((loop) => ({
     b: loop.b.map(fit),
@@ -201,7 +235,6 @@ function Prism({
   const folded = progress < 0.001,
     flat = progress > 0.999;
   const capCount = g.baseCount || (variant.target === "lateral" ? 2 : 0);
-  const showAll = !needsLegend(variant);
   const faceViews = fs
     .map((face) => {
       const loop = mapped[face.ring],
@@ -233,18 +266,139 @@ function Prism({
       : `${number(g.height)} ${variant.unit}`;
   const heightText =
     heightValue === heightName ? heightName : `${heightName} = ${heightValue}`;
-  const annotationPoints = folded
-    ? mapped.map((loop) => loop.t)
-    : mapped.map((loop) => loop.b);
+  const occupied: Box[] = [];
+  const reserve = (label: LabelSpec) => occupied.push(labelBox(label));
+  // Dimensions stay outside the flat faces so small panels remain visible.
+  if (flat) {
+    faceViews.forEach(({ points }) => {
+      const xs = points.map((p) => p.x),
+        ys = points.map((p) => p.y);
+      occupied.push({
+        x: Math.min(...xs),
+        y: Math.min(...ys),
+        w: Math.max(...xs) - Math.min(...xs),
+        h: Math.max(...ys) - Math.min(...ys),
+      });
+    });
+  }
+  if (labels) {
+    faceViews.forEach(({ points, visible, face }) => {
+      if (
+        (folded && !visible) ||
+        Math.abs(points[1].x - points[0].x) <= 24 ||
+        Math.abs(points[3].y - points[0].y) <= 32
+      )
+        return;
+      reserve({
+        p: {
+          x: points.reduce((sum, p) => sum + p.x, 0) / 4,
+          y: points.reduce((sum, p) => sum + p.y, 0) / 4 + 7,
+        },
+        text: face.omitted ? "×" : String(face.index + 1),
+        size: 22,
+      });
+    });
+    if (folded)
+      bs.forEach((boundary, ring) => {
+        if (!boundary.vertexNames) return;
+        const vertices = mapped[ring].t.slice(0, -1);
+        const centre = {
+          x: vertices.reduce((sum, p) => sum + p.x, 0) / vertices.length,
+          y: vertices.reduce((sum, p) => sum + p.y, 0) / vertices.length,
+        };
+        vertices.forEach((point, i) =>
+          reserve({
+            p: {
+              x: point.x + (point.x < centre.x ? -15 : 15),
+              y: point.y + (point.y < centre.y ? -12 : 22),
+            },
+            text: boundary.vertexNames![i],
+            size: 19,
+          }),
+        );
+      });
+  }
+  if (folded && caps && dimensions && !g.schematic)
+    bs.forEach((boundary) => {
+      boundary.measurements?.forEach((measurement) => {
+        const a = fit(
+            project(
+              { x: measurement.a.x * scale, y: measurement.a.y * scale },
+              g.height,
+            ),
+          ),
+          b = fit(
+            project(
+              { x: measurement.b.x * scale, y: measurement.b.y * scale },
+              g.height,
+            ),
+          );
+        reserve({
+          p: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 - 10 },
+          text: measurement.label,
+          size: 18,
+        });
+      });
+    });
+  if (dimensions) {
+    wrap(heightText, box.w < 350 ? 12 : 16).forEach((text, i, lines) =>
+      reserve({
+        p: {
+          x: heightEdge.b.x + 38,
+          y:
+            (heightEdge.b.y + heightEdge.t.y) / 2 +
+            7 +
+            (i - (lines.length - 1) / 2) * 24,
+        },
+        text,
+        anchor: "start",
+      }),
+    );
+    if (flat)
+      mapped.forEach((loop, ring) => {
+        const p = loop.t[0],
+          q = loop.t.at(-1)!;
+        const text = g.omittedEdges?.length
+          ? c.missingStrip
+          : g.perimeterGiven !== undefined
+            ? `P = ${number(g.perimeterGiven)} ${variant.unit}`
+            : ring
+              ? c.innerBoundary
+              : g.holes?.length
+                ? c.outerBoundary
+                : c.basePerimeter;
+        const lines = wrap(
+          text,
+          Math.max(8, Math.floor(Math.abs(q.x - p.x) / 12)),
+        );
+        lines.forEach((text, i) =>
+          reserve({
+            p: {
+              x: (p.x + q.x) / 2,
+              y: p.y - 34 - (lines.length - 1 - i) * 26,
+            },
+            text,
+            size: 22,
+          }),
+        );
+      });
+  }
+  // Width labels belong below the flat panels, never above the P bracket.
+  const labelTop = flat
+    ? Math.max(
+        bounds.y,
+        ...mapped.flatMap((loop) => loop.b.map((p) => p.y + 8)),
+      )
+    : bounds.y;
+  const annotationBounds = {
+    ...bounds,
+    y: labelTop,
+    h: bounds.y + bounds.h - labelTop,
+  };
+  const annotationPoints = mapped.map((loop) => (flat ? loop.b : loop.t));
   const annotations: { p: Point; from: Point; text: string }[] = [];
   fs.forEach((face) => {
-    if (
-      !dimensions ||
-      !face.label ||
-      (!showAll && selected !== face.index) ||
-      (!folded && !flat && selected !== face.index)
-    )
-      return;
+    if (!dimensions || !face.label) return;
     const loop = annotationPoints[face.ring],
       p = loop[face.edge],
       q = loop[face.edge + 1];
@@ -252,33 +406,43 @@ function Prism({
       length = Math.hypot(d.x, d.y);
     if (length < 0.01) return;
     const from = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 };
-    const position = {
+    const preferred = {
       x: from.x + (flat ? 0 : -d.y / length) * 28,
       y: from.y + (flat ? 1 : d.x / length) * 28 + 7,
     };
-    for (let attempt = 0; attempt < 6; attempt++) {
-      const collision =
-        annotations.some(
-          (other) =>
-            Math.abs(other.p.y - position.y) < 24 &&
-            Math.abs(other.p.x - position.x) <
-              (other.text.length + face.label.length) * 5.5 + 8,
-        ) ||
-        (labels &&
-          faceViews.some(({ points, visible }) => {
-            if (folded && !visible) return false;
-            const middle = {
-              x: points.reduce((sum, p) => sum + p.x, 0) / 4,
-              y: points.reduce((sum, p) => sum + p.y, 0) / 4 + 7,
-            };
-            return (
-              Math.abs(middle.y - position.y) < 27 &&
-              Math.abs(middle.x - position.x) < face.label.length * 6 + 18
-            );
-          }));
-      if (!collision) break;
-      position.y += flat ? 27 : position.y < box.y + box.h / 2 ? -27 : 27;
+    const fits = (p: Point) => {
+      const rect = labelBox({ p, text: face.label });
+      return (
+        rect.x >= annotationBounds.x &&
+        rect.y >= annotationBounds.y &&
+        rect.x + rect.w <= annotationBounds.x + annotationBounds.w &&
+        rect.y + rect.h <= annotationBounds.y + annotationBounds.h &&
+        !occupied.some((other) => overlaps(rect, other))
+      );
+    };
+    let position = preferred;
+    if (!fits(position)) {
+      let best = Infinity;
+      for (
+        let y = annotationBounds.y + 25;
+        y < annotationBounds.y + annotationBounds.h - 8;
+        y += 12
+      )
+        for (
+          let x = annotationBounds.x + 25;
+          x < annotationBounds.x + annotationBounds.w - 25;
+          x += 12
+        ) {
+          const p = { x, y };
+          if (!fits(p)) continue;
+          const score = Math.hypot(x - preferred.x, y - preferred.y);
+          if (score < best) {
+            best = score;
+            position = p;
+          }
+        }
     }
+    reserve({ p: position, text: face.label });
     annotations.push({ p: position, from, text: face.label });
   });
   return (
@@ -300,6 +464,7 @@ function Prism({
           y: points.reduce((sum, p) => sum + p.y, 0) / 4 + 7,
         };
         const width = Math.abs(points[1].x - points[0].x);
+        const height = Math.abs(points[3].y - points[0].y);
         return (
           <g
             key={face.index}
@@ -335,7 +500,7 @@ function Prism({
               }}
               style={{ cursor: onSelect ? "pointer" : undefined }}
             />
-            {labels && (!folded || visible) && width > 24 && (
+            {labels && (!folded || visible) && width > 24 && height > 32 && (
               <Label
                 p={mid}
                 text={face.omitted ? "×" : String(face.index + 1)}
@@ -490,19 +655,29 @@ function Prism({
                 : g.holes?.length
                   ? c.outerBoundary
                   : c.basePerimeter;
+          const captionLines = wrap(
+            text,
+            Math.max(8, Math.floor(Math.abs(q.x - p.x) / 12)),
+          );
           return (
-            <g key={ring}>
+            <g key={ring} data-boundary-caption={ring}>
               <path
                 d={`M${p.x},${p.y - 12} v-10 H${q.x} v10`}
                 fill="none"
                 stroke={navy}
                 strokeWidth="1.7"
               />
-              <Label
-                p={{ x: (p.x + q.x) / 2, y: p.y - 34 }}
-                text={text}
-                size={22}
-              />
+              {captionLines.map((line, i) => (
+                <Label
+                  key={i}
+                  p={{
+                    x: (p.x + q.x) / 2,
+                    y: p.y - 34 - (captionLines.length - 1 - i) * 26,
+                  }}
+                  text={line}
+                  size={22}
+                />
+              ))}
             </g>
           );
         })}
@@ -739,11 +914,13 @@ function Base({
         stroke={navy}
         strokeWidth="2"
       />
-      <Label
-        p={{ x: box.x + box.w / 2, y: box.y + box.h + 60 }}
-        text={"B"}
-        size={24}
-      />
+      <g data-base-caption="true">
+        <Label
+          p={{ x: box.x + box.w / 2, y: box.y + box.h + 60 }}
+          text={"B"}
+          size={24}
+        />
+      </g>
       {dimensions &&
         !g.schematic &&
         bs.map((b, i) => <RightAngles key={i} boundary={b} at={at} />)}
@@ -907,7 +1084,7 @@ export default function BankDiagram({
   const live = Boolean(onSelectFace);
   const baseY = comparison ? 1010 : live ? (compact ? 390 : 90) : 470;
   const bodyHeight = comparison
-    ? stage === 4 && baseCount
+    ? (stage === 2 || stage === 4) && baseCount
       ? 1230
       : 970
     : live
@@ -997,6 +1174,7 @@ export default function BankDiagram({
             {...shapeProps}
             progress={0}
             box={{ x: 75, y: 150, w: 510, h: 245 }}
+            labelBounds={{ x: 20, y: 110, w: 760, h: 325 }}
             caps
           />
           <path d="M35 465 H765" stroke="var(--color-grid)" />
@@ -1007,6 +1185,7 @@ export default function BankDiagram({
             {...shapeProps}
             progress={1}
             box={{ x: 70, y: 620, w: 510, h: 240 }}
+            labelBounds={{ x: 20, y: 550, w: 760, h: 370 }}
             caps={false}
           />
         </>
@@ -1024,6 +1203,25 @@ export default function BankDiagram({
           <Shape
             {...shapeProps}
             progress={unfold}
+            labelBounds={{
+              x: 20,
+              y: live ? 70 : 110,
+              w:
+                live && !compact && (stage === 2 || stage === 4)
+                  ? 590
+                  : width - 40,
+              h: live
+                ? compact
+                  ? stage === 2 || stage === 4
+                    ? 250
+                    : 500
+                  : stage === 2
+                    ? 325
+                    : 360
+                : stage === 2
+                  ? 305
+                  : 325,
+            }}
             box={{
               x: live && compact ? 50 : 60,
               y: live ? 105 : 150,
@@ -1070,6 +1268,7 @@ export default function BankDiagram({
         <g>
           {stage === 4 && (
             <text
+              data-base-operator="true"
               x={
                 live && !compact
                   ? 620
@@ -1096,8 +1295,9 @@ export default function BankDiagram({
           {baseCount === 2 && (
             <>
               <text
+                data-base-operator="true"
                 x={live && !compact ? 705 : compact && live ? 250 : 400}
-                y={live && !compact ? 250 : baseY + 65}
+                y={live && !compact ? 278 : baseY + 65}
                 textAnchor="middle"
                 fontSize="30"
                 fill={navy}

@@ -31,7 +31,7 @@ The selector supports section and solid-type filters, text search, source page r
 
 Evidence is in ignored `out/surface-area-bank-preview/` and `out/surface-area-preview/`. The original scanned textbook remains local in ignored `out/surface-area-source/`; app diagrams are reconstructed vectors.
 
-## Release status
+## Status at initial local verification
 
 Local implementation only. No commit, push or deployment was requested or performed. Other tasks' workspace changes are preserved.
 
@@ -54,3 +54,23 @@ Final checks for the correction:
 - **82 focused mathematical checks passed.** The question data and underlying surface-area calculations are unchanged.
 - **29 browser scenarios passed in the final complete run**, including all 69 variants, all ten new classroom regressions, actual PNG/SVG downloads and reopening, responsive layouts, and existing keyboard/touch/reduced-motion controls. The new cases cover stationary clicks at 390/1366/1920px in normal/projection modes, stable diagram bounds, working reveals, restored vertex names, face/measurement collision checks, independent dimension visibility, and text clipping on 390/1366px diagrams.
 - Scoped ESLint, formatting, TypeScript, whitespace checks and the production build passed. The local preview remains `http://localhost:3004/apps/surface-area`; no commit, push or deployment was performed.
+
+## Production release (24/10/2026)
+
+The owner explicitly requested publication to the maths website and Vercel. Commit `aa1d086954320684615a6b7e538f11e92caf7c18` contains only Surface Area Studio, its registry/copy entries, source audit and tests. It was pushed to the existing GitHub `main` branch and triggered the existing Vercel production project. Unrelated polynomial work remains local. The 82 focused mathematical checks passed again before live verification.
+
+Vercel deployment `dpl_6f49YUsEuTyJM9ELBSyaJ5KTNgid` is Ready and aliases `https://lskc-maths.vercel.app`. Its clean production build and TypeScript checks passed. The public app-index entry links to the lesson; both routes return HTTP 200, all 60 presets are present, and the index/lesson audit records no browser errors or emulator requests. All 29 browser scenarios passed across the first run and a focused recheck: one initial navigation was interrupted by `ERR_CONNECTION_CLOSED` before the application loaded; that case passed when rerun. The checks include all 69 variants and actual PNG/SVG exports. Evidence: ignored `out/surface-area-release/`.
+
+Visual inspection of the live 390px hollow-prism view identified an additional readability defect that the earlier checks missed: the outer/inner captions touched, and face numerals were taller than the shallow strips. A teacher reviewer and fixer were assigned to that final correction. Its publication verification is recorded separately below.
+
+The focused correction wraps each boundary caption to the strip's available width and omits interior numerals when a strip is too short to contain them. It retains all numbered face buttons, selected-face highlights, source measurements, formulas and exported legends. The independent teacher review passed the native phone diagram, selected inner face and reopened standalone export. Three focused local browser scenarios passed: the new thin-strip regression (including current/comparison SVG downloads, selection and ordinary taller-panel numerals), existing representative-label clipping, and original-face correspondence. The production follow-up is recorded after publication.
+
+### Perimeter lengths and detached-base spacing
+
+The owner's next screenshot identified Revision Exercise 9 Q26 at Cut and unfold. Its six supplied 3 cm step lengths were hidden by the dense-diagram and partial-unfolding label gates. The two overall 9 cm lengths are calculated values and must remain unrevealed until the teacher reveals working. The detached-base B caption also overlapped the addition sign in the vertical desktop arrangement.
+
+The repair exposes the supplied edge lengths through folding/unfolding and separates the base caption and addition sign without moving the diagram frame or navigation. Bounded leader callouts reserve space for vertex names, altitude measurements, face numbers, the height label and headings. Individual flat-strip widths are placed below the panels, separate from the whole-perimeter bracket above. When space is needed, the whole diagram is fitted uniformly and continuously through unfolding; width and height are never stretched independently.
+
+An independent audit checks every prism at 390/1366px across folded, partly unfolded and flat views (816 views). Its first run found additional dimension collisions with headings, vertex names, altitude measurements and the height label. The bounded-placement rerun passed all 816 views. The strengthened final regression also requires individual widths to remain below the flat strips; all 816 views passed again with zero findings. Results are kept in ignored `out/surface-area-release/label-sweep.json` and `label-sweep-width-band.log`.
+
+Three focused regressions cover the staircase at 390/1366/1920px through every step and 0/50/100% unfolding, B/operator separation across every prism with bases, and real current/comparison SVG and PNG downloads. They also check that the calculated 9 cm lengths appear only after final working is revealed, and that exported base captions remain inside the complete image. Review caught and repaired a pre-existing stage-2 comparison-height omission that clipped the bases. Independent teacher sign-off covers the staircase, Example 9.11, complex notches, hollow prisms and symbolic lengths on phone/desktop screens and exports.
