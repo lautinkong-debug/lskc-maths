@@ -60,6 +60,8 @@ function SurfaceLesson({
   const [showFaces, setShowFaces] = useState(true);
   const [showWorking, setShowWorking] = useState(false);
   const [showWaterDepth, setShowWaterDepth] = useState(false);
+  const [showBasePerimeter, setShowBasePerimeter] = useState(false);
+  const [showBaseArea, setShowBaseArea] = useState(false);
   const [clean, setClean] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [comparison, setComparison] = useState(false);
@@ -114,6 +116,8 @@ function SurfaceLesson({
     setShowDimensions(true);
     setShowFaces(true);
     setShowWaterDepth(false);
+    setShowBasePerimeter(false);
+    setShowBaseArea(false);
     setComparison(false);
   }
   async function save(format: "svg" | "png") {
@@ -142,6 +146,8 @@ function SurfaceLesson({
     showDimensions,
     showFaces,
     revealWaterDepth: showWaterDepth,
+    revealBasePerimeter: showBasePerimeter,
+    revealBaseArea: showBaseArea,
   };
   return (
     <div
@@ -311,6 +317,28 @@ function SurfaceLesson({
                     ? c.showWaterRise
                     : c.showWaterDepth}
                 </label>
+              )}
+              {geometry.kind === "prism" && (
+                <>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={showBasePerimeter}
+                      disabled={!showDimensions}
+                      onChange={(e) => setShowBasePerimeter(e.target.checked)}
+                    />
+                    {c.showBasePerimeter}
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={showBaseArea}
+                      disabled={!showDimensions}
+                      onChange={(e) => setShowBaseArea(e.target.checked)}
+                    />
+                    {c.showBaseArea}
+                  </label>
+                </>
               )}
             </div>
             <button

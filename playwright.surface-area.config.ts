@@ -12,6 +12,7 @@ export default defineConfig({
     "surface-area-label-sweep.spec.ts",
     "surface-area-ordered-dimensions.spec.ts",
     "surface-area-water.spec.ts",
+    "surface-area-values.spec.ts",
   ],
   // Chrome downloads complete in the Windows temporary folder. The protected
   // repository artifact folder can report completion but deny file reads.

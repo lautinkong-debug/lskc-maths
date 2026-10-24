@@ -8,6 +8,7 @@ import {
   edgeScale,
   faces,
   givenFacts,
+  geometryMetrics,
   number,
   teachingLines,
   unfoldBoundary,
@@ -1145,6 +1146,8 @@ export type BankDiagramProps = {
   revealDimensions?: boolean;
   revealWaterDepth?: boolean;
   comparison?: boolean;
+  revealBasePerimeter?: boolean;
+  revealBaseArea?: boolean;
   compact?: boolean;
   onSelectFace?: (i: number) => void;
   svgRef?: Ref<SVGSVGElement>;
@@ -1176,6 +1179,8 @@ export default function BankDiagram({
   showWorking = false,
   revealDimensions = false,
   revealWaterDepth = false,
+  revealBasePerimeter = false,
+  revealBaseArea = false,
   comparison = false,
   compact = false,
   onSelectFace,
@@ -1196,7 +1201,7 @@ export default function BankDiagram({
   const baseCount = g.kind === "prism" ? g.baseCount : 0;
   const live = Boolean(onSelectFace);
   const baseY = comparison ? 1010 : live ? (compact ? 390 : 90) : 470;
-  const bodyHeight = comparison
+  const diagramHeight = comparison
     ? (stage === 2 || stage === 4) && baseCount
       ? 1230
       : 970
@@ -1205,6 +1210,16 @@ export default function BankDiagram({
         ? 620
         : 450
       : 690;
+  // Reserve the value band even while hidden, so a reveal never resizes the diagram.
+  const bodyHeight =
+    diagramHeight +
+    (g.kind === "prism" ? (g.omittedEdges?.length ? 108 : 80) : 0);
+  const metrics = g.kind === "prism" ? geometryMetrics(g) : null;
+  const perimeterValue = metrics ? number(metrics.perimeter) : "";
+  const perimeterRelation =
+    metrics && Math.abs(metrics.perimeter - Number(perimeterValue)) > 1e-8
+      ? "≈"
+      : "=";
   const legend =
     showDimensions && needsLegend(variant)
       ? wrap(
@@ -1430,6 +1445,66 @@ export default function BankDiagram({
                 solved={solved}
               />
             </>
+          )}
+        </g>
+      )}
+      {g.kind === "prism" && metrics && showDimensions && (
+        <g data-base-values="true">
+          {[
+            {
+              show: revealBasePerimeter,
+              key: "perimeter",
+              label: g.holes?.length ? c.allBaseBoundaries : c.basePerimeter,
+              value: `P ${perimeterRelation} ${perimeterValue} ${variant.unit}`,
+            },
+            {
+              show: revealBaseArea,
+              key: "area",
+              label: g.baseCount === 0 ? c.excludedBaseArea : c.oneBaseArea,
+              value: `B = ${number(g.baseArea)} ${variant.unit}²`,
+            },
+          ].map((item, i) =>
+            item.show ? (
+              <g key={item.key} data-base-value={item.key}>
+                <rect
+                  x={20 + (i * width) / 2}
+                  y={diagramHeight + 4}
+                  width={width / 2 - 40}
+                  height={56}
+                  rx={5}
+                  fill="var(--color-navy-wash)"
+                />
+                <text
+                  x={32 + (i * width) / 2}
+                  y={diagramHeight + 23}
+                  fontSize={15}
+                  fill={navy}
+                >
+                  {item.label}
+                </text>
+                <text
+                  x={32 + (i * width) / 2}
+                  y={diagramHeight + 48}
+                  fontSize={22}
+                  fontWeight={600}
+                  fill={navy}
+                >
+                  {item.value}
+                </text>
+              </g>
+            ) : null,
+          )}
+          {revealBasePerimeter && Boolean(g.omittedEdges?.length) && (
+            <text
+              data-retained-widths="true"
+              x={32}
+              y={diagramHeight + 78}
+              fontSize={14}
+              fill={navy}
+            >
+              {c.retainedWidths} = {number(metrics.includedPerimeter)}{" "}
+              {variant.unit} ({c.openingExcluded})
+            </text>
           )}
         </g>
       )}
