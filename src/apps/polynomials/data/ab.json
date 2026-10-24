@@ -1,0 +1,1701 @@
+[
+  {
+    "id": "10A-21a",
+    "bank": "10A",
+    "number": 21,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "a^4*a*b^3",
+    "sourceRect": [0.068, 0.236, 0.39, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Group numerical factors and identical variable bases; the implied index is 1.",
+        "math": "(a^4*a)*b^3"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Multiply the coefficients, then add indices only for the same base.",
+        "math": "a^(4+1)*b^3"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Evaluate each index and retain different bases as separate factors.",
+        "math": "a^5*b^3"
+      }
+    ],
+    "nonzero": [],
+    "answer": "a^5*b^3"
+  },
+  {
+    "id": "10A-21b",
+    "bank": "10A",
+    "number": 21,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "m^2*n^6*m^5*n",
+    "sourceRect": [0.48, 0.236, 0.31, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Group numerical factors and identical variable bases; the implied index is 1.",
+        "math": "(m^2*m^5)*(n^6*n)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Multiply the coefficients, then add indices only for the same base.",
+        "math": "m^(2+5)*n^(6+1)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Evaluate each index and retain different bases as separate factors.",
+        "math": "m^7*n^7"
+      }
+    ],
+    "nonzero": [],
+    "answer": "m^7*n^7"
+  },
+  {
+    "id": "10A-22a",
+    "bank": "10A",
+    "number": 22,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(x*y)*(3*x^4*y^2)",
+    "sourceRect": [0.068, 0.268, 0.39, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Group numerical factors and identical variable bases; the implied index is 1.",
+        "math": "3*(x*x^4)*(y*y^2)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Multiply the coefficients, then add indices only for the same base.",
+        "math": "3*x^(1+4)*y^(1+2)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Evaluate each index and retain different bases as separate factors.",
+        "math": "3*x^5*y^3"
+      }
+    ],
+    "nonzero": [],
+    "answer": "3*x^5*y^3"
+  },
+  {
+    "id": "10A-22b",
+    "bank": "10A",
+    "number": 22,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "-a*b^4*4*a^4*b",
+    "sourceRect": [0.48, 0.268, 0.31, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Group numerical factors and identical variable bases; the implied index is 1.",
+        "math": "(-1*4)*(a*a^4)*(b^4*b)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Multiply the coefficients, then add indices only for the same base.",
+        "math": "-4*a^(1+4)*b^(4+1)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Evaluate each index and retain different bases as separate factors.",
+        "math": "-4*a^5*b^5"
+      }
+    ],
+    "nonzero": [],
+    "answer": "-4*a^5*b^5"
+  },
+  {
+    "id": "10A-23a",
+    "bank": "10A",
+    "number": 23,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(5*x^2*y^3)*(-2*x*y)",
+    "sourceRect": [0.068, 0.299, 0.39, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Group numerical factors and identical variable bases; the implied index is 1.",
+        "math": "(5*(-2))*(x^2*x)*(y^3*y)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Multiply the coefficients, then add indices only for the same base.",
+        "math": "-10*x^(2+1)*y^(3+1)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Evaluate each index and retain different bases as separate factors.",
+        "math": "-10*x^3*y^4"
+      }
+    ],
+    "nonzero": [],
+    "answer": "-10*x^3*y^4"
+  },
+  {
+    "id": "10A-23b",
+    "bank": "10A",
+    "number": 23,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "-4*a^3*b^2*(-3*a*b^5)",
+    "sourceRect": [0.48, 0.299, 0.31, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Group numerical factors and identical variable bases; the implied index is 1.",
+        "math": "((-4)*(-3))*(a^3*a)*(b^2*b^5)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Multiply the coefficients, then add indices only for the same base.",
+        "math": "12*a^(3+1)*b^(2+5)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Evaluate each index and retain different bases as separate factors.",
+        "math": "12*a^4*b^7"
+      }
+    ],
+    "nonzero": [],
+    "answer": "12*a^4*b^7"
+  },
+  {
+    "id": "10A-24a",
+    "bank": "10A",
+    "number": 24,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "m^6/(m^2*n^3)",
+    "sourceRect": [0.068, 0.33, 0.39, 0.045],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "(m^6/m^2)/n^3"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "m^(6-2)/n^3"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "m^4/n^3"
+      }
+    ],
+    "nonzero": ["m", "n"],
+    "answer": "m^4/n^3"
+  },
+  {
+    "id": "10A-24b",
+    "bank": "10A",
+    "number": 24,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(r^8*s^5)/(r^7*s^7)",
+    "sourceRect": [0.48, 0.33, 0.31, 0.045],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "(r^8/r^7)*(s^5/s^7)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "r^(8-7)/s^(7-5)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "r/s^2"
+      }
+    ],
+    "nonzero": ["r", "s"],
+    "answer": "r/s^2"
+  },
+  {
+    "id": "10A-25a",
+    "bank": "10A",
+    "number": 25,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "6*a^2*b^7/(3*a*b^2)",
+    "sourceRect": [0.068, 0.378, 0.39, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "(6/3)*(a^2/a)*(b^7/b^2)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "2*a^(2-1)*b^(7-2)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "2*a*b^5"
+      }
+    ],
+    "nonzero": ["a", "b"],
+    "answer": "2*a*b^5"
+  },
+  {
+    "id": "10A-25b",
+    "bank": "10A",
+    "number": 25,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "-12*x^2*y^4/(48*x*y^3)",
+    "sourceRect": [0.48, 0.378, 0.31, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "(-12/48)*(x^2/x)*(y^4/y^3)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "(-1/4)*x^(2-1)*y^(4-3)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "-x*y/4"
+      }
+    ],
+    "nonzero": ["x", "y"],
+    "answer": "-x*y/4"
+  },
+  {
+    "id": "10A-26a",
+    "bank": "10A",
+    "number": 26,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "24*x*y^4/(6*x^6)",
+    "sourceRect": [0.068, 0.409, 0.39, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "(24/6)*(x/x^6)*y^4"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "4*y^4/x^(6-1)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "4*y^4/x^5"
+      }
+    ],
+    "nonzero": ["x"],
+    "answer": "4*y^4/x^5"
+  },
+  {
+    "id": "10A-26b",
+    "bank": "10A",
+    "number": 26,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "7*a^3*b^8/(-21*a^4*b^3)",
+    "sourceRect": [0.48, 0.409, 0.31, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "(7/(-21))*(a^3/a^4)*(b^8/b^3)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "(-1/3)*b^(8-3)/a^(4-3)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "-b^5/(3*a)"
+      }
+    ],
+    "nonzero": ["a", "b"],
+    "answer": "-b^5/(3*a)"
+  },
+  {
+    "id": "10A-27a",
+    "bank": "10A",
+    "number": 27,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "15*c^2*d^3/(-12*c^6*d^9)",
+    "sourceRect": [0.068, 0.441, 0.39, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "(15/(-12))*(c^2/c^6)*(d^3/d^9)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "(-5/4)/(c^(6-2)*d^(9-3))"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "-5/(4*c^4*d^6)"
+      }
+    ],
+    "nonzero": ["c", "d"],
+    "answer": "-5/(4*c^4*d^6)"
+  },
+  {
+    "id": "10A-27b",
+    "bank": "10A",
+    "number": 27,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "-12*x^4*y^7/(-27*x^12*y^7)",
+    "sourceRect": [0.48, 0.441, 0.31, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "((-12)/(-27))*(x^4/x^12)*(y^7/y^7)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "(4/9)/x^(12-4)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "4/(9*x^8)"
+      }
+    ],
+    "nonzero": ["x", "y"],
+    "answer": "4/(9*x^8)"
+  },
+  {
+    "id": "10A-28a",
+    "bank": "10A",
+    "number": 28,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "4*a^2*b^3*3*a*b^2*(-a*b)",
+    "sourceRect": [0.068, 0.514, 0.39, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Group numerical factors and identical variable bases; the implied index is 1.",
+        "math": "(4*3*(-1))*(a^2*a*a)*(b^3*b^2*b)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Multiply the coefficients, then add indices only for the same base.",
+        "math": "-12*a^(2+1+1)*b^(3+2+1)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Evaluate each index and retain different bases as separate factors.",
+        "math": "-12*a^4*b^6"
+      }
+    ],
+    "nonzero": [],
+    "answer": "-12*a^4*b^6"
+  },
+  {
+    "id": "10A-28b",
+    "bank": "10A",
+    "number": 28,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "5*x^2*y^2*(-2*x^3)/(x^2*y^2)",
+    "sourceRect": [0.48, 0.514, 0.31, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "(5*(-2))*(x^2*x^3/x^2)*(y^2/y^2)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "-10*x^(2+3-2)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "-10*x^3"
+      }
+    ],
+    "nonzero": ["x", "y"],
+    "answer": "-10*x^3"
+  },
+  {
+    "id": "10A-29a",
+    "bank": "10A",
+    "number": 29,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "12*m^3*n^8/(3*m^7*n^2)*(2*m*n)",
+    "sourceRect": [0.068, 0.546, 0.39, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "(12/3*2)*(m^3/m^7*m)*(n^8/n^2*n)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "8*n^(8-2+1)/m^(7-3-1)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "8*n^7/m^3"
+      }
+    ],
+    "nonzero": ["m", "n"],
+    "answer": "8*n^7/m^3"
+  },
+  {
+    "id": "10A-29b",
+    "bank": "10A",
+    "number": 29,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "-16*x*y^7*x^3*y^3/(-12*x^11*y^5)",
+    "sourceRect": [0.48, 0.546, 0.31, 0.035],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "((-16)/(-12))*(x*x^3/x^11)*(y^7*y^3/y^5)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "(4/3)*y^(7+3-5)/x^(11-1-3)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "4*y^5/(3*x^7)"
+      }
+    ],
+    "nonzero": ["x", "y"],
+    "answer": "4*y^5/(3*x^7)"
+  },
+  {
+    "id": "10A-30a",
+    "bank": "10A",
+    "number": 30,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(a*b^2*6*a^4)/(3*b*4*a^2*b^5)",
+    "sourceRect": [0.068, 0.578, 0.39, 0.045],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "(6/(3*4))*(a*a^4/a^2)*(b^2/(b*b^5))"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "(1/2)*a^(1+4-2)/b^(1+5-2)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "a^3/(2*b^4)"
+      }
+    ],
+    "nonzero": ["a", "b"],
+    "answer": "a^3/(2*b^4)"
+  },
+  {
+    "id": "10A-30b",
+    "bank": "10A",
+    "number": 30,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(-y^6*4*x*y)/((-x^4*y^2)*(-8*x^3))",
+    "sourceRect": [0.48, 0.578, 0.31, 0.045],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Separate the numerical coefficient and each variable while preserving the printed operation order.",
+        "math": "((-1)*4/((-1)*(-8)))*(x/(x^4*x^3))*(y^6*y/y^2)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "(-1/2)*y^(6+1-2)/x^(4+3-1)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "-y^5/(2*x^6)"
+      }
+    ],
+    "nonzero": ["x", "y"],
+    "answer": "-y^5/(2*x^6)"
+  },
+  {
+    "id": "10A-31a",
+    "bank": "10A",
+    "number": 31,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "30*m^4/(4*m^3*n^5)/(-5*m*n^2)",
+    "sourceRect": [0.068, 0.625, 0.39, 0.03],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Carry out the two divisions from left to right; both complete monomials are divisors.",
+        "math": "(30/4/(-5))*(m^4/m^3/m)*(1/n^5/n^2)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "(-3/2)/n^(5+2)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "-3/(2*n^7)"
+      }
+    ],
+    "nonzero": ["m", "n"],
+    "answer": "-3/(2*n^7)"
+  },
+  {
+    "id": "10A-31b",
+    "bank": "10A",
+    "number": 31,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "24*a^6*b^7/(-10*a^8*b^2)/(-4*a^3*b)",
+    "sourceRect": [0.48, 0.625, 0.31, 0.03],
+    "steps": [
+      {
+        "title": "Group the factors",
+        "reason": "Carry out the two divisions from left to right; both complete monomials are divisors.",
+        "math": "(24/(-10)/(-4))*(a^6/a^8/a^3)*(b^7/b^2/b)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Reduce the coefficient and subtract denominator indices; equal powers cancel to 1.",
+        "math": "(3/5)*b^(7-2-1)/a^(8+3-6)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Write remaining factors with positive indices; original denominator restrictions still apply.",
+        "math": "3*b^4/(5*a^5)"
+      }
+    ],
+    "nonzero": ["a", "b"],
+    "answer": "3*b^4/(5*a^5)"
+  },
+  {
+    "id": "10A-32a",
+    "bank": "10A",
+    "number": 32,
+    "part": "a",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "18*x^5*y^8/(6*x^4*2*x*y^3)",
+    "sourceRect": [0.068, 0.659, 0.39, 0.045],
+    "steps": [
+      {
+        "title": "Simplify inside brackets",
+        "reason": "Simplify the entire bracketed product or quotient first.",
+        "math": "18*x^5*y^8/(12*x^5*y^3)"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Divide by the complete bracket result; dividing by a fraction multiplies by its reciprocal.",
+        "math": "(18/12)*(x^5/x^5)*y^(8-3)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Cancel identical factors and leave only positive indices.",
+        "math": "3*y^5/2"
+      }
+    ],
+    "nonzero": ["x", "y"],
+    "answer": "3*y^5/2"
+  },
+  {
+    "id": "10A-32b",
+    "bank": "10A",
+    "number": 32,
+    "part": "b",
+    "page": 12,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "8*x*y^2/(7*x^5*y^2/(14*x^3*y^4))",
+    "sourceRect": [0.48, 0.659, 0.31, 0.045],
+    "steps": [
+      {
+        "title": "Simplify inside brackets",
+        "reason": "Simplify the entire bracketed product or quotient first.",
+        "math": "8*x*y^2/(x^2/(2*y^2))"
+      },
+      {
+        "title": "Apply the index laws",
+        "reason": "Divide by the complete bracket result; dividing by a fraction multiplies by its reciprocal.",
+        "math": "8*x*y^2*(2*y^2/x^2)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Cancel identical factors and leave only positive indices.",
+        "math": "16*y^4/x"
+      }
+    ],
+    "nonzero": ["x", "y"],
+    "answer": "16*y^4/x"
+  },
+  {
+    "id": "10B-19a",
+    "bank": "10B",
+    "number": 19,
+    "part": "a",
+    "page": 22,
+    "skill": "terms",
+    "prompt": "Complete the following table.",
+    "expression": "4*d^3-4*b*d-5",
+    "sourceRect": [0.112, 0.408, 0.63, 0.153],
+    "steps": [
+      {
+        "title": "Count the signed terms",
+        "reason": "A minus sign belongs to its term. Count terms separated by addition or subtraction.",
+        "tex": "\\text{Number of terms}=3"
+      },
+      {
+        "title": "Find the constant term",
+        "reason": "The constant term contains no variables; use 0 if no constant term is present.",
+        "tex": "\\text{Constant term}=-5"
+      },
+      {
+        "title": "Find each term degree",
+        "reason": "Add all variable indices within each term; a nonzero constant has degree 0.",
+        "tex": "\\text{Term degrees: }3,\\ 2,\\ 0"
+      },
+      {
+        "title": "Take the greatest degree",
+        "reason": "The degree of a polynomial is the largest total degree among its terms.",
+        "tex": "\\text{Degree of polynomial}=3"
+      }
+    ],
+    "answerTex": "\\text{Number of terms: }3,\\quad\\text{constant term: }-5,\\quad\\text{degree: }3"
+  },
+  {
+    "id": "10B-19b",
+    "bank": "10B",
+    "number": 19,
+    "part": "b",
+    "page": 22,
+    "skill": "terms",
+    "prompt": "Complete the following table.",
+    "expression": "x-2*x^3+8*x*y",
+    "sourceRect": [0.112, 0.408, 0.63, 0.153],
+    "steps": [
+      {
+        "title": "Count the signed terms",
+        "reason": "A minus sign belongs to its term. Count terms separated by addition or subtraction.",
+        "tex": "\\text{Number of terms}=3"
+      },
+      {
+        "title": "Find the constant term",
+        "reason": "The constant term contains no variables; use 0 if no constant term is present.",
+        "tex": "\\text{Constant term}=0"
+      },
+      {
+        "title": "Find each term degree",
+        "reason": "Add all variable indices within each term; a nonzero constant has degree 0.",
+        "tex": "\\text{Term degrees: }1,\\ 3,\\ 2"
+      },
+      {
+        "title": "Take the greatest degree",
+        "reason": "The degree of a polynomial is the largest total degree among its terms.",
+        "tex": "\\text{Degree of polynomial}=3"
+      }
+    ],
+    "answerTex": "\\text{Number of terms: }3,\\quad\\text{constant term: }0,\\quad\\text{degree: }3"
+  },
+  {
+    "id": "10B-19c",
+    "bank": "10B",
+    "number": 19,
+    "part": "c",
+    "page": 22,
+    "skill": "terms",
+    "prompt": "Complete the following table.",
+    "expression": "-q*y+8+5*q*y^2-2*q^2",
+    "sourceRect": [0.112, 0.408, 0.63, 0.153],
+    "steps": [
+      {
+        "title": "Count the signed terms",
+        "reason": "A minus sign belongs to its term. Count terms separated by addition or subtraction.",
+        "tex": "\\text{Number of terms}=4"
+      },
+      {
+        "title": "Find the constant term",
+        "reason": "The constant term contains no variables; use 0 if no constant term is present.",
+        "tex": "\\text{Constant term}=8"
+      },
+      {
+        "title": "Find each term degree",
+        "reason": "Add all variable indices within each term; a nonzero constant has degree 0.",
+        "tex": "\\text{Term degrees: }2,\\ 0,\\ 3,\\ 2"
+      },
+      {
+        "title": "Take the greatest degree",
+        "reason": "The degree of a polynomial is the largest total degree among its terms.",
+        "tex": "\\text{Degree of polynomial}=3"
+      }
+    ],
+    "answerTex": "\\text{Number of terms: }4,\\quad\\text{constant term: }8,\\quad\\text{degree: }3"
+  },
+  {
+    "id": "10B-19d",
+    "bank": "10B",
+    "number": 19,
+    "part": "d",
+    "page": 22,
+    "skill": "terms",
+    "prompt": "Complete the following table.",
+    "expression": "a^3*b^4-5*c^5+a^2*b^2*c^3-7",
+    "sourceRect": [0.112, 0.408, 0.63, 0.153],
+    "steps": [
+      {
+        "title": "Count the signed terms",
+        "reason": "A minus sign belongs to its term. Count terms separated by addition or subtraction.",
+        "tex": "\\text{Number of terms}=4"
+      },
+      {
+        "title": "Find the constant term",
+        "reason": "The constant term contains no variables; use 0 if no constant term is present.",
+        "tex": "\\text{Constant term}=-7"
+      },
+      {
+        "title": "Find each term degree",
+        "reason": "Add all variable indices within each term; a nonzero constant has degree 0.",
+        "tex": "\\text{Term degrees: }7,\\ 5,\\ 7,\\ 0"
+      },
+      {
+        "title": "Take the greatest degree",
+        "reason": "The degree of a polynomial is the largest total degree among its terms.",
+        "tex": "\\text{Degree of polynomial}=7"
+      }
+    ],
+    "answerTex": "\\text{Number of terms: }4,\\quad\\text{constant term: }-7,\\quad\\text{degree: }7"
+  },
+  {
+    "id": "10B-20a",
+    "bank": "10B",
+    "number": 20,
+    "part": "a",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials.",
+    "expression": "6*a*b-7*a-2*b*a+5*a",
+    "sourceRect": [0.068, 0.614, 0.41, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "6*a*b-2*a*b-7*a+5*a"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "(6-2)*a*b+(-7+5)*a"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Keep unlike terms separate.",
+        "math": "4*a*b-2*a"
+      }
+    ],
+    "nonzero": [],
+    "answer": "4*a*b-2*a"
+  },
+  {
+    "id": "10B-20b",
+    "bank": "10B",
+    "number": 20,
+    "part": "b",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials.",
+    "expression": "6*x*y+5*y*x-3*x^2-4*x*y",
+    "sourceRect": [0.48, 0.614, 0.44, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "6*x*y+5*x*y-4*x*y-3*x^2"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "(6+5-4)*x*y-3*x^2"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Keep unlike terms separate.",
+        "math": "7*x*y-3*x^2"
+      }
+    ],
+    "nonzero": [],
+    "answer": "7*x*y-3*x^2"
+  },
+  {
+    "id": "10B-21a",
+    "bank": "10B",
+    "number": 21,
+    "part": "a",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials.",
+    "expression": "7*a*b+8*a*c-12*b*a-3*c*a",
+    "sourceRect": [0.068, 0.646, 0.41, 0.028],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "7*a*b-12*a*b+8*a*c-3*a*c"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "(7-12)*a*b+(8-3)*a*c"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Keep unlike terms separate.",
+        "math": "-5*a*b+5*a*c"
+      }
+    ],
+    "nonzero": [],
+    "answer": "-5*a*b+5*a*c"
+  },
+  {
+    "id": "10B-21b",
+    "bank": "10B",
+    "number": 21,
+    "part": "b",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials.",
+    "expression": "2*p*q+3*q*r-4*p*r-6*r*q",
+    "sourceRect": [0.48, 0.646, 0.44, 0.028],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "2*p*q+3*q*r-6*q*r-4*p*r"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "2*p*q+(3-6)*q*r-4*p*r"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Keep unlike terms separate.",
+        "math": "2*p*q-3*q*r-4*p*r"
+      }
+    ],
+    "nonzero": [],
+    "answer": "2*p*q-3*q*r-4*p*r"
+  },
+  {
+    "id": "10B-22a",
+    "bank": "10B",
+    "number": 22,
+    "part": "a",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials.",
+    "expression": "-c^2*d^2+7*c*d-4*d^2*c^2+5*d*c",
+    "sourceRect": [0.068, 0.675, 0.41, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "-c^2*d^2-4*c^2*d^2+7*c*d+5*c*d"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "(-1-4)*c^2*d^2+(7+5)*c*d"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Keep unlike terms separate.",
+        "math": "-5*c^2*d^2+12*c*d"
+      }
+    ],
+    "nonzero": [],
+    "answer": "-5*c^2*d^2+12*c*d"
+  },
+  {
+    "id": "10B-22b",
+    "bank": "10B",
+    "number": 22,
+    "part": "b",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials.",
+    "expression": "5*a^3*b-3*a*b^3+2*b*a^3-b^3*a",
+    "sourceRect": [0.48, 0.675, 0.44, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "5*a^3*b+2*a^3*b-3*a*b^3-a*b^3"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "(5+2)*a^3*b+(-3-1)*a*b^3"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Keep unlike terms separate.",
+        "math": "7*a^3*b-4*a*b^3"
+      }
+    ],
+    "nonzero": [],
+    "answer": "7*a^3*b-4*a*b^3"
+  },
+  {
+    "id": "10B-23a",
+    "bank": "10B",
+    "number": 23,
+    "part": "a",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials and arrange the terms in descending powers of x.",
+    "expression": "10*x^2-8*x^3+3*x^3-7*x^2",
+    "sourceRect": [0.068, 0.749, 0.41, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "-8*x^3+3*x^3+10*x^2-7*x^2"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "(-8+3)*x^3+(10-7)*x^2"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Arrange from the highest power of x to the lowest; other variables belong to the coefficients.",
+        "math": "-5*x^3+3*x^2"
+      }
+    ],
+    "nonzero": [],
+    "answer": "-5*x^3+3*x^2"
+  },
+  {
+    "id": "10B-23b",
+    "bank": "10B",
+    "number": 23,
+    "part": "b",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials and arrange the terms in descending powers of x.",
+    "expression": "14+5*x^2-15*x^2+25*x^3-17",
+    "sourceRect": [0.48, 0.749, 0.44, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "25*x^3+5*x^2-15*x^2+14-17"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "25*x^3+(5-15)*x^2+(14-17)"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Arrange from the highest power of x to the lowest; other variables belong to the coefficients.",
+        "math": "25*x^3-10*x^2-3"
+      }
+    ],
+    "nonzero": [],
+    "answer": "25*x^3-10*x^2-3"
+  },
+  {
+    "id": "10B-24a",
+    "bank": "10B",
+    "number": 24,
+    "part": "a",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials and arrange the terms in descending powers of x.",
+    "expression": "5*x^4-7*a*x^3+a*x^3-x^4+3*a^2*x^2",
+    "sourceRect": [0.068, 0.78, 0.41, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "5*x^4-x^4-7*a*x^3+a*x^3+3*a^2*x^2"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "(5-1)*x^4+(-7*a+a)*x^3+3*a^2*x^2"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Arrange from the highest power of x to the lowest; other variables belong to the coefficients.",
+        "math": "4*x^4-6*a*x^3+3*a^2*x^2"
+      }
+    ],
+    "nonzero": [],
+    "answer": "4*x^4-6*a*x^3+3*a^2*x^2"
+  },
+  {
+    "id": "10B-24b",
+    "bank": "10B",
+    "number": 24,
+    "part": "b",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials and arrange the terms in descending powers of x.",
+    "expression": "x^2+a^3*x-a*x^3+5*x^2-2+4*a^3*x",
+    "sourceRect": [0.48, 0.78, 0.44, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "-a*x^3+x^2+5*x^2+a^3*x+4*a^3*x-2"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "-a*x^3+(1+5)*x^2+(a^3+4*a^3)*x-2"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Arrange from the highest power of x to the lowest; other variables belong to the coefficients.",
+        "math": "-a*x^3+6*x^2+5*a^3*x-2"
+      }
+    ],
+    "nonzero": [],
+    "answer": "-a*x^3+6*x^2+5*a^3*x-2"
+  },
+  {
+    "id": "10B-25a",
+    "bank": "10B",
+    "number": 25,
+    "part": "a",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials and arrange the terms in ascending powers of y.",
+    "expression": "-2*y^2+6*y-y^3+8*y^2-1-y^3",
+    "sourceRect": [0.068, 0.854, 0.41, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "-1+6*y-2*y^2+8*y^2-y^3-y^3"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "-1+6*y+(-2+8)*y^2+(-1-1)*y^3"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Arrange from the lowest power of y to the highest; other variables belong to the coefficients.",
+        "math": "-1+6*y+6*y^2-2*y^3"
+      }
+    ],
+    "nonzero": [],
+    "answer": "-1+6*y+6*y^2-2*y^3"
+  },
+  {
+    "id": "10B-25b",
+    "bank": "10B",
+    "number": 25,
+    "part": "b",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials and arrange the terms in ascending powers of y.",
+    "expression": "4*y-5*y^4+7-2*y-6*y^4+y^4",
+    "sourceRect": [0.48, 0.854, 0.44, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "7+4*y-2*y-5*y^4-6*y^4+y^4"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "7+(4-2)*y+(-5-6+1)*y^4"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Arrange from the lowest power of y to the highest; other variables belong to the coefficients.",
+        "math": "7+2*y-10*y^4"
+      }
+    ],
+    "nonzero": [],
+    "answer": "7+2*y-10*y^4"
+  },
+  {
+    "id": "10B-26a",
+    "bank": "10B",
+    "number": 26,
+    "part": "a",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials and arrange the terms in ascending powers of y.",
+    "expression": "12*k^3-3*k*y+2*y*k+3*y^2-5*k^3",
+    "sourceRect": [0.068, 0.884, 0.41, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "12*k^3-5*k^3-3*k*y+2*k*y+3*y^2"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "(12-5)*k^3+(-3*k+2*k)*y+3*y^2"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Arrange from the lowest power of y to the highest; other variables belong to the coefficients.",
+        "math": "7*k^3-k*y+3*y^2"
+      }
+    ],
+    "nonzero": [],
+    "answer": "7*k^3-k*y+3*y^2"
+  },
+  {
+    "id": "10B-26b",
+    "bank": "10B",
+    "number": 26,
+    "part": "b",
+    "page": 22,
+    "skill": "simplify",
+    "prompt": "Simplify the following polynomials and arrange the terms in ascending powers of y.",
+    "expression": "7*h*y^3-3*h^2*y^2+9+4*y^3*h+y^2*h^2",
+    "sourceRect": [0.48, 0.884, 0.44, 0.033],
+    "steps": [
+      {
+        "title": "Recognise like terms",
+        "reason": "Reorder variable factors without changing their powers, then group terms with identical variable-and-index patterns.",
+        "math": "9-3*h^2*y^2+h^2*y^2+7*h*y^3+4*h*y^3"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the signed coefficients of like terms; keep their variable parts unchanged.",
+        "math": "9+(-3*h^2+h^2)*y^2+(7*h+4*h)*y^3"
+      },
+      {
+        "title": "Write the simplified polynomial",
+        "reason": "Arrange from the lowest power of y to the highest; other variables belong to the coefficients.",
+        "math": "9-2*h^2*y^2+11*h*y^3"
+      }
+    ],
+    "nonzero": [],
+    "answer": "9-2*h^2*y^2+11*h*y^3"
+  },
+  {
+    "id": "10B-27a",
+    "bank": "10B",
+    "number": 27,
+    "part": "a",
+    "page": 23,
+    "skill": "substitute",
+    "prompt": "Find the value of the polynomial 2x^2 - (3/2)x + 6 in each of the following cases.",
+    "expression": "2*x^2-(3/2)*x+6",
+    "sourceRect": [0.115, 0.065, 0.66, 0.07],
+    "steps": [
+      {
+        "title": "Substitute the given value",
+        "reason": "Replace every x with the given value, using brackets.",
+        "target": "6",
+        "math": "2*(0)^2-(3/2)*(0)+6"
+      },
+      {
+        "title": "Evaluate powers and products",
+        "reason": "Square the bracketed value before multiplying; retain exact fractions.",
+        "target": "6",
+        "math": "0-0+6"
+      },
+      {
+        "title": "Add the signed terms",
+        "reason": "Use a common denominator where necessary.",
+        "target": "6",
+        "math": "6"
+      }
+    ],
+    "givenTex": "x=0",
+    "nonzero": [],
+    "answer": "6"
+  },
+  {
+    "id": "10B-27b",
+    "bank": "10B",
+    "number": 27,
+    "part": "b",
+    "page": 23,
+    "skill": "substitute",
+    "prompt": "Find the value of the polynomial 2x^2 - (3/2)x + 6 in each of the following cases.",
+    "expression": "2*x^2-(3/2)*x+6",
+    "sourceRect": [0.115, 0.065, 0.66, 0.07],
+    "steps": [
+      {
+        "title": "Substitute the given value",
+        "reason": "Replace every x with the given value, using brackets.",
+        "target": "17",
+        "math": "2*(-2)^2-(3/2)*(-2)+6"
+      },
+      {
+        "title": "Evaluate powers and products",
+        "reason": "Square the bracketed value before multiplying; retain exact fractions.",
+        "target": "17",
+        "math": "8+3+6"
+      },
+      {
+        "title": "Add the signed terms",
+        "reason": "Use a common denominator where necessary.",
+        "target": "17",
+        "math": "17"
+      }
+    ],
+    "givenTex": "x=-2",
+    "nonzero": [],
+    "answer": "17"
+  },
+  {
+    "id": "10B-27c",
+    "bank": "10B",
+    "number": 27,
+    "part": "c",
+    "page": 23,
+    "skill": "substitute",
+    "prompt": "Find the value of the polynomial 2x^2 - (3/2)x + 6 in each of the following cases.",
+    "expression": "2*x^2-(3/2)*x+6",
+    "sourceRect": [0.115, 0.065, 0.66, 0.07],
+    "steps": [
+      {
+        "title": "Substitute the given value",
+        "reason": "Replace every x with the given value, using brackets.",
+        "target": "23/4",
+        "math": "2*(1/2)^2-(3/2)*(1/2)+6"
+      },
+      {
+        "title": "Evaluate powers and products",
+        "reason": "Square the bracketed value before multiplying; retain exact fractions.",
+        "target": "23/4",
+        "math": "(1/2)-(3/4)+6"
+      },
+      {
+        "title": "Add the signed terms",
+        "reason": "Use a common denominator where necessary.",
+        "target": "23/4",
+        "math": "23/4"
+      }
+    ],
+    "givenTex": "x=\\frac{1}{2}",
+    "nonzero": [],
+    "answer": "23/4"
+  },
+  {
+    "id": "10B-28a",
+    "bank": "10B",
+    "number": 28,
+    "part": "a",
+    "page": 23,
+    "skill": "substitute",
+    "prompt": "Find the value of the polynomial 2x^2y - (1/4)x^2y^2 + 5xy^2 in each of the following cases.",
+    "expression": "2*x^2*y-(1/4)*x^2*y^2+5*x*y^2",
+    "sourceRect": [0.115, 0.155, 0.72, 0.071],
+    "steps": [
+      {
+        "title": "Substitute both given values",
+        "reason": "Use brackets around negative and fractional values in every occurrence.",
+        "target": "23",
+        "math": "2*(1)^2*(2)-(1/4)*(1)^2*(2)^2+5*(1)*(2)^2"
+      },
+      {
+        "title": "Evaluate powers and products",
+        "reason": "A squared negative value is positive; signs outside powers remain in the products.",
+        "target": "23",
+        "math": "4-1+20"
+      },
+      {
+        "title": "Add the signed terms",
+        "reason": "Use exact fractions and a common denominator where needed.",
+        "target": "23",
+        "math": "23"
+      }
+    ],
+    "givenTex": "x=1,\\quad y=2",
+    "nonzero": [],
+    "answer": "23"
+  },
+  {
+    "id": "10B-28b",
+    "bank": "10B",
+    "number": 28,
+    "part": "b",
+    "page": 23,
+    "skill": "substitute",
+    "prompt": "Find the value of the polynomial 2x^2y - (1/4)x^2y^2 + 5xy^2 in each of the following cases.",
+    "expression": "2*x^2*y-(1/4)*x^2*y^2+5*x*y^2",
+    "sourceRect": [0.115, 0.155, 0.72, 0.071],
+    "steps": [
+      {
+        "title": "Substitute both given values",
+        "reason": "Use brackets around negative and fractional values in every occurrence.",
+        "target": "-56",
+        "math": "2*(-4)^2*(-1)-(1/4)*(-4)^2*(-1)^2+5*(-4)*(-1)^2"
+      },
+      {
+        "title": "Evaluate powers and products",
+        "reason": "A squared negative value is positive; signs outside powers remain in the products.",
+        "target": "-56",
+        "math": "-32-4-20"
+      },
+      {
+        "title": "Add the signed terms",
+        "reason": "Use exact fractions and a common denominator where needed.",
+        "target": "-56",
+        "math": "-56"
+      }
+    ],
+    "givenTex": "x=-4,\\quad y=-1",
+    "nonzero": [],
+    "answer": "-56"
+  },
+  {
+    "id": "10B-28c",
+    "bank": "10B",
+    "number": 28,
+    "part": "c",
+    "page": 23,
+    "skill": "substitute",
+    "prompt": "Find the value of the polynomial 2x^2y - (1/4)x^2y^2 + 5xy^2 in each of the following cases.",
+    "expression": "2*x^2*y-(1/4)*x^2*y^2+5*x*y^2",
+    "sourceRect": [0.115, 0.155, 0.72, 0.071],
+    "steps": [
+      {
+        "title": "Substitute both given values",
+        "reason": "Use brackets around negative and fractional values in every occurrence.",
+        "target": "-5/12",
+        "math": "2*(-2/3)^2*(1/2)-(1/4)*(-2/3)^2*(1/2)^2+5*(-2/3)*(1/2)^2"
+      },
+      {
+        "title": "Evaluate powers and products",
+        "reason": "A squared negative value is positive; signs outside powers remain in the products.",
+        "target": "-5/12",
+        "math": "(4/9)-(1/36)-(5/6)"
+      },
+      {
+        "title": "Add the signed terms",
+        "reason": "Use exact fractions and a common denominator where needed.",
+        "target": "-5/12",
+        "math": "-5/12"
+      }
+    ],
+    "givenTex": "x=(-2/3),\\quad y=(1/2)",
+    "nonzero": [],
+    "answer": "-5/12"
+  },
+  {
+    "id": "10B-29a",
+    "bank": "10B",
+    "number": 29,
+    "part": "a",
+    "page": 23,
+    "skill": "applications",
+    "prompt": "ABCD is a quadrilateral where the lengths of AB, BC, CD and DA are 61 - 15x, x^2 + 3x, 12x + 5 and 6x^2 - 4 respectively. If x = 3, find the lengths of AB, BC, CD and DA.",
+    "expression": "61-15*x",
+    "sourceRect": [0.115, 0.238, 0.82, 0.064],
+    "steps": [
+      {
+        "title": "Substitute x = 3",
+        "reason": "Use the printed expression for AB.",
+        "target": "16",
+        "label": "AB",
+        "math": "61-15*(3)"
+      },
+      {
+        "title": "Evaluate powers and products",
+        "reason": "Calculate AB using the order of operations.",
+        "target": "16",
+        "label": "AB",
+        "math": "61-45"
+      },
+      {
+        "title": "Find the side length",
+        "reason": "The length of AB is 16.",
+        "target": "16",
+        "label": "AB",
+        "math": "16"
+      },
+      {
+        "title": "Substitute x = 3",
+        "reason": "Use the printed expression for BC.",
+        "target": "18",
+        "label": "BC",
+        "math": "(3)^2+3*(3)"
+      },
+      {
+        "title": "Evaluate powers and products",
+        "reason": "Calculate BC using the order of operations.",
+        "target": "18",
+        "label": "BC",
+        "math": "9+9"
+      },
+      {
+        "title": "Find the side length",
+        "reason": "The length of BC is 18.",
+        "target": "18",
+        "label": "BC",
+        "math": "18"
+      },
+      {
+        "title": "Substitute x = 3",
+        "reason": "Use the printed expression for CD.",
+        "target": "41",
+        "label": "CD",
+        "math": "12*(3)+5"
+      },
+      {
+        "title": "Evaluate powers and products",
+        "reason": "Calculate CD using the order of operations.",
+        "target": "41",
+        "label": "CD",
+        "math": "36+5"
+      },
+      {
+        "title": "Find the side length",
+        "reason": "The length of CD is 41.",
+        "target": "41",
+        "label": "CD",
+        "math": "41"
+      },
+      {
+        "title": "Substitute x = 3",
+        "reason": "Use the printed expression for DA.",
+        "target": "50",
+        "label": "DA",
+        "math": "6*(3)^2-4"
+      },
+      {
+        "title": "Evaluate powers and products",
+        "reason": "Calculate DA using the order of operations.",
+        "target": "50",
+        "label": "DA",
+        "math": "54-4"
+      },
+      {
+        "title": "Find the side length",
+        "reason": "The length of DA is 50.",
+        "target": "50",
+        "label": "DA",
+        "math": "50"
+      }
+    ],
+    "givenTex": "x=3",
+    "answerTex": "AB=16,\\quad BC=18,\\quad CD=41,\\quad DA=50",
+    "diagram": "quadrilateral-sides",
+    "diagramLabels": [
+      "AB = 61 - 15x",
+      "BC = x^2 + 3x",
+      "CD = 12x + 5",
+      "DA = 6x^2 - 4"
+    ],
+    "nonzero": []
+  },
+  {
+    "id": "10B-29b",
+    "bank": "10B",
+    "number": 29,
+    "part": "b",
+    "page": 23,
+    "skill": "applications",
+    "prompt": "ABCD is a quadrilateral where the lengths of AB, BC, CD and DA are 61 - 15x, x^2 + 3x, 12x + 5 and 6x^2 - 4 respectively. If x = 3, hence, name the longest side of quadrilateral ABCD.",
+    "expression": "61-15*x",
+    "sourceRect": [0.115, 0.238, 0.82, 0.085],
+    "steps": [
+      {
+        "title": "Recall part (a)",
+        "reason": "Use the four side lengths already calculated.",
+        "tex": "AB=16,\\quad BC=18,\\quad CD=41,\\quad DA=50"
+      },
+      {
+        "title": "Compare the lengths",
+        "reason": "Order the lengths from smallest to largest.",
+        "tex": "16<18<41<50"
+      },
+      {
+        "title": "Name the longest side",
+        "reason": "The greatest length, 50, belongs to DA.",
+        "tex": "\\text{The longest side is }DA."
+      }
+    ],
+    "givenTex": "x=3",
+    "answerTex": "\\text{The longest side is }DA.",
+    "diagram": "quadrilateral-sides",
+    "diagramLabels": [
+      "AB = 61 - 15x",
+      "BC = x^2 + 3x",
+      "CD = 12x + 5",
+      "DA = 6x^2 - 4"
+    ],
+    "nonzero": []
+  },
+  {
+    "id": "10B-30",
+    "bank": "10B",
+    "number": 30,
+    "part": "",
+    "page": 23,
+    "skill": "applications",
+    "prompt": "In triangle PQR, the lengths of PQ, QR and PR are (x + y) cm, (5x - 2y) cm and (2x^2 - y) cm respectively. Is triangle PQR an isosceles triangle if x = 2 and y = 3? Explain your answer.",
+    "expression": "x+y",
+    "sourceRect": [0.115, 0.345, 0.82, 0.044],
+    "steps": [
+      {
+        "title": "Substitute x = 2 and y = 3",
+        "reason": "Find PQ in centimetres from its printed expression.",
+        "target": "5",
+        "label": "PQ",
+        "math": "(2)+(3)"
+      },
+      {
+        "title": "Evaluate the length",
+        "reason": "Evaluate the power and products before addition or subtraction.",
+        "target": "5",
+        "label": "PQ",
+        "math": "2+3"
+      },
+      {
+        "title": "Substitute x = 2 and y = 3",
+        "reason": "Find QR in centimetres from its printed expression.",
+        "target": "4",
+        "label": "QR",
+        "math": "5*(2)-2*(3)"
+      },
+      {
+        "title": "Evaluate the length",
+        "reason": "Evaluate the power and products before addition or subtraction.",
+        "target": "4",
+        "label": "QR",
+        "math": "10-6"
+      },
+      {
+        "title": "Substitute x = 2 and y = 3",
+        "reason": "Find PR in centimetres from its printed expression.",
+        "target": "5",
+        "label": "PR",
+        "math": "2*(2)^2-(3)"
+      },
+      {
+        "title": "Evaluate the length",
+        "reason": "Evaluate the power and products before addition or subtraction.",
+        "target": "5",
+        "label": "PR",
+        "math": "8-3"
+      },
+      {
+        "title": "Compare the sides",
+        "reason": "PQ and PR both have length 5 cm.",
+        "tex": "PQ=PR=5\\text{ cm},\\quad QR=4\\text{ cm}"
+      },
+      {
+        "title": "Apply the definition",
+        "reason": "A triangle with two equal side lengths is isosceles.",
+        "tex": "\\triangle PQR\\text{ is isosceles since }PQ=PR."
+      }
+    ],
+    "givenTex": "x=2,\\quad y=3",
+    "answerTex": "\\text{Yes, since }PQ=PR=5\\text{ cm}.",
+    "diagram": "triangle-sides",
+    "diagramLabels": [
+      "PQ = (x + y) cm",
+      "QR = (5x - 2y) cm",
+      "PR = (2x^2 - y) cm"
+    ],
+    "nonzero": []
+  }
+]

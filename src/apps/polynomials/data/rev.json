@@ -1,0 +1,1876 @@
+[
+  {
+    "id": "REV-33a",
+    "bank": "REV",
+    "number": 33,
+    "part": "a",
+    "page": 42,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "a^4*b^8*a^5",
+    "answer": "a^9*b^8",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.603, 0.34, 0.027],
+    "steps": [
+      {
+        "title": "Group the powers of a",
+        "reason": "The factor b^8 stays separate.",
+        "math": "(a^4*a^5)*b^8"
+      },
+      {
+        "title": "Add indices of the same base",
+        "reason": "Multiply powers of a by adding 4 and 5.",
+        "math": "a^(4+5)*b^8"
+      },
+      {
+        "title": "Simplify",
+        "reason": "The index of b stays 8.",
+        "math": "a^9*b^8"
+      }
+    ]
+  },
+  {
+    "id": "REV-33b",
+    "bank": "REV",
+    "number": 33,
+    "part": "b",
+    "page": 42,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "x*y^3*(-y^5*x^2)",
+    "answer": "-x^3*y^8",
+    "nonzero": [],
+    "sourceRect": [0.475, 0.603, 0.4, 0.027],
+    "steps": [
+      {
+        "title": "Separate the negative sign",
+        "reason": "There is one negative factor.",
+        "math": "-(x*x^2)*(y^3*y^5)"
+      },
+      {
+        "title": "Add indices by base",
+        "reason": "The implied index of the first x is 1.",
+        "math": "-x^(1+2)*y^(3+5)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Keep the negative sign.",
+        "math": "-x^3*y^8"
+      }
+    ]
+  },
+  {
+    "id": "REV-34a",
+    "bank": "REV",
+    "number": 34,
+    "part": "a",
+    "page": 42,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(-9*c^8)/(3*c^13*d^2)",
+    "answer": "-3/(c^5*d^2)",
+    "nonzero": ["c", "d"],
+    "sourceRect": [0.115, 0.635, 0.34, 0.026],
+    "steps": [
+      {
+        "title": "Separate coefficient and variables",
+        "reason": "Divide the entire monomial in the denominator.",
+        "math": "(-9/3)*(c^8/c^13)*(1/d^2)"
+      },
+      {
+        "title": "Cancel eight powers of c",
+        "reason": "Five powers of c remain in the denominator.",
+        "math": "-3*(1/c^5)*(1/d^2)"
+      },
+      {
+        "title": "Write a single fraction",
+        "reason": "Keep positive indices.",
+        "math": "-3/(c^5*d^2)"
+      }
+    ]
+  },
+  {
+    "id": "REV-34b",
+    "bank": "REV",
+    "number": 34,
+    "part": "b",
+    "page": 42,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(-20*m^3*n^7)/(-15*m^8*n^6)",
+    "answer": "4*n/(3*m^5)",
+    "nonzero": ["m", "n"],
+    "sourceRect": [0.475, 0.635, 0.44, 0.026],
+    "steps": [
+      {
+        "title": "Separate coefficient and powers",
+        "reason": "A negative divided by a negative is positive.",
+        "math": "(20/15)*(m^3/m^8)*(n^7/n^6)"
+      },
+      {
+        "title": "Cancel common powers",
+        "reason": "Five m factors remain below and one n factor remains above.",
+        "math": "(4/3)*(1/m^5)*n"
+      },
+      {
+        "title": "Write a single fraction",
+        "reason": "Keep the original nonzero restrictions.",
+        "math": "4*n/(3*m^5)"
+      }
+    ]
+  },
+  {
+    "id": "REV-35a",
+    "bank": "REV",
+    "number": 35,
+    "part": "a",
+    "page": 42,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(-s^4)*(r^3*s^5)*(-r^2)",
+    "answer": "r^5*s^9",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.666, 0.34, 0.026],
+    "steps": [
+      {
+        "title": "Determine the sign",
+        "reason": "The two negative factors give a positive product.",
+        "math": "r^3*r^2*s^4*s^5"
+      },
+      {
+        "title": "Add indices by base",
+        "reason": "Keep r and s separate.",
+        "math": "r^(3+2)*s^(4+5)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Both coefficients have magnitude 1.",
+        "math": "r^5*s^9"
+      }
+    ]
+  },
+  {
+    "id": "REV-35b",
+    "bank": "REV",
+    "number": 35,
+    "part": "b",
+    "page": 42,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "3*x^2*y^2*(-y^4*x^2)/(-9*y^6)",
+    "answer": "x^4/3",
+    "nonzero": ["y"],
+    "sourceRect": [0.475, 0.666, 0.46, 0.026],
+    "steps": [
+      {
+        "title": "Separate signs, coefficients and powers",
+        "reason": "The numerator and denominator are both negative.",
+        "math": "(3/9)*(x^2*x^2)*(y^2*y^4/y^6)"
+      },
+      {
+        "title": "Combine and cancel powers",
+        "reason": "All six powers of y cancel to 1.",
+        "math": "(1/3)*x^(2+2)*(y^6/y^6)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "The original denominator still requires y nonzero.",
+        "math": "x^4/3"
+      }
+    ]
+  },
+  {
+    "id": "REV-36a",
+    "bank": "REV",
+    "number": 36,
+    "part": "a",
+    "page": 42,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(-m^5*n^2)/(6*n^7)*8*m^4*n^4",
+    "answer": "-4*m^9/(3*n)",
+    "nonzero": ["n"],
+    "sourceRect": [0.115, 0.696, 0.37, 0.029],
+    "steps": [
+      {
+        "title": "Read multiplication and division left to right",
+        "reason": "First divide by 6n^7, then multiply by 8m^4n^4.",
+        "math": "(-8/6)*(m^5*m^4)*(n^2*n^4/n^7)"
+      },
+      {
+        "title": "Combine each base",
+        "reason": "Six powers of n above cancel with six below.",
+        "math": "(-4/3)*m^(5+4)*(n^6/n^7)"
+      },
+      {
+        "title": "Use positive indices",
+        "reason": "One factor n remains in the denominator.",
+        "math": "-4*m^9/(3*n)"
+      }
+    ]
+  },
+  {
+    "id": "REV-36b",
+    "bank": "REV",
+    "number": 36,
+    "part": "b",
+    "page": 42,
+    "skill": "indices",
+    "prompt": "Simplify the following expressions.",
+    "expression": "14*p^2*q^4/(21*p*q^7)/(2*p^3*q)",
+    "answer": "1/(3*p^2*q^4)",
+    "nonzero": ["p", "q"],
+    "sourceRect": [0.475, 0.696, 0.46, 0.029],
+    "steps": [
+      {
+        "title": "Keep successive divisions in order",
+        "reason": "Divide first by 21pq^7 and then by 2p^3q.",
+        "math": "(14/21)*(p^2/p)*(q^4/q^7)/(2*p^3*q)"
+      },
+      {
+        "title": "Simplify the first quotient",
+        "reason": "The first quotient is 2p divided by 3q^3.",
+        "math": "(2*p/(3*q^3))/(2*p^3*q)"
+      },
+      {
+        "title": "Divide by the second monomial",
+        "reason": "Multiply by its reciprocal.",
+        "math": "(2*p/(3*q^3))*(1/(2*p^3*q))"
+      },
+      {
+        "title": "Cancel and retain positive indices",
+        "reason": "The two remaining denominator indices are 2 and 4.",
+        "math": "1/(3*p^2*q^4)"
+      }
+    ]
+  },
+  {
+    "id": "REV-37a",
+    "bank": "REV",
+    "number": 37,
+    "part": "a",
+    "page": 42,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in ascending powers of the variables.",
+    "expression": "(7*m^2+m^3-3*m+7)-(3*m-5+m^3)",
+    "answer": "12-6*m+7*m^2",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.769, 0.36, 0.027],
+    "steps": [
+      {
+        "title": "Subtract every term in the second bracket",
+        "reason": "The signs of 3m, -5 and m^3 all reverse.",
+        "math": "7*m^2+m^3-3*m+7-3*m+5-m^3",
+        "focus": {
+          "before": ["3*m", "-5", "m^3"],
+          "after": ["-3*m", "5", "-m^3"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "The two cubic terms cancel.",
+        "math": "(7+5)+(-3-3)*m+7*m^2+(1-1)*m^3"
+      },
+      {
+        "title": "Arrange in ascending powers",
+        "reason": "Write constant, linear, then quadratic terms.",
+        "math": "12-6*m+7*m^2"
+      }
+    ]
+  },
+  {
+    "id": "REV-37b",
+    "bank": "REV",
+    "number": 37,
+    "part": "b",
+    "page": 42,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in ascending powers of the variables.",
+    "expression": "-(2*x^3-3*x^4+5*x-4)+(2*x^4+3-6*x)",
+    "answer": "7-11*x-2*x^3+5*x^4",
+    "nonzero": [],
+    "sourceRect": [0.475, 0.769, 0.47, 0.027],
+    "steps": [
+      {
+        "title": "Apply the outside minus",
+        "reason": "Reverse every sign in the first bracket.",
+        "math": "-2*x^3+3*x^4-5*x+4+2*x^4+3-6*x",
+        "focus": {
+          "before": ["2*x^3", "-3*x^4", "5*x", "-4"],
+          "after": ["-2*x^3", "3*x^4", "-5*x", "4"]
+        }
+      },
+      {
+        "title": "Group like powers",
+        "reason": "There is no quadratic term.",
+        "math": "(4+3)+(-5-6)*x-2*x^3+(3+2)*x^4"
+      },
+      {
+        "title": "Arrange in ascending powers",
+        "reason": "Keep the gap between x and x^3.",
+        "math": "7-11*x-2*x^3+5*x^4"
+      }
+    ]
+  },
+  {
+    "id": "REV-38a",
+    "bank": "REV",
+    "number": 38,
+    "part": "a",
+    "page": 42,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in ascending powers of the variables.",
+    "expression": "(5-y^2)+(6+2*y)-(9*y+2*y^2)",
+    "answer": "11-7*y-3*y^2",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.8, 0.36, 0.027],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "The last minus changes both signs.",
+        "math": "5-y^2+6+2*y-9*y-2*y^2",
+        "focus": {
+          "before": ["9*y", "2*y^2"],
+          "after": ["-9*y", "-2*y^2"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Add the constants and combine coefficients for each power.",
+        "math": "(5+6)+(2-9)*y+(-1-2)*y^2"
+      },
+      {
+        "title": "Arrange in ascending powers",
+        "reason": "The constant comes first.",
+        "math": "11-7*y-3*y^2"
+      }
+    ]
+  },
+  {
+    "id": "REV-38b",
+    "bank": "REV",
+    "number": 38,
+    "part": "b",
+    "page": 42,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in ascending powers of the variables.",
+    "expression": "(6*a-5)-(2*a^3-7*a^2)-(4*a+3*a^2)",
+    "answer": "-5+2*a+4*a^2-2*a^3",
+    "nonzero": [],
+    "sourceRect": [0.475, 0.8, 0.47, 0.027],
+    "steps": [
+      {
+        "title": "Remove the first subtracted bracket",
+        "reason": "Both signs reverse.",
+        "math": "6*a-5-2*a^3+7*a^2-(4*a+3*a^2)",
+        "focus": {
+          "before": ["2*a^3", "-7*a^2"],
+          "after": ["-2*a^3", "7*a^2"]
+        }
+      },
+      {
+        "title": "Remove the last subtracted bracket",
+        "reason": "Both terms become negative.",
+        "math": "6*a-5-2*a^3+7*a^2-4*a-3*a^2",
+        "focus": {
+          "before": ["4*a", "3*a^2"],
+          "after": ["-4*a", "-3*a^2"]
+        }
+      },
+      {
+        "title": "Group in ascending powers",
+        "reason": "Combine the linear and quadratic coefficients.",
+        "math": "-5+(6-4)*a+(7-3)*a^2-2*a^3"
+      },
+      {
+        "title": "Simplify",
+        "reason": "Retain the cubic term.",
+        "math": "-5+2*a+4*a^2-2*a^3"
+      }
+    ]
+  },
+  {
+    "id": "REV-39a",
+    "bank": "REV",
+    "number": 39,
+    "part": "a",
+    "page": 42,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in ascending powers of the variables.",
+    "expression": "(k^2-2)-(4*k-8-2*k^2)+(8*k-12)",
+    "answer": "-6+4*k+3*k^2",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.831, 0.36, 0.029],
+    "steps": [
+      {
+        "title": "Reverse the signs in the middle bracket",
+        "reason": "Subtracting -8 and -2k^2 makes them positive.",
+        "math": "k^2-2-4*k+8+2*k^2+8*k-12",
+        "focus": {
+          "before": ["4*k", "-8", "-2*k^2"],
+          "after": ["-4*k", "8", "2*k^2"]
+        }
+      },
+      {
+        "title": "Collect in ascending powers",
+        "reason": "Combine constants, k terms and k^2 terms.",
+        "math": "(-2+8-12)+(-4+8)*k+(1+2)*k^2"
+      },
+      {
+        "title": "Simplify",
+        "reason": "The constant is -6.",
+        "math": "-6+4*k+3*k^2"
+      }
+    ]
+  },
+  {
+    "id": "REV-39b",
+    "bank": "REV",
+    "number": 39,
+    "part": "b",
+    "page": 42,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in ascending powers of the variables.",
+    "expression": "(4-z^2)+(z-z^3)-(1-z+z^2)",
+    "answer": "3+2*z-2*z^2-z^3",
+    "nonzero": [],
+    "sourceRect": [0.475, 0.831, 0.47, 0.029],
+    "steps": [
+      {
+        "title": "Remove all brackets",
+        "reason": "The final bracket is subtracted as a whole.",
+        "math": "4-z^2+z-z^3-1+z-z^2",
+        "focus": {
+          "before": ["1", "-z", "z^2"],
+          "after": ["-1", "z", "-z^2"]
+        }
+      },
+      {
+        "title": "Group equal powers",
+        "reason": "Keep the cubic term distinct.",
+        "math": "(4-1)+(1+1)*z+(-1-1)*z^2-z^3"
+      },
+      {
+        "title": "Arrange in ascending powers",
+        "reason": "Write the cubic term last.",
+        "math": "3+2*z-2*z^2-z^3"
+      }
+    ]
+  },
+  {
+    "id": "REV-40",
+    "bank": "REV",
+    "number": 40,
+    "part": "",
+    "page": 43,
+    "skill": "simplify",
+    "prompt": "Simplify the following expression and arrange the terms in descending powers of the variable.",
+    "expression": "4*s^2-(s^3-(1+s-4*s^2))",
+    "answer": "-s^3+s+1",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.094, 0.6, 0.029],
+    "steps": [
+      {
+        "title": "Start with the inner subtraction",
+        "reason": "Reverse every sign inside the round brackets.",
+        "math": "4*s^2-(s^3-1-s+4*s^2)",
+        "focus": {
+          "before": ["1", "s", "-4*s^2"],
+          "after": ["-1", "-s", "4*s^2"]
+        }
+      },
+      {
+        "title": "Remove the outer subtracted bracket",
+        "reason": "Reverse all four terms.",
+        "math": "4*s^2-s^3+1+s-4*s^2",
+        "focus": {
+          "before": ["s^3", "-1", "-s", "4*s^2"],
+          "after": ["-s^3", "1", "s", "-4*s^2"]
+        }
+      },
+      {
+        "title": "Cancel the quadratic terms",
+        "reason": "4s^2 and -4s^2 add to zero.",
+        "math": "-s^3+(4-4)*s^2+s+1"
+      },
+      {
+        "title": "Arrange in descending powers",
+        "reason": "The remaining powers are 3, 1 and 0.",
+        "math": "-s^3+s+1"
+      }
+    ]
+  },
+  {
+    "id": "REV-41",
+    "bank": "REV",
+    "number": 41,
+    "part": "",
+    "page": 43,
+    "skill": "simplify",
+    "prompt": "Simplify the following expression and arrange the terms in descending powers of the variable.",
+    "expression": "(2*y^2+5*y)-((-2*y+4*y^2)-(3*y-4+2*y^2))",
+    "answer": "10*y-4",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.125, 0.7, 0.03],
+    "steps": [
+      {
+        "title": "Remove the inner subtracted bracket",
+        "reason": "Reverse the signs of 3y, -4 and 2y^2.",
+        "math": "(2*y^2+5*y)-(-2*y+4*y^2-3*y+4-2*y^2)",
+        "focus": {
+          "before": ["3*y", "-4", "2*y^2"],
+          "after": ["-3*y", "4", "-2*y^2"]
+        }
+      },
+      {
+        "title": "Collect inside the square brackets",
+        "reason": "The inner result has one quadratic, one linear and one constant term.",
+        "math": "(2*y^2+5*y)-(2*y^2-5*y+4)"
+      },
+      {
+        "title": "Subtract the complete inner result",
+        "reason": "All three signs reverse.",
+        "math": "2*y^2+5*y-2*y^2+5*y-4",
+        "focus": {
+          "before": ["2*y^2", "-5*y", "4"],
+          "after": ["-2*y^2", "5*y", "-4"]
+        }
+      },
+      {
+        "title": "Cancel and combine",
+        "reason": "The quadratic terms cancel and the linear terms add.",
+        "math": "10*y-4"
+      }
+    ]
+  },
+  {
+    "id": "REV-42a",
+    "bank": "REV",
+    "number": 42,
+    "part": "a",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand and simplify the following expressions.",
+    "expression": "(4*a^2-14*a)-2*(3*a^2-4*a+5)",
+    "answer": "-2*a^2-6*a-10",
+    "nonzero": [],
+    "sourceRect": [0.16, 0.2, 0.35, 0.028],
+    "steps": [
+      {
+        "title": "Distribute -2 to all three terms",
+        "reason": "Treat the outside subtraction as a factor of -2.",
+        "math": "(4*a^2-14*a)-2*(3*a^2-4*a+5)",
+        "distribution": {
+          "left": ["-2"],
+          "right": ["3*a^2", "-4*a", "5"],
+          "products": ["-6*a^2", "8*a", "-10"]
+        }
+      },
+      {
+        "title": "Write the expansion",
+        "reason": "The product of two negative factors is positive.",
+        "math": "4*a^2-14*a-6*a^2+8*a-10"
+      },
+      {
+        "title": "Collect like terms",
+        "reason": "Combine quadratic terms and linear terms separately.",
+        "math": "(4-6)*a^2+(-14+8)*a-10"
+      },
+      {
+        "title": "Simplify",
+        "reason": "The constant remains -10.",
+        "math": "-2*a^2-6*a-10"
+      }
+    ]
+  },
+  {
+    "id": "REV-42b",
+    "bank": "REV",
+    "number": 42,
+    "part": "b",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand and simplify the following expressions.",
+    "expression": "-2*b*(b^2-7)+4*b^2*(3*b-5)",
+    "answer": "10*b^3-20*b^2+14*b",
+    "nonzero": [],
+    "sourceRect": [0.53, 0.2, 0.42, 0.028],
+    "steps": [
+      {
+        "title": "Distribute -2b",
+        "reason": "Multiply -2b by each term in the first bracket.",
+        "math": "-2*b*(b^2-7)+4*b^2*(3*b-5)",
+        "distribution": {
+          "left": ["-2*b"],
+          "right": ["b^2", "-7"],
+          "products": ["-2*b^3", "14*b"]
+        }
+      },
+      {
+        "title": "Keep the second product intact",
+        "reason": "The first expansion contains a positive 14b.",
+        "math": "-2*b^3+14*b+4*b^2*(3*b-5)",
+        "distribution": {
+          "left": ["4*b^2"],
+          "right": ["3*b", "-5"],
+          "products": ["12*b^3", "-20*b^2"]
+        }
+      },
+      {
+        "title": "Write both expansions",
+        "reason": "Only the cubic terms can be combined.",
+        "math": "-2*b^3+14*b+12*b^3-20*b^2"
+      },
+      {
+        "title": "Collect like terms",
+        "reason": "-2 plus 12 gives the cubic coefficient 10.",
+        "math": "10*b^3-20*b^2+14*b"
+      }
+    ]
+  },
+  {
+    "id": "REV-43a",
+    "bank": "REV",
+    "number": 43,
+    "part": "a",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand and simplify the following expressions.",
+    "expression": "2*x^2*y*(1-4*y)+3*y^2*(x^2-2*x)",
+    "answer": "2*x^2*y-5*x^2*y^2-6*x*y^2",
+    "nonzero": [],
+    "sourceRect": [0.16, 0.231, 0.37, 0.028],
+    "steps": [
+      {
+        "title": "Expand the first product",
+        "reason": "Multiply the monomial by both bracket terms.",
+        "math": "2*x^2*y*(1-4*y)+3*y^2*(x^2-2*x)",
+        "distribution": {
+          "left": ["2*x^2*y"],
+          "right": ["1", "-4*y"],
+          "products": ["2*x^2*y", "-8*x^2*y^2"]
+        }
+      },
+      {
+        "title": "Expand the second product",
+        "reason": "Keep the full variable pattern when multiplying.",
+        "math": "2*x^2*y-8*x^2*y^2+3*y^2*(x^2-2*x)",
+        "distribution": {
+          "left": ["3*y^2"],
+          "right": ["x^2", "-2*x"],
+          "products": ["3*x^2*y^2", "-6*x*y^2"]
+        }
+      },
+      {
+        "title": "Write all four terms",
+        "reason": "Only the two x^2y^2 terms are like terms.",
+        "math": "2*x^2*y-8*x^2*y^2+3*x^2*y^2-6*x*y^2"
+      },
+      {
+        "title": "Combine like terms",
+        "reason": "The x^2y and xy^2 terms stay separate.",
+        "math": "2*x^2*y-5*x^2*y^2-6*x*y^2"
+      }
+    ]
+  },
+  {
+    "id": "REV-43b",
+    "bank": "REV",
+    "number": 43,
+    "part": "b",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand and simplify the following expressions.",
+    "expression": "x^2-3*x*(y-4*x)+y*(2*y-5*x)",
+    "answer": "13*x^2-8*x*y+2*y^2",
+    "nonzero": [],
+    "sourceRect": [0.53, 0.231, 0.43, 0.028],
+    "steps": [
+      {
+        "title": "Distribute -3x",
+        "reason": "Multiplying -3x by -4x gives +12x^2.",
+        "math": "x^2-3*x*(y-4*x)+y*(2*y-5*x)",
+        "distribution": {
+          "left": ["-3*x"],
+          "right": ["y", "-4*x"],
+          "products": ["-3*x*y", "12*x^2"]
+        }
+      },
+      {
+        "title": "Distribute y",
+        "reason": "Multiply y by both terms.",
+        "math": "x^2-3*x*y+12*x^2+y*(2*y-5*x)",
+        "distribution": {
+          "left": ["y"],
+          "right": ["2*y", "-5*x"],
+          "products": ["2*y^2", "-5*x*y"]
+        }
+      },
+      {
+        "title": "Write the expansion",
+        "reason": "Group x^2 and xy terms without combining unlike terms.",
+        "math": "x^2-3*x*y+12*x^2+2*y^2-5*x*y"
+      },
+      {
+        "title": "Collect like terms",
+        "reason": "1+12=13 and -3-5=-8.",
+        "math": "13*x^2-8*x*y+2*y^2"
+      }
+    ]
+  },
+  {
+    "id": "REV-44a",
+    "bank": "REV",
+    "number": 44,
+    "part": "a",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand and simplify the following expressions.",
+    "expression": "(5*y-2)^2+4*y",
+    "answer": "25*y^2-16*y+4",
+    "nonzero": [],
+    "sourceRect": [0.16, 0.262, 0.35, 0.028],
+    "steps": [
+      {
+        "title": "Write the square as two factors",
+        "reason": "The square includes both cross products.",
+        "math": "(5*y-2)*(5*y-2)+4*y",
+        "distribution": {
+          "left": ["5*y", "-2"],
+          "right": ["5*y", "-2"],
+          "products": ["25*y^2", "-10*y", "-10*y", "4"]
+        }
+      },
+      {
+        "title": "Write all four products",
+        "reason": "Retain the added 4y outside the square.",
+        "math": "25*y^2-10*y-10*y+4+4*y"
+      },
+      {
+        "title": "Group the linear terms",
+        "reason": "There are three contributions to the y coefficient.",
+        "math": "25*y^2+(-10-10+4)*y+4"
+      },
+      {
+        "title": "Simplify",
+        "reason": "The linear coefficient is -16.",
+        "math": "25*y^2-16*y+4"
+      }
+    ]
+  },
+  {
+    "id": "REV-44b",
+    "bank": "REV",
+    "number": 44,
+    "part": "b",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand and simplify the following expressions.",
+    "expression": "4*b*(b+3)-(2*b-3)^2",
+    "answer": "24*b-9",
+    "nonzero": [],
+    "sourceRect": [0.53, 0.262, 0.43, 0.028],
+    "steps": [
+      {
+        "title": "Expand the first product",
+        "reason": "Multiply 4b by both terms.",
+        "math": "4*b*(b+3)-(2*b-3)^2",
+        "distribution": {
+          "left": ["4*b"],
+          "right": ["b", "3"],
+          "products": ["4*b^2", "12*b"]
+        }
+      },
+      {
+        "title": "Expand the square",
+        "reason": "Keep the subtraction outside the complete square.",
+        "math": "4*b^2+12*b-(2*b-3)*(2*b-3)",
+        "distribution": {
+          "left": ["2*b", "-3"],
+          "right": ["2*b", "-3"],
+          "products": ["4*b^2", "-6*b", "-6*b", "9"]
+        }
+      },
+      {
+        "title": "Combine inside the subtracted bracket",
+        "reason": "The two cross products total -12b.",
+        "math": "4*b^2+12*b-(4*b^2-12*b+9)"
+      },
+      {
+        "title": "Subtract every term",
+        "reason": "The middle term becomes positive and the constant negative.",
+        "math": "4*b^2+12*b-4*b^2+12*b-9",
+        "focus": {
+          "before": ["4*b^2", "-12*b", "9"],
+          "after": ["-4*b^2", "12*b", "-9"]
+        }
+      },
+      {
+        "title": "Cancel and combine",
+        "reason": "The quadratic terms cancel.",
+        "math": "24*b-9"
+      }
+    ]
+  },
+  {
+    "id": "REV-45a",
+    "bank": "REV",
+    "number": 45,
+    "part": "a",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand the following expressions and arrange the terms in descending powers of the variables.",
+    "expression": "x*(5-3*x)*(2*x-5)",
+    "answer": "-6*x^3+25*x^2-25*x",
+    "nonzero": [],
+    "sourceRect": [0.16, 0.336, 0.35, 0.029],
+    "steps": [
+      {
+        "title": "Expand the two brackets first",
+        "reason": "Retain the outside factor x.",
+        "math": "x*(5-3*x)*(2*x-5)",
+        "distribution": {
+          "left": ["5", "-3*x"],
+          "right": ["2*x", "-5"],
+          "products": ["10*x", "-25", "-6*x^2", "15*x"]
+        }
+      },
+      {
+        "title": "Write the bracket expansion",
+        "reason": "All four pair products remain multiplied by x.",
+        "math": "x*(10*x-25-6*x^2+15*x)"
+      },
+      {
+        "title": "Collect inside the bracket",
+        "reason": "The two linear terms total 25x.",
+        "math": "x*(-6*x^2+25*x-25)",
+        "distribution": {
+          "left": ["x"],
+          "right": ["-6*x^2", "25*x", "-25"],
+          "products": ["-6*x^3", "25*x^2", "-25*x"]
+        }
+      },
+      {
+        "title": "Multiply by x",
+        "reason": "Raise each variable index by 1.",
+        "math": "-6*x^3+25*x^2-25*x"
+      }
+    ]
+  },
+  {
+    "id": "REV-45b",
+    "bank": "REV",
+    "number": 45,
+    "part": "b",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand the following expressions and arrange the terms in descending powers of the variables.",
+    "expression": "-4*y*(2*y-1)*(3*y+2)",
+    "answer": "-24*y^3-4*y^2+8*y",
+    "nonzero": [],
+    "sourceRect": [0.53, 0.336, 0.43, 0.029],
+    "steps": [
+      {
+        "title": "Expand the two brackets",
+        "reason": "Keep -4y outside.",
+        "math": "-4*y*(2*y-1)*(3*y+2)",
+        "distribution": {
+          "left": ["2*y", "-1"],
+          "right": ["3*y", "2"],
+          "products": ["6*y^2", "4*y", "-3*y", "-2"]
+        }
+      },
+      {
+        "title": "Write all four products",
+        "reason": "The outside negative factor has not yet been applied.",
+        "math": "-4*y*(6*y^2+4*y-3*y-2)"
+      },
+      {
+        "title": "Collect inside the bracket",
+        "reason": "4y-3y gives y.",
+        "math": "-4*y*(6*y^2+y-2)",
+        "distribution": {
+          "left": ["-4*y"],
+          "right": ["6*y^2", "y", "-2"],
+          "products": ["-24*y^3", "-4*y^2", "8*y"]
+        }
+      },
+      {
+        "title": "Distribute the outside factor",
+        "reason": "The last term becomes positive.",
+        "math": "-24*y^3-4*y^2+8*y"
+      }
+    ]
+  },
+  {
+    "id": "REV-46a",
+    "bank": "REV",
+    "number": 46,
+    "part": "a",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand the following expressions and arrange the terms in descending powers of the variables.",
+    "expression": "(5-a)*(4+3*a-3*a^2)",
+    "answer": "3*a^3-18*a^2+11*a+20",
+    "nonzero": [],
+    "sourceRect": [0.16, 0.368, 0.35, 0.028],
+    "steps": [
+      {
+        "title": "Multiply every term pair",
+        "reason": "A binomial times a trinomial gives six products.",
+        "math": "(5-a)*(4+3*a-3*a^2)",
+        "distribution": {
+          "left": ["5", "-a"],
+          "right": ["4", "3*a", "-3*a^2"],
+          "products": ["20", "15*a", "-15*a^2", "-4*a", "-3*a^2", "3*a^3"]
+        }
+      },
+      {
+        "title": "Write all six products",
+        "reason": "Include the positive cubic from the two negative factors.",
+        "math": "20+15*a-15*a^2-4*a-3*a^2+3*a^3"
+      },
+      {
+        "title": "Group by descending powers",
+        "reason": "The quadratic coefficient is -15-3.",
+        "math": "3*a^3+(-15-3)*a^2+(15-4)*a+20"
+      },
+      {
+        "title": "Simplify",
+        "reason": "The linear coefficient is 11.",
+        "math": "3*a^3-18*a^2+11*a+20"
+      }
+    ]
+  },
+  {
+    "id": "REV-46b",
+    "bank": "REV",
+    "number": 46,
+    "part": "b",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand the following expressions and arrange the terms in descending powers of the variables.",
+    "expression": "-(3-7*b^2-4*b)*(2*b-3)",
+    "answer": "14*b^3-13*b^2-18*b+9",
+    "nonzero": [],
+    "sourceRect": [0.53, 0.368, 0.43, 0.028],
+    "steps": [
+      {
+        "title": "Expand the bracket product",
+        "reason": "Preserve the leading minus outside all six products.",
+        "math": "-(3-7*b^2-4*b)*(2*b-3)",
+        "distribution": {
+          "left": ["3", "-7*b^2", "-4*b"],
+          "right": ["2*b", "-3"],
+          "products": ["6*b", "-9", "-14*b^3", "21*b^2", "-8*b^2", "12*b"]
+        }
+      },
+      {
+        "title": "Write the six products inside a bracket",
+        "reason": "The outside minus still applies to the entire expansion.",
+        "math": "-(6*b-9-14*b^3+21*b^2-8*b^2+12*b)"
+      },
+      {
+        "title": "Collect inside the bracket",
+        "reason": "Combine quadratic and linear terms before negating.",
+        "math": "-(-14*b^3+13*b^2+18*b-9)"
+      },
+      {
+        "title": "Apply the outside minus",
+        "reason": "Reverse every sign.",
+        "math": "14*b^3-13*b^2-18*b+9",
+        "focus": {
+          "before": ["-14*b^3", "13*b^2", "18*b", "-9"],
+          "after": ["14*b^3", "-13*b^2", "-18*b", "9"]
+        }
+      }
+    ]
+  },
+  {
+    "id": "REV-47",
+    "bank": "REV",
+    "number": 47,
+    "part": "",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand and simplify the following expression, and arrange the terms in descending powers of the variable.",
+    "expression": "2*x^2+(3+2*x-5*x^2)*(2*x^2-1)",
+    "answer": "-10*x^4+4*x^3+13*x^2-2*x-3",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.457, 0.73, 0.028],
+    "steps": [
+      {
+        "title": "Expand every term pair",
+        "reason": "Keep the extra 2x^2 outside the product.",
+        "math": "2*x^2+(3+2*x-5*x^2)*(2*x^2-1)",
+        "distribution": {
+          "left": ["3", "2*x", "-5*x^2"],
+          "right": ["2*x^2", "-1"],
+          "products": ["6*x^2", "-3", "4*x^3", "-2*x", "-10*x^4", "5*x^2"]
+        }
+      },
+      {
+        "title": "Write the six products",
+        "reason": "Do not omit the original 2x^2.",
+        "math": "2*x^2+6*x^2-3+4*x^3-2*x-10*x^4+5*x^2"
+      },
+      {
+        "title": "Collect in descending powers",
+        "reason": "All three quadratic terms contribute.",
+        "math": "-10*x^4+4*x^3+(2+6+5)*x^2-2*x-3"
+      },
+      {
+        "title": "Simplify",
+        "reason": "The quadratic coefficient is 13.",
+        "math": "-10*x^4+4*x^3+13*x^2-2*x-3"
+      }
+    ]
+  },
+  {
+    "id": "REV-48",
+    "bank": "REV",
+    "number": 48,
+    "part": "",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand and simplify the following expression, and arrange the terms in descending powers of the variable.",
+    "expression": "(6*x+1)*(4*x+3*x^2-3)-(10*x^3-20*x-4)",
+    "answer": "8*x^3+27*x^2+6*x+1",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.488, 0.8, 0.029],
+    "steps": [
+      {
+        "title": "Expand every term pair",
+        "reason": "Keep the final polynomial in its subtracted bracket.",
+        "math": "(6*x+1)*(4*x+3*x^2-3)-(10*x^3-20*x-4)",
+        "distribution": {
+          "left": ["6*x", "1"],
+          "right": ["4*x", "3*x^2", "-3"],
+          "products": ["24*x^2", "18*x^3", "-18*x", "4*x", "3*x^2", "-3"]
+        }
+      },
+      {
+        "title": "Write the six products",
+        "reason": "The subtraction has not yet been distributed.",
+        "math": "24*x^2+18*x^3-18*x+4*x+3*x^2-3-(10*x^3-20*x-4)"
+      },
+      {
+        "title": "Subtract every term",
+        "reason": "Both negative terms in the last bracket become positive.",
+        "math": "24*x^2+18*x^3-18*x+4*x+3*x^2-3-10*x^3+20*x+4",
+        "focus": {
+          "before": ["10*x^3", "-20*x", "-4"],
+          "after": ["-10*x^3", "20*x", "4"]
+        }
+      },
+      {
+        "title": "Collect in descending powers",
+        "reason": "The coefficients are 18-10, 24+3, -18+4+20, and -3+4.",
+        "math": "8*x^3+27*x^2+6*x+1"
+      }
+    ]
+  },
+  {
+    "id": "REV-49a",
+    "bank": "REV",
+    "number": 49,
+    "part": "a",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand (3b - 1)(b + 4).",
+    "expression": "(3*b-1)*(b+4)",
+    "answer": "3*b^2+11*b-4",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.531, 0.72, 0.026],
+    "steps": [
+      {
+        "title": "Multiply every term pair",
+        "reason": "There are four pair products.",
+        "math": "(3*b-1)*(b+4)",
+        "distribution": {
+          "left": ["3*b", "-1"],
+          "right": ["b", "4"],
+          "products": ["3*b^2", "12*b", "-b", "-4"]
+        }
+      },
+      {
+        "title": "Write all products",
+        "reason": "The -1 multiplies both terms in b+4.",
+        "math": "3*b^2+12*b-b-4"
+      },
+      {
+        "title": "Collect like terms",
+        "reason": "12b-b gives 11b.",
+        "math": "3*b^2+11*b-4"
+      }
+    ]
+  },
+  {
+    "id": "REV-49b",
+    "bank": "REV",
+    "number": 49,
+    "part": "b",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Hence, expand (3b - 1)(b + 4)(5 - b).",
+    "expression": "(3*b-1)*(b+4)*(5-b)",
+    "answer": "-3*b^3+4*b^2+59*b-20",
+    "nonzero": [],
+    "sourceRect": [0.16, 0.554, 0.69, 0.026],
+    "steps": [
+      {
+        "title": "Reuse the result of part (a)",
+        "reason": "The first two factors expand to 3b^2+11b-4.",
+        "math": "(3*b^2+11*b-4)*(5-b)"
+      },
+      {
+        "title": "Multiply by the remaining factor",
+        "reason": "Multiply each of the three terms by 5 and by -b.",
+        "math": "(3*b^2+11*b-4)*(5-b)",
+        "distribution": {
+          "left": ["3*b^2", "11*b", "-4"],
+          "right": ["5", "-b"],
+          "products": ["15*b^2", "-3*b^3", "55*b", "-11*b^2", "-20", "4*b"]
+        }
+      },
+      {
+        "title": "Write all six products",
+        "reason": "The product of -4 and -b is positive.",
+        "math": "15*b^2-3*b^3+55*b-11*b^2-20+4*b"
+      },
+      {
+        "title": "Collect like powers",
+        "reason": "15-11=4 and 55+4=59.",
+        "math": "-3*b^3+4*b^2+59*b-20"
+      }
+    ]
+  },
+  {
+    "id": "REV-50a",
+    "bank": "REV",
+    "number": 50,
+    "part": "a",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Expand (x - 3)^2.",
+    "expression": "(x-3)^2",
+    "answer": "x^2-6*x+9",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.586, 0.5, 0.026],
+    "steps": [
+      {
+        "title": "Write the square as a product",
+        "reason": "Include both cross products.",
+        "math": "(x-3)*(x-3)",
+        "distribution": {
+          "left": ["x", "-3"],
+          "right": ["x", "-3"],
+          "products": ["x^2", "-3*x", "-3*x", "9"]
+        }
+      },
+      {
+        "title": "Write the four products",
+        "reason": "The constant is positive.",
+        "math": "x^2-3*x-3*x+9"
+      },
+      {
+        "title": "Collect like terms",
+        "reason": "The linear terms total -6x.",
+        "math": "x^2-6*x+9"
+      }
+    ]
+  },
+  {
+    "id": "REV-50b",
+    "bank": "REV",
+    "number": 50,
+    "part": "b",
+    "page": 43,
+    "skill": "expand",
+    "prompt": "Find the coefficient of x^2 in the expansion of (x - 3)^2(x + 1).",
+    "expression": "(x-3)^2*(x+1)",
+    "answer": "-5",
+    "nonzero": [],
+    "sourceRect": [0.16, 0.609, 0.76, 0.027],
+    "steps": [
+      {
+        "title": "Reuse part (a)",
+        "reason": "The square is x^2-6x+9.",
+        "math": "(x^2-6*x+9)*(x+1)"
+      },
+      {
+        "title": "Identify the x^2 contributions",
+        "reason": "Only x^2 times 1 and -6x times x have degree 2.",
+        "tex": "x^2\\cdot1=x^2,\\qquad(-6x)\\cdot x=-6x^2"
+      },
+      {
+        "title": "Add their coefficients",
+        "reason": "The other four products have degrees 3, 1 or 0.",
+        "tex": "[x^2]\\bigl((x-3)^2(x+1)\\bigr)=1-6=-5"
+      },
+      {
+        "title": "State the requested coefficient",
+        "reason": "A coefficient is a number, rather than the whole expanded expression.",
+        "tex": "\\text{Coefficient of }x^2=-5"
+      }
+    ],
+    "answerTex": "\\text{Coefficient of }x^2=-5"
+  },
+  {
+    "id": "REV-51",
+    "bank": "REV",
+    "number": 51,
+    "part": "",
+    "page": 43,
+    "skill": "applications",
+    "prompt": "If the coefficient of x^4 in the expansion of (2 - 3px)(4x^4 + 5x^3 - x) is 38, find the value of p.",
+    "expression": "(2-3*p*x)*(4*x^4+5*x^3-x)",
+    "answer": "-2",
+    "nonzero": [],
+    "sourceRect": [0.09, 0.638, 0.88, 0.025],
+    "steps": [
+      {
+        "title": "Identify the x^4 contributions",
+        "reason": "Only degree pairs 0+4 and 1+3 can contribute.",
+        "tex": "2(4x^4)=8x^4,\\qquad(-3px)(5x^3)=-15px^4"
+      },
+      {
+        "title": "Use the given coefficient",
+        "reason": "The sum of the two coefficients is 38.",
+        "tex": "8-15p=38"
+      },
+      {
+        "title": "Subtract 8 from both sides",
+        "reason": "This isolates the term containing p.",
+        "tex": "-15p=30"
+      },
+      {
+        "title": "Divide both sides by -15",
+        "reason": "The required value is negative.",
+        "tex": "p=-2"
+      },
+      {
+        "title": "Check in the coefficient",
+        "reason": "Substitution gives the stated value 38.",
+        "tex": "8-15(-2)=38"
+      }
+    ],
+    "givenTex": "[x^4]\\bigl((2-3px)(4x^4+5x^3-x)\\bigr)=38",
+    "answerTex": "p=-2"
+  },
+  {
+    "id": "REV-52a",
+    "bank": "REV",
+    "number": 52,
+    "part": "a",
+    "page": 43,
+    "skill": "applications",
+    "prompt": "In the figure, ABCD is a rectangle. The length and width of ABCD are (3a + 1) cm and (2a + 3) cm respectively. (a) Express the perimeter and the area of ABCD in terms of a.",
+    "expression": "2*((3*a+1)+(2*a+3))",
+    "answer": "10*a+8",
+    "nonzero": [],
+    "sourceRect": [0.1, 0.672, 0.86, 0.093],
+    "steps": [
+      {
+        "title": "Model the perimeter",
+        "reason": "A rectangle has two lengths and two widths.",
+        "math": "2*((3*a+1)+(2*a+3))",
+        "target": "10*a+8",
+        "label": "Perimeter"
+      },
+      {
+        "title": "Combine inside the bracket",
+        "reason": "Add lengths before multiplying by 2.",
+        "math": "2*(5*a+4)",
+        "target": "10*a+8",
+        "label": "Perimeter"
+      },
+      {
+        "title": "Simplify the perimeter",
+        "reason": "The perimeter is measured in cm.",
+        "math": "10*a+8",
+        "target": "10*a+8",
+        "label": "Perimeter"
+      },
+      {
+        "title": "Model the area",
+        "reason": "Multiply the length by the width.",
+        "math": "(3*a+1)*(2*a+3)",
+        "target": "6*a^2+11*a+3",
+        "label": "Area",
+        "distribution": {
+          "left": ["3*a", "1"],
+          "right": ["2*a", "3"],
+          "products": ["6*a^2", "9*a", "2*a", "3"]
+        }
+      },
+      {
+        "title": "Write all four area products",
+        "reason": "The units of area are cm^2.",
+        "math": "6*a^2+9*a+2*a+3",
+        "target": "6*a^2+11*a+3",
+        "label": "Area"
+      },
+      {
+        "title": "Collect the area terms",
+        "reason": "9a+2a gives 11a.",
+        "math": "6*a^2+11*a+3",
+        "target": "6*a^2+11*a+3",
+        "label": "Area"
+      },
+      {
+        "title": "State both results with units",
+        "reason": "Keep perimeter and area distinct.",
+        "tex": "P=(10a+8)\\text{ cm},\\qquad A=(6a^2+11a+3)\\text{ cm}^2"
+      }
+    ],
+    "diagram": "rectangle",
+    "diagramLabels": ["AD = 3a + 1 cm", "DC = 2a + 3 cm"],
+    "answerTex": "P=(10a+8)\\text{ cm},\\quad A=(6a^2+11a+3)\\text{ cm}^2"
+  },
+  {
+    "id": "REV-52b",
+    "bank": "REV",
+    "number": 52,
+    "part": "b",
+    "page": 43,
+    "skill": "applications",
+    "prompt": "In the figure, ABCD is a rectangle. The length and width of ABCD are (3a + 1) cm and (2a + 3) cm respectively. (b) If a = 5, find the perimeter and the area of ABCD.",
+    "expression": "10*a+8",
+    "answer": "58",
+    "nonzero": [],
+    "sourceRect": [0.1, 0.672, 0.86, 0.093],
+    "steps": [
+      {
+        "title": "Recall both formulas from part (a)",
+        "reason": "Use the simplified perimeter and area before substituting.",
+        "tex": "P=10a+8,\\qquad A=6a^2+11a+3"
+      },
+      {
+        "title": "Substitute a = 5 in the perimeter",
+        "reason": "Keep the multiplication explicit.",
+        "math": "10*5+8",
+        "target": "58",
+        "label": "Perimeter"
+      },
+      {
+        "title": "Evaluate the perimeter",
+        "reason": "The result is in cm.",
+        "math": "58",
+        "target": "58",
+        "label": "Perimeter"
+      },
+      {
+        "title": "Substitute a = 5 in the area",
+        "reason": "Square 5 before multiplying by 6.",
+        "math": "6*5^2+11*5+3",
+        "target": "208",
+        "label": "Area"
+      },
+      {
+        "title": "Evaluate the area",
+        "reason": "150+55+3 gives 208.",
+        "math": "208",
+        "target": "208",
+        "label": "Area"
+      },
+      {
+        "title": "State the units",
+        "reason": "Perimeter and area use different units.",
+        "tex": "P=58\\text{ cm},\\qquad A=208\\text{ cm}^2"
+      }
+    ],
+    "diagram": "rectangle",
+    "diagramLabels": ["AD = 3a + 1 cm", "DC = 2a + 3 cm"],
+    "givenTex": "a=5",
+    "answerTex": "P=58\\text{ cm},\\quad A=208\\text{ cm}^2"
+  },
+  {
+    "id": "REV-53a",
+    "bank": "REV",
+    "number": 53,
+    "part": "a",
+    "page": 43,
+    "skill": "applications",
+    "prompt": "In a supermarket, each apple costs $(3x - 4) while each orange costs $(2x - 1). Mary wants to buy (y + 1) apples and (2y - 3) oranges in the supermarket. (a) Express the total amount that Mary pays in terms of x and y.",
+    "expression": "(y+1)*(3*x-4)+(2*y-3)*(2*x-1)",
+    "answer": "7*x*y-3*x-6*y-1",
+    "nonzero": [],
+    "sourceRect": [0.11, 0.782, 0.84, 0.106],
+    "steps": [
+      {
+        "title": "Model quantity times unit price",
+        "reason": "Add the cost of the apples and the cost of the oranges.",
+        "math": "(y+1)*(3*x-4)+(2*y-3)*(2*x-1)"
+      },
+      {
+        "title": "Expand the apple cost",
+        "reason": "Multiply both quantity terms by both price terms.",
+        "math": "(y+1)*(3*x-4)+(2*y-3)*(2*x-1)",
+        "distribution": {
+          "left": ["y", "1"],
+          "right": ["3*x", "-4"],
+          "products": ["3*x*y", "-4*y", "3*x", "-4"]
+        }
+      },
+      {
+        "title": "Expand the orange cost",
+        "reason": "The negative quantity term contributes -6x and +3.",
+        "math": "3*x*y-4*y+3*x-4+(2*y-3)*(2*x-1)",
+        "distribution": {
+          "left": ["2*y", "-3"],
+          "right": ["2*x", "-1"],
+          "products": ["4*x*y", "-2*y", "-6*x", "3"]
+        }
+      },
+      {
+        "title": "Write both cost expansions",
+        "reason": "Keep the signs in both products.",
+        "math": "3*x*y-4*y+3*x-4+4*x*y-2*y-6*x+3"
+      },
+      {
+        "title": "Collect like terms",
+        "reason": "The result is the total cost in dollars.",
+        "math": "7*x*y-3*x-6*y-1"
+      },
+      {
+        "title": "State the total payment",
+        "reason": "Use dollar units.",
+        "tex": "\\text{Total payment}=\\$(7xy-3x-6y-1)"
+      }
+    ],
+    "answerTex": "\\$(7xy-3x-6y-1)"
+  },
+  {
+    "id": "REV-53b",
+    "bank": "REV",
+    "number": 53,
+    "part": "b",
+    "page": 43,
+    "skill": "applications",
+    "prompt": "In a supermarket, each apple costs $(3x - 4) while each orange costs $(2x - 1). Mary wants to buy (y + 1) apples and (2y - 3) oranges in the supermarket. (b) Suppose Mary has $100. If x = 4 and y = 5, does she have enough money to pay? Explain your answer.",
+    "expression": "7*x*y-3*x-6*y-1",
+    "answer": "97",
+    "nonzero": [],
+    "sourceRect": [0.11, 0.782, 0.84, 0.106],
+    "steps": [
+      {
+        "title": "Recall the cost from part (a)",
+        "reason": "The total payment is 7xy-3x-6y-1 dollars.",
+        "tex": "C=7xy-3x-6y-1"
+      },
+      {
+        "title": "Substitute both given values",
+        "reason": "Use x=4 and y=5 in every term.",
+        "math": "7*4*5-3*4-6*5-1",
+        "target": "97"
+      },
+      {
+        "title": "Calculate products first",
+        "reason": "The two variable contributions are 12 and 30 dollars.",
+        "math": "140-12-30-1",
+        "target": "97"
+      },
+      {
+        "title": "Calculate the payment",
+        "reason": "Mary pays $97.",
+        "math": "97",
+        "target": "97"
+      },
+      {
+        "title": "Compare with the available money",
+        "reason": "100-97=3, so the available $100 covers the payment.",
+        "tex": "100-97=3>0\\quad\\text{Yes; Mary has \\$3 left.}"
+      }
+    ],
+    "givenTex": "x=4,\\quad y=5",
+    "answerTex": "\\text{Yes. Payment }=\\$97;\\quad\\text{money left }=\\$3."
+  },
+  {
+    "id": "REV-54a",
+    "bank": "REV",
+    "number": 54,
+    "part": "a",
+    "page": 44,
+    "skill": "applications",
+    "prompt": "In the figure, ABCD and APQR are two squares with sides (3x + 5) cm and 2x cm respectively. (a) Express the perimeter and the area of the shaded region in terms of x.",
+    "expression": "(3*x+5)+(3*x+5)+((3*x+5)-2*x)+2*x+2*x+((3*x+5)-2*x)",
+    "answer": "12*x+20",
+    "nonzero": [],
+    "sourceRect": [0.055, 0.065, 0.85, 0.145],
+    "steps": [
+      {
+        "title": "Trace the whole exposed boundary",
+        "reason": "Use DC, CB, BP, PQ, QR and RD; the cut-out replaces two removed lengths.",
+        "math": "(3*x+5)+(3*x+5)+((3*x+5)-2*x)+2*x+2*x+((3*x+5)-2*x)",
+        "target": "12*x+20",
+        "label": "Perimeter"
+      },
+      {
+        "title": "Cancel the removed and replacement lengths",
+        "reason": "Two removed 2x lengths are replaced by PQ and QR, each 2x.",
+        "math": "4*(3*x+5)",
+        "target": "12*x+20",
+        "label": "Perimeter"
+      },
+      {
+        "title": "Expand the perimeter",
+        "reason": "The perimeter is in cm.",
+        "math": "12*x+20",
+        "target": "12*x+20",
+        "label": "Perimeter"
+      },
+      {
+        "title": "Subtract the square areas",
+        "reason": "Shaded area equals the large square minus the cut-out square.",
+        "math": "(3*x+5)^2-(2*x)^2",
+        "target": "5*x^2+30*x+25",
+        "label": "Area",
+        "distribution": {
+          "left": ["3*x", "5"],
+          "right": ["3*x", "5"],
+          "products": ["9*x^2", "15*x", "15*x", "25"]
+        }
+      },
+      {
+        "title": "Write both square areas",
+        "reason": "The small square has area 4x^2.",
+        "math": "9*x^2+15*x+15*x+25-4*x^2",
+        "target": "5*x^2+30*x+25",
+        "label": "Area"
+      },
+      {
+        "title": "Collect the area terms",
+        "reason": "Combine 9x^2-4x^2 and the two cross terms.",
+        "math": "5*x^2+30*x+25",
+        "target": "5*x^2+30*x+25",
+        "label": "Area"
+      },
+      {
+        "title": "State both results with units",
+        "reason": "The cut-out boundary is included in the perimeter.",
+        "tex": "P=(12x+20)\\text{ cm},\\qquad A=(5x^2+30x+25)\\text{ cm}^2"
+      }
+    ],
+    "diagram": "l-shape",
+    "diagramLabels": [
+      "ABCD: side 3x + 5 cm",
+      "APQR: side 2x cm",
+      "Boundary D-C-B-P-Q-R-D"
+    ],
+    "answerTex": "P=(12x+20)\\text{ cm},\\quad A=(5x^2+30x+25)\\text{ cm}^2"
+  },
+  {
+    "id": "REV-54b",
+    "bank": "REV",
+    "number": 54,
+    "part": "b",
+    "page": 44,
+    "skill": "applications",
+    "prompt": "In the figure, ABCD and APQR are two squares with sides (3x + 5) cm and 2x cm respectively. (b) If x = 3, find the perimeter and the area of the shaded region.",
+    "expression": "12*x+20",
+    "answer": "56",
+    "nonzero": [],
+    "sourceRect": [0.055, 0.065, 0.85, 0.145],
+    "steps": [
+      {
+        "title": "Recall the expressions from part (a)",
+        "reason": "Use both the perimeter and area formulas.",
+        "tex": "P=12x+20,\\qquad A=5x^2+30x+25"
+      },
+      {
+        "title": "Substitute x=3 in the perimeter",
+        "reason": "Evaluate 12 times 3 before adding.",
+        "math": "12*3+20",
+        "target": "56",
+        "label": "Perimeter"
+      },
+      {
+        "title": "Evaluate the perimeter",
+        "reason": "The unit is cm.",
+        "math": "56",
+        "target": "56",
+        "label": "Perimeter"
+      },
+      {
+        "title": "Substitute x=3 in the area",
+        "reason": "Square 3 before multiplying by 5.",
+        "math": "5*3^2+30*3+25",
+        "target": "160",
+        "label": "Area"
+      },
+      {
+        "title": "Evaluate the area",
+        "reason": "45+90+25=160.",
+        "math": "160",
+        "target": "160",
+        "label": "Area"
+      },
+      {
+        "title": "State both results with units",
+        "reason": "Perimeter and area have different units.",
+        "tex": "P=56\\text{ cm},\\qquad A=160\\text{ cm}^2"
+      }
+    ],
+    "diagram": "l-shape",
+    "diagramLabels": [
+      "ABCD: side 3x + 5 cm",
+      "APQR: side 2x cm",
+      "Boundary D-C-B-P-Q-R-D"
+    ],
+    "givenTex": "x=3",
+    "answerTex": "P=56\\text{ cm},\\quad A=160\\text{ cm}^2"
+  },
+  {
+    "id": "REV-55a",
+    "bank": "REV",
+    "number": 55,
+    "part": "a",
+    "page": 44,
+    "skill": "applications",
+    "prompt": "In the figure, the perimeter of ABCD is (x^2 + 14x - 6) cm. AB = (6x - 4) cm, BC = (x^2 - 1) cm and CD = 6x cm. Angles ABC and ADC are right angles. (a) Express the length of AD in terms of x.",
+    "expression": "(x^2+14*x-6)-((6*x-4)+(x^2-1)+6*x)",
+    "answer": "2*x-1",
+    "nonzero": [],
+    "sourceRect": [0.055, 0.218, 0.85, 0.15],
+    "steps": [
+      {
+        "title": "Subtract the three known sides",
+        "reason": "AD is the perimeter minus AB, BC and CD.",
+        "math": "(x^2+14*x-6)-((6*x-4)+(x^2-1)+6*x)"
+      },
+      {
+        "title": "Combine the known side lengths",
+        "reason": "Their sum is x^2+12x-5.",
+        "math": "(x^2+14*x-6)-(x^2+12*x-5)"
+      },
+      {
+        "title": "Subtract every term",
+        "reason": "The negative constant -5 becomes +5.",
+        "math": "x^2+14*x-6-x^2-12*x+5",
+        "focus": {
+          "before": ["x^2", "12*x", "-5"],
+          "after": ["-x^2", "-12*x", "5"]
+        }
+      },
+      {
+        "title": "Cancel and combine",
+        "reason": "The x^2 terms cancel.",
+        "math": "2*x-1"
+      },
+      {
+        "title": "State the length",
+        "reason": "AD is measured in cm.",
+        "tex": "AD=(2x-1)\\text{ cm}"
+      }
+    ],
+    "diagram": "quadrilateral-area",
+    "diagramLabels": [
+      "AB = 6x - 4 cm",
+      "BC = x^2 - 1 cm",
+      "CD = 6x cm",
+      "angle ABC = 90 degrees",
+      "angle ADC = 90 degrees",
+      "perimeter = x^2 + 14x - 6 cm"
+    ],
+    "givenTex": "\\angle ABC=\\angle ADC=90^\\circ",
+    "answerTex": "AD=(2x-1)\\text{ cm}"
+  },
+  {
+    "id": "REV-55b",
+    "bank": "REV",
+    "number": 55,
+    "part": "b",
+    "page": 44,
+    "skill": "applications",
+    "prompt": "In the figure, the perimeter of ABCD is (x^2 + 14x - 6) cm. AB = (6x - 4) cm, BC = (x^2 - 1) cm and CD = 6x cm. Angles ABC and ADC are right angles. (b) Express the area of ABCD in terms of x.",
+    "expression": "((6*x-4)*(x^2-1)+6*x*(2*x-1))/2",
+    "answer": "3*x^3+4*x^2-6*x+2",
+    "nonzero": [],
+    "sourceRect": [0.055, 0.218, 0.85, 0.15],
+    "steps": [
+      {
+        "title": "Recall the missing side from part (a)",
+        "reason": "AD = 2x-1 cm.",
+        "tex": "AD=2x-1"
+      },
+      {
+        "title": "Draw diagonal AC and use the marked right angles",
+        "reason": "Triangles ABC and ADC have perpendicular side pairs AB,BC and AD,DC.",
+        "tex": "A_{ABCD}=A_{ABC}+A_{ADC}=\\frac12 AB\\cdot BC+\\frac12 AD\\cdot DC"
+      },
+      {
+        "title": "Substitute all four side expressions",
+        "reason": "The two triangle areas use the two marked right angles.",
+        "math": "((6*x-4)*(x^2-1)+6*x*(2*x-1))/2",
+        "distribution": {
+          "left": ["6*x", "-4"],
+          "right": ["x^2", "-1"],
+          "products": ["6*x^3", "-6*x", "-4*x^2", "4"]
+        }
+      },
+      {
+        "title": "Expand the second triangle product",
+        "reason": "Keep the common factor one half outside.",
+        "math": "(6*x^3-6*x-4*x^2+4+6*x*(2*x-1))/2",
+        "distribution": {
+          "left": ["6*x"],
+          "right": ["2*x", "-1"],
+          "products": ["12*x^2", "-6*x"]
+        }
+      },
+      {
+        "title": "Write all area products",
+        "reason": "Each term still belongs to half the sum.",
+        "math": "(6*x^3-6*x-4*x^2+4+12*x^2-6*x)/2"
+      },
+      {
+        "title": "Collect and divide by 2",
+        "reason": "The numerator is 6x^3+8x^2-12x+4.",
+        "math": "3*x^3+4*x^2-6*x+2"
+      },
+      {
+        "title": "State the area",
+        "reason": "The unit is square centimetres.",
+        "tex": "A_{ABCD}=(3x^3+4x^2-6x+2)\\text{ cm}^2"
+      }
+    ],
+    "diagram": "quadrilateral-area",
+    "diagramLabels": [
+      "AB = 6x - 4 cm",
+      "BC = x^2 - 1 cm",
+      "CD = 6x cm",
+      "angle ABC = 90 degrees",
+      "angle ADC = 90 degrees",
+      "perimeter = x^2 + 14x - 6 cm"
+    ],
+    "givenTex": "\\angle ABC=\\angle ADC=90^\\circ",
+    "answerTex": "(3x^3+4x^2-6x+2)\\text{ cm}^2"
+  },
+  {
+    "id": "REV-56a",
+    "bank": "REV",
+    "number": 56,
+    "part": "a",
+    "page": 44,
+    "skill": "applications",
+    "prompt": "Consider a cuboid of length (x + 5) cm, width (x - 5) cm and height (2x + 1) cm. (a) Express the volume of the cuboid in terms of x.",
+    "expression": "(x+5)*(x-5)*(2*x+1)",
+    "answer": "2*x^3+x^2-50*x-25",
+    "nonzero": [],
+    "sourceRect": [0.055, 0.385, 0.88, 0.069],
+    "steps": [
+      {
+        "title": "Model the volume",
+        "reason": "Multiply length, width and height.",
+        "math": "(x+5)*(x-5)*(2*x+1)"
+      },
+      {
+        "title": "Multiply length and width first",
+        "reason": "Use all four pair products.",
+        "math": "(x+5)*(x-5)*(2*x+1)",
+        "distribution": {
+          "left": ["x", "5"],
+          "right": ["x", "-5"],
+          "products": ["x^2", "-5*x", "5*x", "-25"]
+        }
+      },
+      {
+        "title": "Cancel the cross terms in the base area",
+        "reason": "The base area is x^2-25.",
+        "math": "(x^2-25)*(2*x+1)",
+        "distribution": {
+          "left": ["x^2", "-25"],
+          "right": ["2*x", "1"],
+          "products": ["2*x^3", "x^2", "-50*x", "-25"]
+        }
+      },
+      {
+        "title": "Multiply by the height",
+        "reason": "Keep the negative constant products.",
+        "math": "2*x^3+x^2-50*x-25"
+      },
+      {
+        "title": "State the volume",
+        "reason": "Three lengths multiply to cubic centimetres.",
+        "tex": "V=(2x^3+x^2-50x-25)\\text{ cm}^3"
+      }
+    ],
+    "diagram": "cuboid",
+    "diagramLabels": ["length x + 5 cm", "width x - 5 cm", "height 2x + 1 cm"],
+    "answerTex": "(2x^3+x^2-50x-25)\\text{ cm}^3"
+  },
+  {
+    "id": "REV-56b",
+    "bank": "REV",
+    "number": 56,
+    "part": "b",
+    "page": 44,
+    "skill": "applications",
+    "prompt": "Consider a cuboid of length (x + 5) cm, width (x - 5) cm and height (2x + 1) cm. (b) Express the total surface area of the cuboid in terms of x.",
+    "expression": "2*((x+5)*(x-5)+(x+5)*(2*x+1)+(x-5)*(2*x+1))",
+    "answer": "10*x^2+4*x-50",
+    "nonzero": [],
+    "sourceRect": [0.055, 0.385, 0.88, 0.069],
+    "steps": [
+      {
+        "title": "Include all three pairs of faces",
+        "reason": "Total surface area is twice length-width plus length-height plus width-height.",
+        "math": "2*((x+5)*(x-5)+(x+5)*(2*x+1)+(x-5)*(2*x+1))"
+      },
+      {
+        "title": "Expand length times width",
+        "reason": "This is the first face type.",
+        "math": "2*((x+5)*(x-5)+(x+5)*(2*x+1)+(x-5)*(2*x+1))",
+        "distribution": {
+          "left": ["x", "5"],
+          "right": ["x", "-5"],
+          "products": ["x^2", "-5*x", "5*x", "-25"]
+        }
+      },
+      {
+        "title": "Expand length times height",
+        "reason": "Retain both remaining face types and the factor 2.",
+        "math": "2*(x^2-25+(x+5)*(2*x+1)+(x-5)*(2*x+1))",
+        "distribution": {
+          "left": ["x", "5"],
+          "right": ["2*x", "1"],
+          "products": ["2*x^2", "x", "10*x", "5"]
+        }
+      },
+      {
+        "title": "Expand width times height",
+        "reason": "The negative width constant makes two negative products.",
+        "math": "2*(x^2-25+2*x^2+11*x+5+(x-5)*(2*x+1))",
+        "distribution": {
+          "left": ["x", "-5"],
+          "right": ["2*x", "1"],
+          "products": ["2*x^2", "x", "-10*x", "-5"]
+        }
+      },
+      {
+        "title": "Write all three face areas",
+        "reason": "Each face type occurs twice.",
+        "math": "2*(x^2-25+2*x^2+11*x+5+2*x^2-9*x-5)"
+      },
+      {
+        "title": "Collect inside the bracket",
+        "reason": "The sum of one face of each type is 5x^2+2x-25.",
+        "math": "2*(5*x^2+2*x-25)"
+      },
+      {
+        "title": "Double the result",
+        "reason": "The surface area is measured in cm^2.",
+        "math": "10*x^2+4*x-50"
+      },
+      {
+        "title": "State the surface area",
+        "reason": "All six faces have been included.",
+        "tex": "S=(10x^2+4x-50)\\text{ cm}^2"
+      }
+    ],
+    "diagram": "cuboid",
+    "diagramLabels": ["length x + 5 cm", "width x - 5 cm", "height 2x + 1 cm"],
+    "answerTex": "(10x^2+4x-50)\\text{ cm}^2"
+  }
+]

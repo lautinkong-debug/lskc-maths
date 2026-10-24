@@ -1,0 +1,828 @@
+.player {
+  min-width: 0;
+  color: var(--color-graphite);
+}
+.termTable {
+  padding: 16px 0;
+}
+.tablePolynomial {
+  font-size: clamp(1.15rem, 1.7vw, 1.65rem);
+  overflow-x: auto;
+  padding: 12px 0 20px;
+  text-align: center;
+  color: var(--color-navy);
+}
+.signedTerms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.signedTerms > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 5px;
+  background: white;
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 5px;
+}
+.signedTerms [data-testid="term-degree"] {
+  background: var(--color-highlight);
+  padding: 4px 8px;
+}
+.termTable > p {
+  color: var(--color-navy);
+  font-size: 0.85rem;
+  text-align: center;
+}
+.termTable table {
+  table-layout: fixed;
+  width: 100%;
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+.termTable th {
+  font-size: 0.8rem;
+  padding: 10px 4px;
+  background: var(--color-navy-wash);
+}
+.termTable td {
+  font-size: 1.35rem;
+  padding: 12px;
+  text-align: center;
+}
+.termTable td,
+.termTable th {
+  border: 1px solid var(--color-grid-strong);
+}
+.filters {
+  display: grid;
+  gap: 12px;
+}
+.filters label {
+  display: grid;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--color-navy);
+}
+.filters select,
+.filters input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  background: white;
+  color: var(--color-navy);
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 5px;
+  padding: 7px;
+  font-size: 0.85rem;
+}
+.bankCount {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+.questionGroup {
+  margin-top: 8px;
+}
+.questionGroup h3 {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--color-navy);
+  margin: 14px 0 6px;
+}
+.questionGroup h3 span {
+  font-weight: 400;
+}
+.questionGroup > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+.questionGroup > div button {
+  justify-content: center;
+  padding: 8px 3px;
+  font-size: 0.8rem;
+}
+.empty {
+  font-size: 0.9rem;
+}
+.empty button,
+.questionNavigation button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-grid-strong);
+  background: white;
+  color: var(--color-navy);
+  border-radius: 5px;
+  cursor: pointer;
+}
+.questionNavigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-grid);
+}
+.questionNavigation button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.questionNavigation span {
+  color: var(--color-pencil);
+  font-size: 0.8rem;
+}
+.factorGroups {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--color-navy);
+  padding: 14px 0;
+}
+.factorGroups > div {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: clamp(1.05rem, 1.7vw, 1.55rem);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.factorGroups span[data-active="true"] {
+  background: var(--color-highlight);
+  outline: 2px solid var(--color-navy);
+  border-radius: 3px;
+}
+.activePair {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  color: var(--color-navy);
+  font-size: 1.5rem;
+}
+.activePair > span:first-child {
+  font-size: 0.82rem;
+}
+.termChanges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin: 16px 0;
+}
+.termChanges > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 100px;
+  padding: 10px;
+  background: white;
+  border-block: 1px solid var(--color-grid-strong);
+  font-size: 1.2rem;
+}
+.termChanges .changedTerm {
+  background: var(--color-highlight);
+  padding: 4px;
+}
+.verticalWork {
+  overflow-x: auto;
+  padding: 18px 0;
+}
+.verticalWork table {
+  border-collapse: collapse;
+  margin-inline: auto;
+  font-size: clamp(0.95rem, 1.5vw, 1.35rem);
+}
+.verticalWork td {
+  padding: 10px 8px;
+  text-align: center;
+  border-inline: 1px dashed var(--color-grid);
+}
+.verticalWork tr:last-child td {
+  border-bottom: 2px solid var(--color-navy);
+}
+.verticalWork td[data-active="true"] {
+  background: var(--color-navy-wash);
+}
+.verticalWork th {
+  padding-right: 8px;
+}
+.verticalWork p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-navy);
+}
+.currentCalculation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 0;
+}
+.initialNote {
+  text-align: center;
+}
+.diagram {
+  margin: 0 0 12px;
+}
+.diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.diagram figcaption {
+  font-size: 0.75rem;
+  color: var(--color-pencil);
+  text-align: center;
+}
+.diagramMath {
+  font-size: 20px;
+  text-align: center;
+  color: var(--color-navy);
+}
+.dimensionList {
+  display: grid;
+  grid-template-columns: 1fr;
+  font-size: 0.9rem;
+  color: var(--color-navy);
+}
+.dimensionList p {
+  margin: 3px 0;
+}
+.facePairs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 0;
+  font-size: 0.8rem;
+}
+.facePairs span {
+  padding: 5px;
+  border: 1px solid var(--color-grid);
+  background: white;
+}
+.facePairs [data-active="true"] {
+  background: var(--color-highlight);
+}
+.restrictions {
+  margin-top: 10px !important;
+  color: var(--color-pencil);
+  font-size: 0.85rem;
+}
+.outputLabel {
+  font-weight: 600;
+  color: var(--color-navy);
+}
+.productCell {
+  min-width: 0;
+  overflow-x: auto;
+}
+.activePair > [role="math"] {
+  max-width: 100%;
+  overflow-x: auto;
+}
+@media (max-width: 480px) {
+  .questionNavigation {
+    gap: 5px;
+  }
+  .questionNavigation button {
+    font-size: 0.8rem;
+    padding: 7px;
+  }
+  .verticalWork td {
+    padding: 10px 5px;
+  }
+  .termChanges > div {
+    min-width: 75px;
+    font-size: 1.05rem;
+  }
+}
+.questionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+.questionHeader h2 {
+  font-family: var(--font-display);
+  color: var(--color-navy);
+  font-size: 1.6rem;
+  line-height: 1.2;
+  margin: 0 0 10px;
+}
+.questionHeader p {
+  max-width: 68ch;
+  line-height: 1.5;
+  margin: 0;
+}
+.questionHeader > span {
+  flex: 0 0 auto;
+  color: var(--color-pencil);
+  font-size: 0.875rem;
+}
+.pilotNote {
+  color: var(--color-pencil);
+  font-size: 0.82rem;
+  padding: 12px;
+}
+.controls {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  background: var(--color-paper);
+  border-block: 1px solid var(--color-grid-strong);
+  padding: 12px 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-bottom: 22px;
+}
+.navigationButtons,
+.playbackButtons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.controls button,
+.controls select {
+  min-height: 44px;
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 6px;
+  padding: 9px 12px;
+  background: white;
+  color: var(--color-navy);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.controls button:hover {
+  background: var(--color-navy-wash);
+}
+.controls .primary {
+  background: var(--color-navy);
+  color: white;
+  border-color: var(--color-navy);
+  min-width: 118px;
+}
+.controls .primary:hover {
+  background: var(--color-navy-deep);
+}
+.controls button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+}
+.controls select {
+  padding-inline: 8px;
+  font-weight: 400;
+}
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  font-size: 0.8rem;
+  color: var(--color-navy);
+}
+.progress > div {
+  height: 4px;
+  flex: 1;
+  background: var(--color-grid);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress i {
+  display: block;
+  height: 100%;
+  background: var(--color-navy);
+  transition: width 200ms ease;
+}
+.lessonGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+.board {
+  min-width: 0;
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 10px;
+  overflow: hidden;
+  background: white;
+}
+.boardHeading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--color-grid);
+}
+.boardHeading h3 {
+  font-size: 1.13rem;
+  font-weight: 600;
+  color: var(--color-navy);
+  line-height: 1.3;
+  margin: 0;
+}
+.stepMark {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  background: var(--color-navy-wash);
+  color: var(--color-navy);
+  font-size: 1.6rem;
+  font-family: var(--font-display);
+}
+.boardContent {
+  min-height: 330px;
+  padding: 12px 18px 20px;
+  background-image: linear-gradient(var(--color-rule) 1px, transparent 1px);
+  background-size: 100% 32px;
+}
+.focusStage {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+.heroMath {
+  display: block;
+  font-size: clamp(1.45rem, 2.3vw, 2.15rem);
+  color: var(--color-navy);
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 6px 2px;
+}
+.answerMath {
+  font-size: clamp(1.4rem, 2.1vw, 2rem);
+  border-bottom: 3px double var(--color-navy);
+  padding-bottom: 10px;
+  color: var(--color-navy);
+  max-width: 100%;
+  overflow-x: auto;
+}
+.startHint,
+.boardNote {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-navy-deep);
+  text-align: center;
+  margin: 12px 0 0;
+}
+.explanation {
+  border-top: 1px solid var(--color-grid);
+  background: var(--color-navy-wash);
+  padding: 16px 18px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+  min-height: 78px;
+}
+.distribution {
+  display: block;
+  width: 100%;
+  height: auto;
+  color: var(--color-navy);
+  overflow: visible;
+  margin-bottom: 12px;
+}
+.factor {
+  font-size: 34px;
+  text-align: center;
+  line-height: 1.2;
+  color: var(--color-navy);
+}
+.svgSymbols {
+  font-family: Georgia, serif;
+  font-size: 41px;
+  fill: var(--color-navy);
+  text-anchor: middle;
+}
+.arrow {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3.5;
+  stroke-dasharray: 700;
+  stroke-dashoffset: 0;
+  animation: draw 450ms ease-out;
+}
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.productCell {
+  border: 1px solid var(--color-grid);
+  background: white;
+  border-radius: 6px;
+  min-height: 105px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+}
+.productCell[data-active="true"] {
+  border: 2px solid var(--color-navy);
+  padding: 9px;
+  background: color-mix(in srgb, var(--color-highlight) 22%, white);
+}
+.pair {
+  font-size: 1.05rem;
+  color: var(--color-navy);
+}
+.productResult {
+  font-size: 1.6rem;
+  color: var(--color-navy);
+  animation: reveal 220ms ease-out;
+}
+.unrevealed {
+  color: var(--color-pencil);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+.signExpression {
+  padding: 16px 0 24px;
+  font-size: clamp(1.1rem, 1.65vw, 1.7rem);
+  text-align: center;
+  overflow-x: auto;
+}
+.signColumns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.signColumns > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 4px;
+  border-block: 1px solid var(--color-grid-strong);
+  background: white;
+  font-size: clamp(1.15rem, 1.8vw, 1.65rem);
+}
+.downArrow {
+  display: block;
+  color: var(--color-navy);
+  font-size: 1.8rem;
+  line-height: 1.7;
+}
+.changedTerm {
+  display: flex;
+  align-items: baseline;
+  animation: reveal 220ms ease-out;
+}
+.negativeSign {
+  background: var(--color-highlight);
+  padding: 0 5px;
+  margin-right: 2px;
+  border-radius: 3px;
+  color: var(--color-navy);
+}
+.signPlaceholder {
+  color: var(--color-pencil);
+}
+.answerLabel {
+  margin: 0;
+  color: var(--color-navy);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.working {
+  min-width: 0;
+  border-top: 3px solid var(--color-navy);
+}
+.working > header {
+  padding: 14px 2px 16px;
+  border-bottom: 1px solid var(--color-grid);
+}
+.working h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.35rem;
+  color: var(--color-navy);
+}
+.working header p {
+  color: var(--color-pencil);
+  font-size: 0.85rem;
+  margin: 5px 0 0;
+}
+.working ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.working li {
+  padding: 15px 12px;
+  border-bottom: 1px solid var(--color-grid);
+  animation: reveal 220ms ease-out;
+}
+.working li[data-current="true"] {
+  border-left: 3px solid var(--color-navy);
+  background: var(--color-navy-wash);
+  padding-left: 9px;
+}
+.workingEquation {
+  font-size: clamp(1rem, 1.5vw, 1.38rem);
+  overflow-x: auto;
+  padding: 4px 0 8px;
+}
+.working li p {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin: 4px 0 0;
+  color: var(--color-navy-deep);
+}
+.source {
+  margin-top: 24px;
+  border-top: 1px solid var(--color-grid);
+  padding-block: 14px;
+}
+.source summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-navy);
+  min-height: 40px;
+}
+.source img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--color-grid);
+  margin-top: 10px;
+}
+.source p {
+  font-size: 0.85rem;
+  color: var(--color-pencil);
+  max-width: 80ch;
+}
+.notice {
+  padding: 12px;
+  border-left: 3px solid var(--color-navy);
+  background: var(--color-navy-wash);
+}
+:global([data-presentation="true"]) .questionHeader h2 {
+  font-size: 1.75rem;
+}
+:global([data-presentation="true"]) .boardContent {
+  min-height: 380px;
+}
+:global([data-presentation="true"]) .workingEquation {
+  font-size: 1.6rem;
+}
+:global([data-presentation="true"]) .working li p,
+:global([data-presentation="true"]) .explanation {
+  font-size: 1.05rem;
+}
+:global([data-presentation="true"]) .controls button {
+  font-size: 1.05rem;
+  min-height: 48px;
+}
+@keyframes draw {
+  from {
+    stroke-dashoffset: 700;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes reveal {
+  from {
+    opacity: 0.25;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 760px) {
+  .lessonGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+  .questionHeader {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .questionHeader h2 {
+    font-size: 1.4rem;
+  }
+  .questionHeader p {
+    font-size: 0.95rem;
+  }
+  .boardContent {
+    min-height: 260px;
+  }
+  .focusStage {
+    min-height: 250px;
+  }
+  .heroMath {
+    font-size: 1.8rem;
+  }
+  .workingEquation {
+    font-size: 1.2rem;
+  }
+  .working li p {
+    font-size: 0.9rem;
+  }
+  .signExpression {
+    font-size: 1.2rem;
+  }
+}
+@media (max-width: 480px) {
+  .controls {
+    gap: 7px;
+    padding-block: 9px;
+  }
+  .navigationButtons {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .playbackButtons {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 0.65fr 1.25fr 1fr;
+    gap: 5px;
+  }
+  .controls button {
+    padding-inline: 7px;
+    font-size: 0.82rem;
+  }
+  .controls label {
+    gap: 2px;
+    font-size: 0;
+  }
+  .controls select {
+    width: 100%;
+    font-size: 0.82rem;
+  }
+  .boardHeading {
+    padding: 13px 12px;
+  }
+  .boardHeading h3 {
+    font-size: 1.05rem;
+  }
+  .boardContent {
+    padding-inline: 12px;
+  }
+  .explanation {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+  .productResult {
+    font-size: 1.4rem;
+  }
+  .heroMath {
+    font-size: 1.55rem;
+  }
+  .answerMath {
+    font-size: 1.5rem;
+  }
+}
+@media (max-height: 500px) and (min-width: 761px) {
+  .controls {
+    gap: 6px 10px;
+    padding-block: 6px;
+  }
+  .controls button {
+    min-height: 40px;
+    padding-block: 7px;
+  }
+  .progress {
+    font-size: 0.75rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arrow,
+  .productResult,
+  .changedTerm,
+  .working li {
+    animation: none;
+  }
+  .progress i {
+    transition: none;
+  }
+}

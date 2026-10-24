@@ -1,0 +1,1340 @@
+[
+  {
+    "id": "10D-26a",
+    "bank": "10D",
+    "number": 26,
+    "part": "a",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "x^2*(-2*x^2+6*x+7)",
+    "answer": "-2*x^4+6*x^3+7*x^2",
+    "sourceRect": [0.1, 0.486, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "x^2*(-2*x^2+6*x+7)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["x^2"],
+          "right": ["-2*x^2", "6*x", "7"],
+          "products": ["-2*x^4", "6*x^3", "7*x^2"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "-2*x^4+6*x^3+7*x^2",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "-2*x^4+6*x^3+7*x^2",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-26b",
+    "bank": "10D",
+    "number": 26,
+    "part": "b",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "-4*a^3*(-2*a^2-a+5)",
+    "answer": "8*a^5+4*a^4-20*a^3",
+    "sourceRect": [0.1, 0.486, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "-4*a^3*(-2*a^2-a+5)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["-4*a^3"],
+          "right": ["-2*a^2", "-a", "5"],
+          "products": ["8*a^5", "4*a^4", "-20*a^3"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "8*a^5+4*a^4-20*a^3",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "8*a^5+4*a^4-20*a^3",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-27a",
+    "bank": "10D",
+    "number": 27,
+    "part": "a",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "2*x*y*(x^2-3*x+4)",
+    "answer": "2*x^3*y-6*x^2*y+8*x*y",
+    "sourceRect": [0.1, 0.519, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "2*x*y*(x^2-3*x+4)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["2*x*y"],
+          "right": ["x^2", "-3*x", "4"],
+          "products": ["2*x^3*y", "-6*x^2*y", "8*x*y"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "2*x^3*y-6*x^2*y+8*x*y",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "2*x^3*y-6*x^2*y+8*x*y",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-27b",
+    "bank": "10D",
+    "number": 27,
+    "part": "b",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "(a^2-a*b+b^2)*a^2*b",
+    "answer": "a^4*b-a^3*b^2+a^2*b^3",
+    "sourceRect": [0.1, 0.519, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(a^2-a*b+b^2)*a^2*b",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["a^2", "-a*b", "b^2"],
+          "right": ["a^2*b"],
+          "products": ["a^4*b", "-a^3*b^2", "a^2*b^3"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "a^4*b-a^3*b^2+a^2*b^3",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "a^4*b-a^3*b^2+a^2*b^3",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-28a",
+    "bank": "10D",
+    "number": 28,
+    "part": "a",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "3*(4*x-1)*(2*x+7)",
+    "answer": "24*x^2+78*x-21",
+    "sourceRect": [0.1, 0.55, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "3*(4*x-1)*(2*x+7)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["4*x", "-1"],
+          "right": ["2*x", "7"],
+          "products": ["8*x^2", "28*x", "-2*x", "-7"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "3*(8*x^2+28*x-2*x-7)",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine inside the bracket",
+        "math": "3*(8*x^2+26*x-7)",
+        "reason": "Combine 28x and −2x before multiplying by 3."
+      },
+      {
+        "title": "Distribute each term",
+        "math": "3*(8*x^2+26*x-7)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["3"],
+          "right": ["8*x^2", "26*x", "-7"],
+          "products": ["24*x^2", "78*x", "-21"]
+        }
+      },
+      {
+        "title": "Combine like terms",
+        "math": "24*x^2+78*x-21",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-28b",
+    "bank": "10D",
+    "number": 28,
+    "part": "b",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "-(k+2)*(2*k-9)",
+    "answer": "-2*k^2+5*k+18",
+    "sourceRect": [0.1, 0.55, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "-(k+2)*(2*k-9)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["k", "2"],
+          "right": ["2*k", "-9"],
+          "products": ["2*k^2", "-9*k", "4*k", "-18"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "-(2*k^2-9*k+4*k-18)",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine inside the bracket",
+        "math": "-(2*k^2-5*k-18)",
+        "reason": "Keep the outside minus until the entire product is complete."
+      },
+      {
+        "title": "Subtract every term",
+        "math": "-2*k^2+5*k+18",
+        "reason": "Reverse every sign in the bracket.",
+        "focus": {
+          "before": ["2*k^2", "-5*k", "-18"],
+          "after": ["-2*k^2", "5*k", "18"]
+        }
+      },
+      {
+        "title": "Combine like terms",
+        "math": "-2*k^2+5*k+18",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-29a",
+    "bank": "10D",
+    "number": 29,
+    "part": "a",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "y*(y-2*z)*(3*y+2*z)",
+    "answer": "3*y^3-4*y^2*z-4*y*z^2",
+    "sourceRect": [0.1, 0.581, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "y*(y-2*z)*(3*y+2*z)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["y", "-2*z"],
+          "right": ["3*y", "2*z"],
+          "products": ["3*y^2", "2*y*z", "-6*y*z", "-4*z^2"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "y*(3*y^2+2*y*z-6*y*z-4*z^2)",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Collect the cross terms",
+        "math": "y*(3*y^2-4*y*z-4*z^2)",
+        "reason": "Then multiply every term by y."
+      },
+      {
+        "title": "Distribute each term",
+        "math": "y*(3*y^2-4*y*z-4*z^2)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["y"],
+          "right": ["3*y^2", "-4*y*z", "-4*z^2"],
+          "products": ["3*y^3", "-4*y^2*z", "-4*y*z^2"]
+        }
+      },
+      {
+        "title": "Combine like terms",
+        "math": "3*y^3-4*y^2*z-4*y*z^2",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-29b",
+    "bank": "10D",
+    "number": 29,
+    "part": "b",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "-3*m*(2*n-m)*(m+3)",
+    "answer": "-6*n*m^2+3*m^3-18*m*n+9*m^2",
+    "sourceRect": [0.1, 0.581, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "-3*m*(2*n-m)*(m+3)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["2*n", "-m"],
+          "right": ["m", "3"],
+          "products": ["2*m*n", "6*n", "-m^2", "-3*m"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "-3*m*(2*m*n+6*n-m^2-3*m)",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Distribute each term",
+        "math": "-3*m*(2*m*n+6*n-m^2-3*m)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["-3*m"],
+          "right": ["2*m*n", "6*n", "-m^2", "-3*m"],
+          "products": ["-6*m^2*n", "-18*m*n", "3*m^3", "9*m^2"]
+        }
+      },
+      {
+        "title": "Combine like terms",
+        "math": "-6*n*m^2+3*m^3-18*m*n+9*m^2",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-30a",
+    "bank": "10D",
+    "number": 30,
+    "part": "a",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "(3*x^2+x)*(x^2-5*x+2)",
+    "answer": "3*x^4-14*x^3+x^2+2*x",
+    "sourceRect": [0.1, 0.612, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(3*x^2+x)*(x^2-5*x+2)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["3*x^2", "x"],
+          "right": ["x^2", "-5*x", "2"],
+          "products": ["3*x^4", "-15*x^3", "6*x^2", "x^3", "-5*x^2", "2*x"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "3*x^4-15*x^3+6*x^2+x^3-5*x^2+2*x",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "3*x^4-14*x^3+x^2+2*x",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-30b",
+    "bank": "10D",
+    "number": 30,
+    "part": "b",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "(1-5*w+7*w^2)*(w-4*w^2)",
+    "answer": "w-9*w^2+27*w^3-28*w^4",
+    "sourceRect": [0.1, 0.612, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(1-5*w+7*w^2)*(w-4*w^2)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["1", "-5*w", "7*w^2"],
+          "right": ["w", "-4*w^2"],
+          "products": ["w", "-4*w^2", "-5*w^2", "20*w^3", "7*w^3", "-28*w^4"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "w-4*w^2-5*w^2+20*w^3+7*w^3-28*w^4",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "w-9*w^2+27*w^3-28*w^4",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-31a",
+    "bank": "10D",
+    "number": 31,
+    "part": "a",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "(p+3*r)*(2*p-3*r-1)",
+    "answer": "2*p^2+3*p*r-p-9*r^2-3*r",
+    "sourceRect": [0.1, 0.644, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(p+3*r)*(2*p-3*r-1)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["p", "3*r"],
+          "right": ["2*p", "-3*r", "-1"],
+          "products": ["2*p^2", "-3*p*r", "-p", "6*p*r", "-9*r^2", "-3*r"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "2*p^2-3*p*r-p+6*p*r-9*r^2-3*r",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "2*p^2+3*p*r-p-9*r^2-3*r",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-31b",
+    "bank": "10D",
+    "number": 31,
+    "part": "b",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "(2*c-d)*(c^2+c*d-d^2)",
+    "answer": "2*c^3+c^2*d-3*c*d^2+d^3",
+    "sourceRect": [0.1, 0.644, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(2*c-d)*(c^2+c*d-d^2)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["2*c", "-d"],
+          "right": ["c^2", "c*d", "-d^2"],
+          "products": [
+            "2*c^3",
+            "2*c^2*d",
+            "-2*c*d^2",
+            "-c^2*d",
+            "-c*d^2",
+            "d^3"
+          ]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "2*c^3+2*c^2*d-2*c*d^2-c^2*d-c*d^2+d^3",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "2*c^3+c^2*d-3*c*d^2+d^3",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-32a",
+    "bank": "10D",
+    "number": 32,
+    "part": "a",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in descending powers of the variable.",
+    "expression": "3*a*(a-4)+6*a",
+    "answer": "3*a^2-6*a",
+    "sourceRect": [0.1, 0.732, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "3*a*(a-4)+6*a",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["3*a"],
+          "right": ["a", "-4"],
+          "products": ["3*a^2", "-12*a"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "3*a^2-12*a+6*a",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "3*a^2-6*a",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-32b",
+    "bank": "10D",
+    "number": 32,
+    "part": "b",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in descending powers of the variable.",
+    "expression": "4*(3*c-1)+3*(1-2*c)",
+    "answer": "6*c-1",
+    "sourceRect": [0.1, 0.732, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "4*(3*c-1)+3*(1-2*c)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["4"],
+          "right": ["3*c", "-1"],
+          "products": ["12*c", "-4"]
+        }
+      },
+      {
+        "title": "Distribute each term",
+        "math": "12*c-4+3*(1-2*c)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["3"],
+          "right": ["1", "-2*c"],
+          "products": ["3", "-6*c"]
+        }
+      },
+      {
+        "title": "Remove both brackets",
+        "math": "12*c-4+3-6*c",
+        "reason": "Retain the negative signs on the products."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "6*c-1",
+        "reason": "Combine linear terms and constants separately."
+      }
+    ]
+  },
+  {
+    "id": "10D-33a",
+    "bank": "10D",
+    "number": 33,
+    "part": "a",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in descending powers of the variable.",
+    "expression": "a*(5+a)-a*(2*a-3)",
+    "answer": "-a^2+8*a",
+    "sourceRect": [0.1, 0.764, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "a*(5+a)-a*(2*a-3)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["a"],
+          "right": ["5", "a"],
+          "products": ["5*a", "a^2"]
+        }
+      },
+      {
+        "title": "Distribute each term",
+        "math": "5*a+a^2-a*(2*a-3)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["a"],
+          "right": ["2*a", "-3"],
+          "products": ["2*a^2", "-3*a"]
+        }
+      },
+      {
+        "title": "Keep the subtracted product together",
+        "math": "5*a+a^2-(2*a^2-3*a)",
+        "reason": "Expand before removing the outside minus."
+      },
+      {
+        "title": "Reverse both signs",
+        "math": "5*a+a^2-2*a^2+3*a",
+        "reason": "Subtract the whole second product.",
+        "focus": {
+          "before": ["2*a^2", "-3*a"],
+          "after": ["-2*a^2", "3*a"]
+        }
+      },
+      {
+        "title": "Collect and order",
+        "math": "-a^2+8*a",
+        "reason": "Arrange in descending powers of a."
+      }
+    ]
+  },
+  {
+    "id": "10D-33b",
+    "bank": "10D",
+    "number": 33,
+    "part": "b",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in descending powers of the variable.",
+    "expression": "y*(4*y-2*y^2-3)-2*(y+5)",
+    "answer": "-2*y^3+4*y^2-5*y-10",
+    "sourceRect": [0.1, 0.764, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "y*(4*y-2*y^2-3)-2*(y+5)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["y"],
+          "right": ["4*y", "-2*y^2", "-3"],
+          "products": ["4*y^2", "-2*y^3", "-3*y"]
+        }
+      },
+      {
+        "title": "Distribute each term",
+        "math": "4*y^2-2*y^3-3*y-2*(y+5)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["-2"],
+          "right": ["y", "5"],
+          "products": ["-2*y", "-10"]
+        }
+      },
+      {
+        "title": "Combine the linear terms",
+        "math": "4*y^2-2*y^3-5*y-10",
+        "reason": "Add −3y and −2y."
+      },
+      {
+        "title": "Arrange descending",
+        "math": "-2*y^3+4*y^2-5*y-10",
+        "reason": "Start with the highest power of y."
+      }
+    ]
+  },
+  {
+    "id": "10D-34a",
+    "bank": "10D",
+    "number": 34,
+    "part": "a",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in descending powers of the variable.",
+    "expression": "(2*a-7)*(4*a+7)-(5*a-3)",
+    "answer": "8*a^2-19*a-46",
+    "sourceRect": [0.1, 0.795, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(2*a-7)*(4*a+7)-(5*a-3)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["2*a", "-7"],
+          "right": ["4*a", "7"],
+          "products": ["8*a^2", "14*a", "-28*a", "-49"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "8*a^2+14*a-28*a-49-(5*a-3)",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Remove the subtracted bracket",
+        "math": "8*a^2+14*a-28*a-49-5*a+3",
+        "reason": "Reverse both signs.",
+        "focus": {
+          "before": ["5*a", "-3"],
+          "after": ["-5*a", "3"]
+        }
+      },
+      {
+        "title": "Combine like terms",
+        "math": "8*a^2-19*a-46",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-34b",
+    "bank": "10D",
+    "number": 34,
+    "part": "b",
+    "page": 35,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in descending powers of the variable.",
+    "expression": "2*x^2-(3*x+4)^2",
+    "answer": "-7*x^2-24*x-16",
+    "sourceRect": [0.1, 0.795, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Write the square as a product",
+        "math": "2*x^2-(3*x+4)*(3*x+4)",
+        "reason": "Both cross terms are needed."
+      },
+      {
+        "title": "Distribute each term",
+        "math": "2*x^2-(3*x+4)*(3*x+4)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["3*x", "4"],
+          "right": ["3*x", "4"],
+          "products": ["9*x^2", "12*x", "12*x", "16"]
+        }
+      },
+      {
+        "title": "Complete the product",
+        "math": "2*x^2-(9*x^2+12*x+12*x+16)",
+        "reason": "Keep every product inside the subtracted bracket."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "2*x^2-(9*x^2+24*x+16)",
+        "reason": "Add the two cross terms."
+      },
+      {
+        "title": "Remove the bracket",
+        "math": "2*x^2-9*x^2-24*x-16",
+        "reason": "Every sign changes.",
+        "focus": {
+          "before": ["9*x^2", "24*x", "16"],
+          "after": ["-9*x^2", "-24*x", "-16"]
+        }
+      },
+      {
+        "title": "Combine the squared terms",
+        "math": "-7*x^2-24*x-16",
+        "reason": "Subtract the coefficients."
+      }
+    ]
+  },
+  {
+    "id": "10D-35a",
+    "bank": "10D",
+    "number": 35,
+    "part": "a",
+    "page": 36,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in ascending powers of the variable.",
+    "expression": "-2*n*(7*n+3)+4*(2*n-n^2)",
+    "answer": "2*n-18*n^2",
+    "sourceRect": [0.1, 0.111, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "-2*n*(7*n+3)+4*(2*n-n^2)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["-2*n"],
+          "right": ["7*n", "3"],
+          "products": ["-14*n^2", "-6*n"]
+        }
+      },
+      {
+        "title": "Distribute each term",
+        "math": "-14*n^2-6*n+4*(2*n-n^2)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["4"],
+          "right": ["2*n", "-n^2"],
+          "products": ["8*n", "-4*n^2"]
+        }
+      },
+      {
+        "title": "Collect like terms",
+        "math": "-18*n^2+2*n",
+        "reason": "Combine squared and linear terms separately."
+      },
+      {
+        "title": "Arrange ascending",
+        "math": "2*n-18*n^2",
+        "reason": "Start with the lowest power."
+      }
+    ]
+  },
+  {
+    "id": "10D-35b",
+    "bank": "10D",
+    "number": 35,
+    "part": "b",
+    "page": 36,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in ascending powers of the variable.",
+    "expression": "4*m*(m^2-3)-3*m^2*(m-2*m^2)",
+    "answer": "-12*m+m^3+6*m^4",
+    "sourceRect": [0.1, 0.111, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "4*m*(m^2-3)-3*m^2*(m-2*m^2)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["4*m"],
+          "right": ["m^2", "-3"],
+          "products": ["4*m^3", "-12*m"]
+        }
+      },
+      {
+        "title": "Distribute each term",
+        "math": "4*m^3-12*m-3*m^2*(m-2*m^2)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["-3*m^2"],
+          "right": ["m", "-2*m^2"],
+          "products": ["-3*m^3", "6*m^4"]
+        }
+      },
+      {
+        "title": "Combine the cubic terms",
+        "math": "m^3-12*m+6*m^4",
+        "reason": "The fourth power is a different term."
+      },
+      {
+        "title": "Arrange ascending",
+        "math": "-12*m+m^3+6*m^4",
+        "reason": "Missing powers do not need a nonzero term."
+      }
+    ]
+  },
+  {
+    "id": "10D-36a",
+    "bank": "10D",
+    "number": 36,
+    "part": "a",
+    "page": 36,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in ascending powers of the variable.",
+    "expression": "(2*x-1)^2+(4*x)^2",
+    "answer": "1-4*x+20*x^2",
+    "sourceRect": [0.1, 0.142, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(2*x-1)^2+(4*x)^2",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["2*x", "-1"],
+          "right": ["2*x", "-1"],
+          "products": ["4*x^2", "-2*x", "-2*x", "1"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "4*x^2-2*x-2*x+1+(4*x)^2",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Square the monomial",
+        "math": "4*x^2-2*x-2*x+1+16*x^2",
+        "reason": "Square both the coefficient 4 and the variable x."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "1-4*x+20*x^2",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-36b",
+    "bank": "10D",
+    "number": 36,
+    "part": "b",
+    "page": 36,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in ascending powers of the variable.",
+    "expression": "(x-6)*(3*x+1)-x*(x+3)",
+    "answer": "-6-20*x+2*x^2",
+    "sourceRect": [0.1, 0.142, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(x-6)*(3*x+1)-x*(x+3)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["x", "-6"],
+          "right": ["3*x", "1"],
+          "products": ["3*x^2", "x", "-18*x", "-6"]
+        }
+      },
+      {
+        "title": "Distribute each term",
+        "math": "3*x^2+x-18*x-6-x*(x+3)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["-x"],
+          "right": ["x", "3"],
+          "products": ["-x^2", "-3*x"]
+        }
+      },
+      {
+        "title": "Collect like terms",
+        "math": "2*x^2-20*x-6",
+        "reason": "Combine all three linear contributions."
+      },
+      {
+        "title": "Arrange ascending",
+        "math": "-6-20*x+2*x^2",
+        "reason": "Write the constant first."
+      }
+    ]
+  },
+  {
+    "id": "10D-37a",
+    "bank": "10D",
+    "number": 37,
+    "part": "a",
+    "page": 36,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in ascending powers of the variable.",
+    "expression": "(1-7*x)*(5+2*x)+(x+8)^2",
+    "answer": "69-17*x-13*x^2",
+    "sourceRect": [0.1, 0.173, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(1-7*x)*(5+2*x)+(x+8)^2",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["1", "-7*x"],
+          "right": ["5", "2*x"],
+          "products": ["5", "2*x", "-35*x", "-14*x^2"]
+        }
+      },
+      {
+        "title": "Distribute each term",
+        "math": "5+2*x-35*x-14*x^2+(x+8)*(x+8)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["x", "8"],
+          "right": ["x", "8"],
+          "products": ["x^2", "8*x", "8*x", "64"]
+        }
+      },
+      {
+        "title": "Keep both cross terms",
+        "math": "5+2*x-35*x-14*x^2+x^2+8*x+8*x+64",
+        "reason": "Collect only terms with the same power."
+      },
+      {
+        "title": "Combine and order",
+        "math": "69-17*x-13*x^2",
+        "reason": "Arrange in ascending powers of x."
+      }
+    ]
+  },
+  {
+    "id": "10D-37b",
+    "bank": "10D",
+    "number": 37,
+    "part": "b",
+    "page": 36,
+    "skill": "expand",
+    "prompt": "Expand and simplify the expression, and arrange the terms in ascending powers of the variable.",
+    "expression": "(3*t-2)*(1+2*t)-(6*t-1)*(t+5)",
+    "answer": "3-30*t",
+    "sourceRect": [0.1, 0.173, 0.83, 0.03],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(3*t-2)*(1+2*t)-(6*t-1)*(t+5)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["3*t", "-2"],
+          "right": ["1", "2*t"],
+          "products": ["3*t", "6*t^2", "-2", "-4*t"]
+        }
+      },
+      {
+        "title": "Distribute each term",
+        "math": "3*t+6*t^2-2-4*t-(6*t-1)*(t+5)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["6*t", "-1"],
+          "right": ["t", "5"],
+          "products": ["6*t^2", "30*t", "-t", "-5"]
+        }
+      },
+      {
+        "title": "Collect within each product",
+        "math": "6*t^2-t-2-(6*t^2+29*t-5)",
+        "reason": "Keep the second product in brackets."
+      },
+      {
+        "title": "Reverse every sign",
+        "math": "6*t^2-t-2-6*t^2-29*t+5",
+        "reason": "The squared terms cancel.",
+        "focus": {
+          "before": ["6*t^2", "29*t", "-5"],
+          "after": ["-6*t^2", "-29*t", "5"]
+        }
+      },
+      {
+        "title": "Combine and order",
+        "math": "3-30*t",
+        "reason": "Only the constant and linear term remain."
+      }
+    ]
+  },
+  {
+    "id": "10D-38a",
+    "bank": "10D",
+    "number": 38,
+    "part": "a",
+    "page": 36,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "(2*x+1)*(3*x-1)",
+    "answer": "6*x^2+x-1",
+    "sourceRect": [0.1, 0.215, 0.83, 0.06],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(2*x+1)*(3*x-1)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["2*x", "1"],
+          "right": ["3*x", "-1"],
+          "products": ["6*x^2", "-2*x", "3*x", "-1"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "6*x^2-2*x+3*x-1",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "6*x^2+x-1",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-38b",
+    "bank": "10D",
+    "number": 38,
+    "part": "b",
+    "page": 36,
+    "skill": "expand",
+    "prompt": "Hence, expand (2x + 1)(3x − 1)(4x − 3).",
+    "expression": "(2*x+1)*(3*x-1)*(4*x-3)",
+    "answer": "24*x^3-14*x^2-7*x+3",
+    "sourceRect": [0.1, 0.215, 0.83, 0.06],
+    "steps": [
+      {
+        "title": "Use the result of part (a)",
+        "math": "(6*x^2+x-1)*(4*x-3)",
+        "reason": "The first two factors give 6x² + x − 1."
+      },
+      {
+        "title": "Distribute each term",
+        "math": "(6*x^2+x-1)*(4*x-3)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["6*x^2", "x", "-1"],
+          "right": ["4*x", "-3"],
+          "products": ["24*x^3", "-18*x^2", "4*x^2", "-3*x", "-4*x", "3"]
+        }
+      },
+      {
+        "title": "Write all six products",
+        "math": "24*x^3-18*x^2+4*x^2-3*x-4*x+3",
+        "reason": "Collect the squared and linear terms."
+      },
+      {
+        "title": "Simplify",
+        "math": "24*x^3-14*x^2-7*x+3",
+        "reason": "Keep the cubic and constant terms."
+      }
+    ]
+  },
+  {
+    "id": "10D-39a",
+    "bank": "10D",
+    "number": 39,
+    "part": "a",
+    "page": 36,
+    "skill": "expand",
+    "prompt": "Expand the expression.",
+    "expression": "(3*y+2)*(6*y-5)",
+    "answer": "18*y^2-3*y-10",
+    "sourceRect": [0.1, 0.271, 0.83, 0.06],
+    "steps": [
+      {
+        "title": "Distribute each term",
+        "math": "(3*y+2)*(6*y-5)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["3*y", "2"],
+          "right": ["6*y", "-5"],
+          "products": ["18*y^2", "-15*y", "12*y", "-10"]
+        }
+      },
+      {
+        "title": "Complete the expansion",
+        "math": "18*y^2-15*y+12*y-10",
+        "reason": "Keep every product, including its sign."
+      },
+      {
+        "title": "Combine like terms",
+        "math": "18*y^2-3*y-10",
+        "reason": "Combine coefficients of like terms and write the simplified expression."
+      }
+    ]
+  },
+  {
+    "id": "10D-39b",
+    "bank": "10D",
+    "number": 39,
+    "part": "b",
+    "page": 36,
+    "skill": "expand",
+    "prompt": "Hence, expand (y + 1)(3y + 2)(6y − 5).",
+    "expression": "(y+1)*(3*y+2)*(6*y-5)",
+    "answer": "18*y^3+15*y^2-13*y-10",
+    "sourceRect": [0.1, 0.271, 0.83, 0.06],
+    "steps": [
+      {
+        "title": "Use the result of part (a)",
+        "math": "(y+1)*(18*y^2-3*y-10)",
+        "reason": "Replace the last two factors by their checked expansion."
+      },
+      {
+        "title": "Distribute each term",
+        "math": "(y+1)*(18*y^2-3*y-10)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["y", "1"],
+          "right": ["18*y^2", "-3*y", "-10"],
+          "products": ["18*y^3", "-3*y^2", "-10*y", "18*y^2", "-3*y", "-10"]
+        }
+      },
+      {
+        "title": "Write all six products",
+        "math": "18*y^3-3*y^2-10*y+18*y^2-3*y-10",
+        "reason": "Each term is multiplied by both y and 1."
+      },
+      {
+        "title": "Collect like terms",
+        "math": "18*y^3+15*y^2-13*y-10",
+        "reason": "Combine the squared and linear terms."
+      }
+    ]
+  },
+  {
+    "id": "10D-40",
+    "bank": "10D",
+    "number": 40,
+    "part": "",
+    "page": 36,
+    "skill": "applications",
+    "prompt": "If −x³ + x² + 4 is subtracted from the product of −2x² + x and x + 2, find the result.",
+    "expression": "(-2*x^2+x)*(x+2)-(-x^3+x^2+4)",
+    "answer": "-x^3-4*x^2+2*x-4",
+    "sourceRect": [0.065, 0.329, 0.87, 0.025],
+    "steps": [
+      {
+        "title": "Translate the subtraction",
+        "math": "(-2*x^2+x)*(x+2)-(-x^3+x^2+4)",
+        "reason": "“A is subtracted from B” means B − A."
+      },
+      {
+        "title": "Distribute each term",
+        "math": "(-2*x^2+x)*(x+2)-(-x^3+x^2+4)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["-2*x^2", "x"],
+          "right": ["x", "2"],
+          "products": ["-2*x^3", "-4*x^2", "x^2", "2*x"]
+        }
+      },
+      {
+        "title": "Complete the product",
+        "math": "-2*x^3-4*x^2+x^2+2*x-(-x^3+x^2+4)",
+        "reason": "Keep the quantity being subtracted in brackets."
+      },
+      {
+        "title": "Reverse three signs",
+        "math": "-2*x^3-4*x^2+x^2+2*x+x^3-x^2-4",
+        "reason": "Subtract each term.",
+        "focus": {
+          "before": ["-x^3", "x^2", "4"],
+          "after": ["x^3", "-x^2", "-4"]
+        }
+      },
+      {
+        "title": "Combine like terms",
+        "math": "-x^3-4*x^2+2*x-4",
+        "reason": "The extra positive and negative x² terms cancel."
+      }
+    ]
+  },
+  {
+    "id": "10D-41",
+    "bank": "10D",
+    "number": 41,
+    "part": "",
+    "page": 36,
+    "skill": "applications",
+    "prompt": "Ann buys (7x + 1) pens at $(3x + 2) each and (x + 1) rulers at $(2x − 1) each. Express the total amount that Ann pays in terms of x.",
+    "expression": "(7*x+1)*(3*x+2)+(x+1)*(2*x-1)",
+    "answer": "23*x^2+18*x+1",
+    "sourceRect": [0.065, 0.36, 0.87, 0.045],
+    "steps": [
+      {
+        "title": "Use quantity × price",
+        "math": "(7*x+1)*(3*x+2)+(x+1)*(2*x-1)",
+        "reason": "Add the cost of the pens and the cost of the rulers."
+      },
+      {
+        "title": "Distribute each term",
+        "math": "(7*x+1)*(3*x+2)+(x+1)*(2*x-1)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["7*x", "1"],
+          "right": ["3*x", "2"],
+          "products": ["21*x^2", "14*x", "3*x", "2"]
+        }
+      },
+      {
+        "title": "Distribute each term",
+        "math": "21*x^2+14*x+3*x+2+(x+1)*(2*x-1)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["x", "1"],
+          "right": ["2*x", "-1"],
+          "products": ["2*x^2", "-x", "2*x", "-1"]
+        }
+      },
+      {
+        "title": "Add both costs",
+        "math": "21*x^2+14*x+3*x+2+2*x^2-x+2*x-1",
+        "reason": "All amounts are in dollars."
+      },
+      {
+        "title": "Simplify the total",
+        "math": "23*x^2+18*x+1",
+        "reason": "Ann pays $(23x² + 18x + 1)."
+      }
+    ]
+  },
+  {
+    "id": "10D-42a",
+    "bank": "10D",
+    "number": 42,
+    "part": "a",
+    "page": 36,
+    "skill": "applications",
+    "prompt": "A manufacturer produces (y + 1) boxes of candies. Each box contains (5y + 2) bags and each bag contains (5y + 2) candies. Express the total number of candies in terms of y.",
+    "expression": "(y+1)*(5*y+2)^2",
+    "answer": "25*y^3+45*y^2+24*y+4",
+    "sourceRect": [0.1, 0.412, 0.83, 0.083],
+    "steps": [
+      {
+        "title": "Multiply the three quantities",
+        "math": "(y+1)*(5*y+2)*(5*y+2)",
+        "reason": "Total candies = boxes × bags per box × candies per bag."
+      },
+      {
+        "title": "Distribute each term",
+        "math": "(y+1)*(5*y+2)*(5*y+2)",
+        "reason": "Multiply the bags per box by the candies per bag; keep (y + 1) outside.",
+        "distribution": {
+          "left": ["5*y", "2"],
+          "right": ["5*y", "2"],
+          "products": ["25*y^2", "10*y", "10*y", "4"]
+        }
+      },
+      {
+        "title": "Collect the two cross terms",
+        "math": "(y+1)*(25*y^2+20*y+4)",
+        "reason": "This is the number of candies per box times the number of boxes."
+      },
+      {
+        "title": "Distribute each term",
+        "math": "(y+1)*(25*y^2+20*y+4)",
+        "reason": "Multiply each term of the first factor by every term of the second factor.",
+        "distribution": {
+          "left": ["y", "1"],
+          "right": ["25*y^2", "20*y", "4"],
+          "products": ["25*y^3", "20*y^2", "4*y", "25*y^2", "20*y", "4"]
+        }
+      },
+      {
+        "title": "Simplify the total",
+        "math": "25*y^3+45*y^2+24*y+4",
+        "reason": "The answer is the total number of candies."
+      }
+    ]
+  },
+  {
+    "id": "10D-42b",
+    "bank": "10D",
+    "number": 42,
+    "part": "b",
+    "page": 36,
+    "skill": "substitute",
+    "prompt": "Hence, find the total number of candies that the manufacturer produces when y = 10.",
+    "answer": "29744",
+    "sourceRect": [0.1, 0.412, 0.83, 0.09],
+    "steps": [
+      {
+        "title": "Recall part (a)",
+        "math": "25*y^3+45*y^2+24*y+4",
+        "reason": "Use the total-candies expression.",
+        "target": "(y+1)*(5*y+2)^2"
+      },
+      {
+        "title": "Substitute y = 10",
+        "math": "25*10^3+45*10^2+24*10+4",
+        "reason": "Replace every y by 10.",
+        "target": "29744"
+      },
+      {
+        "title": "Evaluate powers and products",
+        "math": "25000+4500+240+4",
+        "reason": "Multiply after evaluating the powers.",
+        "target": "29744"
+      },
+      {
+        "title": "Add the amounts",
+        "math": "29744",
+        "reason": "The manufacturer produces 29,744 candies.",
+        "target": "29744"
+      }
+    ],
+    "givenTex": "y=10"
+  }
+]

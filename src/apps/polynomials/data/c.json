@@ -1,0 +1,1143 @@
+[
+  {
+    "id": "10C-20a",
+    "bank": "10C",
+    "number": 20,
+    "part": "a",
+    "page": 27,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(c^2-d^2)-(c^2+d^2-2*c*d)",
+    "answer": "-2*d^2+2*c*d",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.655, 0.43, 0.034],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "c^2-d^2-c^2-d^2+2*c*d",
+        "focus": {
+          "before": ["c^2", "d^2", "-2*c*d"],
+          "after": ["-c^2", "-d^2", "2*c*d"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(1-1)*c^2+(-1-1)*d^2+2*c*d"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "-2*d^2+2*c*d"
+      }
+    ]
+  },
+  {
+    "id": "10C-20b",
+    "bank": "10C",
+    "number": 20,
+    "part": "b",
+    "page": 27,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(m^2-n^2-m*n)+(2*n^2+m^2)",
+    "answer": "2*m^2+n^2-m*n",
+    "nonzero": [],
+    "sourceRect": [0.525, 0.655, 0.43, 0.034],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "m^2-n^2-m*n+2*n^2+m^2"
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(1+1)*m^2+(-1+2)*n^2-m*n"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "2*m^2+n^2-m*n"
+      }
+    ]
+  },
+  {
+    "id": "10C-21a",
+    "bank": "10C",
+    "number": 21,
+    "part": "a",
+    "page": 27,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(x^2-x*y-y^2)+(-2*x^2-3*x*y+y^2)",
+    "answer": "-x^2-4*x*y",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.686, 0.43, 0.034],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "x^2-x*y-y^2-2*x^2-3*x*y+y^2"
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(1-2)*x^2+(-1-3)*x*y+(-1+1)*y^2"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "-x^2-4*x*y"
+      }
+    ]
+  },
+  {
+    "id": "10C-21b",
+    "bank": "10C",
+    "number": 21,
+    "part": "b",
+    "page": 27,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(-2*p^2+p*q+2*q^2)-(3*p^2-5*p*q+4*q^2)",
+    "answer": "-5*p^2+6*p*q-2*q^2",
+    "nonzero": [],
+    "sourceRect": [0.525, 0.686, 0.43, 0.034],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "-2*p^2+p*q+2*q^2-3*p^2+5*p*q-4*q^2",
+        "focus": {
+          "before": ["3*p^2", "-5*p*q", "4*q^2"],
+          "after": ["-3*p^2", "5*p*q", "-4*q^2"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(-2-3)*p^2+(1+5)*p*q+(2-4)*q^2"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "-5*p^2+6*p*q-2*q^2"
+      }
+    ]
+  },
+  {
+    "id": "10C-22a",
+    "bank": "10C",
+    "number": 22,
+    "part": "a",
+    "page": 27,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(3*a^2*b-a*b^2)+(1-2*a^2*b+a*b^2)",
+    "answer": "a^2*b+1",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.7170000000000001, 0.43, 0.034],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "3*a^2*b-a*b^2+1-2*a^2*b+a*b^2"
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(3-2)*a^2*b+(-1+1)*a*b^2+1"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "a^2*b+1"
+      }
+    ]
+  },
+  {
+    "id": "10C-22b",
+    "bank": "10C",
+    "number": 22,
+    "part": "b",
+    "page": 27,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(2*y^3+3*x*y^2-y-2)-(2*y-2*x*y^2+4)",
+    "answer": "2*y^3+5*x*y^2-3*y-6",
+    "nonzero": [],
+    "sourceRect": [0.525, 0.7170000000000001, 0.43, 0.034],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "2*y^3+3*x*y^2-y-2-2*y+2*x*y^2-4",
+        "focus": {
+          "before": ["2*y", "-2*x*y^2", "4"],
+          "after": ["-2*y", "2*x*y^2", "-4"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "2*y^3+(3+2)*x*y^2+(-1-2)*y+(-2-4)"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "2*y^3+5*x*y^2-3*y-6"
+      }
+    ]
+  },
+  {
+    "id": "10C-23a",
+    "bank": "10C",
+    "number": 23,
+    "part": "a",
+    "page": 27,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(4*x-9*x^2)-(8*x-11)+(3*x^2+6)",
+    "answer": "-6*x^2-4*x+17",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.748, 0.43, 0.034],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "4*x-9*x^2-8*x+11+(3*x^2+6)",
+        "focus": {
+          "before": ["8*x", "-11"],
+          "after": ["-8*x", "11"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(-9+3)*x^2+(4-8)*x+(11+6)"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "-6*x^2-4*x+17"
+      }
+    ]
+  },
+  {
+    "id": "10C-23b",
+    "bank": "10C",
+    "number": 23,
+    "part": "b",
+    "page": 27,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(4*x-7)-(-2*x^2+3-8*x)+(5*x-2)",
+    "answer": "2*x^2+17*x-12",
+    "nonzero": [],
+    "sourceRect": [0.525, 0.748, 0.43, 0.034],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "4*x-7+2*x^2-3+8*x+(5*x-2)",
+        "focus": {
+          "before": ["-2*x^2", "3", "-8*x"],
+          "after": ["2*x^2", "-3", "8*x"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "2*x^2+(4+8+5)*x+(-7-3-2)"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "2*x^2+17*x-12"
+      }
+    ]
+  },
+  {
+    "id": "10C-24a",
+    "bank": "10C",
+    "number": 24,
+    "part": "a",
+    "page": 27,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(5*y^2+x-3*z)+(2*z-5*x)-(4*z-6*y^2)",
+    "answer": "11*y^2-4*x-5*z",
+    "nonzero": [],
+    "sourceRect": [0.115, 0.779, 0.43, 0.034],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "5*y^2+x-3*z+2*z-5*x-4*z+6*y^2",
+        "focus": {
+          "before": ["4*z", "-6*y^2"],
+          "after": ["-4*z", "6*y^2"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(5+6)*y^2+(1-5)*x+(-3+2-4)*z"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "11*y^2-4*x-5*z"
+      }
+    ]
+  },
+  {
+    "id": "10C-24b",
+    "bank": "10C",
+    "number": 24,
+    "part": "b",
+    "page": 27,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions.",
+    "expression": "(3*x*y-7*z^2)-(6*y^2+5*x-4*z^2)+(x-2*x*y+3*y^2)",
+    "answer": "x*y-3*z^2-3*y^2-4*x",
+    "nonzero": [],
+    "sourceRect": [0.525, 0.779, 0.43, 0.034],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "3*x*y-7*z^2-6*y^2-5*x+4*z^2+(x-2*x*y+3*y^2)",
+        "focus": {
+          "before": ["6*y^2", "5*x", "-4*z^2"],
+          "after": ["-6*y^2", "-5*x", "4*z^2"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(3-2)*x*y+(-7+4)*z^2+(-6+3)*y^2+(-5+1)*x"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "x*y-3*z^2-3*y^2-4*x"
+      }
+    ]
+  },
+  {
+    "id": "10C-25a",
+    "bank": "10C",
+    "number": 25,
+    "part": "a",
+    "page": 28,
+    "skill": "vertical",
+    "prompt": "Complete the following operations.",
+    "expression": "(2*x^3+3*x^2-2*x-9)+(3*x^3-7*x^2+3)",
+    "answer": "5*x^3-4*x^2-2*x-6",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.095, 0.73, 0.052],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "2*x^3+3*x^2-2*x-9+3*x^3-7*x^2+3"
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(2+3)*x^3+(3-7)*x^2-2*x+(-9+3)"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "5*x^3-4*x^2-2*x-6"
+      }
+    ],
+    "vertical": {
+      "rows": [
+        ["2*x^3", "3*x^2", "-2*x", "-9"],
+        ["3*x^3", "-7*x^2", "0", "3"]
+      ],
+      "operator": "+"
+    }
+  },
+  {
+    "id": "10C-25b",
+    "bank": "10C",
+    "number": 25,
+    "part": "b",
+    "page": 28,
+    "skill": "vertical",
+    "prompt": "Complete the following operations.",
+    "expression": "(-2*x^3+12*x^2-5)-(-x^3-9*x+8)",
+    "answer": "-x^3+12*x^2+9*x-13",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.095, 0.73, 0.052],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "-2*x^3+12*x^2-5+x^3+9*x-8",
+        "focus": {
+          "before": ["-x^3", "-9*x", "8"],
+          "after": ["x^3", "9*x", "-8"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(-2+1)*x^3+12*x^2+9*x+(-5-8)"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "-x^3+12*x^2+9*x-13"
+      }
+    ],
+    "vertical": {
+      "rows": [
+        ["-2*x^3", "12*x^2", "0", "-5"],
+        ["-x^3", "0", "-9*x", "8"]
+      ],
+      "operator": "-"
+    }
+  },
+  {
+    "id": "10C-26a",
+    "bank": "10C",
+    "number": 26,
+    "part": "a",
+    "page": 28,
+    "skill": "vertical",
+    "prompt": "Complete the following operations.",
+    "expression": "(-3*p^2+p*q^2-2*q^2-1)-(p^2-3*p*q^2+1)",
+    "answer": "-4*p^2+4*p*q^2-2*q^2-2",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.169, 0.74, 0.052],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "-3*p^2+p*q^2-2*q^2-1-p^2+3*p*q^2-1",
+        "focus": {
+          "before": ["p^2", "-3*p*q^2", "1"],
+          "after": ["-p^2", "3*p*q^2", "-1"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(-3-1)*p^2+(1+3)*p*q^2-2*q^2+(-1-1)"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "-4*p^2+4*p*q^2-2*q^2-2"
+      }
+    ],
+    "vertical": {
+      "rows": [
+        ["-3*p^2", "p*q^2", "-2*q^2", "-1"],
+        ["p^2", "-3*p*q^2", "0", "1"]
+      ],
+      "operator": "-"
+    }
+  },
+  {
+    "id": "10C-26b",
+    "bank": "10C",
+    "number": 26,
+    "part": "b",
+    "page": 28,
+    "skill": "vertical",
+    "prompt": "Complete the following operations.",
+    "expression": "(2*x^2*y^2-x^2*y-6*y^2)+(-5*x^2*y^2+3*x*y+4*y^2)",
+    "answer": "-3*x^2*y^2-x^2*y+3*x*y-2*y^2",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.169, 0.74, 0.052],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "2*x^2*y^2-x^2*y-6*y^2-5*x^2*y^2+3*x*y+4*y^2"
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(2-5)*x^2*y^2-x^2*y+3*x*y+(-6+4)*y^2"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "-3*x^2*y^2-x^2*y+3*x*y-2*y^2"
+      }
+    ],
+    "vertical": {
+      "rows": [
+        ["2*x^2*y^2", "-x^2*y", "0", "-6*y^2"],
+        ["-5*x^2*y^2", "0", "3*x*y", "4*y^2"]
+      ],
+      "operator": "+"
+    }
+  },
+  {
+    "id": "10C-27a",
+    "bank": "10C",
+    "number": 27,
+    "part": "a",
+    "page": 28,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in descending powers of the variables.",
+    "expression": "(8*x+x^3-5)+(3*x^2-2*x^3-6*x)",
+    "answer": "-x^3+3*x^2+2*x-5",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.269, 0.76, 0.031],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "8*x+x^3-5+3*x^2-2*x^3-6*x"
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(1-2)*x^3+3*x^2+(8-6)*x-5"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Write the result in descending powers.",
+        "math": "-x^3+3*x^2+2*x-5"
+      }
+    ]
+  },
+  {
+    "id": "10C-27b",
+    "bank": "10C",
+    "number": 27,
+    "part": "b",
+    "page": 28,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in descending powers of the variables.",
+    "expression": "(4*x^3-3*x-5*x^2)-(2*x^2-x+6*x^3-3)",
+    "answer": "-2*x^3-7*x^2-2*x+3",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.269, 0.76, 0.031],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "4*x^3-3*x-5*x^2-2*x^2+x-6*x^3+3",
+        "focus": {
+          "before": ["2*x^2", "-x", "6*x^3", "-3"],
+          "after": ["-2*x^2", "x", "-6*x^3", "3"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(4-6)*x^3+(-5-2)*x^2+(-3+1)*x+3"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Write the result in descending powers.",
+        "math": "-2*x^3-7*x^2-2*x+3"
+      }
+    ]
+  },
+  {
+    "id": "10C-28a",
+    "bank": "10C",
+    "number": 28,
+    "part": "a",
+    "page": 28,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in descending powers of the variables.",
+    "expression": "(1-x^2)-(x-x^2)-(2-x+x^2)",
+    "answer": "-x^2-1",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.302, 0.76, 0.031],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "1-x^2-x+x^2-(2-x+x^2)",
+        "focus": {
+          "before": ["x", "-x^2"],
+          "after": ["-x", "x^2"]
+        }
+      },
+      {
+        "title": "Reverse the next bracket signs",
+        "reason": "Subtract each term in the remaining bracket; reverse every sign.",
+        "math": "1-x^2-x+x^2-2+x-x^2",
+        "focus": {
+          "before": ["2", "-x", "x^2"],
+          "after": ["-2", "x", "-x^2"]
+        }
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Write the result in descending powers.",
+        "math": "-x^2-1"
+      }
+    ]
+  },
+  {
+    "id": "10C-28b",
+    "bank": "10C",
+    "number": 28,
+    "part": "b",
+    "page": 28,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in descending powers of the variables.",
+    "expression": "(3*x+x^2)+(1+2*x^2-x)-(-2+3*x)",
+    "answer": "3*x^2-x+3",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.302, 0.76, 0.031],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "3*x+x^2+1+2*x^2-x+2-3*x",
+        "focus": {
+          "before": ["-2", "3*x"],
+          "after": ["2", "-3*x"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(1+2)*x^2+(3-1-3)*x+(1+2)"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Write the result in descending powers.",
+        "math": "3*x^2-x+3"
+      }
+    ]
+  },
+  {
+    "id": "10C-29a",
+    "bank": "10C",
+    "number": 29,
+    "part": "a",
+    "page": 28,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in ascending powers of the variables.",
+    "expression": "(4+8*x^5-x^3)-(7*x^3-2*x^5-3)",
+    "answer": "7-8*x^3+10*x^5",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.374, 0.76, 0.031],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "4+8*x^5-x^3-7*x^3+2*x^5+3",
+        "focus": {
+          "before": ["7*x^3", "-2*x^5", "-3"],
+          "after": ["-7*x^3", "2*x^5", "3"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(4+3)+(-1-7)*x^3+(8+2)*x^5"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Write the result in ascending powers.",
+        "math": "7-8*x^3+10*x^5"
+      }
+    ]
+  },
+  {
+    "id": "10C-29b",
+    "bank": "10C",
+    "number": 29,
+    "part": "b",
+    "page": 28,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in ascending powers of the variables.",
+    "expression": "(9*b-(3*b^2-7))-(2*b+6*b^2+11)",
+    "answer": "-4+7*b-9*b^2",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.374, 0.76, 0.031],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "9*b-3*b^2+7-(2*b+6*b^2+11)",
+        "focus": {
+          "before": ["3*b^2", "-7"],
+          "after": ["-3*b^2", "7"]
+        }
+      },
+      {
+        "title": "Reverse the next bracket signs",
+        "reason": "Subtract each term in the remaining bracket; reverse every sign.",
+        "math": "9*b-3*b^2+7-2*b-6*b^2-11",
+        "focus": {
+          "before": ["2*b", "6*b^2", "11"],
+          "after": ["-2*b", "-6*b^2", "-11"]
+        }
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Write the result in ascending powers.",
+        "math": "-4+7*b-9*b^2"
+      }
+    ]
+  },
+  {
+    "id": "10C-30a",
+    "bank": "10C",
+    "number": 30,
+    "part": "a",
+    "page": 28,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in ascending powers of the variables.",
+    "expression": "(-5+8*y^2)+(6*y-8)-(3*y^2+14*y)",
+    "answer": "-13-8*y+5*y^2",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.408, 0.76, 0.031],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "-5+8*y^2+6*y-8-3*y^2-14*y",
+        "focus": {
+          "before": ["3*y^2", "14*y"],
+          "after": ["-3*y^2", "-14*y"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(-5-8)+(6-14)*y+(8-3)*y^2"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Write the result in ascending powers.",
+        "math": "-13-8*y+5*y^2"
+      }
+    ]
+  },
+  {
+    "id": "10C-30b",
+    "bank": "10C",
+    "number": 30,
+    "part": "b",
+    "page": 28,
+    "skill": "simplify",
+    "prompt": "Simplify the following expressions and arrange the terms in ascending powers of the variables.",
+    "expression": "(7*a^3-3*a)-(6*a^2-a-8)+(-2+8*a^2)",
+    "answer": "6-2*a+2*a^2+7*a^3",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.408, 0.76, 0.031],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "7*a^3-3*a-6*a^2+a+8+(-2+8*a^2)",
+        "focus": {
+          "before": ["6*a^2", "-a", "-8"],
+          "after": ["-6*a^2", "a", "8"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(8-2)+(-3+1)*a+(-6+8)*a^2+7*a^3"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Write the result in ascending powers.",
+        "math": "6-2*a+2*a^2+7*a^3"
+      }
+    ]
+  },
+  {
+    "id": "10C-31a",
+    "bank": "10C",
+    "number": 31,
+    "part": "a",
+    "page": 28,
+    "skill": "simplify",
+    "prompt": "Simplify (2*x^3+5-x)+(3*x^2-2*x-2*x^3).",
+    "expression": "(2*x^3+5-x)+(3*x^2-2*x-2*x^3)",
+    "answer": "5-3*x+3*x^2",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.45, 0.8, 0.057],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "2*x^3+5-x+3*x^2-2*x-2*x^3"
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(2-2)*x^3+3*x^2+(-1-2)*x+5"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "5-3*x+3*x^2"
+      }
+    ]
+  },
+  {
+    "id": "10C-31b",
+    "bank": "10C",
+    "number": 31,
+    "part": "b",
+    "page": 28,
+    "skill": "substitute",
+    "prompt": "Hence, find the value of the above expression when x = -3.",
+    "expression": "5-3*x+3*x^2",
+    "answer": "41",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.45, 0.8, 0.057],
+    "steps": [
+      {
+        "title": "Recall part (a)",
+        "reason": "Use the simplified expression from part (a).",
+        "math": "5-3*x+3*x^2"
+      },
+      {
+        "title": "Substitute x = -3",
+        "reason": "Bracket the negative value before squaring.",
+        "math": "5-3*(-3)+3*(-3)^2",
+        "target": "41"
+      },
+      {
+        "title": "Evaluate the products",
+        "reason": "The square of -3 is 9.",
+        "math": "5+9+27",
+        "target": "41"
+      },
+      {
+        "title": "Add",
+        "reason": "Find the value of the expression.",
+        "math": "41",
+        "target": "41"
+      }
+    ],
+    "givenTex": "x=-3"
+  },
+  {
+    "id": "10C-32a",
+    "bank": "10C",
+    "number": 32,
+    "part": "a",
+    "page": 28,
+    "skill": "simplify",
+    "prompt": "Simplify (p^2-4*p*q+q^2)-(p^2+4*p*q-q^2).",
+    "expression": "(p^2-4*p*q+q^2)-(p^2+4*p*q-q^2)",
+    "answer": "-8*p*q+2*q^2",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.505, 0.83, 0.057],
+    "steps": [
+      {
+        "title": "Remove the brackets",
+        "reason": "An addition sign keeps every sign; a subtraction sign reverses every sign in its bracket.",
+        "math": "p^2-4*p*q+q^2-p^2-4*p*q+q^2",
+        "focus": {
+          "before": ["p^2", "4*p*q", "-q^2"],
+          "after": ["-p^2", "-4*p*q", "q^2"]
+        }
+      },
+      {
+        "title": "Group like terms",
+        "reason": "Only terms with identical variables and indices can be combined.",
+        "math": "(1-1)*p^2+(-4-4)*p*q+(1+1)*q^2"
+      },
+      {
+        "title": "Combine the coefficients",
+        "reason": "Add the coefficients of each group of like terms.",
+        "math": "-8*p*q+2*q^2"
+      }
+    ]
+  },
+  {
+    "id": "10C-32b",
+    "bank": "10C",
+    "number": 32,
+    "part": "b",
+    "page": 28,
+    "skill": "substitute",
+    "prompt": "Hence, find the value of the above expression when p = 2 and q = -3.",
+    "expression": "-8*p*q+2*q^2",
+    "answer": "66",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.505, 0.83, 0.057],
+    "steps": [
+      {
+        "title": "Recall part (a)",
+        "reason": "Reuse the simplified result.",
+        "math": "-8*p*q+2*q^2"
+      },
+      {
+        "title": "Substitute both values",
+        "reason": "Bracket q = -3 in both appearances.",
+        "math": "-8*2*(-3)+2*(-3)^2",
+        "target": "66"
+      },
+      {
+        "title": "Evaluate the products",
+        "reason": "A negative times a negative is positive.",
+        "math": "48+18",
+        "target": "66"
+      },
+      {
+        "title": "Add",
+        "reason": "Find the value of the expression.",
+        "math": "66",
+        "target": "66"
+      }
+    ],
+    "givenTex": "p=2,\\quad q=-3"
+  },
+  {
+    "id": "10C-33a",
+    "bank": "10C",
+    "number": 33,
+    "part": "a",
+    "page": 28,
+    "skill": "applications",
+    "prompt": "In the figure, ABC is a triangle. The lengths of its sides are 2x, x^2 - 6 and x + 2. Express the perimeter of triangle ABC in terms of x.",
+    "expression": "2*x+(x^2-6)+(x+2)",
+    "answer": "x^2+3*x-4",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.565, 0.83, 0.112],
+    "steps": [
+      {
+        "title": "Model the perimeter",
+        "reason": "Add all three side lengths.",
+        "math": "2*x+(x^2-6)+(x+2)"
+      },
+      {
+        "title": "Remove the brackets",
+        "reason": "Each side is added.",
+        "math": "2*x+x^2-6+x+2"
+      },
+      {
+        "title": "Collect like terms",
+        "reason": "Combine the x terms and the constants.",
+        "math": "x^2+(2+1)*x+(-6+2)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "This is the perimeter in terms of x.",
+        "math": "x^2+3*x-4"
+      }
+    ],
+    "diagram": "triangle-perimeter",
+    "diagramLabels": ["2x", "x^2 - 6", "x + 2"]
+  },
+  {
+    "id": "10C-33b",
+    "bank": "10C",
+    "number": 33,
+    "part": "b",
+    "page": 28,
+    "skill": "applications",
+    "prompt": "Hence, find the perimeter of triangle ABC when x = 4.",
+    "expression": "x^2+3*x-4",
+    "answer": "24",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.565, 0.83, 0.112],
+    "steps": [
+      {
+        "title": "Recall part (a)",
+        "reason": "The perimeter is the sum of the three sides.",
+        "math": "x^2+3*x-4"
+      },
+      {
+        "title": "Substitute x = 4",
+        "reason": "Use the perimeter expression.",
+        "math": "4^2+3*4-4",
+        "target": "24"
+      },
+      {
+        "title": "Evaluate",
+        "reason": "Square first, then multiply.",
+        "math": "16+12-4",
+        "target": "24"
+      },
+      {
+        "title": "Add and subtract",
+        "reason": "The perimeter is 24; the question supplies no length unit.",
+        "math": "24",
+        "target": "24"
+      }
+    ],
+    "diagram": "triangle-perimeter",
+    "diagramLabels": ["2x", "x^2 - 6", "x + 2"]
+  },
+  {
+    "id": "10C-34a",
+    "bank": "10C",
+    "number": 34,
+    "part": "a",
+    "page": 28,
+    "skill": "applications",
+    "prompt": "Mary has $(12x - 1), John has $(3x^2 + x - 7) and Tim has $(10x^2 - 3x). Express the total amount of money they have in terms of x.",
+    "expression": "(12*x-1)+(3*x^2+x-7)+(10*x^2-3*x)",
+    "answer": "13*x^2+10*x-8",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.68, 0.83, 0.075],
+    "steps": [
+      {
+        "title": "Model the total",
+        "reason": "Add the amounts belonging to Mary, John and Tim.",
+        "math": "(12*x-1)+(3*x^2+x-7)+(10*x^2-3*x)"
+      },
+      {
+        "title": "Remove the brackets",
+        "reason": "All three amounts are being added.",
+        "math": "12*x-1+3*x^2+x-7+10*x^2-3*x"
+      },
+      {
+        "title": "Collect like terms",
+        "reason": "Keep square terms, linear terms and constants separate.",
+        "math": "(3+10)*x^2+(12+1-3)*x+(-1-7)"
+      },
+      {
+        "title": "Simplify",
+        "reason": "The total amount is in dollars.",
+        "math": "13*x^2+10*x-8"
+      }
+    ],
+    "answerTex": "\\$(13x^2+10x-8)"
+  },
+  {
+    "id": "10C-34b",
+    "bank": "10C",
+    "number": 34,
+    "part": "b",
+    "page": 28,
+    "skill": "applications",
+    "prompt": "Hence, find the total amount of money they have when x = 10.",
+    "expression": "13*x^2+10*x-8",
+    "answer": "1392",
+    "nonzero": [],
+    "sourceRect": [0.065, 0.68, 0.83, 0.075],
+    "steps": [
+      {
+        "title": "Recall part (a)",
+        "reason": "Use the total amount from part (a).",
+        "math": "13*x^2+10*x-8"
+      },
+      {
+        "title": "Substitute x = 10",
+        "reason": "Evaluate the square before multiplying.",
+        "math": "13*10^2+10*10-8",
+        "target": "1392"
+      },
+      {
+        "title": "Evaluate the products",
+        "reason": "All amounts are in dollars.",
+        "math": "1300+100-8",
+        "target": "1392"
+      },
+      {
+        "title": "Calculate the total",
+        "reason": "They have $1392 in total.",
+        "math": "1392",
+        "target": "1392"
+      }
+    ],
+    "answerTex": "\\$1392"
+  },
+  {
+    "id": "10C-35a",
+    "bank": "10C",
+    "number": 35,
+    "part": "a",
+    "page": 28,
+    "skill": "applications",
+    "prompt": "Kelvin had $(18x^2 + 2xy) of pocket money for this week. He spent $(3xy + 4y^2), $(5x^2 - 2y^2) and $(2x^2 + 3xy - 5y^2) on Monday, Tuesday and Wednesday respectively. Express the total amount of pocket money Kelvin spent in terms of x and y.",
+    "expression": "(3*x*y+4*y^2)+(5*x^2-2*y^2)+(2*x^2+3*x*y-5*y^2)",
+    "answer": "7*x^2+6*x*y-3*y^2",
+    "nonzero": [],
+    "sourceRect": [0.05, 0.758, 0.86, 0.105],
+    "steps": [
+      {
+        "title": "Model the amount spent",
+        "reason": "Add the Monday, Tuesday and Wednesday amounts.",
+        "math": "(3*x*y+4*y^2)+(5*x^2-2*y^2)+(2*x^2+3*x*y-5*y^2)"
+      },
+      {
+        "title": "Remove the brackets",
+        "reason": "All spending amounts are added.",
+        "math": "3*x*y+4*y^2+5*x^2-2*y^2+2*x^2+3*x*y-5*y^2"
+      },
+      {
+        "title": "Collect like terms",
+        "reason": "Keep x squared, xy and y squared in separate groups.",
+        "math": "(5+2)*x^2+(3+3)*x*y+(4-2-5)*y^2"
+      },
+      {
+        "title": "Simplify",
+        "reason": "The total spent is in dollars.",
+        "math": "7*x^2+6*x*y-3*y^2"
+      }
+    ],
+    "answerTex": "\\$(7x^2+6xy-3y^2)"
+  },
+  {
+    "id": "10C-35b",
+    "bank": "10C",
+    "number": 35,
+    "part": "b",
+    "page": 28,
+    "skill": "applications",
+    "prompt": "Suppose x = 4 and y = 3. Kelvin claims that the remaining amount of pocket money for this week is more than $150. Do you agree? Explain your answer.",
+    "expression": "(18*x^2+2*x*y)-(7*x^2+6*x*y-3*y^2)",
+    "answer": "155",
+    "nonzero": [],
+    "sourceRect": [0.05, 0.758, 0.86, 0.105],
+    "steps": [
+      {
+        "title": "Recall part (a)",
+        "reason": "The amount spent is 7x squared + 6xy - 3y squared dollars.",
+        "math": "7*x^2+6*x*y-3*y^2",
+        "target": "7*x^2+6*x*y-3*y^2",
+        "label": "Spent"
+      },
+      {
+        "title": "Model the remaining money",
+        "reason": "Subtract total spent from the initial amount.",
+        "math": "(18*x^2+2*x*y)-(7*x^2+6*x*y-3*y^2)"
+      },
+      {
+        "title": "Calculate the initial amount",
+        "reason": "Substitute x = 4 and y = 3; the initial amount is $312.",
+        "math": "18*4^2+2*4*3",
+        "target": "312"
+      },
+      {
+        "title": "Calculate the amount spent",
+        "reason": "Use part (a); the amount spent is $157.",
+        "math": "7*4^2+6*4*3-3*3^2",
+        "target": "157"
+      },
+      {
+        "title": "Subtract the spending",
+        "reason": "The remaining amount is $155.",
+        "math": "312-157",
+        "target": "155"
+      },
+      {
+        "title": "Compare with $150",
+        "reason": "$155 exceeds $150 by $5, so Kelvin is correct.",
+        "tex": "155>150\\quad\\text{Yes, I agree.}"
+      }
+    ],
+    "answerTex": "\\text{Yes. Remaining money}=\\$155>\\$150."
+  }
+]

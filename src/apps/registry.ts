@@ -10,6 +10,8 @@ import SimilarityThumbnail from "./similarity/Thumbnail";
 import CongruenceThumbnail from "./congruence/Thumbnail";
 import SurfaceAreaThumbnail from "./surface-area/Thumbnail";
 
+import PolynomialsThumbnail from "./polynomials/Thumbnail";
+
 export interface AppEntry {
   slug: string;
   title: string;
@@ -25,6 +27,17 @@ export interface AppEntry {
 
 /** The index and detail route both use this list. New apps register here. */
 export const appRegistry: readonly AppEntry[] = [
+  {
+    slug: "polynomials",
+    topicCodes: ["1A10"],
+    title: copy.polynomials.title,
+    topic: copy.polynomials.topic,
+    levels: ["F1"],
+    strand: "number-algebra",
+    summary: copy.polynomials.summary,
+    thumbnail: PolynomialsThumbnail,
+    load: () => import("./polynomials"),
+  },
   {
     slug: "surface-area",
     topicCodes: ["1A09"],

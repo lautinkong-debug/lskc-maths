@@ -2,6 +2,13 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Polynomial demonstrations publication (24/10/2026)
+
+- [x] Owner approved publication of the reviewed complete Level 2 bank: 81 numbered questions / 158 demonstrations across 10A–10D and Revision Exercise 10.
+- [x] Prepare the release from current origin/main using the verified demonstration snapshot. Preserve the published Surface Area and Similarity updates; ongoing game work stays in its original workspace.
+- [x] Verify release integration: 1,306 unit tests, 20 browser scenarios, production build/TypeScript, scoped ESLint and whitespace checks pass; all 17 app/data files match the reviewed snapshot.
+- [ ] Publish the exact commit and verify the live question bank, controls, source images and phone/projection layouts.
+
 
 ## Similarity question conditions and persistent proof history (23/10/2026)
 
