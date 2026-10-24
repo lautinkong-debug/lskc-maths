@@ -15,8 +15,9 @@ import type {
 } from "./types";
 
 import { ENERGY_CAP, SKILLS } from "./skills";
+import { speedBonus } from "./timing";
 
-export const GOAL = 24;
+export const GOAL = 48;
 const pupil = (): Pupil => ({
   attempt: 0,
   phase: "answering",
@@ -32,6 +33,7 @@ export function newMatch(
   return {
     seed,
     secret,
+    goal: GOAL,
     revision: 0,
     members: [null, null, null, null],
     pairs: [0, 1].map(() => ({
@@ -46,6 +48,11 @@ export function newMatch(
       usedSkillRound: -1,
       lastSkill: null,
       lastBlocked: 0,
+      startedAt: null,
+      lastElapsedMs: null,
+      lastBasePower: 0,
+      lastSpeedBonus: 0,
+      lastSkillBonus: 0,
     })),
     pupils: [0, 1, 2, 3].map(pupil),
     position: 0,
@@ -58,8 +65,31 @@ function activeSeats(match: Match, side: number) {
       match.members[seat] !== null && match.pupils[seat].phase !== "waiting",
   );
 }
+/** Arm only occupied teams. Empty teams start when their first pupil joins. */
+export function startMatchClocks(current: Match, now: number): Match {
+  const match = structuredClone(current);
+  let changed = false;
+  for (let side = 0; side < 2; side++) {
+    if (
+      activeSeats(match, side).length &&
+      Object.hasOwn(match.pairs[side], "startedAt") &&
+      match.pairs[side].startedAt == null
+    ) {
+      match.pairs[side].startedAt = now;
+      changed = true;
+    }
+  }
+  if (!changed) return current;
+  match.revision++;
+  return match;
+}
 /** Late arrivals join the next round once this pair has begun solving. */
-export function joinMatch(current: Match, uid: string, side: number): Match {
+export function joinMatch(
+  current: Match,
+  uid: string,
+  side: number,
+  now?: number,
+): Match {
   if (side !== 0 && side !== 1) throw new Error("invalid-seat");
   if (current.winner !== null) throw new Error("finished");
   if (current.members.includes(uid)) return current;
@@ -69,7 +99,9 @@ export function joinMatch(current: Match, uid: string, side: number): Match {
   if (seat === undefined) throw new Error("full");
   const match = structuredClone(current),
     pair = match.pairs[side];
+  const wasEmpty = activeSeats(current, side).length === 0;
   const started =
+    pair.startedAt != null ||
     pair.resolved ||
     pair.usedSkillRound === pair.round ||
     activeSeats(current, side).some(
@@ -78,6 +110,8 @@ export function joinMatch(current: Match, uid: string, side: number): Match {
         current.pupils[i].attempt > 0,
     );
   match.members[seat] = uid;
+  if (wasEmpty && Object.hasOwn(pair, "startedAt") && typeof now === "number")
+    pair.startedAt = now;
   match.pupils[seat] = { ...pupil(), phase: started ? "waiting" : "answering" };
   match.revision++;
   return match;
@@ -126,7 +160,12 @@ export function optionsFor(match: Match, seat: number) {
       .digest("hex"),
   });
 }
-export function applyMove(current: Match, seat: number, move: Move): Match {
+export function applyMove(
+  current: Match,
+  seat: number,
+  move: Move,
+  now = Date.now(),
+): Match {
   assertSeat(seat);
   if (current.winner !== null) throw new Error("finished");
   if (current.members[seat] === null) throw new Error("empty-seat");
@@ -170,10 +209,19 @@ export function applyMove(current: Match, seat: number, move: Move): Match {
       activeSeats(match, side).every((i) => match.pupils[i].phase === "correct")
     ) {
       const base = pairLevel(pair);
-      const charged =
-        pair.armed === "surge"
-          ? base * 2
-          : base + (pair.armed === "boost" ? 2 : 0);
+      const elapsed =
+        pair.startedAt == null ? null : Math.max(0, now - pair.startedAt);
+      const clean = activeSeats(match, side).every(
+        (i) => match.pupils[i].attempt === 0,
+      );
+      const timed = speedBonus(base, elapsed, clean);
+      const skill =
+        pair.armed === "surge" ? base + timed : pair.armed === "boost" ? 2 : 0;
+      const charged = base + timed + skill;
+      pair.lastBasePower = base;
+      pair.lastElapsedMs = elapsed;
+      pair.lastSpeedBonus = timed;
+      pair.lastSkillBonus = skill;
       const opponent = match.pairs[1 - side];
       const blocked = opponent.shield ? Math.min(2, charged) : 0;
       const power = charged - blocked;
@@ -184,11 +232,12 @@ export function applyMove(current: Match, seat: number, move: Move): Match {
       pair.lastPower = power;
       pair.pulls++;
       pair.resolved = true;
+      const goal = match.goal ?? 24;
       match.position = Math.max(
-        -GOAL,
-        Math.min(GOAL, match.position + (side === 0 ? -power : power)),
+        -goal,
+        Math.min(goal, match.position + (side === 0 ? -power : power)),
       );
-      if (Math.abs(match.position) === GOAL) match.winner = side;
+      if (Math.abs(match.position) === goal) match.winner = side;
     }
   } else if (move.action === "retry") {
     if (player.phase !== "wrong") throw new Error("not-ready");
@@ -202,6 +251,8 @@ export function applyMove(current: Match, seat: number, move: Move): Match {
     pair.next[local] = true;
     if (activeSeats(match, side).every((i) => pair.next[i % 2])) {
       pair.round++;
+      if (pair.startedAt != null) pair.startedAt = now;
+      pair.lastBlocked = 0;
       pair.resolved = false;
       pair.next = [false, false];
       match.pupils[side * 2] = pupil();
@@ -211,8 +262,18 @@ export function applyMove(current: Match, seat: number, move: Move): Match {
   match.revision++;
   return match;
 }
-export function matchSummary(match: Match): MatchSummary {
+// Historical results predate component fields, but the completed-pull count
+// still identifies the difficulty before levelling up. Net power plus blocked
+// power recovers the gross pull, including any old offensive skill.
+function completedBase(pair: Pair) {
+  return (
+    pair.lastBasePower ??
+    (pair.pulls === 0 ? 0 : Math.min(4, 1 + Math.floor((pair.pulls - 1) / 3)))
+  );
+}
+export function matchSummary(match: Match, now = Date.now()): MatchSummary {
   return {
+    goal: match.goal ?? 24,
     revision: match.revision,
     occupied: match.members.map(Boolean),
     waiting: match.pupils.map((p) => p.phase === "waiting"),
@@ -232,6 +293,24 @@ export function matchSummary(match: Match): MatchSummary {
       skillUsed: pair.usedSkillRound === pair.round,
       lastSkill: pair.lastSkill ?? null,
       lastBlocked: pair.lastBlocked ?? 0,
+      elapsedMs: pair.resolved
+        ? (pair.lastElapsedMs ?? null)
+        : pair.startedAt == null
+          ? null
+          : Math.max(0, now - pair.startedAt),
+      speedEligible: activeSeats(match, side).every(
+        (i) =>
+          match.pupils[i].attempt === 0 && match.pupils[i].phase !== "wrong",
+      ),
+      lastElapsedMs: pair.lastElapsedMs ?? null,
+      lastBasePower: completedBase(pair),
+      lastSpeedBonus: pair.lastSpeedBonus ?? 0,
+      lastSkillBonus:
+        pair.lastSkillBonus ??
+        Math.max(
+          0,
+          pair.lastPower + (pair.lastBlocked ?? 0) - completedBase(pair),
+        ),
     })),
   };
 }

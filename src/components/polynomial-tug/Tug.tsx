@@ -19,6 +19,7 @@ import type { RoomView, MatchSummary } from "@/lib/polynomial-tug/types";
 import questStyles from "@/apps/polynomials/quest/quest.module.css";
 import { Rope } from "./Rope";
 import { SkillTray } from "./SkillTray";
+import { ForceMeter } from "./ForceMeter";
 import styles from "./Tug.module.css";
 const c = copy.polynomialTug,
   qcopy = copy.polynomialQuest;
@@ -570,6 +571,10 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
                   <a className={styles.skillJump} href="#team-skills">
                     {c.skillJump(match.pairs[Math.floor(me.seat / 2)].energy)}
                   </a>
+                  <ForceMeter
+                    pair={match.pairs[Math.floor(me.seat / 2)]}
+                    paused={state.status === "paused"}
+                  />
                   <h3>{c.choose}</h3>
                   <div
                     className={styles.expression}
@@ -668,12 +673,21 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
                                 )
                               : c.waitPartner}
                           </p>
-                          {match.pairs[Math.floor(me.seat / 2)].lastBlocked >
-                            0 && (
-                            <p>
-                              {c.blocked(
+                          {match.pairs[Math.floor(me.seat / 2)].resolved && (
+                            <p
+                              className={styles.forceResult}
+                              data-testid="tug-force-result"
+                            >
+                              {c.forceBreakdown(
+                                match.pairs[Math.floor(me.seat / 2)]
+                                  .lastBasePower,
+                                match.pairs[Math.floor(me.seat / 2)]
+                                  .lastSpeedBonus,
+                                match.pairs[Math.floor(me.seat / 2)]
+                                  .lastSkillBonus,
                                 match.pairs[Math.floor(me.seat / 2)]
                                   .lastBlocked,
+                                match.pairs[Math.floor(me.seat / 2)].lastPower,
                               )}
                             </p>
                           )}

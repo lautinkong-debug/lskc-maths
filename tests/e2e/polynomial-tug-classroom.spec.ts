@@ -12,6 +12,7 @@ test("32 independent browsers join eight groups and complete all four levels wit
   mkdirSync(output, { recursive: true });
   const errors: string[] = [];
   const rounds: object[] = [];
+  const positions: number[] = Array(8).fill(0);
   const contexts: BrowserContext[] = [];
   const students: {
     page: Page;
@@ -212,25 +213,57 @@ test("32 independent browsers join eight groups and complete all four levels wit
       }
       await until(
         () =>
-          students.every(
-            (s) =>
-              s.view!.match!.position === 0 &&
-              s.view!.match!.pairs.every(
-                (p) => p.pulls === round + 1 && p.resolved,
-              ),
+          students.every((s) =>
+            s.view!.match!.pairs.every(
+              (p) => p.pulls === round + 1 && p.resolved,
+            ),
           ),
         "completed round " + round,
       );
-      const power = round === 3 ? 4 : round === 6 ? 1 : round === 9 ? 8 : level;
-      for (const s of students)
-        expect(s.view!.match!.pairs.every((p) => p.lastPower === power)).toBe(
-          true,
-        );
+      const forces = [];
+      for (let group = 0; group < 8; group++) {
+        const match = students.find((s) => s.view!.you!.group === group)!.view!
+          .match!;
+        expect(match.goal).toBe(48);
+        const powers = match.pairs.map((p, side) => {
+          // Independent score calculation from observed server elapsed time.
+          const fast = [20000, 30000, 40000, 50000][level - 1];
+          const elapsed = p.lastElapsedMs!;
+          expect(elapsed).toBeGreaterThanOrEqual(0);
+          const time =
+            round === 0 && side === 0
+              ? 0
+              : elapsed <= fast
+                ? 2
+                : elapsed <= fast * 2
+                  ? 1
+                  : 0;
+          const extra = round === 3 ? 2 : round === 9 ? level + time : 0;
+          const blocked = round === 6 ? 2 : 0;
+          expect(p).toMatchObject({
+            lastBasePower: level,
+            lastSpeedBonus: time,
+            lastSkillBonus: extra,
+            lastBlocked: blocked,
+            lastPower: level + time + extra - blocked,
+          });
+          return p.lastPower;
+        });
+        positions[group] += powers[1] - powers[0];
+        expect(match.position).toBe(positions[group]);
+        forces.push({
+          group: group + 1,
+          position: match.position,
+          powers,
+          elapsedMs: match.pairs.map((p) => p.lastElapsedMs),
+          timeBonuses: match.pairs.map((p) => p.lastSpeedBonus),
+        });
+      }
       rounds.push({
         round: round + 1,
         level,
         skill,
-        power,
+        forces,
         correctAnswers: 32,
         pairs: 16,
       });
@@ -272,7 +305,12 @@ test("32 independent browsers join eight groups and complete all four levels wit
       students.map((s) =>
         expect(
           s.page.getByRole("heading", {
-            name: "A balanced finish — draw",
+            name:
+              positions[s.view!.you!.group] === 0
+                ? "A balanced finish — draw"
+                : positions[s.view!.you!.group] < 0
+                  ? "Pair A wins!"
+                  : "Pair B wins!",
             exact: true,
           }),
         ).toBeVisible(),

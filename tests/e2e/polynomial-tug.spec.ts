@@ -8,8 +8,7 @@ import { equivalent } from "../../src/apps/polynomials/algebra";
 import { mkdirSync } from "node:fs";
 import type { RoomView } from "../../src/lib/polynomial-tug/types";
 const evidence = "out/polynomial-tug-preview";
-async function answer(page: Page, wrong = false) {
-  // Read the question only after a retry/advance response has replaced disabled choices.
+async function answer(page: Page, wrong = false): Promise<RoomView> {
   await expect(page.getByTestId("tug-choice").first()).toBeEnabled();
   const source = (await page
     .getByTestId("tug-question")
@@ -22,12 +21,36 @@ async function answer(page: Page, wrong = false) {
       (await choice.getAttribute("data-source"))!,
     );
     if (match !== wrong) {
+      const responsePromise = page.waitForResponse(
+        (response) =>
+          response.url().includes("/api/polynomial-tug") &&
+          response.request().method() === "POST" &&
+          response.request().postDataJSON()?.action === "answer",
+      );
       await choice.click();
-      return;
+      const response = await responsePromise;
+      expect(response.status()).toBe(200);
+      const state = (await response.json()).state as RoomView;
+      await expect(
+        page
+          .getByRole("status")
+          .filter({
+            hasText: wrong
+              ? "Check the working, then try again"
+              : "Your answer is ready!",
+          })
+          .or(
+            page.getByRole("heading", {
+              name: /Pair [AB] wins!|Practice complete!/,
+            }),
+          ),
+      ).toBeVisible();
+      return state;
     }
   }
   throw new Error("No valid option");
 }
+
 test("teacher and four separate pupils complete cooperative pulls, level up, reconnect and pause", async ({
   page,
   browser,
@@ -91,7 +114,7 @@ test("teacher and four separate pupils complete cooperative pulls, level up, rec
     await answer(students[1]);
     for (const student of students.slice(0, 2))
       await expect(
-        student.getByText("Together you pulled 1 unit!", { exact: true }),
+        student.getByText(/^Together you pulled \d+ units?!$/, { exact: true }),
       ).toBeVisible();
     for (let round = 1; round < 3; round++) {
       await Promise.all(
@@ -114,7 +137,9 @@ test("teacher and four separate pupils complete cooperative pulls, level up, rec
       await Promise.all(students.slice(0, 2).map((s) => answer(s)));
       for (const student of students.slice(0, 2))
         await expect(
-          student.getByText("Together you pulled 1 unit!", { exact: true }),
+          student.getByText(/^Together you pulled \d+ units?!$/, {
+            exact: true,
+          }),
         ).toBeVisible();
     }
     await expect(
@@ -122,7 +147,9 @@ test("teacher and four separate pupils complete cooperative pulls, level up, rec
     ).toBeVisible();
     await students[0].reload();
     await expect(
-      students[0].getByText("Together you pulled 1 unit!", { exact: true }),
+      students[0].getByText(/^Together you pulled \d+ units?!$/, {
+        exact: true,
+      }),
     ).toBeVisible();
     await page
       .getByRole("button", { name: "Pause class", exact: true })
@@ -159,7 +186,7 @@ test("teacher and four separate pupils complete cooperative pulls, level up, rec
       fullPage: true,
     });
     // Complete every remaining tier through the actual four independent clients.
-    for (let round = 3; round < 11; round++) {
+    for (let round = 3; round < 20; round++) {
       await Promise.all(
         students.slice(0, 2).map((s) =>
           s
@@ -177,15 +204,15 @@ test("teacher and four separate pupils complete cooperative pulls, level up, rec
             expect(s.getByTestId("tug-choice").first()).toBeEnabled(),
           ),
       );
-      await Promise.all(students.slice(0, 2).map((s) => answer(s)));
-      if (round < 10) {
-        const power = Math.min(4, Math.floor(round / 3) + 1);
-        await expect(
-          students[0].getByText(`Together you pulled ${power} units!`, {
-            exact: true,
-          }),
-        ).toBeVisible();
-      }
+      const results = await Promise.all(
+        students.slice(0, 2).map((s) => answer(s)),
+      );
+      if (results.some((view) => view.match!.winner === 0)) break;
+      await expect(
+        students[0].getByText(/^Together you pulled \d+ units?!$/, {
+          exact: true,
+        }),
+      ).toBeVisible();
     }
     for (const student of students) {
       await expect(
@@ -404,7 +431,7 @@ test("one student can start, a late partner waits safely, and an opponent can jo
     ).toBeVisible();
     await answer(solo);
     await expect(
-      solo.getByText("Together you pulled 1 unit!", { exact: true }),
+      solo.getByText(/^Together you pulled \d+ units?!$/, { exact: true }),
     ).toBeVisible();
     await late.goto(`/polynomial-tug?room=${code}`);
     await late
@@ -426,7 +453,7 @@ test("one student can start, a late partner waits safely, and an opponent can jo
     await Promise.all([answer(solo), answer(late), answer(opponent)]);
     for (const student of students)
       await expect(
-        student.getByText("Together you pulled 1 unit!", { exact: true }),
+        student.getByText(/^Together you pulled \d+ units?!$/, { exact: true }),
       ).toBeVisible();
     await page.getByRole("button", { name: "End class", exact: true }).click();
     await page
@@ -469,7 +496,7 @@ test("a stale match in an end-class response does not freeze a student in live p
       .click();
     await answer(student);
     await expect(
-      student.getByText("Together you pulled 1 unit!", { exact: true }),
+      student.getByText(/^Together you pulled \d+ units?!$/, { exact: true }),
     ).toBeVisible();
     let closedPolls = 0;
     await student.route("**/api/polynomial-tug?*", async (route) => {

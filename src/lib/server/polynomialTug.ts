@@ -3,6 +3,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { adminDb, ChallengeError } from "./firebaseAdmin";
 import {
   applyMove,
+  startMatchClocks,
   joinMatch,
   matchSummary,
   newMatch,
@@ -12,6 +13,7 @@ import type { Match, Move, Room, RoomView } from "../polynomial-tug/types";
 import { copy } from "../copy";
 import { CODE_ALPHABET } from "../challenges/codes";
 import { createReadCache } from "./tugReadCache";
+import { activeClock } from "../polynomial-tug/timing";
 const cache = createReadCache();
 const e = copy.polynomialTug.errors;
 function fail(message: string, status = 400): never {
@@ -30,10 +32,29 @@ function roomData(data: FirebaseFirestore.DocumentData | undefined): Room {
 }
 function matchData(data: FirebaseFirestore.DocumentData | undefined): Match {
   if (!data) fail(e.missing, 404);
-  const { seed, secret, revision, members, pairs, pupils, position, winner } =
-    data!;
+  const {
+    seed,
+    secret,
+    goal,
+    revision,
+    members,
+    pairs,
+    pupils,
+    position,
+    winner,
+  } = data!;
   // Keep Firestore Timestamp metadata outside the pure structured-cloned game.
-  return { seed, secret, revision, members, pairs, pupils, position, winner };
+  return {
+    seed,
+    secret,
+    goal: goal ?? 24,
+    revision,
+    members,
+    pairs,
+    pupils,
+    position,
+    winner,
+  };
 }
 export async function createTugRoom(
   owner: string,
@@ -56,6 +77,8 @@ export async function createTugRoom(
         owner,
         groupCount,
         status: "lobby",
+        pausedMs: 0,
+        pausedAt: null,
         revision: 0,
         expiresAt,
         expireAt: Timestamp.fromMillis(expiresAt),
@@ -98,7 +121,12 @@ export async function joinTugRoom(
         (i) => game.members[i] === null,
       );
       if (seat === undefined) fail(e.full, 409);
-      game = joinMatch(game, uid, side);
+      game = joinMatch(
+        game,
+        uid,
+        side,
+        room.status === "lobby" ? undefined : activeClock(room, Date.now()),
+      );
       tx.set(gameRef, game, { merge: true });
       tx.create(membership, {
         group,
@@ -120,6 +148,7 @@ export async function controlTugRoom(
   await adminDb.runTransaction(async (tx) => {
     const room = roomData((await tx.get(ref)).data());
     if (room.owner !== owner) fail(e.owner, 403);
+    const now = Date.now();
     if (action === "start") {
       if (room.status === "live") return;
       if (room.status !== "lobby") fail(e.control, 409);
@@ -132,16 +161,34 @@ export async function controlTugRoom(
         !groups.some((g) => (g.data() as Match).members.some((m) => m !== null))
       )
         fail(e.incomplete, 409);
+      for (const group of groups) {
+        const before = matchData(group.data()),
+          after = startMatchClocks(before, activeClock(room, now));
+        if (after !== before) tx.set(group.ref, after, { merge: true });
+      }
       room.status = "live";
-    } else if (action === "pause" && room.status === "live")
+    } else if (action === "pause" && room.status === "live") {
       room.status = "paused";
-    else if (action === "resume" && room.status === "paused")
+      room.pausedAt = now;
+    } else if (action === "resume" && room.status === "paused") {
+      room.pausedMs =
+        (room.pausedMs ?? 0) +
+        (room.pausedAt == null ? 0 : Math.max(0, now - room.pausedAt));
+      room.pausedAt = null;
       room.status = "live";
-    else if (action === "end") room.status = "closed";
+    } else if (action === "end") room.status = "closed";
     else fail(e.control, 409);
-    tx.update(ref, { status: room.status, revision: room.revision + 1 });
+    tx.update(ref, {
+      status: room.status,
+      revision: room.revision + 1,
+      pausedMs: room.pausedMs ?? 0,
+      pausedAt: room.pausedAt ?? null,
+    });
   });
   cache.drop(`${code}:room`);
+  if (action === "start")
+    for (let group = 0; group < 8; group++)
+      cache.drop(`${code}:match:${group}`);
 }
 export async function moveTug(
   uid: string,
@@ -163,7 +210,12 @@ export async function moveTug(
       if (game.members[member.seat] !== uid) fail(e.joinFirst, 403);
       let next: Match;
       try {
-        next = applyMove(game, member.seat, move);
+        next = applyMove(
+          game,
+          member.seat,
+          move,
+          activeClock(room, Date.now()),
+        );
       } catch (cause) {
         const key = cause instanceof Error ? cause.message : "";
         fail(
@@ -221,6 +273,7 @@ export async function readTugRoom(
     : await Promise.all(
         Array.from({ length: room.groupCount }, (_, i) => getMatch(i)),
       );
+  const now = activeClock(room, Date.now());
   return {
     code: room.code,
     groupCount: room.groupCount,
@@ -228,8 +281,8 @@ export async function readTugRoom(
     revision: room.revision,
     expiresAt: room.expiresAt,
     role: teacher ? "teacher" : "student",
-    groups: matches.map(matchSummary),
-    match: own ? matchSummary(own) : null,
+    groups: matches.map((game) => matchSummary(game, now)),
+    match: own ? matchSummary(own, now) : null,
     you,
     player:
       own && you && room.status !== "lobby" ? playerView(own, you.seat) : null,

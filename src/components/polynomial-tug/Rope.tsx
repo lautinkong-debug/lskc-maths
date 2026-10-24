@@ -4,6 +4,7 @@ import styles from "./Tug.module.css";
 const c = copy.polynomialTug;
 export function Rope({ match }: { match?: MatchSummary }) {
   const position = match?.position ?? 0;
+  const scaledPosition = (position * 24) / (match?.goal ?? 48);
   return (
     <div
       className={styles.rope}
@@ -79,7 +80,7 @@ export function Rope({ match }: { match?: MatchSummary }) {
               key={i}
               className={styles.crew}
               opacity={!match || match.occupied[i] ? 1 : 0.24}
-              transform={`translate(${x + position * 1.2}, 144)`}
+              transform={`translate(${x + scaledPosition * 1.2}, 144)`}
             >
               {pair?.shield && (
                 <path
@@ -153,7 +154,7 @@ export function Rope({ match }: { match?: MatchSummary }) {
           );
         })}
         <g
-          transform={`translate(${400 + position * 10}, 0)`}
+          transform={`translate(${400 + scaledPosition * 10}, 0)`}
           className={styles.flag}
         >
           <path

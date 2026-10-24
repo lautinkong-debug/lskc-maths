@@ -823,3 +823,39 @@
     margin-top: 14px;
   }
 }
+
+.forceMeter {
+  border-radius: 14px;
+  background: #fff0c8;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+.forceMeter h3 {
+  font-size: 1rem;
+}
+.forceStats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+}
+.forceStats span {
+  font-size: 0.75rem;
+}
+.forceStats b {
+  display: block;
+  font-size: 1.5rem;
+  color: #4930b4;
+}
+.forceMeter p {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  margin-top: 5px;
+}
+.forceResult {
+  padding: 10px;
+  background: #ddf8f2;
+  color: #086650;
+  border-radius: 10px;
+  font-weight: 700;
+}

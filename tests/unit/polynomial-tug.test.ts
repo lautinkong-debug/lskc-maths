@@ -88,14 +88,14 @@ describe("cooperative polynomial tug", () => {
   it("earns levels 1–4 with bounded powers and a terminal win", () => {
     let m = newMatch(7);
     const powers: number[] = [];
-    for (let turn = 0; turn < 11; turn++) {
+    for (let turn = 0; turn < 17; turn++) {
       powers.push(pairLevel(m.pairs[0]));
       m = solve(solve(m, 0), 1);
       if (m.winner !== null) break;
       m = advance(m, 0);
     }
-    expect(powers).toEqual([1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4]);
-    expect(m.position).toBe(-24);
+    expect(powers).toEqual([1, 1, 1, 2, 2, 2, 3, 3, 3, ...Array(8).fill(4)]);
+    expect(m.position).toBe(-48);
     expect(m.winner).toBe(0);
     expect(matchSummary(m).pairs[0].power).toBe(4);
     expect(() =>

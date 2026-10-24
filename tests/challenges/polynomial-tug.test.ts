@@ -9,6 +9,7 @@ import {
 } from "../../src/lib/server/polynomialTug";
 import { questionFor, optionsFor } from "../../src/lib/polynomial-tug/game";
 import { sameAnswer } from "../../src/apps/polynomials/quest/algebra";
+import { speedBonus } from "../../src/lib/polynomial-tug/timing";
 import type { Match } from "../../src/lib/polynomial-tug/types";
 if (
   process.env.GCLOUD_PROJECT !== "demo-lskc-maths" ||
@@ -70,7 +71,13 @@ describe("Polynomial Tug on the demo emulator", () => {
     await Promise.all([correct(code, "tug-0", 0), correct(code, "tug-1", 0)]);
     await correct(code, "tug-0", 0);
     const after = await readTugRoom("tug-0", null, code);
-    expect(after.match!.position).toBe(-1);
+    expect(after.match!.pairs[0].lastBasePower).toBe(1);
+    expect(after.match!.pairs[0].lastSpeedBonus).toBe(
+      speedBonus(1, after.match!.pairs[0].lastElapsedMs, true),
+    );
+    expect(after.match!.position).toBe(
+      -1 - after.match!.pairs[0].lastSpeedBonus,
+    );
     expect(after.groups).toEqual([]);
     expect(
       typeof (
@@ -209,7 +216,9 @@ describe("flexible attendance and transactional skills", () => {
       correct(code, "skill-1", 0),
     ]);
     const after = await readTugRoom("skill-0", null, code);
-    expect(after.match!.position).toBe(-6);
+    const expected =
+      (4 + speedBonus(4, after.match!.pairs[0].lastElapsedMs, true)) * 2 - 2;
+    expect(after.match!.position).toBe(-expected);
     expect(after.match!.pairs[0]).toMatchObject({
       energy: 3,
       armed: null,
@@ -218,7 +227,48 @@ describe("flexible attendance and transactional skills", () => {
     });
     expect(after.match!.pairs[1].shield).toBe(false);
     await correct(code, "skill-0", 0);
-    expect((await readTugRoom("skill-0", null, code)).match!.position).toBe(-6);
+    expect((await readTugRoom("skill-0", null, code)).match!.position).toBe(
+      -expected,
+    );
     await controlTugRoom("tug-test@lskc.edu.hk", code, "end");
   }, 30000);
 });
+
+it("freezes the team clock during teacher pauses and does not write during reads", async () => {
+  const code = await room(2);
+  await joinTugRoom("clock-pupil", code, 0, 0);
+  await controlTugRoom("tug-test@lskc.edu.hk", code, "start");
+  const matchRef = adminDb.doc("polynomialTugRooms/" + code + "/matches/0");
+  const before = await matchRef.get();
+  await readTugRoom("clock-pupil", null, code, true);
+  await readTugRoom("clock-pupil", null, code, true);
+  expect((await matchRef.get()).updateTime!.isEqual(before.updateTime!)).toBe(
+    true,
+  );
+  await controlTugRoom("tug-test@lskc.edu.hk", code, "pause");
+  const frozen = (await readTugRoom("clock-pupil", null, code, true)).match!
+    .pairs[0].elapsedMs!;
+  await joinTugRoom("paused-arrival", code, 1, 0);
+  await new Promise((resolve) => setTimeout(resolve, 1200));
+  expect(
+    (await readTugRoom("clock-pupil", null, code, true)).match!.pairs[0]
+      .elapsedMs,
+  ).toBe(frozen);
+  expect(
+    (await readTugRoom("paused-arrival", null, code, true)).match!.pairs[0]
+      .elapsedMs,
+  ).toBe(0);
+  await controlTugRoom("tug-test@lskc.edu.hk", code, "resume");
+  const resumed = (await readTugRoom("clock-pupil", null, code, true)).match!
+    .pairs[0].elapsedMs!;
+  expect(resumed - frozen).toBeLessThan(1000);
+  const roomData = (
+    await adminDb.doc("polynomialTugRooms/" + code).get()
+  ).data()!;
+  expect(roomData.pausedMs).toBeGreaterThanOrEqual(1200);
+  await correct(code, "clock-pupil", 0);
+  const result = (await readTugRoom("clock-pupil", null, code, true)).match!
+    .pairs[0];
+  expect(result.lastPower).toBe(result.lastBasePower + result.lastSpeedBonus);
+  await controlTugRoom("tug-test@lskc.edu.hk", code, "end");
+}, 30000);

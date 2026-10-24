@@ -14,6 +14,11 @@ export type Pair = {
   usedSkillRound?: number;
   lastSkill?: Skill | null;
   lastBlocked?: number;
+  startedAt?: number | null;
+  lastElapsedMs?: number | null;
+  lastBasePower?: number;
+  lastSpeedBonus?: number;
+  lastSkillBonus?: number;
 };
 export type Pupil = {
   attempt: number;
@@ -24,6 +29,7 @@ export type Pupil = {
 export type Match = {
   seed: number;
   secret: string;
+  goal?: number;
   revision: number;
   members: (string | null)[];
   pairs: Pair[];
@@ -38,6 +44,7 @@ export type Move = {
   skill?: Skill;
 };
 export type MatchSummary = {
+  goal: number;
   revision: number;
   occupied: boolean[];
   waiting: boolean[];
@@ -57,6 +64,12 @@ export type MatchSummary = {
     skillUsed: boolean;
     lastSkill: Skill | null;
     lastBlocked: number;
+    elapsedMs: number | null;
+    speedEligible: boolean;
+    lastElapsedMs: number | null;
+    lastBasePower: number;
+    lastSpeedBonus: number;
+    lastSkillBonus: number;
   }[];
 };
 export type PlayerView = {
@@ -77,6 +90,8 @@ export type Room = {
   status: RoomStatus;
   revision: number;
   expiresAt: number;
+  pausedMs?: number;
+  pausedAt?: number | null;
 };
 export type RoomView = {
   code: string;
