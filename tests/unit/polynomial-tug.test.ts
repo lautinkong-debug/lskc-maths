@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  newMatch,
+  newMatch as emptyMatch,
   questionFor,
   applyMove,
   pairLevel,
@@ -12,6 +12,11 @@ import { answerChoices } from "../../src/apps/polynomials/quest/choices";
 import { sameAnswer } from "../../src/apps/polynomials/quest/algebra";
 import type { Match } from "../../src/lib/polynomial-tug/types";
 
+function newMatch(seed: number, secret?: string) {
+  const match = emptyMatch(seed, secret);
+  match.members = ["a", "b", "c", "d"];
+  return match;
+}
 function solve(m: Match, seat: number) {
   const q = questionFor(m, seat);
   return applyMove(m, seat, {

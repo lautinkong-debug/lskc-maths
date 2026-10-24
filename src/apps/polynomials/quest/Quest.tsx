@@ -127,7 +127,11 @@ export default function Quest({ active }: { active: boolean }) {
   };
   const total = stored.progress.stages.reduce((sum, s) => sum + s.stars, 0);
   return (
-    <div className={styles.quest} data-presenting={presenting || undefined}>
+    <div
+      className={styles.quest}
+      data-arcade
+      data-presenting={presenting || undefined}
+    >
       {!stored.available && (
         <p className={styles.storageError} role="status">
           {c.savingFailed}
@@ -193,9 +197,21 @@ export default function Quest({ active }: { active: boolean }) {
               const record = stored.progress.stages[i],
                 locked = i === 3 && !unlocked;
               return (
-                <li key={stage.name} data-locked={locked} data-boss={i === 3}>
+                <li
+                  key={stage.name}
+                  data-stage={i}
+                  data-locked={locked}
+                  data-boss={i === 3}
+                >
                   <div className={styles.stop} aria-hidden="true">
                     {record.stars ? "✓" : i + 1}
+                  </div>
+                  <div className={styles.stageCreature}>
+                    <Guardian
+                      stage={i}
+                      remaining={6}
+                      celebrate={record.stars > 0}
+                    />
                   </div>
                   <span className={styles.stageMark} aria-hidden="true">
                     {stage.mark}

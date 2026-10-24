@@ -747,3 +747,263 @@
     animation: none;
   }
 }
+
+/* The games have their own arcade palette; teaching panels keep the school theme. */
+.quest[data-arcade] {
+  --color-navy: #4930b4;
+  --color-navy-deep: #39218f;
+  --color-navy-soft: #a28adf;
+  --color-navy-wash: #ece6ff;
+  --color-crimson: #a83353;
+  --color-crimson-wash: #ffedf1;
+  --color-paper: #fff;
+  --color-grid: #d4caf2;
+  --color-grid-strong: #b4a4d8;
+  --color-graphite: #202153;
+  --quest-line: #d4caf2;
+  padding: 20px;
+  border-radius: 25px;
+  background: #f1edff;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+}
+.quest[data-arcade] :is(h2, h3, h4) {
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-weight: 800;
+  color: #202153;
+}
+.quest[data-arcade] .mapHeader {
+  background: #ddd4ff;
+  border-radius: 22px;
+  padding: 24px;
+  margin-top: 18px;
+}
+.quest[data-arcade] .mapHeader h2 {
+  letter-spacing: -0.04em;
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+}
+.quest[data-arcade] .total {
+  background: #ffc857;
+  color: #202153;
+  border: 0;
+  border-radius: 18px;
+  padding: 7px 14px;
+}
+.quest[data-arcade] .trail {
+  gap: 16px;
+  margin: 28px 0 20px;
+}
+.quest[data-arcade] .trail li {
+  --stage: #16cdb8;
+  --stage-wash: #ddf8f2;
+  border: 2px solid var(--stage);
+  border-bottom-width: 6px;
+  border-radius: 24px;
+  padding: 20px 16px 16px;
+  background: var(--stage-wash);
+}
+.quest[data-arcade] .trail li[data-stage="1"] {
+  --stage: #ff6b7b;
+  --stage-wash: #ffedf1;
+}
+.quest[data-arcade] .trail li[data-stage="2"] {
+  --stage: #9c80ed;
+  --stage-wash: #eee6ff;
+}
+.quest[data-arcade] .trail li[data-stage="3"] {
+  --stage: #e2b136;
+  --stage-wash: #fff0c8;
+}
+.quest[data-arcade] .trail .stop {
+  background: #202153;
+  color: #fff;
+  border: 3px solid white;
+  width: 38px;
+  height: 38px;
+  top: -14px;
+  left: 15px;
+}
+.stageCreature {
+  width: 100%;
+  max-width: 180px;
+  align-self: center;
+}
+.quest[data-arcade] .stageMark {
+  display: none;
+}
+.quest[data-arcade] .trail h3 {
+  font-size: 1.16rem;
+  min-height: 0;
+}
+.quest[data-arcade] .trail button {
+  border-radius: 12px;
+  background: white;
+  border: 2px solid #202153;
+  color: #202153;
+  box-shadow: 0 3px 0 #202153;
+}
+.quest[data-arcade] .trail li[data-boss="true"] button {
+  background: #202153;
+  color: white;
+}
+.quest[data-arcade] .stars [data-earned="true"] {
+  color: #966b08;
+}
+.quest[data-arcade] .rules {
+  background: white;
+  border: 0;
+  border-radius: 16px;
+  padding: 18px;
+}
+.quest[data-arcade] .primary,
+.quest[data-arcade] .secondary {
+  border-radius: 12px;
+  box-shadow: 0 3px 0 #b4a4d8;
+}
+.quest[data-arcade] .battleGrid {
+  gap: 20px;
+}
+.quest[data-arcade] .arena {
+  background: #ddd4ff;
+  border-radius: 22px;
+  padding: 14px 10px;
+}
+.quest[data-arcade] .problem {
+  background: white;
+  border: 2px solid #d4caf2;
+  border-radius: 22px;
+  padding: 20px;
+}
+.quest[data-arcade] .question {
+  background: #f5f2ff;
+  border: 0;
+  border-radius: 14px;
+}
+.quest[data-arcade] .choice {
+  border-radius: 14px;
+  box-shadow: 0 3px 0 #e1d9f1;
+}
+.quest[data-arcade] .shieldTrack i {
+  background: #ffc857;
+  border-color: #966b08;
+  border-radius: 4px;
+}
+.quest[data-arcade] .shieldTrack i[data-cleared="true"] {
+  background: white;
+}
+.quest[data-arcade] .feedback {
+  border-radius: 16px;
+}
+.quest[data-arcade] .result {
+  background: #fff0c8;
+  border-radius: 24px;
+  margin-top: 18px;
+}
+.guardian {
+  --creature: #16cdb8;
+  --creature-dark: #08786e;
+  --limbs: #54dec9;
+}
+.guardian[data-stage="1"] {
+  --creature: #ff6b7b;
+  --creature-dark: #a83353;
+  --limbs: #ffadbc;
+}
+.guardian[data-stage="2"] {
+  --creature: #8b6ee5;
+  --creature-dark: #4930b4;
+  --limbs: #b3a0f1;
+}
+.guardian[data-stage="3"] {
+  --creature: #ffc857;
+  --creature-dark: #92670c;
+  --limbs: #ffe49a;
+}
+.guardian .body {
+  fill: var(--creature);
+  stroke: var(--creature-dark);
+}
+.guardian :is(.horns, .arms, .feet) {
+  fill: var(--limbs);
+  stroke: var(--creature-dark);
+}
+.guardian .facets {
+  stroke: var(--creature-dark);
+  opacity: 0.3;
+}
+.guardian :is(.eyes, .mouth) {
+  stroke: #202153;
+}
+.guardian .gem {
+  fill: #fff;
+  stroke: var(--creature-dark);
+}
+.guardian .shield path:first-child {
+  fill: #fff;
+  stroke: var(--creature-dark);
+}
+.guardian .shield path + path {
+  stroke: var(--creature-dark);
+}
+.guardian .spark {
+  stroke: #92670c;
+}
+@media (max-width: 1100px) {
+  .quest[data-arcade] .trail {
+    gap: 24px 14px;
+  }
+}
+@media (max-width: 650px) {
+  .quest[data-arcade] {
+    padding: 12px;
+  }
+  .quest[data-arcade] .mapHeader {
+    padding: 18px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .quest[data-arcade] .mapHeader > .guardian {
+    display: none;
+  }
+  .quest[data-arcade] .mapHeader h2 {
+    font-size: 2.25rem;
+  }
+  .quest[data-arcade] .trail {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .quest[data-arcade] .trail li {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 5px 12px;
+    padding: 20px 14px 16px;
+  }
+  .stageCreature {
+    grid-column: 1;
+    grid-row: 1 / 5;
+    align-self: center;
+  }
+  .quest[data-arcade] .trail :is(h3, p, .stars) {
+    grid-column: 2;
+  }
+  .quest[data-arcade] .trail .stageStatus {
+    min-height: 0;
+    margin-bottom: 6px;
+  }
+  .quest[data-arcade] .trail button {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+  }
+  .quest[data-arcade] .trail h3 {
+    font-size: 1.12rem;
+  }
+  .quest[data-arcade] .arena {
+    margin-bottom: 14px;
+    padding: 10px;
+  }
+  .quest[data-arcade] .problem {
+    padding: 14px 10px;
+  }
+  .quest[data-arcade] .rules {
+    padding: 14px;
+  }
+}

@@ -14,6 +14,8 @@ import type {
   Pupil,
 } from "./types";
 
+import { ENERGY_CAP, SKILLS } from "./skills";
+
 export const GOAL = 24;
 const pupil = (): Pupil => ({
   attempt: 0,
@@ -38,11 +40,47 @@ export function newMatch(
       resolved: false,
       next: [false, false],
       lastPower: 0,
+      energy: 0,
+      armed: null,
+      shield: false,
+      usedSkillRound: -1,
+      lastSkill: null,
+      lastBlocked: 0,
     })),
     pupils: [0, 1, 2, 3].map(pupil),
     position: 0,
     winner: null,
   };
+}
+function activeSeats(match: Match, side: number) {
+  return [side * 2, side * 2 + 1].filter(
+    (seat) =>
+      match.members[seat] !== null && match.pupils[seat].phase !== "waiting",
+  );
+}
+/** Late arrivals join the next round once this pair has begun solving. */
+export function joinMatch(current: Match, uid: string, side: number): Match {
+  if (side !== 0 && side !== 1) throw new Error("invalid-seat");
+  if (current.winner !== null) throw new Error("finished");
+  if (current.members.includes(uid)) return current;
+  const seat = [side * 2, side * 2 + 1].find(
+    (i) => current.members[i] === null,
+  );
+  if (seat === undefined) throw new Error("full");
+  const match = structuredClone(current),
+    pair = match.pairs[side];
+  const started =
+    pair.resolved ||
+    pair.usedSkillRound === pair.round ||
+    activeSeats(current, side).some(
+      (i) =>
+        current.pupils[i].phase !== "answering" ||
+        current.pupils[i].attempt > 0,
+    );
+  match.members[seat] = uid;
+  match.pupils[seat] = { ...pupil(), phase: started ? "waiting" : "answering" };
+  match.revision++;
+  return match;
 }
 function assertSeat(seat: number) {
   if (!Number.isInteger(seat) || seat < 0 || seat > 3)
@@ -91,6 +129,8 @@ export function optionsFor(match: Match, seat: number) {
 export function applyMove(current: Match, seat: number, move: Move): Match {
   assertSeat(seat);
   if (current.winner !== null) throw new Error("finished");
+  if (current.members[seat] === null) throw new Error("empty-seat");
+  if (current.pupils[seat].phase === "waiting") throw new Error("waiting");
   const question = questionFor(current, seat);
   if (move.questionId !== question.id) throw new Error("stale-question");
   const side = Math.floor(seat / 2),
@@ -98,7 +138,23 @@ export function applyMove(current: Match, seat: number, move: Move): Match {
   const match = structuredClone(current),
     pair = match.pairs[side],
     player = match.pupils[seat];
-  if (move.action === "answer") {
+  if (move.action === "skill") {
+    const spec = SKILLS.find((s) => s.id === move.skill);
+    if (!spec) throw new Error("invalid-skill");
+    if (pair.usedSkillRound === pair.round) {
+      if (pair.lastSkill === spec.id) return current;
+      throw new Error("skill-used");
+    }
+    if (pair.resolved) throw new Error("not-ready");
+    if (pairLevel(pair) < spec.level) throw new Error("locked");
+    if ((pair.energy ?? 0) < spec.cost) throw new Error("energy");
+    if (spec.id === "shield" && pair.shield) throw new Error("shield-active");
+    pair.energy = (pair.energy ?? 0) - spec.cost;
+    pair.usedSkillRound = pair.round;
+    pair.lastSkill = spec.id;
+    if (spec.id === "shield") pair.shield = true;
+    else pair.armed = spec.id;
+  } else if (move.action === "answer") {
     if (!Number.isInteger(move.option) || move.option! < 0 || move.option! > 3)
       throw new Error("invalid-option");
     if (player.phase !== "answering") return current;
@@ -111,9 +167,20 @@ export function applyMove(current: Match, seat: number, move: Move): Match {
       : "wrong";
     if (
       !pair.resolved &&
-      [side * 2, side * 2 + 1].every((i) => match.pupils[i].phase === "correct")
+      activeSeats(match, side).every((i) => match.pupils[i].phase === "correct")
     ) {
-      const power = pairLevel(pair);
+      const base = pairLevel(pair);
+      const charged =
+        pair.armed === "surge"
+          ? base * 2
+          : base + (pair.armed === "boost" ? 2 : 0);
+      const opponent = match.pairs[1 - side];
+      const blocked = opponent.shield ? Math.min(2, charged) : 0;
+      const power = charged - blocked;
+      opponent.shield = false;
+      pair.armed = null;
+      pair.lastBlocked = blocked;
+      pair.energy = Math.min(ENERGY_CAP, (pair.energy ?? 0) + 1);
       pair.lastPower = power;
       pair.pulls++;
       pair.resolved = true;
@@ -133,7 +200,7 @@ export function applyMove(current: Match, seat: number, move: Move): Match {
     if (!pair.resolved) throw new Error("not-ready");
     if (pair.next[local]) return current;
     pair.next[local] = true;
-    if (pair.next.every(Boolean)) {
+    if (activeSeats(match, side).every((i) => pair.next[i % 2])) {
       pair.round++;
       pair.resolved = false;
       pair.next = [false, false];
@@ -148,6 +215,7 @@ export function matchSummary(match: Match): MatchSummary {
   return {
     revision: match.revision,
     occupied: match.members.map(Boolean),
+    waiting: match.pupils.map((p) => p.phase === "waiting"),
     position: match.position,
     winner: match.winner,
     pairs: match.pairs.map((pair, side) => ({
@@ -158,6 +226,12 @@ export function matchSummary(match: Match): MatchSummary {
       advancing: [...pair.next],
       resolved: pair.resolved,
       lastPower: pair.lastPower,
+      energy: pair.energy ?? 0,
+      armed: pair.armed ?? null,
+      shield: pair.shield ?? false,
+      skillUsed: pair.usedSkillRound === pair.round,
+      lastSkill: pair.lastSkill ?? null,
+      lastBlocked: pair.lastBlocked ?? 0,
     })),
   };
 }
@@ -174,7 +248,7 @@ export function playerView(match: Match, seat: number): PlayerView {
       hint: q.hint,
     },
     feedback:
-      player.phase === "answering"
+      player.phase === "answering" || player.phase === "waiting"
         ? null
         : {
             correct: player.phase === "correct",

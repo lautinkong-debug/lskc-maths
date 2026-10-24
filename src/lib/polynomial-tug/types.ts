@@ -1,12 +1,19 @@
 import type { Hint, Question } from "@/apps/polynomials/quest/questions";
 
-export type Phase = "answering" | "correct" | "wrong";
+export type Phase = "answering" | "correct" | "wrong" | "waiting";
+export type Skill = "boost" | "shield" | "surge";
 export type Pair = {
   round: number;
   pulls: number;
   resolved: boolean;
   next: boolean[];
   lastPower: number;
+  energy?: number;
+  armed?: "boost" | "surge" | null;
+  shield?: boolean;
+  usedSkillRound?: number;
+  lastSkill?: Skill | null;
+  lastBlocked?: number;
 };
 export type Pupil = {
   attempt: number;
@@ -25,13 +32,15 @@ export type Match = {
   winner: number | null;
 };
 export type Move = {
-  action: "answer" | "retry" | "next";
+  action: "answer" | "retry" | "next" | "skill";
   questionId: string;
   option?: number;
+  skill?: Skill;
 };
 export type MatchSummary = {
   revision: number;
   occupied: boolean[];
+  waiting: boolean[];
   position: number;
   winner: number | null;
   pairs: {
@@ -42,6 +51,12 @@ export type MatchSummary = {
     advancing: boolean[];
     resolved: boolean;
     lastPower: number;
+    energy: number;
+    armed: "boost" | "surge" | null;
+    shield: boolean;
+    skillUsed: boolean;
+    lastSkill: Skill | null;
+    lastBlocked: number;
   }[];
 };
 export type PlayerView = {
@@ -71,6 +86,7 @@ export type RoomView = {
   expiresAt: number;
   role: "teacher" | "student";
   groups: MatchSummary[];
+  match: MatchSummary | null;
   you: { group: number; seat: number } | null;
   player: PlayerView | null;
 };

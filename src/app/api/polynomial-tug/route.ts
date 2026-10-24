@@ -24,6 +24,23 @@ const response = (state: unknown) =>
     { ok: true, state },
     { headers: { "Cache-Control": "no-store" } },
   );
+function tugFailure(error: unknown) {
+  const code = (error as { code?: unknown })?.code;
+  if (
+    code === 8 ||
+    code === "RESOURCE_EXHAUSTED" ||
+    code === "resource-exhausted"
+  )
+    return Response.json(
+      {
+        ok: false,
+        code: "service-quota",
+        message: copy.polynomialTug.errors.quota,
+      },
+      { status: 503, headers: { "Retry-After": "60" } },
+    );
+  return challengeFailure(error);
+}
 async function actor(request: Request) {
   const token = await verifyBearer(request.headers.get("authorization"));
   requireContentAccess(token);
@@ -43,7 +60,7 @@ export async function GET(request: Request) {
     }
     return response(await readTugRoom(token.uid, teacher, code));
   } catch (error) {
-    return challengeFailure(error);
+    return tugFailure(error);
   }
 }
 export async function POST(request: Request) {
@@ -67,19 +84,20 @@ export async function POST(request: Request) {
         body.group as number,
         body.side as number,
       );
-    else if (["answer", "retry", "next"].includes(String(body.action)))
+    else if (["answer", "retry", "next", "skill"].includes(String(body.action)))
       await moveTug(token.uid, code, {
         action: body.action as Move["action"],
         questionId: body.questionId as string,
         option: body.option as number,
+        skill: body.skill as Move["skill"],
       });
     else
       throw new ChallengeError(
         "invalid-action",
         copy.polynomialTug.errors.move,
       );
-    return response(await readTugRoom(token.uid, teacher, code));
+    return response(await readTugRoom(token.uid, teacher, code, true));
   } catch (error) {
-    return challengeFailure(error);
+    return tugFailure(error);
   }
 }

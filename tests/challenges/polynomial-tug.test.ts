@@ -70,13 +70,18 @@ describe("Polynomial Tug on the demo emulator", () => {
     await Promise.all([correct(code, "tug-0", 0), correct(code, "tug-1", 0)]);
     await correct(code, "tug-0", 0);
     const after = await readTugRoom("tug-0", null, code);
-    expect(after.groups[0].position).toBe(-1);
+    expect(after.match!.position).toBe(-1);
+    expect(after.groups).toEqual([]);
     expect(
       typeof (
         await adminDb.doc(`polynomialTugRooms/${code}/matches/0`).get()
       ).get("expireAt").toMillis,
     ).toBe("function");
-    expect(after.groups.slice(1).every((g) => g.position === 0)).toBe(true);
+    expect(
+      (await readTugRoom("teacher", "tug-test@lskc.edu.hk", code)).groups
+        .slice(1)
+        .every((g) => g.position === 0),
+    ).toBe(true);
     await controlTugRoom("tug-test@lskc.edu.hk", code, "pause");
     await expect(correct(code, "tug-2", 0)).rejects.toThrow("paused");
     await controlTugRoom("tug-test@lskc.edu.hk", code, "resume");
@@ -91,7 +96,7 @@ describe("Polynomial Tug on the demo emulator", () => {
     ).rejects.toThrow("owner");
     await expect(
       controlTugRoom("tug-test@lskc.edu.hk", code, "start"),
-    ).rejects.toThrow("four");
+    ).rejects.toThrow("one student");
     await Promise.all(
       [0, 1, 2, 3].map((i) =>
         joinTugRoom(`secure-${i}`, code, 0, Math.floor(i / 2)),
@@ -114,8 +119,106 @@ describe("Polynomial Tug on the demo emulator", () => {
       }),
     ).rejects.toThrow("Join");
     await adminDb.doc(`polynomialTugRooms/${code}`).update({ expiresAt: 0 });
-    await expect(readTugRoom("secure-0", null, code)).rejects.toThrow(
+    await expect(readTugRoom("secure-0", null, code, true)).rejects.toThrow(
       "expired",
     );
+  }, 30000);
+});
+
+describe("flexible attendance and transactional skills", () => {
+  it("starts with one pupil, queues a late partner and requires both next round", async () => {
+    const code = await room(8);
+    await readTugRoom("late", null, code); // Previously cached as unseated.
+    await joinTugRoom("solo", code, 0, 0);
+    await controlTugRoom("tug-test@lskc.edu.hk", code, "start");
+    await correct(code, "solo", 0);
+    await joinTugRoom("late", code, 0, 0);
+    const late = await readTugRoom("late", null, code);
+    expect(late.player!.phase).toBe("waiting");
+    expect(late.groups).toHaveLength(0);
+    expect(late.match!.pairs[0].pulls).toBe(1);
+    await expect(
+      moveTug("late", code, {
+        action: "next",
+        questionId: late.player!.question.id,
+      }),
+    ).rejects.toThrow("next round");
+    const solo = await readTugRoom("solo", null, code);
+    await moveTug("solo", code, {
+      action: "next",
+      questionId: solo.player!.question.id,
+    });
+    expect((await readTugRoom("late", null, code)).player!.phase).toBe(
+      "answering",
+    );
+    await correct(code, "solo", 0);
+    expect((await readTugRoom("solo", null, code)).match!.pairs[0].pulls).toBe(
+      1,
+    );
+    await correct(code, "late", 0);
+    expect((await readTugRoom("late", null, code)).match!.pairs[0].pulls).toBe(
+      2,
+    );
+    await controlTugRoom("tug-test@lskc.edu.hk", code, "pause");
+    await joinTugRoom("opponent", code, 0, 1);
+    expect((await readTugRoom("opponent", null, code)).player!.phase).toBe(
+      "answering",
+    );
+    await expect(correct(code, "opponent", 0)).rejects.toThrow("paused");
+    await controlTugRoom("tug-test@lskc.edu.hk", code, "end");
+    await expect(joinTugRoom("new", code, 1, 0)).rejects.toThrow("ended");
+  }, 30000);
+  it("deduplicates simultaneous partner skills and consumes an opposing shield once", async () => {
+    const code = await room(1);
+    await Promise.all(
+      [0, 1, 2, 3].map((i) =>
+        joinTugRoom("skill-" + i, code, 0, Math.floor(i / 2)),
+      ),
+    );
+    const ref = adminDb.doc("polynomialTugRooms/" + code + "/matches/0");
+    const match = (await ref.get()).data() as Match;
+    for (const p of match.pairs) {
+      p.pulls = 9;
+      p.round = 9;
+      p.energy = 6;
+    }
+    await ref.set(match);
+    await controlTugRoom("tug-test@lskc.edu.hk", code, "start");
+    const views = await Promise.all(
+      [0, 1, 2, 3].map((i) => readTugRoom("skill-" + i, null, code, true)),
+    );
+    await Promise.all(
+      [0, 1].map((i) =>
+        moveTug("skill-" + i, code, {
+          action: "skill",
+          skill: "surge",
+          questionId: views[i].player!.question.id,
+        }),
+      ),
+    );
+    expect(
+      (await readTugRoom("skill-0", null, code)).match!.pairs[0].energy,
+    ).toBe(2);
+    await moveTug("skill-2", code, {
+      action: "skill",
+      skill: "shield",
+      questionId: views[2].player!.question.id,
+    });
+    await Promise.all([
+      correct(code, "skill-0", 0),
+      correct(code, "skill-1", 0),
+    ]);
+    const after = await readTugRoom("skill-0", null, code);
+    expect(after.match!.position).toBe(-6);
+    expect(after.match!.pairs[0]).toMatchObject({
+      energy: 3,
+      armed: null,
+      lastBlocked: 2,
+      pulls: 10,
+    });
+    expect(after.match!.pairs[1].shield).toBe(false);
+    await correct(code, "skill-0", 0);
+    expect((await readTugRoom("skill-0", null, code)).match!.position).toBe(-6);
+    await controlTugRoom("tug-test@lskc.edu.hk", code, "end");
   }, 30000);
 });

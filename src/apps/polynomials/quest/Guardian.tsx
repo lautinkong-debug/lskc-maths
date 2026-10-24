@@ -14,6 +14,7 @@ export function Guardian({
     <svg
       viewBox="0 0 300 250"
       className={styles.guardian}
+      data-stage={stage}
       data-celebrate={celebrate || undefined}
       aria-hidden="true"
     >

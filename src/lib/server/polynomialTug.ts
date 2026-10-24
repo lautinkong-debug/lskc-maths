@@ -3,6 +3,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { adminDb, ChallengeError } from "./firebaseAdmin";
 import {
   applyMove,
+  joinMatch,
   matchSummary,
   newMatch,
   playerView,
@@ -10,6 +11,8 @@ import {
 import type { Match, Move, Room, RoomView } from "../polynomial-tug/types";
 import { copy } from "../copy";
 import { CODE_ALPHABET } from "../challenges/codes";
+import { createReadCache } from "./tugReadCache";
+const cache = createReadCache();
 const e = copy.polynomialTug.errors;
 function fail(message: string, status = 400): never {
   throw new ChallengeError("tug-error", message, status);
@@ -80,7 +83,7 @@ export async function joinTugRoom(
     async (tx) => {
       const room = roomData((await tx.get(ref)).data());
       if ((await tx.get(membership)).exists) return;
-      if (room.status !== "lobby") fail(e.joinClosed, 409);
+      if (room.status === "closed") fail(e.joinClosed, 409);
       if (
         !Number.isInteger(group) ||
         group < 0 ||
@@ -89,13 +92,13 @@ export async function joinTugRoom(
       )
         fail(e.seat);
       const gameRef = ref.collection("matches").doc(String(group));
-      const game = matchData((await tx.get(gameRef)).data());
+      let game = matchData((await tx.get(gameRef)).data());
+      if (game.winner !== null) fail(e.finished, 409);
       const seat = [side * 2, side * 2 + 1].find(
         (i) => game.members[i] === null,
       );
       if (seat === undefined) fail(e.full, 409);
-      game.members[seat] = uid;
-      game.revision++;
+      game = joinMatch(game, uid, side);
       tx.set(gameRef, game, { merge: true });
       tx.create(membership, {
         group,
@@ -105,6 +108,8 @@ export async function joinTugRoom(
     },
     { maxAttempts: 15 },
   );
+  cache.drop(`${code}:member:${uid}`);
+  cache.drop(`${code}:match:${group}`);
 }
 export async function controlTugRoom(
   owner: string,
@@ -124,7 +129,7 @@ export async function controlTugRoom(
         ),
       );
       if (
-        groups.some((g) => (g.data() as Match).members.some((m) => m === null))
+        !groups.some((g) => (g.data() as Match).members.some((m) => m !== null))
       )
         fail(e.incomplete, 409);
       room.status = "live";
@@ -136,6 +141,7 @@ export async function controlTugRoom(
     else fail(e.control, 409);
     tx.update(ref, { status: room.status, revision: room.revision + 1 });
   });
+  cache.drop(`${code}:room`);
 }
 export async function moveTug(
   uid: string,
@@ -143,6 +149,7 @@ export async function moveTug(
   move: Move,
 ): Promise<void> {
   const ref = roomRef(code);
+  let changedGroup = -1;
   await adminDb.runTransaction(
     async (tx) => {
       const room = roomData((await tx.get(ref)).data());
@@ -150,6 +157,7 @@ export async function moveTug(
         fail(room.status === "paused" ? e.paused : e.closed, 409);
       const member = (await tx.get(ref.collection("players").doc(uid))).data();
       if (!member) fail(e.joinFirst, 403);
+      changedGroup = member.group;
       const gameRef = ref.collection("matches").doc(String(member.group));
       const game = matchData((await tx.get(gameRef)).data());
       if (game.members[member.seat] !== uid) fail(e.joinFirst, 403);
@@ -163,7 +171,13 @@ export async function moveTug(
             ? e.stale
             : key === "finished"
               ? e.finished
-              : e.move,
+              : key === "waiting"
+                ? e.waiting
+                : key === "energy"
+                  ? e.energy
+                  : key === "skill-used"
+                    ? e.skillUsed
+                    : e.move,
           409,
         );
       }
@@ -171,40 +185,53 @@ export async function moveTug(
     },
     { maxAttempts: 15 },
   );
+  cache.drop(`${code}:match:${changedGroup}`);
 }
 export async function readTugRoom(
   uid: string,
   teacherEmail: string | null,
   code: string,
+  fresh = false,
 ): Promise<RoomView> {
-  const ref = roomRef(code),
-    room = roomData((await ref.get()).data());
-  const [membership, games] = await Promise.all([
-    ref.collection("players").doc(uid).get(),
-    adminDb.getAll(
-      ...Array.from({ length: room.groupCount }, (_, i) =>
-        ref.collection("matches").doc(String(i)),
-      ),
-    ),
-  ]);
-  const matches = games.map((g) => matchData(g.data())),
-    member = membership.data();
+  const ref = roomRef(code);
+  const read = <T>(key: string, ttl: number, fetch: () => Promise<T>) =>
+    fresh ? fetch() : cache.get(key, ttl, fetch);
+  const room = roomData(
+    await read(code + ":room", 1200, async () => (await ref.get()).data()),
+  );
+  const teacher = teacherEmail === room.owner;
+  const member = teacher
+    ? undefined
+    : await read(code + ":member:" + uid, 60000, async () =>
+        (await ref.collection("players").doc(uid).get()).data(),
+      );
   const you = member
     ? { group: Number(member.group), seat: Number(member.seat) }
     : null;
-  const role = teacherEmail === room.owner ? "teacher" : "student";
+  const getMatch = async (group: number) =>
+    matchData(
+      await read(code + ":match:" + group, 1200, async () =>
+        (await ref.collection("matches").doc(String(group)).get()).data(),
+      ),
+    );
+  // A seated pupil needs only their own match. Other groups and member IDs stay private.
+  const own = you ? await getMatch(you.group) : null;
+  const matches = own
+    ? []
+    : await Promise.all(
+        Array.from({ length: room.groupCount }, (_, i) => getMatch(i)),
+      );
   return {
     code: room.code,
     groupCount: room.groupCount,
     status: room.status,
     revision: room.revision,
     expiresAt: room.expiresAt,
-    role,
+    role: teacher ? "teacher" : "student",
     groups: matches.map(matchSummary),
+    match: own ? matchSummary(own) : null,
     you,
     player:
-      you && room.status !== "lobby"
-        ? playerView(matches[you.group], you.seat)
-        : null,
+      own && you && room.status !== "lobby" ? playerView(own, you.seat) : null,
   };
 }

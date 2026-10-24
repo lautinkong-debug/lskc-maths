@@ -9,6 +9,8 @@ import { mkdirSync } from "node:fs";
 import type { RoomView } from "../../src/lib/polynomial-tug/types";
 const evidence = "out/polynomial-tug-preview";
 async function answer(page: Page, wrong = false) {
+  // Read the question only after a retry/advance response has replaced disabled choices.
+  await expect(page.getByTestId("tug-choice").first()).toBeEnabled();
   const source = (await page
     .getByTestId("tug-question")
     .getAttribute("data-source"))!;
@@ -364,4 +366,76 @@ test("32 authenticated pupils play across eight groups with protected controls a
   await expect(
     page.getByText("A balanced finish — draw", { exact: true }),
   ).toHaveCount(8);
+});
+
+test("one student can start, a late partner waits safely, and an opponent can join live", async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(120000);
+  await page.goto("/login");
+  await page.getByRole("button", { name: /^Teacher:/ }).click();
+  await expect(page.getByText("Teacher access is active.")).toBeVisible();
+  await page.goto("/polynomial-tug");
+  await page.getByLabel("Number of groups").selectOption("2");
+  await page
+    .getByRole("button", { name: "Create class room", exact: true })
+    .click();
+  const code = await page.getByTestId("tug-code").innerText();
+  const contexts = await Promise.all([0, 1, 2].map(() => browser.newContext()));
+  try {
+    const students = await Promise.all(contexts.map((c) => c.newPage()));
+    const [solo, late, opponent] = students;
+    await solo.goto(`/polynomial-tug?room=${code}`);
+    await solo
+      .getByRole("button", { name: "Join Group 1 Pair A", exact: true })
+      .click();
+    await expect(
+      page.getByText("1 / 8 seats filled", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Start all matches", exact: true }),
+    ).toBeEnabled();
+    await page
+      .getByRole("button", { name: "Start all matches", exact: true })
+      .click();
+    await expect(
+      solo.getByText("Solo practice", { exact: true }),
+    ).toBeVisible();
+    await answer(solo);
+    await expect(
+      solo.getByText("Together you pulled 1 unit!", { exact: true }),
+    ).toBeVisible();
+    await late.goto(`/polynomial-tug?room=${code}`);
+    await late
+      .getByRole("button", { name: "Join Group 1 Pair A", exact: true })
+      .click();
+    await expect(
+      late.getByRole("heading", { name: "Joining next round", exact: true }),
+    ).toBeVisible();
+    await expect(late.getByTestId("tug-choice")).toHaveCount(0);
+    await solo
+      .getByRole("button", { name: "Ready for next question", exact: true })
+      .click();
+    await expect(late.getByTestId("tug-choice").first()).toBeEnabled();
+    await opponent.goto(`/polynomial-tug?room=${code}`);
+    await opponent
+      .getByRole("button", { name: "Join Group 1 Pair B", exact: true })
+      .click();
+    await expect(opponent.getByText("2 vs 1", { exact: true })).toBeVisible();
+    await Promise.all([answer(solo), answer(late), answer(opponent)]);
+    for (const student of students)
+      await expect(
+        student.getByText("Together you pulled 1 unit!", { exact: true }),
+      ).toBeVisible();
+    await page.getByRole("button", { name: "End class", exact: true }).click();
+    await page
+      .getByRole("button", { name: "End matches", exact: true })
+      .click();
+    await expect(
+      solo.getByRole("heading", { name: "Pair A wins!", exact: true }),
+    ).toBeVisible();
+  } finally {
+    await Promise.all(contexts.map((c) => c.close()));
+  }
 });

@@ -18,6 +18,7 @@ import { expressionTex } from "@/apps/polynomials/algebra";
 import type { RoomView, MatchSummary } from "@/lib/polynomial-tug/types";
 import questStyles from "@/apps/polynomials/quest/quest.module.css";
 import { Rope } from "./Rope";
+import { SkillTray } from "./SkillTray";
 import styles from "./Tug.module.css";
 const c = copy.polynomialTug,
   qcopy = copy.polynomialQuest;
@@ -43,7 +44,10 @@ async function call(
     },
   );
   const result = await response.json();
-  if (!response.ok) throw new Error(result.message || c.errors.connection);
+  if (!response.ok)
+    throw Object.assign(new Error(result.message || c.errors.connection), {
+      retryAfter: Number(response.headers.get("Retry-After")) || 0,
+    });
   return result.state;
 }
 function PairStatus({ match, side }: { match: MatchSummary; side: number }) {
@@ -58,13 +62,15 @@ function PairStatus({ match, side }: { match: MatchSummary; side: number }) {
         {[0, 1].map((i) => (
           <span key={i} data-ready={pair.ready[i]}>
             {c.seat(i)}:{" "}
-            {pair.advancing[i]
-              ? c.nextReady
-              : pair.ready[i]
-                ? c.ready
-                : match.occupied[side * 2 + i]
-                  ? c.thinking
-                  : c.waitingSeat}
+            {match.waiting?.[side * 2 + i]
+              ? c.waitingRound
+              : pair.advancing[i]
+                ? c.nextReady
+                : pair.ready[i]
+                  ? c.ready
+                  : match.occupied[side * 2 + i]
+                    ? c.thinking
+                    : c.emptySeat}
           </span>
         ))}
       </div>
@@ -72,6 +78,11 @@ function PairStatus({ match, side }: { match: MatchSummary; side: number }) {
   );
 }
 function result(match: MatchSummary, closed: boolean) {
+  if (
+    !match.occupied.slice(0, 2).some(Boolean) ||
+    !match.occupied.slice(2).some(Boolean)
+  )
+    return c.practiceComplete;
   const winner =
     match.winner ??
     (closed
@@ -131,8 +142,14 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
     setState((old) => {
       if (
         old?.code === next.code &&
-        (next.revision < old.revision ||
-          next.groups.some((g, i) => g.revision < old.groups[i].revision))
+        (Boolean(old.you && !next.you) ||
+          next.revision < old.revision ||
+          (next.match &&
+            old.match &&
+            next.match.revision < old.match.revision) ||
+          next.groups.some(
+            (g, i) => g.revision < (old.groups[i]?.revision ?? 0),
+          ))
       )
         return old;
       return next;
@@ -142,24 +159,40 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
   useEffect(() => {
     if (!code || loading) return;
     let cancelled = false,
+      failures = 0,
       timer: ReturnType<typeof setTimeout>;
     const poll = async () => {
+      let delay = 3000;
       if (!document.hidden)
         try {
           const next = await call(undefined, code);
           if (!cancelled) {
             accept(next);
             setError("");
+            failures = 0;
+            if (
+              next.status === "closed" ||
+              (next.role === "student" &&
+                next.match &&
+                next.match.winner !== null)
+            )
+              return;
+            if (next.status === "lobby") delay = 5000;
           }
         } catch (cause) {
           if (!cancelled) {
+            failures++;
+            delay = Math.max(
+              Math.min(30000, 3000 * 2 ** Math.min(failures, 4)),
+              ((cause as { retryAfter?: number })?.retryAfter ?? 0) * 1000,
+            );
             setOffline(true);
             setError(
               cause instanceof Error ? cause.message : c.errors.connection,
             );
           }
         }
-      if (!cancelled) timer = setTimeout(poll, 2000);
+      if (!cancelled) timer = setTimeout(poll, delay);
     };
     void poll();
     return () => {
@@ -196,7 +229,7 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
   };
   const player = state?.player,
     me = state?.you,
-    match = state && me ? state.groups[me.group] : null;
+    match = state && me ? state.match : null;
   const phase = player?.phase,
     qid = player?.question.id;
   useEffect(() => {
@@ -231,7 +264,13 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
       {offline && state && <p role="status">{c.reconnect}</p>}
       {!code && (
         <>
-          <p className={styles.intro}>{c.intro}</p>
+          <section className={styles.previewArena}>
+            <div>
+              <h2>{c.arenaIntro}</h2>
+              <p className={styles.intro}>{c.intro}</p>
+            </div>
+            <Rope />
+          </section>
           <div className={styles.setup}>
             <section>
               <h2>{c.joinTitle}</h2>
@@ -295,7 +334,9 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
               )}
             </section>
           </div>
-          <p className={styles.rules}>{c.rules}</p>
+          <p className={styles.rules}>
+            {c.rules} {c.flexible}
+          </p>
           <ol className={styles.levels}>
             {c.levels.map((name, i) => (
               <li key={name}>
@@ -325,6 +366,9 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
                 )}
               </p>
               <p>{c[state.status]}</p>
+              {state.status === "lobby" && (
+                <p className={styles.flexibleNote}>{c.flexible}</p>
+              )}
             </div>
             <div className={styles.qr}>
               <JoinQR url={`${origin}/polynomial-tug?room=${state.code}`} />
@@ -334,7 +378,7 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
                 <button
                   className={styles.primary}
                   disabled={
-                    busy || state.groups.some((g) => g.occupied.some((v) => !v))
+                    busy || !state.groups.some((g) => g.occupied.some(Boolean))
                   }
                   onClick={() => void command("start")}
                 >
@@ -390,7 +434,15 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
           <div className={styles.matches}>
             {state.groups.map((game, i) => (
               <article key={i} className={styles.match}>
-                <h2>{c.group(i + 1)}</h2>
+                <h2>
+                  {c.group(i + 1)}{" "}
+                  <span className={styles.modeBadge}>
+                    {c.matchMode(
+                      game.occupied.slice(0, 2).filter(Boolean).length,
+                      game.occupied.slice(2).filter(Boolean).length,
+                    )}
+                  </span>
+                </h2>
                 <Rope match={game} />
                 {(game.winner !== null || closed) && (
                   <p className={styles.winner}>{result(game, !!closed)}</p>
@@ -410,7 +462,7 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
           <h2>
             {c.joinTitle} · {state.code}
           </h2>
-          <p>{state.status === "lobby" ? c.choosePair : c[state.status]}</p>
+          <p>{closed ? c.closed : c.choosePair}</p>
           <div className={styles.joinGroups}>
             {state.groups.map((game, g) => (
               <article key={g}>
@@ -421,7 +473,8 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
                     className={styles.joinPair}
                     disabled={
                       busy ||
-                      state.status !== "lobby" ||
+                      closed ||
+                      game.winner !== null ||
                       game.occupied.slice(side * 2, side * 2 + 2).every(Boolean)
                     }
                     aria-label={c.joinPair(g + 1, side)}
@@ -458,6 +511,13 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
               {c.seat(me.seat % 2)}
             </h2>
             <p role="status">{c[state.status]}</p>
+
+            <span className={styles.modeBadge}>
+              {c.matchMode(
+                match.occupied.slice(0, 2).filter(Boolean).length,
+                match.occupied.slice(2).filter(Boolean).length,
+              )}
+            </span>
           </div>
           <Rope match={match} />
           <div className={styles.pairs}>
@@ -469,6 +529,11 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
             <div className={styles.result}>
               <h2>{result(match, !!closed)}</h2>
               <p>{c.result}</p>
+            </div>
+          ) : phase === "waiting" ? (
+            <div className={styles.waiting}>
+              <h3>{c.waitingRound}</h3>
+              <p>{c.waitingRoundDetail}</p>
             </div>
           ) : state.status === "lobby" ? (
             <p className={styles.rules}>{c.rules}</p>
@@ -491,10 +556,21 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
                         )}
                   </p>
                   <p>{c.goal}</p>
+                  <SkillTray
+                    pair={match.pairs[Math.floor(me.seat / 2)]}
+                    disabled={busy || offline || state.status !== "live"}
+                    onActivate={(skill) =>
+                      void command("skill", { questionId: qid, skill })
+                    }
+                  />
                 </aside>
                 <section
+                  id="tug-question-panel"
                   className={`${styles.questionPanel} ${questStyles.quest}`}
                 >
+                  <a className={styles.skillJump} href="#team-skills">
+                    {c.skillJump(match.pairs[Math.floor(me.seat / 2)].energy)}
+                  </a>
                   <h3>{c.choose}</h3>
                   <div
                     className={styles.expression}
@@ -593,6 +669,15 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
                                 )
                               : c.waitPartner}
                           </p>
+                          {match.pairs[Math.floor(me.seat / 2)].lastBlocked >
+                            0 && (
+                            <p>
+                              {c.blocked(
+                                match.pairs[Math.floor(me.seat / 2)]
+                                  .lastBlocked,
+                              )}
+                            </p>
+                          )}
                           {match.pairs[Math.floor(me.seat / 2)].resolved &&
                             (match.pairs[Math.floor(me.seat / 2)].advancing[
                               me.seat % 2

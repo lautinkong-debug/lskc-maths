@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 export default defineConfig({
   testDir: "./tests/e2e",
-  testMatch: "polynomial-tug.spec.ts",
+  testMatch: "polynomial-tug*.spec.ts",
   globalSetup: "./tests/e2e/polynomial-tug-setup.ts",
   workers: 1,
   outputDir: join(tmpdir(), "lskc-polynomial-tug-tests"),
