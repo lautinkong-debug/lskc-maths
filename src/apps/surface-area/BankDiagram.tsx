@@ -4,6 +4,7 @@ import { stepsFor } from "./lesson";
 import { WaterTank } from "./WaterTank";
 import { baseCalculations } from "./baseWorking";
 import { lateralCalculation } from "./lateralWorking";
+import { totalCalculation } from "./totalWorking";
 import {
   boundaries,
   boundaryEdges,
@@ -1153,6 +1154,8 @@ export type BankDiagramProps = {
   showPerimeterWorking?: boolean;
   showBaseAreaWorking?: boolean;
   showLateralWorking?: boolean;
+  showTotalWorking?: boolean;
+  showFinalAnswer?: boolean;
   compact?: boolean;
   onSelectFace?: (i: number) => void;
   svgRef?: Ref<SVGSVGElement>;
@@ -1189,6 +1192,8 @@ export default function BankDiagram({
   showPerimeterWorking = false,
   showBaseAreaWorking = false,
   showLateralWorking = false,
+  showTotalWorking = false,
+  showFinalAnswer = false,
   comparison = false,
   compact = false,
   onSelectFace,
@@ -1196,10 +1201,20 @@ export default function BankDiagram({
 }: BankDiagramProps) {
   const id = useId(),
     g = variant.geometry,
-    solved = revealDimensions || (showWorking && stage === 4);
-  const lines = (showWorking ? teachingLines(variant, stage) : []).flatMap(
-    (s) => wrap(s),
-  );
+    solved =
+      showFinalAnswer && (revealDimensions || (showWorking && stage === 4));
+  const total = totalCalculation(variant, {
+    revealBasePerimeter,
+    revealBaseArea,
+    revealWaterDepth,
+  });
+  const lines = (
+    showWorking
+      ? stage === 4 && !showFinalAnswer
+        ? total.lines
+        : teachingLines(variant, stage)
+      : []
+  ).flatMap((s) => wrap(s));
   const notes = showWorking && solved && variant.note ? wrap(variant.note) : [];
   const facts = [
     ...(showDimensions ? givenFacts(variant) : []),
@@ -1276,7 +1291,28 @@ export default function BankDiagram({
           ),
         ),
       );
-  const bodyHeight = lateralY + (g.kind === "prism" ? lateralHeight + 12 : 0);
+  const totalY = lateralY + (g.kind === "prism" ? lateralHeight + 12 : 0);
+  const totalLines = wrapLateral(total.lines);
+  const totalHeight =
+    72 +
+    25 *
+      Math.max(
+        ...[false, true].flatMap((perimeter) =>
+          [false, true].flatMap((area) =>
+            [false, true].map(
+              (depth) =>
+                wrapLateral(
+                  totalCalculation(variant, {
+                    revealBasePerimeter: perimeter,
+                    revealBaseArea: area,
+                    revealWaterDepth: depth,
+                  }).lines,
+                ).length,
+            ),
+          ),
+        ),
+      );
+  const bodyHeight = totalY + totalHeight + 12;
   const metrics = g.kind === "prism" ? geometryMetrics(g) : null;
   const perimeterValue = metrics ? number(metrics.perimeter) : "";
   const perimeterRelation =
@@ -1618,6 +1654,46 @@ export default function BankDiagram({
               {line}{" "}
             </text>
           ))}
+        </g>
+      )}
+      {showTotalWorking && showDimensions && (
+        <g data-total-working="true" fill={ink}>
+          <rect
+            x={20}
+            y={totalY}
+            width={width - 40}
+            height={totalHeight}
+            rx={5}
+            fill="var(--color-navy-wash)"
+          />
+          <text x={32} y={totalY + 22} fontSize={15} fill={navy}>
+            {total.title}
+          </text>
+          {totalLines.map((line, i) => (
+            <text key={i} x={32} y={totalY + 49 + i * 25} fontSize={20}>
+              {line}{" "}
+            </text>
+          ))}
+        </g>
+      )}
+      {showFinalAnswer && (
+        <g data-final-answer="true" fill={navy}>
+          <rect
+            x={20}
+            y={totalY + totalHeight - 40}
+            width={width - 40}
+            height={40}
+            rx={5}
+            fill="var(--color-navy-wash)"
+          />
+          <text
+            x={32}
+            y={totalY + totalHeight - 12}
+            fontSize={22}
+            fontWeight={600}
+          >
+            {c.finalAnswer}: {total.answer}
+          </text>
         </g>
       )}
       {!live &&

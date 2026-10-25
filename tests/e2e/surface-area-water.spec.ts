@@ -83,6 +83,9 @@ test("water depth can be shown independently of working throughout the lesson", 
       await lesson
         .getByRole("button", { name: "Show working", exact: true })
         .click();
+      await lesson
+        .getByRole("checkbox", { name: "Show final answer", exact: true })
+        .check();
       await expect(lesson.getByTestId("surface-working")).toContainText(
         `${area} cm²`,
       );
@@ -311,6 +314,9 @@ test("tank and strip exports preserve the water context without revealing hidden
     await lesson
       .getByRole("button", { name: "Show working", exact: true })
       .click();
+    await lesson
+      .getByRole("checkbox", { name: "Show final answer", exact: true })
+      .check();
     await lesson.getByLabel("Image layout").selectOption("comparison");
     const downloadEvent = page.waitForEvent("download");
     await lesson

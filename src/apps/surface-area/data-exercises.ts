@@ -618,6 +618,7 @@ export const exerciseQuestions: SurfaceQuestion[] = [
     variants: [
       {
         id: "chocolate-chips",
+        quantity: 20,
         givens: ["The original chocolate bar measures 15 cm by 8 cm by 3 cm."],
         label: "20 separate chocolate chips",
         unit: "cm",

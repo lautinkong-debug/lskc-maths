@@ -182,7 +182,7 @@
   background: white;
   border: 1px solid var(--color-grid);
   border-radius: 8px;
-  height: clamp(380px, 46vw, 570px);
+  height: clamp(500px, 60vw, 740px);
   overflow-anchor: none;
 }
 .viewport svg {

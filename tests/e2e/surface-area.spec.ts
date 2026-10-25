@@ -28,6 +28,10 @@ test("teacher can unfold, reveal and reset Example 9.11", async ({ page }) => {
   await lesson
     .getByRole("button", { name: "Show working", exact: true })
     .click();
+  await expect(lesson.getByTestId("surface-working")).not.toContainText("338");
+  await lesson
+    .getByRole("checkbox", { name: "Show final answer", exact: true })
+    .check();
   await expect(lesson.getByTestId("surface-working")).toContainText("338");
   await lesson
     .getByRole("button", { name: "Reset lesson", exact: true })
@@ -62,6 +66,9 @@ test("exports real PNG and SVG files without leaking hidden working", async ({
   expect(hidden).not.toContain("data-export-working");
   expect(hidden).not.toContain("var(--color");
   await page.getByRole("button", { name: "Show working", exact: true }).click();
+  await page
+    .getByRole("checkbox", { name: "Show final answer", exact: true })
+    .check();
   const shown = (await download("SVG", "example-9-11.svg")).toString();
   expect(shown).toContain("338 cm²");
   expect(shown).toContain("286 cm²");
@@ -88,6 +95,9 @@ test("exports real PNG and SVG files without leaking hidden working", async ({
   await preview.close();
   await page.getByLabel("Image layout").selectOption("comparison");
   await page.getByRole("button", { name: "Hide working", exact: true }).click();
+  await page
+    .getByRole("checkbox", { name: "Show final answer", exact: true })
+    .uncheck();
   const comparison = (
     await download("SVG", "comparison-hidden.svg")
   ).toString();

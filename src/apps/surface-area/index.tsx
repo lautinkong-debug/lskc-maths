@@ -9,6 +9,7 @@ import { downloadDiagram } from "./export";
 import { faces, givenFacts, teachingLines } from "./geometry";
 import { questionName, questions, resolvePreset, sections } from "./bank";
 import { shapeGroup, stepsFor } from "./lesson";
+import { totalCalculation } from "./totalWorking";
 import type { SurfaceQuestion, SurfaceVariant } from "./types";
 import styles from "./surface-area.module.css";
 
@@ -65,6 +66,8 @@ function SurfaceLesson({
   const [showPerimeterWorking, setShowPerimeterWorking] = useState(false);
   const [showBaseAreaWorking, setShowBaseAreaWorking] = useState(false);
   const [showLateralWorking, setShowLateralWorking] = useState(false);
+  const [showTotalWorking, setShowTotalWorking] = useState(false);
+  const [showFinalAnswer, setShowFinalAnswer] = useState(false);
   const [clean, setClean] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [comparison, setComparison] = useState(false);
@@ -75,6 +78,16 @@ function SurfaceLesson({
   const cleanTrigger = useRef<HTMLButtonElement>(null);
   const geometry = variant.geometry;
   const steps = stepsFor(variant);
+  const total = totalCalculation(variant, {
+    revealBasePerimeter: showBasePerimeter,
+    revealBaseArea: showBaseArea,
+    revealWaterDepth: showWaterDepth,
+  });
+  const solved = showWorking && stage === 4 && showFinalAnswer;
+  const lessonLines =
+    stage === 4 && !showFinalAnswer
+      ? total.lines
+      : teachingLines(variant, stage);
   const shownQuestions = questions.filter(
     (q) =>
       (!section || q.section === section) &&
@@ -124,6 +137,8 @@ function SurfaceLesson({
     setShowPerimeterWorking(false);
     setShowBaseAreaWorking(false);
     setShowLateralWorking(false);
+    setShowTotalWorking(false);
+    setShowFinalAnswer(false);
     setComparison(false);
   }
   async function save(format: "svg" | "png") {
@@ -157,6 +172,8 @@ function SurfaceLesson({
     showPerimeterWorking,
     showBaseAreaWorking,
     showLateralWorking,
+    showTotalWorking,
+    showFinalAnswer,
   };
   return (
     <div
@@ -378,6 +395,23 @@ function SurfaceLesson({
                   </label>
                 </>
               )}
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showTotalWorking}
+                  disabled={!showDimensions}
+                  onChange={(e) => setShowTotalWorking(e.target.checked)}
+                />
+                {total.toggle}
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showFinalAnswer}
+                  onChange={(e) => setShowFinalAnswer(e.target.checked)}
+                />
+                {c.showFinalAnswer}
+              </label>
             </div>
             <button
               ref={cleanTrigger}
@@ -429,7 +463,7 @@ function SurfaceLesson({
               <Diagram
                 {...diagramProps}
                 compact={compact}
-                revealDimensions={showWorking && stage === 4}
+                revealDimensions={solved}
                 onSelectFace={setSelectedFace}
               />
             </div>
@@ -451,7 +485,7 @@ function SurfaceLesson({
             </button>
           </div>
           <div className={styles.faces} aria-label={c.selectFace}>
-            {faces(variant, showWorking && stage === 4).map((face, i) => (
+            {faces(variant, solved).map((face, i) => (
               <button
                 type="button"
                 key={i}
@@ -471,7 +505,7 @@ function SurfaceLesson({
           >
             {showDimensions && needsLegend(variant) && (
               <p>
-                {faces(variant, showWorking && stage === 4)
+                {faces(variant, solved)
                   .filter((face) => face.label)
                   .map(
                     (face) =>
@@ -496,7 +530,7 @@ function SurfaceLesson({
             </figcaption>
             <OriginalPrism
               {...diagramProps}
-              solved={showWorking && stage === 4}
+              solved={solved}
               onSelectFace={setSelectedFace}
             />
           </figure>
@@ -510,24 +544,26 @@ function SurfaceLesson({
                 <Formula display>
                   {geometry.kind === "cubes"
                     ? "A=\\sum 6s^2-2\\sum A_{\\text{contact}}"
-                    : geometry.omittedEdges?.length
-                      ? "A=H\\sum w_{\\text{retained}}+nB"
-                      : stage < 4
-                        ? stage < 3
-                          ? "P=\\text{sum of boundary lengths}"
-                          : "A_{\\text{lateral}}=PH"
-                        : geometry.baseCount
-                          ? geometry.baseCount === 1
-                            ? "A=PH+B"
-                            : "A=PH+2B"
-                          : "A=PH"}
+                    : stage === 4 && variant.quantity
+                      ? `A=${variant.quantity}(PH+2B)`
+                      : geometry.omittedEdges?.length
+                        ? "A=H\\sum w_{\\text{retained}}+nB"
+                        : stage < 4
+                          ? stage < 3
+                            ? "P=\\text{sum of boundary lengths}"
+                            : "A_{\\text{lateral}}=PH"
+                          : geometry.baseCount
+                            ? geometry.baseCount === 1
+                              ? "A=PH+B"
+                              : "A=PH+2B"
+                            : "A=PH"}
                 </Formula>
                 <ol>
-                  {teachingLines(variant, stage).map((line, i) => (
+                  {lessonLines.map((line, i) => (
                     <li key={`${i}-${line}`}>{line}</li>
                   ))}
                 </ol>
-                {stage === 4 && (
+                {stage === 4 && showFinalAnswer && (
                   <>
                     <p className={styles.answer}>{variant.answer}</p>
                     {variant.note && (

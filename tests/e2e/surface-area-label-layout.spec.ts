@@ -90,6 +90,9 @@ test("staircase givens label the solid and strip without colliding with base ope
           });
           if (stage === 4) {
             await lesson
+              .getByRole("checkbox", { name: "Show final answer", exact: true })
+              .check();
+            await lesson
               .getByRole("button", { name: "Show working", exact: true })
               .click();
             await expect(

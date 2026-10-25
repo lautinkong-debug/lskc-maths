@@ -63,6 +63,9 @@ test("all 69 textbook variants unfold and reveal their checked answer", async ({
       await lesson
         .getByRole("button", { name: "Show working", exact: true })
         .click();
+      await lesson
+        .getByRole("checkbox", { name: "Show final answer", exact: true })
+        .check();
       await expect(lesson.getByTestId("surface-working")).toContainText(
         v.answer,
       );
@@ -138,6 +141,9 @@ for (const id of [
     await page
       .getByRole("button", { name: "Show working", exact: true })
       .click();
+    await page
+      .getByRole("checkbox", { name: "Show final answer", exact: true })
+      .check();
     const svg = await save("SVG", "shown");
     expect(svg.toString()).toContain("data-export-working");
     const png = await save("PNG", "shown");
@@ -173,6 +179,9 @@ test("complex presets fit phone and projection layouts", async ({ page }) => {
       await lesson
         .getByRole("button", { name: "Show working", exact: true })
         .click();
+      await lesson
+        .getByRole("checkbox", { name: "Show final answer", exact: true })
+        .check();
       if (width > 1000)
         await page
           .getByRole("button", { name: "Projection mode", exact: true })

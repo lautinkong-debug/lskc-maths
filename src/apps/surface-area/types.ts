@@ -51,6 +51,8 @@ export type SurfaceVariant = {
   baseWorking?: string;
   /** Base-boundary calculation only; retain unknowns without solving the whole question. */
   perimeterWorking?: string[];
+  /** Number of separate, identical solids when the question asks for their combined area. */
+  quantity?: number;
   /** Independently authored intermediate working, checked against the key. */
   working: string[];
   answer: string;
