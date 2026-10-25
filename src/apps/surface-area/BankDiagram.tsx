@@ -3,6 +3,7 @@ import { copy } from "@/lib/copy";
 import { stepsFor } from "./lesson";
 import { WaterTank } from "./WaterTank";
 import { baseCalculations } from "./baseWorking";
+import { lateralCalculation } from "./lateralWorking";
 import {
   boundaries,
   boundaryEdges,
@@ -1151,6 +1152,7 @@ export type BankDiagramProps = {
   revealBaseArea?: boolean;
   showPerimeterWorking?: boolean;
   showBaseAreaWorking?: boolean;
+  showLateralWorking?: boolean;
   compact?: boolean;
   onSelectFace?: (i: number) => void;
   svgRef?: Ref<SVGSVGElement>;
@@ -1186,6 +1188,7 @@ export default function BankDiagram({
   revealBaseArea = false,
   showPerimeterWorking = false,
   showBaseAreaWorking = false,
+  showLateralWorking = false,
   comparison = false,
   compact = false,
   onSelectFace,
@@ -1242,13 +1245,38 @@ export default function BankDiagram({
   const valuesBottom =
     diagramHeight +
     (g.kind === "prism" ? (g.omittedEdges?.length ? 108 : 80) : 0);
-  const bodyHeight =
+  const lateralY =
     valuesBottom +
     (g.kind === "prism"
       ? stackedWorking
         ? workingCards.reduce((sum, card) => sum + card.height + 12, 0)
         : Math.max(...workingCards.map((card) => card.height)) + 12
       : 0);
+  const lateral = lateralCalculation(variant, {
+    revealBasePerimeter,
+    revealWaterDepth,
+  });
+  const wrapLateral = (lines: string[]) =>
+    lines.flatMap((line) => wrap(line, Math.floor((width - 64) / 12.4)));
+  const lateralLines = wrapLateral(lateral.lines);
+  // A value reveal can change the formula's length, so reserve the largest state.
+  const lateralHeight =
+    42 +
+    25 *
+      Math.max(
+        ...[false, true].flatMap((perimeter) =>
+          [false, true].map(
+            (depth) =>
+              wrapLateral(
+                lateralCalculation(variant, {
+                  revealBasePerimeter: perimeter,
+                  revealWaterDepth: depth,
+                }).lines,
+              ).length,
+          ),
+        ),
+      );
+  const bodyHeight = lateralY + (g.kind === "prism" ? lateralHeight + 12 : 0);
   const metrics = g.kind === "prism" ? geometryMetrics(g) : null;
   const perimeterValue = metrics ? number(metrics.perimeter) : "";
   const perimeterRelation =
@@ -1572,6 +1600,26 @@ export default function BankDiagram({
             </g>
           ) : null;
         })}
+      {g.kind === "prism" && showDimensions && showLateralWorking && (
+        <g data-lateral-working="true" fill={ink}>
+          <rect
+            x={20}
+            y={lateralY}
+            width={width - 40}
+            height={lateralHeight}
+            rx={5}
+            fill="var(--color-navy-wash)"
+          />
+          <text x={32} y={lateralY + 22} fontSize={15} fill={navy}>
+            {lateral.title}
+          </text>
+          {lateralLines.map((line, i) => (
+            <text key={i} x={32} y={lateralY + 49 + i * 25} fontSize={20}>
+              {line}{" "}
+            </text>
+          ))}
+        </g>
+      )}
       {!live &&
         legend.map((line, i) => (
           <text

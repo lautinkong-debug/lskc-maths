@@ -64,6 +64,7 @@ function SurfaceLesson({
   const [showBaseArea, setShowBaseArea] = useState(false);
   const [showPerimeterWorking, setShowPerimeterWorking] = useState(false);
   const [showBaseAreaWorking, setShowBaseAreaWorking] = useState(false);
+  const [showLateralWorking, setShowLateralWorking] = useState(false);
   const [clean, setClean] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [comparison, setComparison] = useState(false);
@@ -122,6 +123,7 @@ function SurfaceLesson({
     setShowBaseArea(false);
     setShowPerimeterWorking(false);
     setShowBaseAreaWorking(false);
+    setShowLateralWorking(false);
     setComparison(false);
   }
   async function save(format: "svg" | "png") {
@@ -154,6 +156,7 @@ function SurfaceLesson({
     revealBaseArea: showBaseArea,
     showPerimeterWorking,
     showBaseAreaWorking,
+    showLateralWorking,
   };
   return (
     <div
@@ -363,6 +366,15 @@ function SurfaceLesson({
                       onChange={(e) => setShowBaseAreaWorking(e.target.checked)}
                     />
                     {c.showBaseAreaWorking}
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={showLateralWorking}
+                      disabled={!showDimensions}
+                      onChange={(e) => setShowLateralWorking(e.target.checked)}
+                    />
+                    {c.showLateralWorking}
                   </label>
                 </>
               )}
