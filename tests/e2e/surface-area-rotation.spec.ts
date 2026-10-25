@@ -38,7 +38,7 @@ async function checkLabels(svg: Locator) {
   expect(issues).toEqual([]);
 }
 
-test("rotated solids preserve measurements, fixed controls and the face-on unfolded strip", async ({
+test("rotated solids preserve measurements, fixed controls and the chosen unfolded view", async ({
   page,
 }) => {
   test.setTimeout(180_000);
@@ -109,12 +109,13 @@ test("rotated solids preserve measurements, fixed controls and the face-on unfol
       await lesson
         .getByRole("button", { name: "Flat strip", exact: true })
         .click();
-      await expect(yaw).toBeDisabled();
+      await expect(yaw).toBeEnabled();
+      await expect(svg).toHaveAttribute("data-view-yaw", "90");
       const flat = await polygons();
       await lesson
         .getByRole("button", { name: "Reset view", exact: true })
         .click();
-      expect(await polygons()).toBe(flat);
+      expect(await polygons()).not.toBe(flat);
       await lesson.getByRole("button", { name: "Folded", exact: true }).click();
       await expect(yaw).toBeEnabled();
       await yaw.focus();

@@ -17,6 +17,7 @@ export default defineConfig({
     "surface-area-lateral-working.spec.ts",
     "surface-area-total-working.spec.ts",
     "surface-area-rotation.spec.ts",
+    "surface-area-unfolded-view.spec.ts",
   ],
   // Chrome downloads complete in the Windows temporary folder. The protected
   // repository artifact folder can report completion but deny file reads.

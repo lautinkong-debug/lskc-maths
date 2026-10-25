@@ -509,7 +509,6 @@ function SurfaceLesson({
                 max="180"
                 step="1"
                 value={view.yaw}
-                disabled={unfold >= 0.999}
                 onChange={(e) =>
                   setView(limitView({ ...view, yaw: Number(e.target.value) }))
                 }
@@ -526,7 +525,6 @@ function SurfaceLesson({
                 max="55"
                 step="1"
                 value={view.tilt}
-                disabled={unfold >= 0.999}
                 onChange={(e) =>
                   setView(limitView({ ...view, tilt: Number(e.target.value) }))
                 }

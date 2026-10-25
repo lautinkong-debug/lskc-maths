@@ -4,7 +4,6 @@ import {
   limitView,
   projectView,
   rotatePoint,
-  unfoldingView,
 } from "../../src/apps/surface-area/view";
 
 describe("solid camera", () => {
@@ -44,11 +43,14 @@ describe("solid camera", () => {
       tilt: -10,
     });
   });
-  it("returns continuously to the original flat-strip projection", () => {
-    expect(unfoldingView({ yaw: 90, tilt: 40 }, 0.5)).toEqual({
-      yaw: 45,
-      tilt: 20,
-    });
-    expect(unfoldingView({ yaw: 90, tilt: 40 }, 1)).toEqual(DEFAULT_VIEW);
+  it("projects a flat net with the chosen view while preserving its real dimensions", () => {
+    const p = { x: 22, y: 0 },
+      view = { yaw: 90, tilt: 40 };
+    expect(projectView(p, 13, view)).not.toEqual(projectView(p, 13));
+    const rotated = rotatePoint(p, 13, view);
+    expect(Math.hypot(rotated.x, rotated.y, rotated.z)).toBeCloseTo(
+      Math.hypot(22, 13),
+      10,
+    );
   });
 });

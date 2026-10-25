@@ -1,11 +1,5 @@
 import { useId, useRef, type Ref } from "react";
-import {
-  DEFAULT_VIEW,
-  limitView,
-  projectView,
-  unfoldingView,
-  type SolidView,
-} from "./view";
+import { DEFAULT_VIEW, limitView, projectView, type SolidView } from "./view";
 import { copy } from "@/lib/copy";
 import { stepsFor } from "./lesson";
 import { WaterTank } from "./WaterTank";
@@ -209,9 +203,17 @@ function Prism({
     bs = boundaries(g);
   // Keep the projection direction consistent as the boundary hinges open.
   // Fit each view uniformly inside the stationary teaching canvas.
-  // At the endpoint the width is horizontal and H is vertical: a rectangle.
-  const camera = unfoldingView(view, progress);
-  const project = (p: Point, z: number) => projectView(p, z, camera);
+  // The chosen camera stays unchanged while the faces hinge open.
+  const project = (p: Point, z: number) => projectView(p, z, view);
+  const rotatedFlat = progress > 0.999 && (view.yaw !== 0 || view.tilt !== 0);
+  const topReserve =
+    (view.yaw !== 0 || view.tilt !== 0 ? 55 + (bs.length - 1) * 30 : 0) *
+    progress;
+  const layoutBox = {
+    ...box,
+    y: box.y + topReserve,
+    h: Math.max(45, box.h - topReserve),
+  };
   const loopsAt = (amount: number) =>
     bs.map((boundary, ring) => {
       const offset = bs
@@ -259,9 +261,9 @@ function Prism({
           return { face: face.index, x: (a.x + b.x) / 2, text: face.label };
         }),
     );
-  let flatHeight = box.h;
+  let flatHeight = layoutBox.h;
   for (let attempt = 0; attempt < 6; attempt++) {
-    const at = fitter(flatPoints, { ...box, h: flatHeight });
+    const at = fitter(flatPoints, { ...layoutBox, h: flatHeight });
     const rows = lanePlan(at).rows;
     const bottom = Math.max(...flatPoints.map((p) => at(p).y));
     const band = rows * 34 + 20;
@@ -269,14 +271,14 @@ function Prism({
       break;
     const next = Math.max(
       45,
-      Math.min(flatHeight, bounds.y + bounds.h - box.y - band),
+      Math.min(flatHeight, bounds.y + bounds.h - layoutBox.y - band),
     );
     if (next === flatHeight) break;
     flatHeight = next;
   }
   const fit = fitter(
     loops.flatMap((loop) => [...loop.b, ...loop.t]),
-    { ...box, h: box.h + (flatHeight - box.h) * progress },
+    { ...layoutBox, h: layoutBox.h + (flatHeight - layoutBox.h) * progress },
   );
   const mapped = loops.map((loop) => ({
     b: loop.b.map(fit),
@@ -288,6 +290,15 @@ function Prism({
       .join(" ");
   const folded = progress < 0.001,
     flat = progress > 0.999;
+  const edgeOn =
+    flat &&
+    mapped.every((loop) => Math.abs(loop.b.at(-1)!.x - loop.b[0].x) < 45);
+  const captionY = (ring: number, firstY: number) =>
+    rotatedFlat
+      ? Math.min(...mapped.flatMap((loop) => loop.t.map((p) => p.y))) -
+        34 -
+        (mapped.length - 1 - ring) * 30
+      : firstY - 34;
   const capCount = g.baseCount || (variant.target === "lateral" ? 2 : 0);
   const faceViews = fs
     .map((face) => {
@@ -417,7 +428,7 @@ function Prism({
         anchor: "start",
       }),
     );
-    if (flat)
+    if (flat && !edgeOn)
       mapped.forEach((loop, ring) => {
         const p = loop.t[0],
           q = loop.t.at(-1)!;
@@ -432,13 +443,13 @@ function Prism({
                 : c.basePerimeter;
         const lines = wrap(
           text,
-          Math.max(8, Math.floor(Math.abs(q.x - p.x) / 12)),
+          rotatedFlat ? 30 : Math.max(8, Math.floor(Math.abs(q.x - p.x) / 12)),
         );
         lines.forEach((text, i) =>
           reserve({
             p: {
               x: (p.x + q.x) / 2,
-              y: p.y - 34 - (lines.length - 1 - i) * 26,
+              y: captionY(ring, p.y) - (lines.length - 1 - i) * 26,
             },
             text,
             size: 22,
@@ -466,7 +477,7 @@ function Prism({
     ...mapped.flatMap((loop) => loop.b.map((p) => p.y)),
   );
   fs.forEach((face) => {
-    if (!dimensions || !face.label) return;
+    if (!dimensions || !face.label || edgeOn) return;
     const loop = annotationPoints[face.ring],
       p = loop[face.edge],
       q = loop[face.edge + 1];
@@ -526,7 +537,11 @@ function Prism({
     annotations.push({ p: position, from, text: face.label, face: face.index });
   });
   return (
-    <g data-projection="parallel" data-unfold={progress}>
+    <g
+      data-projection="parallel"
+      data-unfold={progress}
+      data-edge-on={edgeOn || undefined}
+    >
       {folded && caps && capCount > 0 && (
         <path
           d={capPath(false)}
@@ -583,11 +598,7 @@ function Prism({
                 }
               }}
               style={{
-                cursor: onSelect
-                  ? progress < 0.999
-                    ? "grab"
-                    : "pointer"
-                  : undefined,
+                cursor: onSelect ? "grab" : undefined,
               }}
             />
             {labels && (!folded || visible) && width > 24 && height > 32 && (
@@ -764,6 +775,7 @@ function Prism({
         </g>
       )}
       {flat &&
+        !edgeOn &&
         dimensions &&
         mapped.map((loop, ring) => {
           const p = loop.t[0],
@@ -779,12 +791,14 @@ function Prism({
                   : c.basePerimeter;
           const captionLines = wrap(
             text,
-            Math.max(8, Math.floor(Math.abs(q.x - p.x) / 12)),
+            rotatedFlat
+              ? 30
+              : Math.max(8, Math.floor(Math.abs(q.x - p.x) / 12)),
           );
           return (
             <g key={ring} data-boundary-caption={ring}>
               <path
-                d={`M${p.x},${p.y - 12} v-10 H${q.x} v10`}
+                d={`M${p.x},${p.y - 12} v-10 L${q.x},${q.y - 22} v10`}
                 fill="none"
                 stroke={navy}
                 strokeWidth="1.7"
@@ -794,7 +808,7 @@ function Prism({
                   key={i}
                   p={{
                     x: (p.x + q.x) / 2,
-                    y: p.y - 34 - (captionLines.length - 1 - i) * 26,
+                    y: captionY(ring, p.y) - (captionLines.length - 1 - i) * 26,
                   }}
                   text={line}
                   size={22}
@@ -803,6 +817,13 @@ function Prism({
             </g>
           );
         })}
+      {edgeOn && (
+        <Label
+          p={{ x: box.x + box.w / 2, y: bounds.y + bounds.h - 5 }}
+          text={c.edgeOnView}
+          size={15}
+        />
+      )}
       {folded && !caps && (
         <line
           x1={mapped[0].b[0].x}
@@ -835,13 +856,19 @@ function Cubes({
     }));
     const cursor = g.cubes.reduce((sum, cube) => sum + cube.side * 4 + 3, 0);
     const maxSide = Math.max(...g.cubes.map((c) => c.side));
-    const fit = fitter(
-      [
-        { x: 0, y: 0 },
-        { x: cursor - 3, y: maxSide * 3 },
-      ],
-      box,
-    );
+    const project = (x: number, y: number) =>
+      projectView({ x, y: 0 }, -y, view);
+    const corners = (x: number, y: number, w: number, h: number) => [
+      project(x, y),
+      project(x + w, y),
+      project(x + w, y + h),
+      project(x, y + h),
+    ];
+    const fit = fitter(corners(0, 0, cursor - 3, maxSide * 3), box);
+    const at = (x: number, y: number) => fit(project(x, y));
+    const netLabels = nets
+      .map((n, ci) => ({ ci, x: at(n.x + 2 * n.side, 0).x }))
+      .sort((a, b) => a.x - b.x);
     return (
       <g>
         {nets.map((n, ci) => {
@@ -856,8 +883,14 @@ function Cubes({
           return (
             <g key={ci}>
               {cells.map(([x, y], j) => {
-                const a = fit({ x: n.x + x * n.side, y: y * n.side }),
-                  b = fit({ x: n.x + (x + 1) * n.side, y: (y + 1) * n.side }),
+                const points = corners(
+                    n.x + x * n.side,
+                    y * n.side,
+                    n.side,
+                    n.side,
+                  ).map(fit),
+                  a = points[0],
+                  b = points[2],
                   i = ci * 6 + j;
                 const contact = g.contacts.filter(
                   (c) =>
@@ -865,11 +898,8 @@ function Cubes({
                 );
                 return (
                   <g key={j} data-face={i}>
-                    <rect
-                      x={a.x}
-                      y={a.y}
-                      width={b.x - a.x}
-                      height={b.y - a.y}
+                    <polygon
+                      points={poly(points)}
                       fill={selected === i ? gold : palette[ci % 4]}
                       stroke={navy}
                       role={onSelect ? "button" : undefined}
@@ -885,35 +915,51 @@ function Cubes({
                       }}
                     />
                     {contact.map((c, k) => {
-                      const width = ((b.x - a.x) * Math.sqrt(c.area)) / n.side;
+                      const width = Math.sqrt(c.area);
                       return (
-                        <rect
+                        <polygon
                           key={k}
-                          x={a.x + (b.x - a.x - width) / 2}
-                          y={a.y + (b.y - a.y - width) / 2}
-                          width={width}
-                          height={width}
+                          points={poly(
+                            corners(
+                              n.x + x * n.side + (n.side - width) / 2,
+                              y * n.side + (n.side - width) / 2,
+                              width,
+                              width,
+                            ).map(fit),
+                          )}
+                          data-contact-patch="true"
+                          pointerEvents="none"
                           fill="white"
                           stroke="var(--color-crimson)"
                           strokeDasharray="4 3"
                         />
                       );
                     })}
-                    {labels && (
-                      <Label
-                        p={{ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 + 5 }}
-                        text={String(j + 1)}
-                        size={15}
-                      />
-                    )}
+                    {labels &&
+                      Math.abs(points[1].x - points[0].x) > 15 &&
+                      Math.abs(points[3].y - points[0].y) > 18 && (
+                        <Label
+                          p={{ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 + 5 }}
+                          text={String(j + 1)}
+                          size={15}
+                        />
+                      )}
                   </g>
                 );
               })}
               {dimensions && (
                 <Label
-                  p={{ x: fit({ x: n.x + 2 * n.side, y: 0 }).x, y: box.y - 20 }}
-                  text={`${number(n.side)} ${variant.unit} ${c.cube}`}
-                  size={21}
+                  p={{
+                    x:
+                      box.x +
+                      (box.w *
+                        (netLabels.findIndex((label) => label.ci === ci) +
+                          0.5)) /
+                        nets.length,
+                    y: box.y - 20,
+                  }}
+                  text={`${number(n.side)} ${variant.unit}`}
+                  size={18}
                 />
               )}
             </g>
@@ -922,9 +968,7 @@ function Cubes({
       </g>
     );
   }
-  const camera = unfoldingView(view, progress);
-  const project = ([x, y, z]: number[]) =>
-    projectView({ x, y }, z, camera, true);
+  const project = ([x, y, z]: number[]) => projectView({ x, y }, z, view, true);
   const cubes = g.cubes.map((cube, ci) => {
     const separate = g.cubes
       .slice(0, ci)
@@ -1043,10 +1087,7 @@ function Cubes({
 }
 function Shape(props: ShapeProps) {
   return (
-    <g
-      data-rotation-surface="true"
-      style={{ touchAction: props.progress < 0.999 ? "none" : undefined }}
-    >
+    <g data-rotation-surface="true" style={{ touchAction: "none" }}>
       <ShapeContent {...props} />
     </g>
   );
@@ -1071,7 +1112,9 @@ function Base({
   box,
   dimensions,
   solved,
+  view = DEFAULT_VIEW,
 }: {
+  view?: SolidView;
   variant: SurfaceVariant;
   box: Box;
   dimensions: boolean;
@@ -1080,13 +1123,79 @@ function Base({
   const g = variant.geometry as PrismGeometry,
     bs = boundaries(g),
     fit = fitter(
-      bs.flatMap((b) => b.points.map((p) => ({ x: p.x, y: -p.y }))),
+      bs.flatMap((b) =>
+        b.points.map((p) => projectView({ x: p.x, y: 0 }, p.y, view)),
+      ),
       box,
     ),
-    at = (p: Point) => fit({ x: p.x, y: -p.y });
+    at = (p: Point) => fit(projectView({ x: p.x, y: 0 }, p.y, view));
   const path = bs.map((b) => `M${poly(b.points.map(at))}Z`).join(" ");
+  const projected = bs.flatMap((b) => b.points.map(at));
+  const readable =
+    Math.max(...projected.map((p) => p.x)) -
+      Math.min(...projected.map((p) => p.x)) >
+    35;
+  const normalSign = projectView({ x: 1, y: 0 }, 0, view).x < 0 ? -1 : 1;
+  const occupied: Box[] = [];
+  const baseLabel = (
+    preferred: Point,
+    text: string,
+    key: string | number,
+    from: Point,
+  ) => {
+    if (view.yaw === 0 && view.tilt === 0)
+      return <Label key={key} p={preferred} text={text} size={18} />;
+    const bounds = {
+      x: box.x - 38,
+      y: box.y - 8,
+      w: box.w + 76,
+      h: box.h + 43,
+    };
+    const fits = (p: Point) => {
+      const r = labelBox({ p, text, size: 18 });
+      return (
+        r.x >= bounds.x &&
+        r.y >= bounds.y &&
+        r.x + r.w <= bounds.x + bounds.w &&
+        r.y + r.h <= bounds.y + bounds.h &&
+        !occupied.some((other) => overlaps(r, other))
+      );
+    };
+    let p = preferred;
+    let distance = Infinity;
+    // Fixed slots prevent early labels leaving unusable gaps for later ones.
+    for (let row = 0; row < 4; row++)
+      for (const column of [0.25, 0.75]) {
+        const x = bounds.x + bounds.w * column,
+          y = bounds.y + 22 + row * 32;
+        const candidate = { x, y },
+          score = Math.hypot(x - preferred.x, y - preferred.y);
+        if (score < distance && fits(candidate)) {
+          p = candidate;
+          distance = score;
+        }
+      }
+    occupied.push(labelBox({ p, text, size: 18 }));
+    return (
+      <g key={key}>
+        <line
+          x1={from.x}
+          y1={from.y}
+          x2={p.x}
+          y2={p.y - 7}
+          stroke="var(--color-pencil)"
+          strokeWidth={0.8}
+        />
+        <Label p={p} text={text} size={18} />
+      </g>
+    );
+  };
   return (
-    <g>
+    <g
+      data-detached-base="true"
+      data-rotation-surface="true"
+      style={{ touchAction: "none" }}
+    >
       <path
         d={path}
         fill={g.water ? "#46a9d4" : gold}
@@ -1103,9 +1212,11 @@ function Base({
         />
       </g>
       {dimensions &&
+        readable &&
         !g.schematic &&
         bs.map((b, i) => <RightAngles key={i} boundary={b} at={at} />)}
       {dimensions &&
+        readable &&
         bs.map((b, ri) => (
           <g key={ri}>
             {b.points.length <= 6 &&
@@ -1124,17 +1235,20 @@ function Base({
                     : !solved && provided
                       ? provided
                       : `${number(Math.hypot(q.x - p.x, q.y - p.y))} ${variant.unit}`;
-                return text ? (
-                  <Label
-                    key={i}
-                    p={{
-                      x: (a.x + z.x) / 2 - (d.y / length) * 21,
-                      y: (a.y + z.y) / 2 + (d.x / length) * 21 + 5,
-                    }}
-                    text={text}
-                    size={18}
-                  />
-                ) : null;
+                return text && length > 0.01
+                  ? baseLabel(
+                      {
+                        x: (a.x + z.x) / 2 - (d.y / length) * 21 * normalSign,
+                        y:
+                          (a.y + z.y) / 2 +
+                          (d.x / length) * 21 * normalSign +
+                          5,
+                      },
+                      text,
+                      i,
+                      { x: (a.x + z.x) / 2, y: (a.y + z.y) / 2 },
+                    )
+                  : null;
               })}
             {b.measurements?.map((m, i) => {
               const a = at(m.a),
@@ -1149,11 +1263,12 @@ function Base({
                     stroke={navy}
                     strokeDasharray="4 3"
                   />
-                  <Label
-                    p={{ x: (a.x + z.x) / 2 + 8, y: (a.y + z.y) / 2 - 6 }}
-                    text={m.label}
-                    size={18}
-                  />
+                  {baseLabel(
+                    { x: (a.x + z.x) / 2 + 8, y: (a.y + z.y) / 2 - 6 },
+                    m.label,
+                    `measure-${i}`,
+                    { x: (a.x + z.x) / 2, y: (a.y + z.y) / 2 },
+                  )}
                 </g>
               );
             })}
@@ -1459,7 +1574,7 @@ export default function BankDiagram({
       data-view-tilt={view.tilt}
       data-solved={solved || undefined}
       onPointerDown={
-        onViewChange && unfold < 0.999
+        onViewChange
           ? (event) => {
               if (
                 event.button !== 0 ||
@@ -1534,7 +1649,7 @@ export default function BankDiagram({
         {question.label}: {variant.label}
       </title>
       <rect width={width} height={height} fill="white" />
-      {onViewChange && !comparison && unfold < 0.999 && (
+      {onViewChange && !comparison && (
         <rect
           data-rotation-surface="true"
           x={20}
@@ -1675,6 +1790,7 @@ export default function BankDiagram({
             </text>
           )}
           <Base
+            view={view}
             variant={variant}
             box={{ x: firstBaseX, y: baseY, w: baseWidth, h: baseHeight }}
             dimensions={showDimensions && stage === 4}
@@ -1693,6 +1809,7 @@ export default function BankDiagram({
                 +
               </text>
               <Base
+                view={view}
                 variant={variant}
                 box={{
                   x: secondBaseX,

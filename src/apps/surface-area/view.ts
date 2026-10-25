@@ -7,13 +7,6 @@ export const limitView = (view: SolidView): SolidView => ({
   // Keep the camera above the base and avoid an edge-on height dimension.
   tilt: Math.max(-10, Math.min(55, view.tilt)),
 });
-export const unfoldingView = (
-  view: SolidView,
-  progress: number,
-): SolidView => ({
-  yaw: view.yaw * (1 - progress),
-  tilt: view.tilt * (1 - progress),
-});
 
 /** Rigid 3D rotation: turn about the prism axis, then tilt about screen-right. */
 export function rotatePoint(p: Point, z: number, view: SolidView) {
