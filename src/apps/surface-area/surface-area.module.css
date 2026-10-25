@@ -208,7 +208,44 @@
   min-height: 48px;
   font-size: 0.9rem;
 }
+.viewControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 18px;
+  padding: 12px 0;
+  overflow-anchor: none;
+}
+.viewControls label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--color-navy);
+}
+.viewControls label span {
+  display: flex;
+  justify-content: space-between;
+}
+.viewControls input {
+  width: 100%;
+  min-height: 24px;
+  accent-color: var(--color-navy);
+}
+.viewControls p {
+  grid-column: 1 / -1;
+  min-height: 2.6em;
+  margin: 0;
+  color: var(--color-pencil);
+  font-size: 0.85rem;
+}
 @media (max-width: 700px) {
+  .viewControls {
+    gap: 8px;
+  }
+  .viewControls button {
+    padding: 10px 8px;
+    font-size: 0.85rem;
+  }
   .lineControls {
     grid-template-columns: 1fr 1fr;
   }

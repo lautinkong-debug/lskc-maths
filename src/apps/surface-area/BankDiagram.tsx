@@ -1,4 +1,11 @@
-import { useId, type Ref } from "react";
+import { useId, useRef, type Ref } from "react";
+import {
+  DEFAULT_VIEW,
+  limitView,
+  projectView,
+  unfoldingView,
+  type SolidView,
+} from "./view";
 import { copy } from "@/lib/copy";
 import { stepsFor } from "./lesson";
 import { WaterTank } from "./WaterTank";
@@ -37,6 +44,7 @@ const palette = [
 ];
 type Box = { x: number; y: number; w: number; h: number };
 type ShapeProps = {
+  view?: SolidView;
   variant: SurfaceVariant;
   progress: number;
   box: Box;
@@ -193,6 +201,7 @@ function Prism({
   revealWaterDepth = false,
   labelBounds,
   onSelect,
+  view = DEFAULT_VIEW,
 }: ShapeProps) {
   const g = variant.geometry as PrismGeometry;
   const scale = edgeScale(g),
@@ -201,10 +210,8 @@ function Prism({
   // Keep the projection direction consistent as the boundary hinges open.
   // Fit each view uniformly inside the stationary teaching canvas.
   // At the endpoint the width is horizontal and H is vertical: a rectangle.
-  const project = (p: Point, z: number) => ({
-    x: p.x - 0.55 * p.y,
-    y: -0.45 * p.y - z,
-  });
+  const camera = unfoldingView(view, progress);
+  const project = (p: Point, z: number) => projectView(p, z, camera);
   const loopsAt = (amount: number) =>
     bs.map((boundary, ring) => {
       const offset = bs
@@ -294,7 +301,8 @@ function Prism({
         face,
         points,
         visible,
-        depth: (-0.55 * (a.x + b.x)) / 2 - (a.y + b.y) / 2,
+        depth: project({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, g.height / 2)
+          .depth,
       };
     })
     .sort((a, b) => a.depth - b.depth);
@@ -574,7 +582,13 @@ function Prism({
                   onSelect(face.index);
                 }
               }}
-              style={{ cursor: onSelect ? "pointer" : undefined }}
+              style={{
+                cursor: onSelect
+                  ? progress < 0.999
+                    ? "grab"
+                    : "pointer"
+                  : undefined,
+              }}
             />
             {labels && (!folded || visible) && width > 24 && height > 32 && (
               <Label
@@ -811,6 +825,7 @@ function Cubes({
   dimensions,
   labels,
   onSelect,
+  view = DEFAULT_VIEW,
 }: ShapeProps) {
   const g = variant.geometry as CubeGeometry;
   if (progress > 0.99) {
@@ -907,10 +922,9 @@ function Cubes({
       </g>
     );
   }
-  const project = ([x, y, z]: number[]) => ({
-    x: x - 0.55 * y,
-    y: -0.28 * (x + y) - z,
-  });
+  const camera = unfoldingView(view, progress);
+  const project = ([x, y, z]: number[]) =>
+    projectView({ x, y }, z, camera, true);
   const cubes = g.cubes.map((cube, ci) => {
     const separate = g.cubes
       .slice(0, ci)
@@ -936,56 +950,108 @@ function Cubes({
     cubes.flatMap((c) => c.vertices),
     box,
   );
+  const cubeFaces = cubes
+    .flatMap((cube, ci) =>
+      [
+        [0, 1, 5, 4],
+        [1, 2, 6, 5],
+        [2, 3, 7, 6],
+        [3, 0, 4, 7],
+        [4, 5, 6, 7],
+        [3, 2, 1, 0],
+      ]
+        .map((ids, face) => {
+          const points = ids.map((i) => fit(cube.vertices[i]));
+          const area = points.reduce((sum, p, i) => {
+            const q = points[(i + 1) % points.length];
+            return sum + p.x * q.y - q.x * p.y;
+          }, 0);
+          return {
+            points,
+            ci,
+            face,
+            side: cube.side,
+            visible: area < -0.1,
+            depth: ids.reduce((sum, i) => sum + cube.vertices[i].depth, 0) / 4,
+          };
+        })
+        .filter((face) => face.visible),
+    )
+    .sort((a, b) => a.depth - b.depth);
+  const cubeLabels = cubes
+    .map((cube, ci) => {
+      const points = cube.vertices.map(fit);
+      const right = Math.max(...points.map((p) => p.x));
+      const edge = points.filter((p) => Math.abs(p.x - right) < 0.01);
+      const y = edge.reduce((sum, p) => sum + p.y, 0) / edge.length;
+      return { ci, right, y, labelY: y, side: cube.side };
+    })
+    .sort((a, b) => a.y - b.y);
+  cubeLabels.forEach((label, index) => {
+    label.labelY = Math.max(
+      label.y,
+      index ? cubeLabels[index - 1].labelY + 30 : box.y + 10,
+    );
+  });
+  const labelShift = Math.max(0, cubeLabels.at(-1)!.labelY - (box.y + box.h));
   return (
     <g>
-      {cubes.map((cube, ci) => {
-        const points = cube.vertices.map(fit);
+      {cubeFaces.map(({ points, ci, face, side }) => {
+        const i = ci * 6 + face;
         return (
-          <g key={ci}>
-            {[
-              [0, 1, 5, 4],
-              [3, 0, 4, 7],
-              [4, 5, 6, 7],
-            ].map((ids, j) => {
-              const i = ci * 6 + [0, 3, 4][j];
-              return (
-                <polygon
-                  key={j}
-                  data-face={i}
-                  points={poly(ids.map((k) => points[k]))}
-                  fill={selected === i ? gold : palette[(ci + j) % 4]}
-                  stroke={navy}
-                  strokeWidth="1.8"
-                  role={onSelect ? "button" : undefined}
-                  tabIndex={onSelect ? 0 : undefined}
-                  aria-label={`${number(cube.side)} ${variant.unit} cube, face ${[1, 4, 5][j]}`}
-                  aria-pressed={onSelect ? selected === i : undefined}
-                  onClick={() => onSelect?.(i)}
-                  onKeyDown={(e) => {
-                    if (onSelect && (e.key === "Enter" || e.key === " ")) {
-                      e.preventDefault();
-                      onSelect(i);
-                    }
-                  }}
-                />
-              );
-            })}
-            {dimensions && (
-              <Label
-                p={{
-                  x: (points[0].x + points[1].x) / 2,
-                  y: (points[0].y + points[1].y) / 2 + 25,
-                }}
-                text={`${number(cube.side)} ${variant.unit}`}
-              />
-            )}
-          </g>
+          <polygon
+            key={i}
+            data-face={i}
+            points={poly(points)}
+            fill={selected === i ? gold : palette[(ci + face) % 4]}
+            stroke={navy}
+            strokeWidth="1.8"
+            role={onSelect ? "button" : undefined}
+            tabIndex={onSelect ? 0 : undefined}
+            aria-label={`${number(side)} ${variant.unit} cube, face ${face + 1}`}
+            aria-pressed={onSelect ? selected === i : undefined}
+            onClick={() => onSelect?.(i)}
+            onKeyDown={(e) => {
+              if (onSelect && (e.key === "Enter" || e.key === " ")) {
+                e.preventDefault();
+                onSelect(i);
+              }
+            }}
+          />
         );
       })}
+      {dimensions &&
+        cubeLabels.map(({ ci, right, y, labelY, side }) => {
+          return (
+            <g key={ci} data-cube-dimension={ci}>
+              <path
+                d={`M${right},${y} L${box.x + box.w + 13},${labelY - labelShift}`}
+                fill="none"
+                stroke={navy}
+                strokeWidth={1}
+              />
+              <Label
+                p={{ x: box.x + box.w + 18, y: labelY - labelShift + 7 }}
+                anchor="start"
+                text={`${number(side)} ${variant.unit}`}
+              />
+            </g>
+          );
+        })}
     </g>
   );
 }
 function Shape(props: ShapeProps) {
+  return (
+    <g
+      data-rotation-surface="true"
+      style={{ touchAction: props.progress < 0.999 ? "none" : undefined }}
+    >
+      <ShapeContent {...props} />
+    </g>
+  );
+}
+function ShapeContent(props: ShapeProps) {
   if (
     props.variant.geometry.kind === "prism" &&
     props.variant.geometry.water &&
@@ -1103,7 +1169,9 @@ export function OriginalPrism({
   showFaces,
   onSelectFace,
   solved = false,
+  view = DEFAULT_VIEW,
 }: {
+  view?: SolidView;
   variant: SurfaceVariant;
   selectedFace: number | null;
   showDimensions: boolean;
@@ -1123,6 +1191,7 @@ export function OriginalPrism({
       }}
     >
       <Shape
+        view={view}
         variant={variant}
         progress={0}
         box={{ x: 70, y: 45, w: 270, h: 195 }}
@@ -1138,6 +1207,8 @@ export function OriginalPrism({
 }
 
 export type BankDiagramProps = {
+  view?: SolidView;
+  onViewChange?: (view: SolidView) => void;
   question: SurfaceQuestion;
   variant: SurfaceVariant;
   stage: number;
@@ -1178,6 +1249,8 @@ const wrap = (line: string, max = 65) => {
   return lines;
 };
 export default function BankDiagram({
+  view = DEFAULT_VIEW,
+  onViewChange,
   question,
   variant,
   stage,
@@ -1201,6 +1274,13 @@ export default function BankDiagram({
   onSelectFace,
   svgRef,
 }: BankDiagramProps) {
+  const drag = useRef<{
+    x: number;
+    y: number;
+    view: SolidView;
+    moved: boolean;
+  } | null>(null);
+  const suppressClick = useRef(false);
   const id = useId(),
     g = variant.geometry,
     solved =
@@ -1355,6 +1435,7 @@ export default function BankDiagram({
   const secondBaseX = live && !compact ? 650 : compact && live ? 310 : 490;
   const secondBaseY = live && !compact ? 290 : baseY;
   const shapeProps = {
+    view,
     variant,
     selected: selectedFace,
     dimensions: showDimensions,
@@ -1374,7 +1455,74 @@ export default function BankDiagram({
       aria-label={`${question.label}, ${variant.label}`}
       data-testid="surface-diagram"
       data-question={question.id}
+      data-view-yaw={view.yaw}
+      data-view-tilt={view.tilt}
       data-solved={solved || undefined}
+      onPointerDown={
+        onViewChange && unfold < 0.999
+          ? (event) => {
+              if (
+                event.button !== 0 ||
+                !(event.target as Element).closest("[data-rotation-surface]")
+              )
+                return;
+              suppressClick.current = false;
+              drag.current = {
+                x: event.clientX,
+                y: event.clientY,
+                view,
+                moved: false,
+              };
+            }
+          : undefined
+      }
+      onPointerMove={
+        onViewChange
+          ? (event) => {
+              const start = drag.current;
+              if (!start) return;
+              const dx = event.clientX - start.x,
+                dy = event.clientY - start.y;
+              if (Math.hypot(dx, dy) < 5 && !start.moved) return;
+              if (!start.moved)
+                event.currentTarget.setPointerCapture(event.pointerId);
+              start.moved = true;
+              suppressClick.current = true;
+              onViewChange(
+                limitView({
+                  yaw: start.view.yaw + dx * 0.5,
+                  tilt: start.view.tilt - dy * 0.3,
+                }),
+              );
+            }
+          : undefined
+      }
+      onPointerUp={
+        onViewChange
+          ? (event) => {
+              drag.current = null;
+              if (event.currentTarget.hasPointerCapture(event.pointerId))
+                event.currentTarget.releasePointerCapture(event.pointerId);
+            }
+          : undefined
+      }
+      onPointerCancel={
+        onViewChange
+          ? () => {
+              drag.current = null;
+            }
+          : undefined
+      }
+      onClickCapture={
+        onViewChange
+          ? (event) => {
+              if (suppressClick.current) {
+                event.stopPropagation();
+                suppressClick.current = false;
+              }
+            }
+          : undefined
+      }
       style={{
         display: "block",
         width: "100%",
@@ -1386,6 +1534,17 @@ export default function BankDiagram({
         {question.label}: {variant.label}
       </title>
       <rect width={width} height={height} fill="white" />
+      {onViewChange && !comparison && unfold < 0.999 && (
+        <rect
+          data-rotation-surface="true"
+          x={20}
+          y={70}
+          width={width - 40}
+          height={diagramHeight - 85}
+          fill="transparent"
+          style={{ touchAction: "none", cursor: "grab" }}
+        />
+      )}
       {!live && (
         <text x="35" y="38" fill={navy} fontSize="23" fontWeight="700">
           {/^Q\d/.test(question.label)

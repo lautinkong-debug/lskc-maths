@@ -1,5 +1,6 @@
 import { copy } from "@/lib/copy";
 import { number } from "./geometry";
+import { DEFAULT_VIEW, projectView, type SolidView } from "./view";
 import type { Point, SurfaceVariant } from "./types";
 
 const c = copy.surfaceArea;
@@ -8,6 +9,7 @@ const wet = "#46a9d4";
 const band = "#f2ce50";
 type Box = { x: number; y: number; w: number; h: number };
 type Props = {
+  view?: SolidView;
   variant: SurfaceVariant;
   box: Box;
   dimensions: boolean;
@@ -27,6 +29,7 @@ export function WaterTank({
   revealWaterDepth = false,
   selected,
   onSelect,
+  view = DEFAULT_VIEW,
 }: Props) {
   const g = variant.geometry;
   if (g.kind !== "prism" || !g.water) return null;
@@ -35,10 +38,7 @@ export function WaterTank({
   const oldDepth = g.water.initialDepth ?? (increasing ? g.height * 2 : 0);
   const waterDepth = increasing ? oldDepth + g.height : g.height;
   const tankHeight = g.water.tankHeight ?? waterDepth + g.height;
-  const project = (p: Point, z: number): Point => ({
-    x: p.x - p.y * 0.55,
-    y: -p.y * 0.45 - z,
-  });
+  const project = (p: Point, z: number) => projectView(p, z, view);
   const raw = g.outer.points.flatMap((p) => [
     project(p, 0),
     project(p, tankHeight),
@@ -71,6 +71,17 @@ export function WaterTank({
     at((i + 1) % 4, high),
     at(i, high),
   ];
+  const wallOrder = [0, 1, 2, 3].sort((a, b) => {
+    const depth = (i: number) =>
+      (project(g.outer.points[i], 0).depth +
+        project(g.outer.points[(i + 1) % 4], 0).depth) /
+      2;
+    return depth(a) - depth(b);
+  });
+  const front = wallOrder.filter(
+    (i) => at((i + 1) % 4, 0).x - at(i, 0).x > 0.001,
+  );
+  const rear = wallOrder.filter((i) => !front.includes(i));
   const text = (
     x: number,
     y: number,
@@ -116,16 +127,23 @@ export function WaterTank({
           : undefined
       }
       aria-label={`${c.face} ${i + 1}`}
-      style={onSelect ? { cursor: "pointer" } : undefined}
+      style={onSelect ? { cursor: "grab" } : undefined}
     />
   );
-  const frontRight = at(1, 0),
-    waterRight = at(1, waterDepth),
-    oldRight = at(1, oldDepth);
-  const top = at(3, tankHeight),
-    leftBottom = at(3, 0);
-  const tankLeft =
-    at(0, tankHeight).x - (at(0, tankHeight).x - at(3, tankHeight).x) - 13;
+  const right = [0, 1, 2, 3].reduce(
+    (best, i) => (at(i, 0).x > at(best, 0).x ? i : best),
+    0,
+  );
+  const left = [0, 1, 2, 3].reduce(
+    (best, i) => (at(i, 0).x < at(best, 0).x ? i : best),
+    0,
+  );
+  const frontRight = at(right, 0),
+    waterRight = at(right, waterDepth),
+    oldRight = at(right, oldDepth);
+  const top = at(left, tankHeight),
+    leftBottom = at(left, 0);
+  const tankLeft = top.x - 13;
   const depthX = frontRight.x + 13;
   const bottomY = frontRight.y;
   const captionX = box.x + box.w / 2;
@@ -144,7 +162,7 @@ export function WaterTank({
       data-closed-tank={g.water.closed ? "true" : "false"}
     >
       {/* Rear tank walls, then submerged rear walls and the bottom. */}
-      {[1, 2].map((i) => (
+      {rear.map((i) => (
         <polygon
           key={i}
           points={points(side(i, 0, tankHeight))}
@@ -155,7 +173,7 @@ export function WaterTank({
           strokeWidth={1.3}
         />
       ))}
-      {[1, 2].map(wall)}
+      {rear.map(wall)}
       <polygon
         data-tank-bottom="true"
         data-counted={increasing ? "false" : "true"}
@@ -166,7 +184,7 @@ export function WaterTank({
         strokeWidth={1.5}
       />
       {/* The water volume is translucent so the bottom and submerged objects remain visible. */}
-      {[0, 3].map((i) => (
+      {front.map((i) => (
         <polygon
           key={i}
           points={points(side(i, 0, waterDepth))}
@@ -189,7 +207,8 @@ export function WaterTank({
               (waterDepth - (increasing ? g.height : 0)) * scale * 0.29,
             );
             const x = a.x + (b.x - a.x) * fraction + (back.x - a.x) * 0.38;
-            const y = a.y + (back.y - a.y) * 0.38 - radius;
+            const y =
+              a.y + (b.y - a.y) * fraction + (back.y - a.y) * 0.38 - radius;
             return g.water?.contents === "balls" ? (
               <circle
                 key={i}
@@ -219,7 +238,7 @@ export function WaterTank({
         stroke="#1688b5"
         strokeWidth={2}
       />
-      {[0, 3].map(wall)}
+      {front.map(wall)}
       {oldDepth > 0 && (
         <polyline
           data-old-waterline="true"
@@ -321,17 +340,54 @@ export function WaterTank({
             </g>
           )}
           <g data-tank-base-dimensions="true">
-            {text(
-              (at(0, 0).x + frontRight.x) / 2,
-              bottomY + 25,
-              `${number(g.outer.points[1].x - g.outer.points[0].x)} ${variant.unit}`,
-            )}
-            {text(
-              (at(0, 0).x + at(3, 0).x) / 2 - 12,
-              bottomY + 25,
-              `${number(g.outer.points[3].y - g.outer.points[0].y)} ${variant.unit}`,
-              "end",
-              17,
+            {view.yaw !== 0 || view.tilt !== 0 ? (
+              [...front]
+                .sort(
+                  (a, b) =>
+                    at(a, 0).x +
+                    at((a + 1) % 4, 0).x -
+                    (at(b, 0).x + at((b + 1) % 4, 0).x),
+                )
+                .map((edge, index) => {
+                  const a = at(edge, 0),
+                    b = at((edge + 1) % 4, 0);
+                  const p = g.outer.points[edge],
+                    q = g.outer.points[(edge + 1) % 4];
+                  const x = area.x + (area.w * (index + 0.5)) / front.length;
+                  const y = Math.max(...plane(0).map((point) => point.y)) + 25;
+                  return (
+                    <g key={edge}>
+                      <path
+                        d={`M${(a.x + b.x) / 2},${(a.y + b.y) / 2} V${y - 18} H${x}`}
+                        fill="none"
+                        stroke={outline}
+                        strokeWidth={1}
+                      />
+                      {text(
+                        x,
+                        y,
+                        `${number(Math.hypot(q.x - p.x, q.y - p.y))} ${variant.unit}`,
+                        "middle",
+                        17,
+                      )}
+                    </g>
+                  );
+                })
+            ) : (
+              <>
+                {text(
+                  (at(0, 0).x + frontRight.x) / 2,
+                  bottomY + 25,
+                  `${number(g.outer.points[1].x - g.outer.points[0].x)} ${variant.unit}`,
+                )}
+                {text(
+                  (at(0, 0).x + at(3, 0).x) / 2 - 12,
+                  bottomY + 25,
+                  `${number(g.outer.points[3].y - g.outer.points[0].y)} ${variant.unit}`,
+                  "end",
+                  17,
+                )}
+              </>
             )}
           </g>
           {g.water.contents &&

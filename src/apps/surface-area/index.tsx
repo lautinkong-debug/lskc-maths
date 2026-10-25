@@ -10,6 +10,7 @@ import { faces, givenFacts, teachingLines } from "./geometry";
 import { questionName, questions, resolvePreset, sections } from "./bank";
 import { shapeGroup, stepsFor } from "./lesson";
 import { totalCalculation } from "./totalWorking";
+import { DEFAULT_VIEW, limitView, type SolidView } from "./view";
 import type { SurfaceQuestion, SurfaceVariant } from "./types";
 import styles from "./surface-area.module.css";
 
@@ -56,6 +57,7 @@ function SurfaceLesson({
   const [search, setSearch] = useState("");
   const [stage, setStage] = useState(0);
   const [unfold, setUnfold] = useState(0);
+  const [view, setView] = useState<SolidView>(DEFAULT_VIEW);
   const [selectedFace, setSelectedFace] = useState<number | null>(null);
   const [showDimensions, setShowDimensions] = useState(true);
   const [showFaces, setShowFaces] = useState(true);
@@ -133,6 +135,7 @@ function SurfaceLesson({
   }
   function reset() {
     go(0);
+    setView(DEFAULT_VIEW);
     setZoom(100);
     setShowDimensions(true);
     setShowFaces(true);
@@ -165,6 +168,7 @@ function SurfaceLesson({
     }
   }
   const diagramProps = {
+    view,
     question,
     variant,
     stage,
@@ -490,6 +494,49 @@ function SurfaceLesson({
               </button>
             </div>
           </div>
+          <div
+            className={styles.viewControls}
+            data-testid="surface-view-controls"
+          >
+            <label>
+              <span>
+                {c.viewRotation} <output>{Math.round(view.yaw)}°</output>
+              </span>
+              <input
+                aria-label={c.viewRotation}
+                type="range"
+                min="-180"
+                max="180"
+                step="1"
+                value={view.yaw}
+                disabled={unfold >= 0.999}
+                onChange={(e) =>
+                  setView(limitView({ ...view, yaw: Number(e.target.value) }))
+                }
+              />
+            </label>
+            <label>
+              <span>
+                {c.viewTilt} <output>{Math.round(view.tilt)}°</output>
+              </span>
+              <input
+                aria-label={c.viewTilt}
+                type="range"
+                min="-10"
+                max="55"
+                step="1"
+                value={view.tilt}
+                disabled={unfold >= 0.999}
+                onChange={(e) =>
+                  setView(limitView({ ...view, tilt: Number(e.target.value) }))
+                }
+              />
+            </label>
+            <button type="button" onClick={() => setView(DEFAULT_VIEW)}>
+              {c.resetView}
+            </button>
+            <p>{unfold >= 0.999 ? c.flatViewHint : c.rotateHint}</p>
+          </div>
           <div className={styles.viewport} data-testid="surface-viewport">
             <div
               style={{
@@ -500,6 +547,7 @@ function SurfaceLesson({
             >
               <Diagram
                 {...diagramProps}
+                onViewChange={setView}
                 compact={compact}
                 revealDimensions={solved}
                 onSelectFace={setSelectedFace}
@@ -663,7 +711,11 @@ function SurfaceLesson({
             {c.exitClean}
           </button>
           <div>
-            <Diagram {...diagramProps} showWorking={showWorking} />
+            <Diagram
+              {...diagramProps}
+              showWorking={showWorking}
+              onViewChange={setView}
+            />
           </div>
         </div>
       )}
