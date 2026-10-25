@@ -104,13 +104,24 @@ export function ReasonsPanel({
     if (classroom) {
       const body = panel.current?.querySelector(`.${styles.proofBody}`);
       const row = body?.querySelector(`[data-step-index="${focus}"]`);
-      if (history && body && row) {
-        const viewport = body.getBoundingClientRect();
-        const line = row.getBoundingClientRect();
-        if (line.bottom > viewport.bottom)
-          body.scrollTop += line.bottom - viewport.bottom;
-        else if (line.top < viewport.top)
-          body.scrollTop -= viewport.top - line.top;
+      if (body && row) {
+        const keepVisible = () => {
+          // The row can fit even when its table heading also needs space.
+          if (!history) body.scrollTop = 0;
+          const viewport = body.getBoundingClientRect();
+          const line = row.getBoundingClientRect();
+          if (line.bottom > viewport.bottom)
+            body.scrollTop += line.bottom - viewport.bottom;
+          else if (line.top < viewport.top)
+            body.scrollTop -= viewport.top - line.top;
+        };
+        keepVisible();
+        if (history) return;
+        // The first revealed equation can load fonts after the initial render.
+        const observer = new ResizeObserver(keepVisible);
+        observer.observe(row);
+        observer.observe(body);
+        return () => observer.disconnect();
       } else body?.scrollTo(0, 0);
       return;
     }

@@ -2,6 +2,16 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Similarity two-agent bug audit (25/10/2026)
+
+- Requested roles: an independent read-only bug finder and a separate debugger. Audited all 72 initial questions, first proof steps, vertex labels, equation fitting, game constructions, and triangle pose retention.
+- Found one P2 defect: six current proof rows in Q19 and Revision Q33/Q38 were clipped on a 360 x 640 phone. The row fit, but the table heading used remaining height; the first revealed KaTeX equation also grew after its fonts loaded.
+- Fixed only proof-panel visibility: align the current row and observe size changes while showing one step. Earlier-step history retains normal manual scrolling, with observer cleanup on mode and step changes. Textbook wording, proof order, reasons, and diagrams are unchanged.
+- Verification: revised production build and TypeScript passed; scoped 90 Similarity unit tests passed; three browser regressions cover all six affected rows and deliberately delayed KaTeX fonts. Independent recheck passed four fresh browser contexts, 16 timed snapshots, and 198 proof-row states with zero browser errors. Seven focused integration checks passed for history, Previous/Reset, part boundaries, phone landscape, and controls/game pose retention. Scoped formatting, lint, and whitespace checks passed.
+- The first immediate-alignment fix passed warm-font checks but failed cold-load verification; the released version observes late row resizing. Before/after evidence remains under ignored out/similarity-bug-audit/.
+- Scoped GitHub/Vercel publication is authorized by the existing Similarity Studio release request. Exact release and live-verification results are recorded in out/similarity-bug-audit/release.json.
+
+
 ## Similarity readable vertices and current proof parts (24/10/2026)
 
 - [x] Owner requests smaller, nearby vertex names, a 2:1 graph/solution split, and point-form givens in the top-left. Replace equal desktop halves with 2:1, retain phone layouts and larger phone labels, split independent givens into separate bullets, and keep internal vertex labels near their points while avoiding edges, other labels and drag rings. Reserve the actual italic font height; verify the reported Revision Q33 figure.
