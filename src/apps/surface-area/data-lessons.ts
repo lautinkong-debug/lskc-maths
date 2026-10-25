@@ -133,6 +133,7 @@ export const lessonQuestions: SurfaceQuestion[] = [
         },
         note: "Take rectangle PQRS as the base, as in the printed solution.",
         baseWorking: "B = 8a cm².",
+        perimeterWorking: ["P = 2 × (8 + a) = 16 + 2a cm"],
         working: [
           "Base area = 8a cm².",
           "Total area of all lateral faces = [(8 + a) × 2] × 10 = 160 + 20a cm².",
@@ -253,6 +254,7 @@ export const lessonQuestions: SurfaceQuestion[] = [
         },
         note: "ABCD is the trapezium base and DE is the prism height. The printed solution introduces AD = y cm.",
         baseWorking: "B = ½ × (6 + y) × 12 cm².",
+        perimeterWorking: ["P = 12 + 13 + 6 + y = 31 + y cm"],
         working: [
           "(a) Let AD = y cm.",
           "Base area × height = volume of the prism.",
@@ -853,6 +855,7 @@ export const lessonQuestions: SurfaceQuestion[] = [
         },
         note: "Take the x cm × 5 cm end rectangle as the base, with prism height 6 cm.",
         baseWorking: "B = 5x cm².",
+        perimeterWorking: ["P = 2 × (5 + x) = 10 + 2x cm"],
         working: [
           "B = 5x cm² and P = 2(x + 5) cm.",
           "Total surface area = PH + 2B.",

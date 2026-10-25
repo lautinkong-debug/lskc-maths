@@ -38,6 +38,7 @@ const integerCuboidVariants: SurfaceVariant[] = integerCuboids.map(
     },
     note: "The question is open-ended. The nine arrangements retain the source's separate x, y and z roles; rotating a cuboid can therefore give a different ordered answer.",
     baseWorking: "B = xy",
+    perimeterWorking: ["P = 2 × (x + y) cm"],
     working: [
       "2(xy + xz + yz) = 72",
       "xy + xz + yz = 36",
@@ -500,6 +501,10 @@ export const exerciseQuestions: SurfaceQuestion[] = [
           baseCount: 2,
         },
         baseWorking: "B = 3x − 1.5(x − 2) = 1.5x + 3",
+        perimeterWorking: [
+          "P = x + 3 + 1 + 1.5 + (x − 2) + 1.5 + 1 + 3",
+          "P = 2x + 9 cm",
+        ],
         working: [
           "Width of the rectangular notch = x − 1 − 1 = x − 2 cm",
           "Base area = 3x − 1.5(x − 2) = 1.5x + 3 cm²",
@@ -542,6 +547,11 @@ export const exerciseQuestions: SurfaceQuestion[] = [
         },
         note: "Choose the two trapezium-shaped side panels as bases and the 8 cm width as prism height. The sloping lateral face is the opening. Both trapezium bases, the bottom, the 8 cm front and the 24 cm back are cardboard.",
         baseWorking: "B = ½ × (8 + 24) × 18 = 288 cm²",
+        perimeterWorking: [
+          "Let s be the sloping opening length (cm).",
+          "P = 18 + 24 + s + 8 = 50 + s cm",
+          "Retained widths = 18 + 24 + 8 = 50 cm",
+        ],
         working: [
           "Area of one trapezium side panel = ½ × (8 + 24) × 18 = 288 cm²",
           "The sloping opening has no cardboard.",

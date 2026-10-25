@@ -49,6 +49,8 @@ export type SurfaceVariant = {
   /** Source context and any choice of prism axis/opening. */
   note?: string;
   baseWorking?: string;
+  /** Base-boundary calculation only; retain unknowns without solving the whole question. */
+  perimeterWorking?: string[];
   /** Independently authored intermediate working, checked against the key. */
   working: string[];
   answer: string;

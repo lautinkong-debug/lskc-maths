@@ -62,6 +62,8 @@ function SurfaceLesson({
   const [showWaterDepth, setShowWaterDepth] = useState(false);
   const [showBasePerimeter, setShowBasePerimeter] = useState(false);
   const [showBaseArea, setShowBaseArea] = useState(false);
+  const [showPerimeterWorking, setShowPerimeterWorking] = useState(false);
+  const [showBaseAreaWorking, setShowBaseAreaWorking] = useState(false);
   const [clean, setClean] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [comparison, setComparison] = useState(false);
@@ -118,6 +120,8 @@ function SurfaceLesson({
     setShowWaterDepth(false);
     setShowBasePerimeter(false);
     setShowBaseArea(false);
+    setShowPerimeterWorking(false);
+    setShowBaseAreaWorking(false);
     setComparison(false);
   }
   async function save(format: "svg" | "png") {
@@ -148,6 +152,8 @@ function SurfaceLesson({
     revealWaterDepth: showWaterDepth,
     revealBasePerimeter: showBasePerimeter,
     revealBaseArea: showBaseArea,
+    showPerimeterWorking,
+    showBaseAreaWorking,
   };
   return (
     <div
@@ -337,6 +343,26 @@ function SurfaceLesson({
                       onChange={(e) => setShowBaseArea(e.target.checked)}
                     />
                     {c.showBaseArea}
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={showPerimeterWorking}
+                      disabled={!showDimensions}
+                      onChange={(e) =>
+                        setShowPerimeterWorking(e.target.checked)
+                      }
+                    />
+                    {c.showPerimeterWorking}
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={showBaseAreaWorking}
+                      disabled={!showDimensions}
+                      onChange={(e) => setShowBaseAreaWorking(e.target.checked)}
+                    />
+                    {c.showBaseAreaWorking}
                   </label>
                 </>
               )}

@@ -323,6 +323,7 @@ export const revisionQuestions: SurfaceQuestion[] = [
           84,
         ),
         baseWorking: "B = 840 ÷ 10 = 84 cm²",
+        perimeterWorking: ["P = 24 + x + 25 = 49 + x cm"],
         working: [
           "½ × 24 × x × 10 = 840",
           "120x = 840",
@@ -545,6 +546,7 @@ export const revisionQuestions: SurfaceQuestion[] = [
           21.5,
         ),
         baseWorking: "B = 7(x + 2) − 2(2x) = 3x + 14 cm²",
+        perimeterWorking: ["P = 2 × (x + 2 + 7) + 4 × 2 = 2x + 26 cm"],
         working: [
           "B = 7(x + 2) − 2(2x) = 3x + 14 cm²",
           "P = 2(x + 2 + 7) + 4 × 2 = 2x + 26 cm",

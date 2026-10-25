@@ -2,6 +2,7 @@ import { useId, type Ref } from "react";
 import { copy } from "@/lib/copy";
 import { stepsFor } from "./lesson";
 import { WaterTank } from "./WaterTank";
+import { baseCalculations } from "./baseWorking";
 import {
   boundaries,
   boundaryEdges,
@@ -1148,6 +1149,8 @@ export type BankDiagramProps = {
   comparison?: boolean;
   revealBasePerimeter?: boolean;
   revealBaseArea?: boolean;
+  showPerimeterWorking?: boolean;
+  showBaseAreaWorking?: boolean;
   compact?: boolean;
   onSelectFace?: (i: number) => void;
   svgRef?: Ref<SVGSVGElement>;
@@ -1181,6 +1184,8 @@ export default function BankDiagram({
   revealWaterDepth = false,
   revealBasePerimeter = false,
   revealBaseArea = false,
+  showPerimeterWorking = false,
+  showBaseAreaWorking = false,
   comparison = false,
   compact = false,
   onSelectFace,
@@ -1210,10 +1215,40 @@ export default function BankDiagram({
         ? 620
         : 450
       : 690;
-  // Reserve the value band even while hidden, so a reveal never resizes the diagram.
-  const bodyHeight =
+  const width = live && compact ? 500 : 800;
+  const stackedWorking = live && compact;
+  const calculationWidth = stackedWorking ? width - 40 : width / 2 - 40;
+  const calculations = baseCalculations(variant);
+  const workingCards = [
+    {
+      key: "perimeter",
+      title: c.perimeterWorking,
+      show: showPerimeterWorking,
+      lines: calculations.perimeter,
+    },
+    {
+      key: "area",
+      title: c.baseAreaWorking,
+      show: showBaseAreaWorking,
+      lines: calculations.area,
+    },
+  ].map((item) => {
+    const lines = item.lines.flatMap((line) =>
+      wrap(line, Math.floor((calculationWidth - 24) / 12.4)),
+    );
+    return { ...item, lines, height: 42 + lines.length * 25 };
+  });
+  // Reserve both calculations while hidden to keep the shape and controls stationary.
+  const valuesBottom =
     diagramHeight +
     (g.kind === "prism" ? (g.omittedEdges?.length ? 108 : 80) : 0);
+  const bodyHeight =
+    valuesBottom +
+    (g.kind === "prism"
+      ? stackedWorking
+        ? workingCards.reduce((sum, card) => sum + card.height + 12, 0)
+        : Math.max(...workingCards.map((card) => card.height)) + 12
+      : 0);
   const metrics = g.kind === "prism" ? geometryMetrics(g) : null;
   const perimeterValue = metrics ? number(metrics.perimeter) : "";
   const perimeterRelation =
@@ -1241,7 +1276,6 @@ export default function BankDiagram({
     (lines.length ? lines.length * 31 + 45 : 0) +
     (notes.length ? notes.length * 25 + 28 : 0) +
     (live ? 0 : 35);
-  const width = live && compact ? 500 : 800;
   const baseWidth = live && !compact ? 100 : compact && live ? 130 : 180;
   const baseHeight = live && !compact ? 85 : 105;
   const firstBaseX =
@@ -1461,7 +1495,9 @@ export default function BankDiagram({
               show: revealBaseArea,
               key: "area",
               label: g.baseCount === 0 ? c.excludedBaseArea : c.oneBaseArea,
-              value: `B = ${number(g.baseArea)} ${variant.unit}²`,
+              value: variant.baseWorking
+                ? `B = ${number(g.baseArea)} ${variant.unit}²`
+                : c.baseAreaNotGiven,
             },
           ].map((item, i) =>
             item.show ? (
@@ -1508,6 +1544,34 @@ export default function BankDiagram({
           )}
         </g>
       )}
+      {g.kind === "prism" &&
+        showDimensions &&
+        workingCards.map((card, i) => {
+          const x = stackedWorking ? 20 : 20 + (i * width) / 2;
+          const y =
+            valuesBottom +
+            (stackedWorking && i ? workingCards[0].height + 12 : 0);
+          return card.show ? (
+            <g key={card.key} data-base-working={card.key} fill={ink}>
+              <rect
+                x={x}
+                y={y}
+                width={calculationWidth}
+                height={card.height}
+                rx={5}
+                fill="var(--color-navy-wash)"
+              />
+              <text x={x + 12} y={y + 22} fontSize={15} fill={navy}>
+                {card.title}
+              </text>
+              {card.lines.map((line, j) => (
+                <text key={j} x={x + 12} y={y + 49 + j * 25} fontSize={20}>
+                  {line}{" "}
+                </text>
+              ))}
+            </g>
+          ) : null;
+        })}
       {!live &&
         legend.map((line, i) => (
           <text

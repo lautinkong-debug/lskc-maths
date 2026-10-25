@@ -509,7 +509,11 @@
   }
   .viewport {
     margin: 0 -7px;
-    height: 480px;
+    height: auto;
+  }
+  .viewport svg {
+    height: auto !important;
+    display: block;
   }
   .unfold {
     grid-template-columns: 1fr auto;
