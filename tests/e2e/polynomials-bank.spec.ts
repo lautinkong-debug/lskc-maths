@@ -87,6 +87,59 @@ test("all five banks are searchable and navigation resets playback", async ({
   ).toBeVisible();
 });
 
+test("question search accepts displayed labels and compact references", async ({
+  page,
+}) => {
+  await page.goto("/apps/polynomials#textbook:e=10D-34b");
+  const search = page.getByRole("searchbox", {
+    name: "Find a question",
+    exact: true,
+  });
+  const matches = page.getByRole("button", { name: "Q34(b)", exact: true });
+  for (const query of ["Q34(b)", "34(b)", " q34(b) ", "Q34b", "34b"]) {
+    await search.fill(query);
+    await expect(matches, query).toHaveCount(3);
+  }
+  await page
+    .getByRole("combobox", { name: "Exercise", exact: true })
+    .selectOption("10D");
+  await search.fill("Q34(b)");
+  await expect(matches).toHaveCount(1);
+  await search.fill("10D-34b");
+  await expect(matches).toHaveCount(1);
+  await matches.click();
+  await expect(page.getByTestId("polynomial-player")).toHaveAttribute(
+    "data-question",
+    "10D-34b",
+  );
+});
+
+test("skip to content preserves the current question and playback", async ({
+  page,
+}) => {
+  await page.goto("/apps/polynomials#textbook:e=10D-26a");
+  const player = page.getByTestId("polynomial-player");
+  await page.getByRole("button", { name: "Next step", exact: true }).click();
+  await page.clock.install({ time: new Date("2026-10-25T12:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-10-25T12:00:01Z"));
+  await page.getByRole("button", { name: "Play", exact: true }).click();
+  const skip = page.getByRole("link", { name: "Skip to content", exact: true });
+  await skip.focus();
+  await skip.press("Enter");
+  await expect(page).toHaveURL(/#textbook:e=10D-26a$/);
+  await expect(page.locator("#site-content")).toBeFocused();
+  await expect(player).toHaveAttribute("data-question", "10D-26a");
+  await expect(player).toHaveAttribute("data-step", "1");
+  await expect(player).toHaveAttribute("data-playing", "true");
+  await expect(
+    page.getByText(
+      "This question link was not recognised. Exercise 10D Q34(b) is shown.",
+    ),
+  ).toHaveCount(0);
+  await page.clock.runFor(1400);
+  await expect(player).toHaveAttribute("data-step", "2");
+});
+
 test("every textbook entry opens, starts hidden and reaches its complete working", async ({
   page,
 }) => {
@@ -121,7 +174,9 @@ test("every textbook entry opens, starts hidden and reaches its complete working
       )
       .toBeGreaterThan(100);
     if (++verified % 20 === 0 || verified === lessons.length)
-      console.log(`Verified ${verified}/${lessons.length} complete demonstrations.`);
+      console.log(
+        `Verified ${verified}/${lessons.length} complete demonstrations.`,
+      );
   }
 });
 

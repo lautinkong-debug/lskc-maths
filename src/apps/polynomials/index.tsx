@@ -44,7 +44,7 @@ export default function Polynomials() {
     (l) =>
       (!bank || l.bank === bank) &&
       (!skill || l.skill === skill) &&
-      `${l.id} Q${l.number}${l.part} ${c.banks[l.bank]} ${l.prompt}`
+      `${l.id} Q${l.number}${l.part} ${c.questionLabel(l.number, l.part)} ${c.banks[l.bank]} ${l.prompt}`
         .toLowerCase()
         .includes(search.toLowerCase().trim()),
   );

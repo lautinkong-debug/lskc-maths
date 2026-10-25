@@ -1063,3 +1063,10 @@ Home, top to bottom:
 - Difficulty plus server-timed first-try completion determines force. Whole-pair time excludes teacher pauses; harder levels allow longer windows. New games use 48-unit goals, existing games retain untimed 24-unit rules.
 - Final local matrix: 1372 unit tests,5 demo integration tests,5 classroom browser flows (32 independent students, 384 correct answers through all four levels),13 solo browser checks, types/lint/build and rendered phone/projector QA pass.
 - Production Firebase still returns quota errors; final live 32-student completion is pending. Release evidence: docs/polynomial-arcade-verification.md.
+
+### Polynomial demonstration bug audit (25/10/2026)
+
+- Owner requested two agents: independent bug finder and debugger. Both confirmed defects were reproduced, fixed and independently rechecked.
+- Search now accepts displayed references such as `Q34(b)`. The shared Skip to content link preserves lesson hashes and playback while transferring focus.
+- Verification: 169 polynomial unit checks; all 158 demonstrations and source images on the production build; both new browser regressions; shared-header checks on the app list, Polynomial Quest and Directed Numbers; lint, TypeScript and production build passed.
+- Owner reviewed the preview on port 3043 and approved publication on 25/10/2026. Release scope is the two fixes, their regression tests and audit notes. Evidence and test-run limitations are recorded in `docs/polynomials-bug-audit.md`.

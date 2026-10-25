@@ -103,7 +103,18 @@ export function SiteHeader() {
 
   return (
     <header className="studio-header bg-navy text-white">
-      <a href="#site-content" className="studio-skip">
+      <a
+        href="#site-content"
+        className="studio-skip"
+        onClick={(event) => {
+          const content = document.getElementById("site-content");
+          if (!content) return;
+          // Teaching apps keep their selected lesson in the URL fragment.
+          event.preventDefault();
+          content.focus({ preventScroll: true });
+          content.scrollIntoView({ block: "start" });
+        }}
+      >
         {copy.studio.skip}
       </a>
       <div className="studio-header-inner">
