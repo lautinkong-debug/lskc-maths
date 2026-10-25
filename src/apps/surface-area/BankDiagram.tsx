@@ -1155,6 +1155,7 @@ export type BankDiagramProps = {
   showBaseAreaWorking?: boolean;
   showLateralWorking?: boolean;
   showTotalWorking?: boolean;
+  totalWorkingLines?: number;
   showFinalAnswer?: boolean;
   compact?: boolean;
   onSelectFace?: (i: number) => void;
@@ -1193,6 +1194,7 @@ export default function BankDiagram({
   showBaseAreaWorking = false,
   showLateralWorking = false,
   showTotalWorking = false,
+  totalWorkingLines = 1,
   showFinalAnswer = false,
   comparison = false,
   compact = false,
@@ -1211,7 +1213,7 @@ export default function BankDiagram({
   const lines = (
     showWorking
       ? stage === 4 && !showFinalAnswer
-        ? total.lines
+        ? total.lines.slice(0, totalWorkingLines)
         : teachingLines(variant, stage)
       : []
   ).flatMap((s) => wrap(s));
@@ -1292,7 +1294,7 @@ export default function BankDiagram({
         ),
       );
   const totalY = lateralY + (g.kind === "prism" ? lateralHeight + 12 : 0);
-  const totalLines = wrapLateral(total.lines);
+  const totalLines = wrapLateral(total.lines.slice(0, totalWorkingLines));
   const totalHeight =
     72 +
     25 *

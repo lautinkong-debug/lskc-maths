@@ -67,6 +67,7 @@ function SurfaceLesson({
   const [showBaseAreaWorking, setShowBaseAreaWorking] = useState(false);
   const [showLateralWorking, setShowLateralWorking] = useState(false);
   const [showTotalWorking, setShowTotalWorking] = useState(false);
+  const [totalWorkingLines, setTotalWorkingLines] = useState(1);
   const [showFinalAnswer, setShowFinalAnswer] = useState(false);
   const [clean, setClean] = useState(false);
   const [zoom, setZoom] = useState(100);
@@ -84,9 +85,13 @@ function SurfaceLesson({
     revealWaterDepth: showWaterDepth,
   });
   const solved = showWorking && stage === 4 && showFinalAnswer;
+  const visibleTotalLines = Math.min(totalWorkingLines, total.lines.length);
+  const totalWorkingActive =
+    (showTotalWorking && showDimensions) ||
+    (showWorking && stage === 4 && !showFinalAnswer);
   const lessonLines =
     stage === 4 && !showFinalAnswer
-      ? total.lines
+      ? total.lines.slice(0, visibleTotalLines)
       : teachingLines(variant, stage);
   const shownQuestions = questions.filter(
     (q) =>
@@ -138,6 +143,7 @@ function SurfaceLesson({
     setShowBaseAreaWorking(false);
     setShowLateralWorking(false);
     setShowTotalWorking(false);
+    setTotalWorkingLines(1);
     setShowFinalAnswer(false);
     setComparison(false);
   }
@@ -173,6 +179,7 @@ function SurfaceLesson({
     showBaseAreaWorking,
     showLateralWorking,
     showTotalWorking,
+    totalWorkingLines: visibleTotalLines,
     showFinalAnswer,
   };
   return (
@@ -419,6 +426,37 @@ function SurfaceLesson({
               onClick={() => setClean(true)}
             >
               {c.clean}
+            </button>
+          </div>
+          <div
+            className={styles.lineControls}
+            data-testid="total-line-controls"
+          >
+            <div>
+              <strong>{total.title}</strong>
+              <span role="status" aria-live="polite">
+                {c.workingLineProgress(
+                  totalWorkingActive ? visibleTotalLines : 0,
+                  total.lines.length,
+                )}
+              </span>
+            </div>
+            <button
+              type="button"
+              disabled={!totalWorkingActive || visibleTotalLines <= 1}
+              onClick={() => setTotalWorkingLines(visibleTotalLines - 1)}
+            >
+              {c.previousWorkingLine}
+            </button>
+            <button
+              type="button"
+              className={styles.primary}
+              disabled={
+                !totalWorkingActive || visibleTotalLines >= total.lines.length
+              }
+              onClick={() => setTotalWorkingLines(visibleTotalLines + 1)}
+            >
+              {c.nextWorkingLine}
             </button>
           </div>
           <div className={styles.unfold} data-enabled={stage === 2}>
