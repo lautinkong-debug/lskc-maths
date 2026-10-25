@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   newSession,
   transition,
@@ -12,6 +12,9 @@ import {
   STORAGE_KEY,
 } from "../../src/apps/polynomials/quest/progress";
 import type { Coefficients } from "../../src/apps/polynomials/quest/algebra";
+import { sameAnswer } from "../../src/apps/polynomials/quest/algebra";
+import { answerChoices } from "../../src/apps/polynomials/quest/choices";
+import * as questions from "../../src/apps/polynomials/quest/questions";
 
 describe("Polynomial Quest battle rules", () => {
   it("six original successes win, duplicate submissions/next actions cannot advance twice", () => {
@@ -76,6 +79,61 @@ describe("Polynomial Quest battle rules", () => {
     }
     expect(s.unaided).toBe(4);
     expect(starsFor(s.unaided)).toBe(2);
+  });
+  it("keeps retries playable after every square variant has been seen, without granting free progress", () => {
+    let s = newSession(2, 42, "square-recovery");
+    for (let round = 0; round < 4; round++) {
+      s = transition(s, {
+        type: "submit",
+        id: s.question.id,
+        answer: s.question.answer,
+      });
+      s = transition(s, { type: "next", id: s.question.id });
+    }
+    expect(s.question.template).toBe("square");
+    // Keep the real generator, but turn an unbounded synchronous loop into a
+    // test failure so a regression cannot freeze the entire Vitest worker.
+    const generate = questions.generateQuestion;
+    let candidates = 0;
+    const guard = vi
+      .spyOn(questions, "generateQuestion")
+      .mockImplementation((...args) => {
+        if (++candidates > 1024)
+          throw new Error("Retry did not finish within the candidate budget");
+        return generate(...args);
+      });
+    try {
+      // (ax+b)^2 has only 100 sources here: a,b are each one of +/-1..5.
+      for (let retry = 0; retry < 110; retry++) {
+        const previous = s.question.source;
+        const wrong = answerChoices(s.question).find(
+          (answer) => !sameAnswer(answer, s.question.answer),
+        )!;
+        s = transition(s, {
+          type: "submit",
+          id: s.question.id,
+          answer: wrong,
+        });
+        candidates = 0;
+        s = transition(s, { type: "retry", id: s.question.id });
+        expect(s.phase).toBe("answering");
+        expect(s.question.source).not.toBe(previous);
+        expect(s.question.template).toBe("square");
+        expect(s.supported).toBe(true);
+        expect(s.cleared).toBe(4);
+        expect(s.unaided).toBe(4);
+      }
+      s = transition(s, {
+        type: "submit",
+        id: s.question.id,
+        answer: s.question.answer,
+      });
+      expect(s.cleared).toBe(5);
+      expect(s.unaided).toBe(4);
+      expect(starsFor(s.unaided)).toBe(2);
+    } finally {
+      guard.mockRestore();
+    }
   });
   it("invalid numbers and stale actions leave the state unchanged", () => {
     const s = newSession(0, 1, "safe");

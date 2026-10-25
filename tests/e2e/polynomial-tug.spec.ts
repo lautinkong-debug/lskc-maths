@@ -3,11 +3,37 @@ import {
   expect,
   type Page,
   type APIRequestContext,
+  type Browser,
 } from "@playwright/test";
 import { equivalent } from "../../src/apps/polynomials/algebra";
 import { mkdirSync } from "node:fs";
 import type { RoomView } from "../../src/lib/polynomial-tug/types";
 const evidence = "out/polynomial-tug-preview";
+async function soloRoom(teacher: Page, browser: Browser) {
+  await teacher.goto("/login");
+  await teacher.getByRole("button", { name: /^Teacher:/ }).click();
+  await expect(teacher.getByText("Teacher access is active.")).toBeVisible();
+  await teacher.goto("/polynomial-tug");
+  await teacher.getByLabel("Number of groups").selectOption("1");
+  await teacher
+    .getByRole("button", { name: "Create class room", exact: true })
+    .click();
+  const code = await teacher.getByTestId("tug-code").innerText();
+  const context = await browser.newContext();
+  const student = await context.newPage();
+  await student.goto(`/polynomial-tug?room=${code}`);
+  await student
+    .getByRole("button", { name: "Join Group 1 Pair A", exact: true })
+    .click();
+  await expect(
+    teacher.getByText("1 / 4 seats filled", { exact: true }),
+  ).toBeVisible();
+  await teacher
+    .getByRole("button", { name: "Start all matches", exact: true })
+    .click();
+  await expect(student.getByTestId("tug-choice").first()).toBeEnabled();
+  return { context, student };
+}
 async function answer(page: Page, wrong = false): Promise<RoomView> {
   await expect(page.getByTestId("tug-choice").first()).toBeEnabled();
   const source = (await page
@@ -518,6 +544,104 @@ test("a stale match in an end-class response does not freeze a student in live p
     ).toBeVisible({ timeout: 12000 });
     expect(closedPolls).toBeGreaterThanOrEqual(2);
   } finally {
+    await context.close();
+  }
+});
+
+test("a stalled answer response recovers without repeating the committed pull", async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(90000);
+  const { context, student } = await soloRoom(page, browser);
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let first: RoomView | null = null;
+  let answerRequests = 0;
+  try {
+    await student.route("**/api/polynomial-tug", async (route) => {
+      if (route.request().postDataJSON()?.action !== "answer")
+        return route.continue();
+      answerRequests++;
+      if (answerRequests !== 1) return route.continue();
+      const response = await route.fetch();
+      expect(response.status()).toBe(200);
+      first = (await response.json()).state;
+      await held;
+      // A successful timeout aborts this request, so late delivery may be rejected.
+      await route.fulfill({ response }).catch(() => {});
+    });
+    const source = (await student
+      .getByTestId("tug-question")
+      .getAttribute("data-source"))!;
+    const choices = student.getByTestId("tug-choice");
+    for (const choice of await choices.all()) {
+      if (equivalent(source, (await choice.getAttribute("data-source"))!)) {
+        await choice.click();
+        break;
+      }
+    }
+    await expect(
+      student.getByText(/^Together you pulled \d+ units?!$/),
+    ).toBeVisible();
+    const next = student.getByRole("button", {
+      name: "Ready for next question",
+      exact: true,
+    });
+    await expect(next).toBeEnabled({ timeout: 22000 });
+    expect(first).not.toBeNull();
+    expect(first!.match!.pairs[0].pulls).toBe(1);
+    await next.click();
+    const second = await answer(student);
+    expect(answerRequests).toBe(2);
+    expect(second.match!.pairs[0].pulls).toBe(2);
+    expect(second.match!.position).toBe(
+      first!.match!.position - second.match!.pairs[0].lastPower,
+    );
+    release();
+    await expect(
+      student.getByText(/^Together you pulled \d+ units?!$/),
+    ).toBeVisible();
+  } finally {
+    release();
+    await context.close();
+  }
+});
+
+test("a stalled poll times out and later polls receive the teacher pause", async ({
+  page,
+  browser,
+}) => {
+  test.setTimeout(90000);
+  const { context, student } = await soloRoom(page, browser);
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let polls = 0;
+  try {
+    await student.route("**/api/polynomial-tug?*", async (route) => {
+      polls++;
+      if (polls !== 1) return route.continue();
+      const response = await route.fetch();
+      await held;
+      await route.fulfill({ response }).catch(() => {});
+    });
+    await expect.poll(() => polls).toBe(1);
+    await page
+      .getByRole("button", { name: "Pause class", exact: true })
+      .click();
+    await expect(
+      student.getByText("Class paused — wait for your teacher", {
+        exact: true,
+      }),
+    ).toBeVisible({ timeout: 28000 });
+    await expect(student.getByTestId("tug-choice").first()).toBeDisabled();
+    expect(polls).toBeGreaterThanOrEqual(2);
+  } finally {
+    release();
     await context.close();
   }
 });

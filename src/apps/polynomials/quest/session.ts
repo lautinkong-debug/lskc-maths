@@ -89,14 +89,21 @@ export function transition(s: Session, action: Action): Session {
   if (action.type === "retry" && s.phase === "correction") {
     let recovery = s.recovery,
       question = s.question;
-    do {
+    // A template has a finite pool (only 100 sources for a square). Prefer an
+    // unseen source, but bound the search so repeated mistakes cannot freeze UI.
+    for (let candidate = 0; candidate < 128; candidate++) {
       recovery++;
       question = generateQuestion(
         s.stage,
         s.round,
         (s.seed + recovery * 104729) >>> 0,
+        s.question.source,
       );
-    } while (s.seen.includes(question.source));
+      if (!s.seen.includes(question.source)) break;
+    }
+    const seen = s.seen.includes(question.source)
+      ? [s.question.source, question.source]
+      : [...s.seen, question.source];
     return {
       ...s,
       phase: "answering",
@@ -104,7 +111,7 @@ export function transition(s: Session, action: Action): Session {
       supported: true,
       hint: false,
       recovery,
-      seen: [...s.seen, question.source],
+      seen,
       submitted: undefined,
     };
   }

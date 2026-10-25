@@ -4,6 +4,7 @@
  */
 export const copy = {
   polynomialTug: {
+    requestTimeout: "The request took too long. Reconnecting — check the latest result before trying again.",
     skillJump: (energy:number)=>`Team skills · ${energy}/6 energy`, backToQuestion: "Back to the question",
     forceTitle: "Your pulling force", difficultyForce: "Difficulty", timeBonus: "Time bonus", teamTime: "Team time", seconds: (n:number)=>`${n.toFixed(1)}s`, timeTargets:(fast:number,steady:number)=>`+2 within ${fast}s · +1 within ${steady}s`, clockPaused:"Clock paused by your teacher.", teamTimeRule:"Time stops when everyone in your pair is correct. First attempts earn a time bonus.", noTimeBonus:"A retry keeps the difficulty power, with no time bonus this round.", forceBreakdown:(base:number,time:number,skill:number,blocked:number,total:number)=>`Difficulty ${base} + time ${time} + skill ${skill} − shield ${blocked} = ${total} pulling force`,
     energy: "Team energy", energyRule: "Earn 1 energy each time your pair completes a pull. Choose one skill per round.",

@@ -19,6 +19,7 @@ test("32 independent browsers join eight groups and complete all four levels wit
     view: RoomView | null;
     levels: Set<number>;
     index: number;
+    network: object[];
   }[] = [];
   let fatal = "";
   const watch = (p: Page) =>
@@ -33,11 +34,24 @@ test("32 independent browsers join eight groups and complete all four levels wit
     }
   }
   async function answer(s: (typeof students)[number], wrong = false) {
+    const question = s.view!.player!.question;
+    // The response observer runs before React renders the accepted question.
+    // Match the complete rendered choice order before deciding which to tap.
+    await expect(s.page.getByTestId("tug-question")).toHaveAttribute(
+      "data-source",
+      question.source,
+    );
+    const choices = s.page.getByTestId("tug-choice");
+    await expect(choices).toHaveCount(4);
+    for (let i = 0; i < 4; i++)
+      await expect(choices.nth(i)).toHaveAttribute(
+        "data-source",
+        question.choices[i],
+      );
+    await expect(choices.first()).toBeEnabled();
     const source = (await s.page
       .getByTestId("tug-question")
       .getAttribute("data-source"))!;
-    const choices = s.page.getByTestId("tug-choice");
-    await expect(choices).toHaveCount(4);
     const correct: number[] = [];
     for (let i = 0; i < 4; i++)
       if (
@@ -45,11 +59,25 @@ test("32 independent browsers join eight groups and complete all four levels wit
       )
         correct.push(i);
     expect(correct).toHaveLength(1);
-    await choices.nth(wrong ? (correct[0] + 1) % 4 : correct[0]).click();
-    await until(
-      () => s.view?.player?.phase === (wrong ? "wrong" : "correct"),
-      "answer " + s.index,
+    const option = wrong ? (correct[0] + 1) % 4 : correct[0];
+    const request = s.page.waitForRequest(
+      (r) =>
+        r.url().includes("/api/polynomial-tug") &&
+        r.method() === "POST" &&
+        r.postDataJSON()?.action === "answer",
     );
+    await choices.nth(option).click();
+    expect((await request).postDataJSON()).toMatchObject({
+      questionId: question.id,
+      option,
+    });
+    await until(() => {
+      if (!wrong && s.view?.player?.phase === "wrong")
+        throw new Error(
+          `Student ${s.index} submitted an unexpected wrong answer`,
+        );
+      return s.view?.player?.phase === (wrong ? "wrong" : "correct");
+    }, "answer " + s.index);
   }
   await page.goto("/login");
   await page.getByRole("button", { name: /^Teacher:/ }).click();
@@ -74,12 +102,32 @@ test("32 independent browsers join eight groups and complete all four levels wit
             view: null,
             levels: new Set(),
             index: group * 4 + local,
+            network: [],
           };
           students.push(s);
+          p.on("requestfailed", (request) => {
+            if (!request.url().includes("/api/polynomial-tug")) return;
+            s.network.push({
+              at: Date.now(),
+              method: request.method(),
+              command: request.postDataJSON(),
+              failure: request.failure()?.errorText,
+            });
+          });
           p.on("response", async (response) => {
             if (!response.url().includes("/api/polynomial-tug")) return;
             try {
               const body = await response.json();
+              s.network.push({
+                at: Date.now(),
+                method: response.request().method(),
+                command: response.request().postDataJSON(),
+                status: response.status(),
+                message: body.message,
+                phase: body.state?.player?.phase,
+                questionId: body.state?.player?.question.id,
+              });
+              if (s.network.length > 30) s.network.shift();
               if (response.status() >= 500) {
                 fatal = body.message || "Classroom service failed";
                 errors.push(fatal);
@@ -335,6 +383,40 @@ test("32 independent browsers join eight groups and complete all four levels wit
         2,
       ),
     );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const failedIndex = message.match(/(?:answer |Student )(\d+)/)?.[1];
+    const failedStudent = students.find((s) => s.index === Number(failedIndex));
+    if (failedStudent)
+      await failedStudent.page.screenshot({
+        path: `${output}/failure-${code}-student-${failedIndex}.png`,
+        fullPage: true,
+      });
+    writeFileSync(
+      `${output}/failure-${code}.json`,
+      JSON.stringify(
+        {
+          code,
+          error: message,
+          rounds,
+          students: await Promise.all(
+            students.map(async (s) => ({
+              index: s.index,
+              view: s.view,
+              network: s.network,
+              screen: await s.page
+                .locator("body")
+                .innerText()
+                .catch(() => "Page closed"),
+            })),
+          ),
+          errors,
+        },
+        null,
+        2,
+      ),
+    );
+    throw error;
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
   }

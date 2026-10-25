@@ -1070,3 +1070,10 @@ Home, top to bottom:
 - Search now accepts displayed references such as `Q34(b)`. The shared Skip to content link preserves lesson hashes and playback while transferring focus.
 - Verification: 169 polynomial unit checks; all 158 demonstrations and source images on the production build; both new browser regressions; shared-header checks on the app list, Polynomial Quest and Directed Numbers; lint, TypeScript and production build passed.
 - Owner reviewed the preview on port 3043 and approved publication on 25/10/2026. Release scope is the two fixes, their regression tests and audit notes. Evidence and test-run limitations are recorded in `docs/polynomials-bug-audit.md`.
+
+### Polynomial two-agent bug audit (25/10/2026)
+
+- Owner requested one bug-finding agent and one debugging agent. They reproduced and repaired solo retry exhaustion and indefinitely stalled classroom requests, then independently reviewed the fixes.
+- Regression evidence: 1,377 unit tests, five demo integration tests, seven classroom browser cases and 13 solo browser cases passed, including 32 independent pupils through all four levels. Production build, TypeScript and scoped lint passed. Some initial browser cases required isolated reruns; the full record preserves those failures and their limits.
+- The classroom test now waits for the rendered question and choices before answering, after a separate deterministic reproduction established a test race. No scoring assertions were relaxed.
+- Findings, fixes and evidence: docs/polynomial-bug-audit-2026-10-25.md. Live Firebase verification remains blocked by quota; no billing, rules or production-data changes were made.

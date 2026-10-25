@@ -7,8 +7,6 @@ import {
   useSyncExternalStore,
 } from "react";
 import Link from "next/link";
-import { signInAnonymously } from "firebase/auth";
-import { auth } from "@/lib/firebase";
 import { useAuth } from "@/lib/auth";
 import { copy } from "@/lib/copy";
 import { Math as MathNotation } from "@/components/Math";
@@ -16,6 +14,7 @@ import { JoinQR } from "@/components/challenges/JoinQR";
 import { Working } from "@/apps/polynomials/quest/Working";
 import { expressionTex } from "@/apps/polynomials/algebra";
 import type { RoomView, MatchSummary } from "@/lib/polynomial-tug/types";
+import { callTug as call } from "@/lib/polynomial-tug/client";
 import questStyles from "@/apps/polynomials/quest/quest.module.css";
 import { Rope } from "./Rope";
 import { SkillTray } from "./SkillTray";
@@ -26,31 +25,6 @@ const c = copy.polynomialTug,
 const subscribeOrigin = () => () => {};
 const readOrigin = () => window.location.origin;
 const serverOrigin = () => "";
-async function call(
-  body?: Record<string, unknown>,
-  code?: string,
-): Promise<RoomView> {
-  await auth.authStateReady();
-  const user = auth.currentUser ?? (await signInAnonymously(auth)).user;
-  const response = await fetch(
-    `/api/polynomial-tug${body ? "" : `?code=${encodeURIComponent(code!)}`}`,
-    {
-      method: body ? "POST" : "GET",
-      headers: {
-        Authorization: `Bearer ${await user.getIdToken()}`,
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-      ...(body ? { body: JSON.stringify(body) } : {}),
-    },
-  );
-  const result = await response.json();
-  if (!response.ok)
-    throw Object.assign(new Error(result.message || c.errors.connection), {
-      retryAfter: Number(response.headers.get("Retry-After")) || 0,
-    });
-  return result.state;
-}
 function PairStatus({ match, side }: { match: MatchSummary; side: number }) {
   const pair = match.pairs[side];
   return (
