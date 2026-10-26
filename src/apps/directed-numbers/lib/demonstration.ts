@@ -1,6 +1,11 @@
 import { type Ast } from "./parse";
 import { groupedSteps } from "./groupedSteps";
 import {
+  signSlot,
+  signSlotAbove,
+  type InsetSignLayout,
+} from "./signArrowLayout";
+import {
   bracketSteps,
   expressionTex,
   workOut,
@@ -84,4 +89,28 @@ export function signArrowTex(step: Step): string | null {
       count++ < 2 ? `\\textcolor{#DA2127}{${sign}}` : sign,
     );
   return count >= 2 ? tex.slice(0, start) + marked + tex.slice(end) : null;
+}
+
+/** Reserve the sign diagram inside the affected fraction operand. */
+export function insetSignLayout(step: Step): InsetSignLayout | null {
+  if (step.signArrows?.inset) return step.signArrows.inset;
+  const original = expressionTex(step.before, step.numberStyle);
+  const marked = signArrowTex(step);
+  if (!original.includes("\\dfrac{") || !marked || !step.highlight) return null;
+  const { start, end } = step.highlight;
+  const markedEnd = end + marked.length - original.length;
+  const part = marked.slice(start, markedEnd);
+  const prefix = marked.slice(0, start),
+    suffix = marked.slice(markedEnd);
+  const above = signSlotAbove(step.before, step.sourceHighlight);
+  return {
+    above: [above],
+    plain:
+      original.slice(0, start) +
+      signSlot(original.slice(start, end), 0, above) +
+      original.slice(end),
+    marked: prefix + signSlot(part, 0, above) + suffix,
+    highlighted:
+      prefix + signSlot(`\\colorbox{#fff1ad}{$${part}$}`, 0, above) + suffix,
+  };
 }

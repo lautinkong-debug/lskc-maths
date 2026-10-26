@@ -1,5 +1,6 @@
 import { evaluate, type Ast } from "./parse";
 import { abs, toTex } from "./rational";
+import { signSlot, signSlotAbove } from "./signArrowLayout";
 import {
   expressionTex,
   texHighlight,
@@ -64,6 +65,7 @@ export function groupedSteps(ast: Ast, style: NumberStyle): Step[] | null {
     (node) => `\\left(${chain(node, false)}\\right)`,
   );
   const marked = groups.map((node) => chain(node, true));
+  const above = groups.map((node) => signSlotAbove(ast, node.span));
   // Map KaTeX's bottom-to-top fraction DOM back to the source factor order.
   let anchorIndex = 0;
   function factorOrder(node: Ast): number[] {
@@ -131,6 +133,26 @@ export function groupedSteps(ast: Ast, style: NumberStyle): Step[] | null {
       signArrows: {
         pair: signs.join(""),
         anchorOrder: renderedOrder(ast),
+        ...(original.includes("\\dfrac{")
+          ? {
+              inset: {
+                above,
+                plain: replace(
+                  spans.map((span, i) =>
+                    signSlot(original.slice(span.start, span.end), i, above[i]),
+                  ),
+                ),
+                marked: replace(
+                  marked.map((part, i) => signSlot(part, i, above[i])),
+                ),
+                highlighted: replace(
+                  marked.map((part, i) =>
+                    signSlot(`\\colorbox{#fff1ad}{$${part}$}`, i, above[i]),
+                  ),
+                ),
+              },
+            }
+          : {}),
         tex: replace(marked),
         highlighted: replace(
           marked.map((part) => `\\colorbox{#fff1ad}{$${part}$}`),

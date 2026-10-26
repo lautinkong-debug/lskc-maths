@@ -10,7 +10,12 @@ import { Math as Tex } from "@/components/Math";
 import { copy } from "@/lib/copy";
 import { type Ast } from "../lib/parse";
 import { expressionTex, type Step } from "../lib/steps";
-import { highlightedTex, signArrowTex } from "../lib/demonstration";
+import {
+  highlightedTex,
+  signArrowTex,
+  insetSignLayout,
+} from "../lib/demonstration";
+import { signSlotColour } from "../lib/signArrowLayout";
 import { button, field, primary } from "./ui";
 import styles from "./TeachingSteps.module.css";
 const c = copy.apps.directedNumbers;
@@ -138,15 +143,19 @@ function EquationLine({
   const focused = highlight && Boolean(nextStep);
   const operationArrows = Boolean(nextStep?.signArrows);
   const revealing = Boolean(reveal) && arrowPhase === 0 && !focused;
+  const inset = nextStep ? insetSignLayout(nextStep) : null;
   const root = useRef<HTMLDivElement>(null);
   const marker = useId().replaceAll(":", "");
-  const markedTex = focused
-    ? `${original ? "" : "= "}${highlightedTex(nextStep!, true)}`
-    : marked && arrowPhase > 0
-      ? `${original ? "" : "= "}${marked}`
-      : revealing
-        ? `= ${reveal!.animatedTex}`
-        : tex;
+  const markedTex =
+    inset && !revealing
+      ? `${original ? "" : "= "}${focused ? inset.highlighted : arrowPhase > 0 ? inset.marked : inset.plain}`
+      : focused
+        ? `${original ? "" : "= "}${highlightedTex(nextStep!, true)}`
+        : marked && arrowPhase > 0
+          ? `${original ? "" : "= "}${marked}`
+          : revealing
+            ? `= ${reveal!.animatedTex}`
+            : tex;
   useLayoutEffect(() => {
     const node = root.current;
     if (!node || !marked) return;
@@ -166,7 +175,11 @@ function EquationLine({
       const box = node.getBoundingClientRect();
       const renderedAnchors = signs.map((el) => {
         const r = el.getBoundingClientRect();
-        return r.left - box.left + r.width / 2;
+        return {
+          x: r.left - box.left + r.width / 2,
+          top: r.top - box.top,
+          bottom: r.bottom - box.top,
+        };
       });
       const order = nextStep?.signArrows?.anchorOrder;
       const anchors = order
@@ -178,11 +191,47 @@ function EquationLine({
       let offset = 0;
       groups.forEach((group, index) => {
         const values = anchors.slice(offset, offset + group.signs.length);
-        const middle = (values[0] + values.at(-1)!) / 2;
+        const xs = values.map((anchor) => anchor.x);
+        const middle = (xs[0] + xs.at(-1)!) / 2;
         const arrows = node.querySelector(`[data-arrow-group="${index}"]`)!;
+        if (inset) {
+          const slot = node.querySelector(
+            `.${styles.plain} .katex-rule[style*="${signSlotColour(index)}"]`,
+          );
+          if (!slot) return;
+          const space = slot.getBoundingClientRect();
+          const top = space.top - box.top;
+          const bottom = space.bottom - box.top;
+          const above = inset.above[index];
+          const end = top + space.height * (above ? 0.52 : 0.48);
+          const bottoms = values.map((anchor) => anchor.bottom);
+          const lastRow = Math.max(...bottoms);
+          const firstRow = Math.min(...values.map((anchor) => anchor.top));
+          const gutter =
+            slot.closest(".op-limits")!.getBoundingClientRect().left -
+            box.left +
+            2;
+          arrows.removeAttribute("transform");
+          values.forEach((anchor, i) => {
+            const target = middle + (i - (values.length - 1) / 2) * 6;
+            const d = above
+              ? anchor.top > firstRow + 10
+                ? `M ${anchor.x} ${anchor.top - 3} Q ${gutter} ${anchor.top - 3} ${gutter} ${anchor.top - 15} L ${gutter} ${end + 14} Q ${gutter} ${end} ${target} ${end}`
+                : `M ${anchor.x} ${bottom - 2} Q ${anchor.x} ${end + 12} ${target} ${end}`
+              : anchor.bottom < lastRow - 10
+                ? `M ${anchor.x} ${anchor.bottom + 3} Q ${gutter} ${anchor.bottom + 3} ${gutter} ${anchor.bottom + 15} L ${gutter} ${end - 14} Q ${gutter} ${end} ${target} ${end}`
+                : `M ${anchor.x} ${top + 2} Q ${anchor.x} ${end - 12} ${target} ${end}`;
+            arrows.querySelectorAll("[data-arrow]")[i]?.setAttribute("d", d);
+          });
+          const result = arrows.querySelector("[data-result-sign]");
+          result?.setAttribute("x", String(middle));
+          result?.setAttribute("y", String(above ? top + 22 : bottom - 3));
+          offset += values.length;
+          return;
+        }
         const range = {
-          start: Math.min(...values) - 14,
-          end: Math.max(...values) + 14,
+          start: Math.min(...xs) - 14,
+          end: Math.max(...xs) + 14,
         };
         let lane = 0;
         while (
@@ -193,7 +242,7 @@ function EquationLine({
           lane++;
         (lanes[lane] ??= []).push(range);
         arrows.setAttribute("transform", `translate(0 ${lane * 64})`);
-        values.forEach((value, i) =>
+        xs.forEach((value, i) =>
           arrows
             .querySelectorAll("[data-arrow]")
             [i]?.setAttribute(
@@ -210,7 +259,7 @@ function EquationLine({
         .querySelector('svg[data-testid="sign-combination"]')
         ?.setAttribute(
           "height",
-          String(60 + Math.max(0, lanes.length - 1) * 64),
+          String(inset ? box.height : 60 + Math.max(0, lanes.length - 1) * 64),
         );
       node.setAttribute("data-arrows-positioned", "true");
     };
@@ -222,7 +271,7 @@ function EquationLine({
       observer.disconnect();
       document.fonts.removeEventListener("loadingdone", measure);
     };
-  }, [marked, markedTex, nextStep, pair]);
+  }, [marked, markedTex, nextStep, pair, inset]);
   return (
     <div
       className={`${styles.equation} ${revealing ? `${styles.splitOperation} ${magnitudeShown ? styles.magnitudeShown : ""}` : ""}`}
@@ -242,11 +291,11 @@ function EquationLine({
       {focused && <span className="sr-only">{t.calculateNext}</span>}
       <div
         ref={root}
-        className={`${styles.layers} ${arrowPhase > 0 ? styles.arrowsShown : ""} ${arrowPhase > 1 || (operationArrows && arrowPhase > 0) ? styles.arrowsCombined : ""}`}
+        className={`${styles.layers} ${inset ? styles.insetArrows : ""} ${arrowPhase > 0 ? styles.arrowsShown : ""} ${arrowPhase > 1 || (operationArrows && arrowPhase > 0) ? styles.arrowsCombined : ""}`}
       >
         {nextStep && (
           <span className={styles.sizing} aria-hidden="true">
-            <Tex>{`${original ? "" : "= "}${highlightedTex(nextStep, true)}`}</Tex>
+            <Tex>{`${original ? "" : "= "}${inset?.highlighted ?? highlightedTex(nextStep, true)}`}</Tex>
           </span>
         )}
         <Tex

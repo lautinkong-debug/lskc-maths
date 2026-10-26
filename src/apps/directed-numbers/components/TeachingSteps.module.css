@@ -33,6 +33,7 @@
   background: #fff1ad;
 }
 .layers {
+  position: relative;
   display: grid;
   width: max-content;
   align-items: center;
@@ -162,6 +163,16 @@
 }
 .layers > .arrowsRow {
   grid-area: 2 / 1;
+}
+.insetArrows > .arrowsRow {
+  position: absolute;
+  inset: 0;
+  grid-area: auto;
+  grid-template-rows: 1fr;
+  pointer-events: none;
+}
+.insetArrows .arrowContents {
+  overflow: visible;
 }
 .arrowsRow {
   display: grid;

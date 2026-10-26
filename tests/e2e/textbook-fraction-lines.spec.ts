@@ -1,4 +1,18 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
+
+async function numeratorTop(original: Locator, fractionY: number) {
+  return original.locator('.katex-html [style*="color"]:visible').evaluateAll(
+    (elements, line) =>
+      Math.min(
+        ...elements
+          .filter((el) => /^[+−-]$/.test(el.textContent ?? ""))
+          .map((el) => el.getBoundingClientRect())
+          .filter((rect) => rect.bottom < line)
+          .map((rect) => rect.top),
+      ),
+    fractionY,
+  );
+}
 
 const printedFractions = [
   "2C-5a",
@@ -27,6 +41,42 @@ const printedFractions = [
   "R2-37a",
   "R2-37b",
 ];
+
+test("fraction sign arrows stay with their numerator and denominator", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/apps/directed-numbers#textbook:e=R2-37b");
+  await page.getByRole("button", { name: "Next step", exact: true }).click();
+  const original = page.locator("[data-equation-line]").first();
+  await expect(original.locator('[data-arrows-positioned="true"]')).toHaveCount(
+    1,
+  );
+  const bar = await original
+    .locator(".frac-line:visible")
+    .first()
+    .boundingBox();
+  expect(bar).not.toBeNull();
+  const numerator = await numeratorTop(original, bar!.y);
+  expect(Number.isFinite(numerator)).toBe(true);
+  for (const index of [0, 1]) {
+    const arrows = await original
+      .locator(`[data-arrow-group="${index}"]`)
+      .boundingBox();
+    expect(
+      arrows!.y + arrows!.height,
+      `numerator sign group ${index} must be above the numerator`,
+    ).toBeLessThan(numerator);
+  }
+  const denominator = await original
+    .locator('[data-arrow-group="2"]')
+    .boundingBox();
+  expect(
+    denominator!.y,
+    "denominator arrows must be below the fraction line",
+  ).toBeGreaterThan(bar!.y + bar!.height);
+});
 
 test("all 25 printed fractions have a horizontal line, with original divide signs retained", async ({
   page,
@@ -79,6 +129,12 @@ for (const viewport of [
         name: "Projection mode",
         exact: true,
       });
+      if (viewport.width === 1920)
+        await expect(
+          page.getByRole("button", {
+            name: /^(Projection mode|Leave projection mode)$/,
+          }),
+        ).toBeVisible();
       if (viewport.width === 1920 && (await projection.isVisible()))
         await projection.click();
       await page
@@ -123,6 +179,21 @@ for (const viewport of [
                 };
               }),
             );
+          const fractionLine = await original
+            .locator(".frac-line:visible")
+            .first()
+            .boundingBox();
+          const numerator = await numeratorTop(original, fractionLine!.y);
+          expect(Number.isFinite(numerator)).toBe(true);
+          expect(boxes[0].bottom, "first numerator sign diagram").toBeLessThan(
+            numerator,
+          );
+          expect(boxes[1].bottom, "second numerator sign diagram").toBeLessThan(
+            numerator,
+          );
+          expect(boxes[2].top, "denominator sign diagram").toBeGreaterThan(
+            fractionLine!.y + fractionLine!.height,
+          );
           for (let a = 0; a < boxes.length; a++)
             for (let b = a + 1; b < boxes.length; b++) {
               const overlap =

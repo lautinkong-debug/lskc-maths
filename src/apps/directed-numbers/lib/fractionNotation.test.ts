@@ -7,6 +7,7 @@ import {
   demonstrationSteps,
   highlightedTex,
   signArrowTex,
+  insetSignLayout,
 } from "./demonstration";
 import { textbookQuestions } from "./textbook";
 import { equals } from "./rational";
@@ -72,6 +73,7 @@ it.each(printedFractions)(
     ]) {
       expect(equals(evaluate(step.ast), answer.value)).toBe(true);
       if (hasFractionBar(step.ast)) expect(step.tex).toContain("\\dfrac{");
+      const inset = insetSignLayout(step);
       for (const tex of [
         step.tex,
         highlightedTex(step),
@@ -81,6 +83,9 @@ it.each(printedFractions)(
         step.compactReveal?.animatedTex,
         step.batchReveal?.signTex,
         step.batchReveal?.animatedTex,
+        inset?.plain,
+        inset?.marked,
+        inset?.highlighted,
       ]) {
         if (tex)
           expect(() =>

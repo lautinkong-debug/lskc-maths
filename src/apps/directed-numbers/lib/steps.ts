@@ -1,5 +1,10 @@
 import { copy } from "@/lib/copy";
 import {
+  signSlot,
+  signSlotAbove,
+  type InsetSignLayout,
+} from "./signArrowLayout";
+import {
   evaluate,
   parse,
   type Ast,
@@ -50,6 +55,7 @@ export type Step = {
     groups?: { signs: string; result: string }[];
     /** KaTeX places a fraction's denominator before its numerator in the DOM. */
     anchorOrder?: number[];
+    inset?: InsetSignLayout;
     highlighted?: string;
   };
   batchReveal?: { signTex: string; animatedTex: string };
@@ -765,15 +771,40 @@ function generalWorkOut(
           return operand.replace(/^(\s*(?:\\left[([])*)/, `$1${mark}`);
         return `\\left(${mark}${toTex(abs(index === 0 ? a : b), { style })}\\right)`;
       });
+      const markedOperation = fractionBar
+        ? `\\dfrac{${markedOperands[0]}}{${markedOperands[1]}}`
+        : markedOperands.join(op === "*" ? "\\times" : "\\div");
+      const replaceOperation = (part: string) =>
+        previous.slice(0, highlight.start) +
+        part +
+        previous.slice(highlight.end);
+      const above = signSlotAbove(ast, change.sourceHighlight);
       const signArrows = {
         pair: signs.join(""),
         ...(fractionBar ? { anchorOrder: [1, 0] } : {}),
-        tex:
-          previous.slice(0, highlight.start) +
-          (fractionBar
-            ? `\\dfrac{${markedOperands[0]}}{${markedOperands[1]}}`
-            : markedOperands.join(op === "*" ? "\\times" : "\\div")) +
-          previous.slice(highlight.end),
+        tex: replaceOperation(markedOperation),
+        ...(previous.includes("\\dfrac{")
+          ? {
+              inset: {
+                above: [above],
+                plain: replaceOperation(
+                  signSlot(
+                    previous.slice(highlight.start, highlight.end),
+                    0,
+                    above,
+                  ),
+                ),
+                marked: replaceOperation(signSlot(markedOperation, 0, above)),
+                highlighted: replaceOperation(
+                  signSlot(
+                    `\\colorbox{#fff1ad}{$${markedOperation}$}`,
+                    0,
+                    above,
+                  ),
+                ),
+              },
+            }
+          : {}),
       };
       // Keep a signed subexpression grouped when it sits inside a larger sum/product.
       const nested = highlight.start > 0 || highlight.end < previous.length;
