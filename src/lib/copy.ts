@@ -2378,7 +2378,7 @@ export const copy = {
         coverage:
           "Included: Exercise 2B Q1–15 and Q21–28; Exercise 2C Q1–16 and Q20–33; Revision Exercise 2 Q7–21 and Q25–38. These are the numerical calculation questions; word problems and multiple-choice questions are not included.",
         source:
-          "Source: supplied 1A02 textbook, pp. 2.32–2.34, 2.46–2.48 and 2.56–2.58. Answers checked against pp. 2.68–2.69. Division bars are displayed as equivalent ÷ expressions.",
+          "Source: supplied 1A02 textbook, pp. 2.32–2.34, 2.46–2.48 and 2.56–2.58. Answers checked against pp. 2.68–2.69. Fraction lines and ÷ signs follow the textbook.",
         exercise: "Exercise",
         exerciseName: (name: string) =>
           name === "R2" ? "Revision Exercise 2" : `Exercise ${name}`,

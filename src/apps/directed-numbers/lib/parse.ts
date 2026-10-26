@@ -27,6 +27,8 @@ export type Ast =
       left: Ast;
       right: Ast;
       implicit: boolean;
+      /** A source slash between expressions represents a printed fraction bar. */
+      fractionBar?: boolean;
       span: Span;
     };
 type ErrorKey = keyof typeof copy.apps.directedNumbers.errors;
@@ -121,6 +123,7 @@ export function parse(source: string): ParseResult<Ast> {
       const token = text[i];
       const implicit = token === "(" || token === "[";
       if (token !== "*" && token !== "/" && !implicit) break;
+      const fractionBar = token === "/" && source[i] === "/";
       if (!implicit) i++;
       const right = primary(false);
       left = {
@@ -129,6 +132,7 @@ export function parse(source: string): ParseResult<Ast> {
         left,
         right,
         implicit,
+        ...(fractionBar ? { fractionBar: true } : {}),
         span: { start: left.span.start, end: right.span.end },
       };
     }

@@ -164,15 +164,35 @@ function EquationLine({
       )
         return;
       const box = node.getBoundingClientRect();
-      const anchors = signs.map((el) => {
+      const renderedAnchors = signs.map((el) => {
         const r = el.getBoundingClientRect();
         return r.left - box.left + r.width / 2;
       });
+      const order = nextStep?.signArrows?.anchorOrder;
+      const anchors = order
+        ? renderedAnchors.map(
+            (_, index) => renderedAnchors[order.indexOf(index)],
+          )
+        : renderedAnchors;
+      const lanes: { start: number; end: number }[][] = [];
       let offset = 0;
       groups.forEach((group, index) => {
         const values = anchors.slice(offset, offset + group.signs.length);
         const middle = (values[0] + values.at(-1)!) / 2;
         const arrows = node.querySelector(`[data-arrow-group="${index}"]`)!;
+        const range = {
+          start: Math.min(...values) - 14,
+          end: Math.max(...values) + 14,
+        };
+        let lane = 0;
+        while (
+          lanes[lane]?.some(
+            (other) => range.start < other.end && range.end > other.start,
+          )
+        )
+          lane++;
+        (lanes[lane] ??= []).push(range);
+        arrows.setAttribute("transform", `translate(0 ${lane * 64})`);
         values.forEach((value, i) =>
           arrows
             .querySelectorAll("[data-arrow]")
@@ -186,6 +206,12 @@ function EquationLine({
           ?.setAttribute("x", String(middle));
         offset += values.length;
       });
+      node
+        .querySelector('svg[data-testid="sign-combination"]')
+        ?.setAttribute(
+          "height",
+          String(60 + Math.max(0, lanes.length - 1) * 64),
+        );
       node.setAttribute("data-arrows-positioned", "true");
     };
     measure();

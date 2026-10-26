@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { arithmeticTex } from "../../../../tests/helpers/arithmeticTex";
 import { teachingCaseGroups } from "./teachingCases";
 import {
   compactWorking,
@@ -46,14 +47,7 @@ it("optional-step hiding preserves every textbook answer, sign arrows and progre
         true,
       );
       if (end > start) {
-        const displayed = parse(
-          step.tex
-            .replace(/\\left|\\right/g, "")
-            .replace(/\\times/g, "*")
-            .replace(/\\div/g, "÷")
-            .replace(/\\frac\{(\d+)\}\{(\d+)\}/g, "$1/$2")
-            .replace(/\\,/g, " "),
-        );
+        const displayed = parse(arithmeticTex(step.tex));
         expect(displayed.ok, `${question.id}: ${step.tex}`).toBe(true);
         if (displayed.ok)
           expect(

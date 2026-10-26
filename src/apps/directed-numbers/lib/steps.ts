@@ -48,6 +48,8 @@ export type Step = {
     tex: string;
     pair: string;
     groups?: { signs: string; result: string }[];
+    /** KaTeX places a fraction's denominator before its numerator in the DOM. */
+    anchorOrder?: number[];
     highlighted?: string;
   };
   batchReveal?: { signTex: string; animatedTex: string };
@@ -91,11 +93,16 @@ const number = (value: Rational, span: Span): Ast => ({
 });
 
 export type NumberStyle = "improper" | "decimal";
+type TexPiece = { text: string; span: Span; structural?: boolean };
+/** The fraction line already groups a compound numerator or denominator. */
+function fractionOperand(ast: Ast): Ast {
+  return ast.kind === "group" && ast.child.kind !== "number" ? ast.child : ast;
+}
 function texPieces(
   ast: Ast,
   signed = false,
   style: NumberStyle = "improper",
-): { text: string; span: Span }[] {
+): TexPiece[] {
   if (ast.kind === "number")
     return [
       {
@@ -111,6 +118,13 @@ function texPieces(
         span: ast.span,
       },
     ];
+  if (
+    ast.kind === "group" &&
+    ast.bracket === "(" &&
+    ast.child.kind === "binary" &&
+    ast.child.fractionBar
+  )
+    return texPieces(ast.child, signed, style);
   if (ast.kind === "group")
     return [
       {
@@ -130,6 +144,14 @@ function texPieces(
         span: { start: ast.span.start, end: ast.child.span.start },
       },
       ...texPieces(ast.child, false, style),
+    ];
+  if (ast.op === "/" && ast.fractionBar)
+    return [
+      { text: "\\dfrac{", span: ast.span, structural: true },
+      ...texPieces(fractionOperand(ast.left), false, style),
+      { text: "}{", span: ast.span, structural: true },
+      ...texPieces(fractionOperand(ast.right), false, style),
+      { text: "}", span: ast.span, structural: true },
     ];
   const right =
     ast.right.kind === "number" && ast.right.value.n < 0
@@ -190,7 +212,7 @@ export function evaluatedReveal(
       .map((node) => [key(node.span), node]),
   );
   const pieces = texPieces(after, false, style).map((piece) => {
-    const node = changed.get(key(piece.span));
+    const node = piece.structural ? undefined : changed.get(key(piece.span));
     if (!node || node.value.n === 0)
       return { full: piece.text, sign: piece.text, animated: piece.text };
     const magnitude = toTex(abs(node.value), {
@@ -229,7 +251,11 @@ export function texHighlight(
     start = Infinity,
     end = 0;
   for (const piece of texPieces(ast, false, style)) {
-    if (piece.span.end > source.start && piece.span.start < source.end) {
+    if (
+      piece.structural
+        ? source.start <= piece.span.start && source.end >= piece.span.end
+        : piece.span.end > source.start && piece.span.start < source.end
+    ) {
       start = Math.min(start, offset);
       end = offset + piece.text.length;
     }
@@ -472,7 +498,14 @@ type GeneralChange = {
   sourceHighlight: Span;
   ruleId: RuleId;
   kind: Step["kind"];
-  operation?: { op: "*" | "/"; a: Rational; b: Rational };
+  operation?: {
+    op: "*" | "/";
+    a: Rational;
+    b: Rational;
+    fractionBar?: boolean;
+    left: Ast;
+    right: Ast;
+  };
 };
 function atomic(ast: Ast): boolean {
   return (
@@ -590,7 +623,16 @@ function reduceTier(
         : "left-to-right",
     kind: ast.op === "*" ? "product" : ast.op === "/" ? "quotient" : "sum",
     operation:
-      ast.op === "*" || ast.op === "/" ? { op: ast.op, a, b } : undefined,
+      ast.op === "*" || ast.op === "/"
+        ? {
+            op: ast.op,
+            a,
+            b,
+            fractionBar: ast.fractionBar,
+            left: ast.left,
+            right: ast.right,
+          }
+        : undefined,
   };
 }
 function reduceExpression(
@@ -703,14 +745,16 @@ function generalWorkOut(
       change.operation.a.n &&
       change.operation.b.n
     ) {
-      const { a, b, op } = change.operation;
+      const { a, b, op, fractionBar } = change.operation;
       const same = Math.sign(a.n) === Math.sign(b.n);
       const ruleId: RuleId = `${same ? "same" : "diff"}-sign-${op === "*" ? "product" : "quotient"}`;
       const previous = expressionTex(ast, style);
       const signs = [a, b].map((value) => (value.n < 0 ? "-" : "+"));
-      const operands = previous
-        .slice(highlight.start, highlight.end)
-        .split(/\\times|\\div/);
+      const operands = fractionBar
+        ? [change.operation.left, change.operation.right].map((node) =>
+            expressionTex(fractionOperand(node), style),
+          )
+        : previous.slice(highlight.start, highlight.end).split(/\\times|\\div/);
       const markedOperands = operands.map((operand, index) => {
         const mark = `\\textcolor{#DA2127}{${signs[index]}}`;
         const existing = operand.match(/[+-]/g) ?? [];
@@ -723,9 +767,12 @@ function generalWorkOut(
       });
       const signArrows = {
         pair: signs.join(""),
+        ...(fractionBar ? { anchorOrder: [1, 0] } : {}),
         tex:
           previous.slice(0, highlight.start) +
-          markedOperands.join(op === "*" ? "\\times" : "\\div") +
+          (fractionBar
+            ? `\\dfrac{${markedOperands[0]}}{${markedOperands[1]}}`
+            : markedOperands.join(op === "*" ? "\\times" : "\\div")) +
           previous.slice(highlight.end),
       };
       // Keep a signed subexpression grouped when it sits inside a larger sum/product.
@@ -733,7 +780,9 @@ function generalWorkOut(
       const signReveal = {
         prefix: previous.slice(0, highlight.start) + (nested ? "\\left(" : ""),
         sign: same ? "+" : "-",
-        magnitude: `\\left(${toTex(abs(a), { style })} ${op === "*" ? "\\times" : "\\div"} ${toTex(abs(b), { style })}\\right)`,
+        magnitude: fractionBar
+          ? `\\dfrac{${toTex(abs(a), { style })}}{${toTex(abs(b), { style })}}`
+          : `\\left(${toTex(abs(a), { style })} ${op === "*" ? "\\times" : "\\div"} ${toTex(abs(b), { style })}\\right)`,
         suffix: (nested ? "\\right)" : "") + previous.slice(highlight.end),
       };
       steps.push({

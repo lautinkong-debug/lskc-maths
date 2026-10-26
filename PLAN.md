@@ -2,6 +2,13 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Directed Numbers textbook fraction lines — approved release (26/10/2026)
+
+- [x] Compare the supplied scan, pp. 2.47–2.48 and 2.56–2.58, and restore the printed fraction lines in 25 Exercise 2C / Revision Exercise 2 questions. Retain printed ÷ operations, including Revision Q38(a), and the leading minus outside Revision Q14(b)'s fraction.
+- [x] Preserve larger compound fractions throughout full and compact working, highlights, sign-first reveals and optional steps. Map numerator/denominator sign anchors correctly and separate overlapping arrow groups into lanes. Update the source note to describe the preserved textbook notation.
+- [x] Pass all 653 Directed Numbers checks, scoped ESLint and whitespace checks, TypeScript and the production build. Browser verification covers all 25 source fractions, retained ÷ notation, optional-step switching, hidden magnitudes and non-overlapping arrows at 390px / 1920px; the final Projection mode recheck also passes. Review screenshots: ignored `out/fraction-lines-browser/`.
+- [x] Local preview: `http://localhost:3000/apps/directed-numbers#textbook:e=R2-37b`. Owner approved publication to Vercel on 26/10/2026.
+
 ## Similarity two-agent bug audit (25/10/2026)
 
 - Requested roles: an independent read-only bug finder and a separate debugger. Audited all 72 initial questions, first proof steps, vertex labels, equation fitting, game constructions, and triangle pose retention.

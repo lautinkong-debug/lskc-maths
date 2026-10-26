@@ -55,6 +55,8 @@ export function groupedSteps(ast: Ast, style: NumberStyle): Step[] | null {
     if (node.kind === "group")
       return `\\left(${chain(node.child, marked)}\\right)`;
     if (node.kind !== "binary") throw new Error("Invalid independent product");
+    if (node.op === "/" && node.fractionBar)
+      return `\\dfrac{${chain(node.left, marked)}}{${chain(node.right, marked)}}`;
     return `${chain(node.left, marked)} ${node.op === "*" ? "\\times" : "\\div"} ${chain(node.right, marked)}`;
   }
   const signs = groups.map((node) => (evaluate(node).n < 0 ? "-" : "+"));
@@ -62,6 +64,27 @@ export function groupedSteps(ast: Ast, style: NumberStyle): Step[] | null {
     (node) => `\\left(${chain(node, false)}\\right)`,
   );
   const marked = groups.map((node) => chain(node, true));
+  // Map KaTeX's bottom-to-top fraction DOM back to the source factor order.
+  let anchorIndex = 0;
+  function factorOrder(node: Ast): number[] {
+    if (atomic(node)) return [anchorIndex++];
+    if (node.kind === "group") return factorOrder(node.child);
+    if (node.kind !== "binary") return [];
+    const left = factorOrder(node.left),
+      right = factorOrder(node.right);
+    return node.fractionBar ? [...right, ...left] : [...left, ...right];
+  }
+  const groupOrders = new Map(groups.map((node) => [node, factorOrder(node)]));
+  function renderedOrder(node: Ast): number[] {
+    const group = groupOrders.get(node);
+    if (group) return group;
+    if (node.kind === "binary") {
+      const left = renderedOrder(node.left),
+        right = renderedOrder(node.right);
+      return node.fractionBar ? [...right, ...left] : [...left, ...right];
+    }
+    return node.kind === "number" ? [] : renderedOrder(node.child);
+  }
   const result = new Map(groups.map((node) => [node, evaluate(node)]));
   function reduce(node: Ast): Ast {
     const value = result.get(node);
@@ -107,6 +130,7 @@ export function groupedSteps(ast: Ast, style: NumberStyle): Step[] | null {
       },
       signArrows: {
         pair: signs.join(""),
+        anchorOrder: renderedOrder(ast),
         tex: replace(marked),
         highlighted: replace(
           marked.map((part) => `\\colorbox{#fff1ad}{$${part}$}`),

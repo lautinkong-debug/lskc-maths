@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import katex from "katex";
+import { arithmeticTex } from "../../../../tests/helpers/arithmeticTex";
 import { evaluate, parse, parseAnswer } from "./parse";
 import { equals } from "./rational";
 import { textbookQuestions } from "./textbook";
@@ -120,13 +121,7 @@ describe("teacher demonstration frames", () => {
       expect(steps.length).toBeGreaterThan(0);
       for (const step of steps) {
         if (step.signReveal || step.batchReveal) {
-          const shown = parse(
-            step.tex
-              .replace(/\\frac\{(\d+)\}\{(\d+)\}/g, "($1/$2)")
-              .replace(/\\left|\\right/g, "")
-              .replace(/\\times/g, "×")
-              .replace(/\\div/g, "÷"),
-          );
+          const shown = parse(arithmeticTex(step.tex));
           expect(shown.ok).toBe(true);
           if (shown.ok)
             expect(equals(evaluate(shown.value), answer.value)).toBe(true);
@@ -145,14 +140,7 @@ describe("teacher demonstration frames", () => {
           expect(arrows).not.toBeNull();
           expect(arrows!.match(/textcolor/g)).toHaveLength(2);
           if (step.signArrows) {
-            const shown = parse(
-              arrows!
-                .replace(/\\textcolor\{#DA2127\}\{([+-])\}/g, "$1")
-                .replace(/\\frac\{(\d+)\}\{(\d+)\}/g, "($1/$2)")
-                .replace(/\\left|\\right/g, "")
-                .replace(/\\times/g, "×")
-                .replace(/\\div/g, "÷"),
-            );
+            const shown = parse(arithmeticTex(arrows!));
             expect(shown.ok, arrows!).toBe(true);
             if (shown.ok)
               expect(equals(evaluate(shown.value), answer.value)).toBe(true);
