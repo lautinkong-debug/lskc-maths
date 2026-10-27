@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
 import { copy } from "@/lib/copy";
 import { useAnswers } from "./answers";
-import {
-  ageExamples,
-  ageRows,
-  conceptRows,
-  cumulativeExamples,
-  stemLeaves,
-} from "./concepts";
+import { ageExamples, ageRows, conceptRows, stemLeaves } from "./concepts";
 import { percentileEstimate } from "./advanced";
 import { billRows, weightRows, walkthroughLengths } from "./walkthroughs";
+import { histogramWalkthroughChoices } from "./walkthroughChoiceData";
+import { WalkthroughChoices } from "./WalkthroughChoices";
 import {
   cumulativePoints,
   curvePath,
@@ -28,6 +24,7 @@ function Plot({
   guide,
   title,
   axis,
+  scalePeak,
 }: {
   rows: Row[];
   cumulative?: boolean;
@@ -43,14 +40,17 @@ function Plot({
   };
   title: string;
   axis: string;
+  scalePeak?: number;
 }) {
   const limits = frequencyPoints(rows);
   const xmin = curve ? limits[0].x : rows[0].low,
     xmax = curve ? limits.at(-1)!.x : rows.at(-1)!.high;
   const x = (n: number) => 68 + ((n - xmin) / (xmax - xmin)) * 610;
-  const peak = cumulative
-    ? rows.at(-1)!.cumulative
-    : Math.ceil(Math.max(6, ...rows.map((r) => r.frequency)) / 4) * 4;
+  const peak =
+    scalePeak ??
+    (cumulative
+      ? rows.at(-1)!.cumulative
+      : Math.ceil(Math.max(6, ...rows.map((r) => r.frequency)) / 4) * 4);
   const y = (n: number) => 310 - (n / peak) * 250;
   const points = cumulativePoints(rows);
   return (
@@ -209,6 +209,8 @@ export function AnimatedWalkthroughs() {
     [step, setStep] = useState(0),
     [playing, setPlaying] = useState(false),
     [delay, setDelay] = useState(2200);
+  const [histogramChoice, setHistogramChoice] = useState(1);
+  const [curveChoice, setCurveChoice] = useState<number | null>(null);
   const answers = useAnswers(),
     max = walkthroughLengths[lesson],
     current = answers ? step : 0;
@@ -224,7 +226,7 @@ export function AnimatedWalkthroughs() {
   const ages = [...ageExamples[0]].sort((a, b) => a - b),
     ageData = ageRows(ages.slice(0, Math.min(15, current))),
     fullAges = ageRows(ages);
-  const cumulative = conceptRows(cumulativeExamples[0]),
+  const cumulative = conceptRows(histogramWalkthroughChoices[histogramChoice]),
     active = Math.max(0, current - 1);
   const median = percentileEstimate(billRows, 50, "polygon")!,
     percentile = percentileEstimate(billRows, 85, "polygon")!;
@@ -251,7 +253,11 @@ export function AnimatedWalkthroughs() {
             vertical: current >= 4,
           };
   return (
-    <section className={s.walkthrough} aria-label={c.title}>
+    <section
+      className={s.walkthrough}
+      aria-label={c.title}
+      data-comparison={lesson < 2}
+    >
       <div className={s.activityHeader}>
         <div>
           <p className={s.chapter}>{c.eyebrow}</p>
@@ -398,8 +404,9 @@ export function AnimatedWalkthroughs() {
           <Plot
             rows={cumulative}
             cumulative
+            scalePeak={32}
             active={current ? current - 1 : -1}
-            title={c.sourceGraph}
+            title={`${c.sourceGraph} · ${"ABCD"[histogramChoice]}`}
             axis={copy.statisticalCharts.concepts.value}
           />
           <Plot
@@ -410,6 +417,20 @@ export function AnimatedWalkthroughs() {
             axis={copy.statisticalCharts.concepts.value}
           />
         </div>
+      )}
+      {lesson < 2 && (
+        <WalkthroughChoices
+          cumulative={lesson === 1}
+          selected={lesson === 1 ? histogramChoice : curveChoice}
+          answers={answers}
+          onSelect={(i) => {
+            if (lesson === 1) {
+              setHistogramChoice(i);
+              setStep(0);
+              setPlaying(false);
+            } else setCurveChoice(i);
+          }}
+        />
       )}
       {lesson === 2 && (
         <div className={s.conceptGrid}>

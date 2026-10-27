@@ -296,6 +296,17 @@
   display: grid;
   gap: 18px;
 }
+@media (min-width: 1100px) {
+  .walkthrough[data-comparison="true"] { gap: 12px; }
+  .walkthrough[data-comparison="true"] .animationPlot svg { max-height: 230px; }
+  .walkthrough[data-comparison="true"] .animationPlot,
+  .walkthrough[data-comparison="true"] .conceptCard { padding: 12px 18px; }
+  .walkthrough[data-comparison="true"] .stemTable { margin: 10px 0; }
+  .walkthrough[data-comparison="true"] .stemTable th,
+  .walkthrough[data-comparison="true"] .stemTable td { padding: 5px 16px; }
+  .walkthrough[data-comparison="true"] .stemTable caption { padding-top: 8px; }
+  .walkthrough[data-comparison="true"] .animationNarration { min-height: 0; margin: 0; padding: 8px 16px; font-size: 16px; }
+}
 .vocabulary {
   display: grid;
   gap: 18px;
