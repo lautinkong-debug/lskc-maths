@@ -67,3 +67,6 @@ emulator-data/
 .vercel
 .env*
 !.env.example
+
+# Local source PDF and rendering scratch for Algebra Simplification
+/tmp/algebra-source/

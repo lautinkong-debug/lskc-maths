@@ -1,5 +1,11 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Algebra Simplification publication (28/10/2026)
+
+- [x] Owner approved publication of the verified 42-question Practice/Learn app: Exercise 3A Q7-10, Quick Practice 3.4-3.6 and Revision Exercise 3 Q3-6 / Q28-29.
+- [x] Prepare a scoped release on production main containing the app, registry entry, central copy, focused tests, local preview script and source/verification document. Exclude unrelated local work and textbook scans.
+- [ ] Verify the exact release, publish it, confirm Vercel READY, and test the live official route. No Firebase data or rules changes are required.
+
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
 ## Directed Numbers challenge practice — approved publication (27/10/2026)

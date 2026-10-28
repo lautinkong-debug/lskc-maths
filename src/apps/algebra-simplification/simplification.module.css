@@ -1,0 +1,463 @@
+.app {
+  color: var(--color-graphite);
+}
+.app button,
+.app select {
+  font: inherit;
+}
+.app button {
+  cursor: pointer;
+}
+.app button:disabled {
+  opacity: 0.48;
+  cursor: default;
+}
+.navigation {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+.navigation button {
+  text-align: left;
+  padding: 0.8rem 1rem;
+  border-radius: 0.4rem;
+  border: 1px solid transparent;
+  font-weight: 600;
+}
+.navigation button[aria-current] {
+  color: var(--color-navy);
+  background: var(--color-navy-wash);
+  border-color: var(--color-grid);
+}
+.coverage {
+  font-size: 0.85rem;
+  color: var(--color-pencil);
+  margin: 1.25rem 0.5rem;
+}
+.content {
+  padding: clamp(0.8rem, 2vw, 2rem);
+  min-width: 0;
+}
+.heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+.heading h2 {
+  font-family: var(--font-display);
+  color: var(--color-navy);
+  font-size: clamp(1.5rem, 2.2vw, 2.2rem);
+  line-height: 1.2;
+}
+.heading p {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+}
+.score {
+  display: grid;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: 0.85rem;
+}
+.score strong {
+  color: var(--color-navy);
+  font-size: 1rem;
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.filters label,
+.playerControls label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.filters select,
+.playerControls select {
+  min-height: 44px;
+  padding: 0.4rem 2rem 0.4rem 0.7rem;
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 0.3rem;
+  background: var(--color-paper);
+}
+.sheet {
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 0.6rem;
+  background: var(--color-paper);
+  overflow: hidden;
+}
+.source {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  background: var(--color-navy-wash);
+  color: var(--color-navy);
+  padding: 0.7rem 1.3rem;
+  font-size: 0.85rem;
+}
+.problem {
+  padding: 1.6rem 1.5rem 1.2rem;
+  background-image: linear-gradient(var(--color-rule) 1px, transparent 1px);
+  background-size: 100% 28px;
+}
+.problem > span:first-child {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.7rem;
+}
+.expression {
+  display: block;
+  font-size: clamp(1.35rem, 2.4vw, 2.25rem);
+  color: var(--color-navy);
+}
+.expression :global(.katex),
+.lineMath :global(.katex),
+.correction :global(.katex) {
+  font-size: 1em;
+}
+.choose {
+  padding: 0.8rem 1.5rem 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding: 0 1.5rem;
+}
+.choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 82px;
+  padding: 1rem;
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 0.45rem;
+  text-align: left;
+  background: white;
+  font-size: clamp(1rem, 1.5vw, 1.35rem) !important;
+}
+.choice:not(:disabled):hover {
+  border-color: var(--color-navy);
+  background: var(--color-navy-wash);
+}
+.choice[data-selected] {
+  border: 2px solid var(--color-navy);
+  background: var(--color-navy-wash);
+  padding-bottom: 1.7rem;
+}
+.choice[data-correct] {
+  background: var(--color-navy);
+  color: white;
+  opacity: 1 !important;
+}
+.choiceLabel {
+  position: absolute;
+  right: 0.65rem;
+  bottom: 0.2rem;
+  font-size: 0.7rem;
+}
+.letter {
+  color: var(--color-pencil);
+  font-size: 0.8rem;
+}
+.choice[data-correct] .letter {
+  color: inherit;
+}
+.feedback {
+  min-height: 7.7rem;
+  padding: 1.1rem 1.5rem 0.6rem;
+  font-size: 0.95rem;
+}
+.feedback strong {
+  color: var(--color-navy);
+}
+.feedback p {
+  max-width: 70ch;
+  margin: 0.3rem 0;
+}
+.correction {
+  display: block;
+  margin-top: 0.7rem;
+  font-size: clamp(0.9rem, 1.5vw, 1.4rem);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 0 1.5rem 1.2rem;
+}
+.actions button,
+.playerControls button,
+.questionControls button,
+.back {
+  min-height: 44px;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--color-grid-strong);
+  background: var(--color-paper);
+  border-radius: 0.3rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.app .primary {
+  background: var(--color-navy);
+  border-color: var(--color-navy);
+  color: white;
+}
+.app .primary:not(:disabled):hover {
+  background: var(--color-navy-deep);
+}
+.questionControls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-grid);
+}
+.questionControls > span {
+  flex-shrink: 0;
+  color: var(--color-pencil);
+  font-size: 0.85rem;
+}
+.lesson {
+  padding: 1rem 1.5rem;
+}
+.playerHeader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+.playerHeader h3 {
+  font-weight: 600;
+  font-size: 1rem;
+}
+.working {
+  min-height: 15rem;
+  padding: 0.5rem 0;
+}
+.start {
+  padding: 1.2rem 0;
+  max-width: 50ch;
+  color: var(--color-pencil);
+}
+.workingLine {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 0.8rem;
+  border-left: 3px solid transparent;
+  animation: reveal 0.25s ease-out;
+}
+.workingLine[data-current] {
+  border-color: var(--color-navy);
+  background: var(--color-navy-wash);
+}
+.lineMath {
+  font-size: clamp(1.1rem, 1.5vw, 1.55rem);
+}
+.workingLine p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.playerControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: end;
+  border-top: 1px solid var(--color-grid);
+  padding-top: 1rem;
+}
+.playerControls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.back {
+  margin-top: 1rem;
+}
+.note {
+  color: var(--color-pencil);
+  font-size: 0.8rem;
+  margin-top: 1rem;
+  max-width: 85ch;
+}
+.complete {
+  color: var(--color-navy);
+  padding: 1rem;
+  background: var(--color-navy-wash);
+  margin-top: 1rem;
+}
+.app[data-presenting] .expression {
+  font-size: 2.7rem;
+}
+.app[data-presenting] .lineMath {
+  font-size: 1.85rem;
+}
+.app[data-presenting] .workingLine p {
+  font-size: 1.1rem;
+}
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 1050px) {
+  .workingLine {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+}
+@media (max-width: 600px) {
+  .heading {
+    display: block;
+  }
+  .score {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.8rem;
+    text-align: left;
+    align-items: baseline;
+  }
+  .filters {
+    gap: 0.65rem;
+  }
+  .filters label:first-child {
+    flex: 1 1 100%;
+  }
+  .filters label:last-child {
+    flex: 1;
+  }
+  .source,
+  .problem {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+  .choices {
+    grid-template-columns: 1fr;
+    padding: 0 0.85rem;
+    gap: 0.5rem;
+  }
+  .choice {
+    min-height: 61px;
+    padding: 0.75rem;
+  }
+  .choose,
+  .feedback,
+  .actions,
+  .lesson,
+  .questionControls {
+    padding-left: 0.85rem;
+    padding-right: 0.85rem;
+  }
+  .feedback {
+    min-height: 6.5rem;
+  }
+  .correction {
+    font-size: 0.85rem;
+  }
+  .questionControls button {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  .workingLine {
+    padding-left: 0.5rem;
+    padding-right: 0.4rem;
+  }
+  .lineMath {
+    font-size: 1rem;
+  }
+  .working {
+    min-height: 17rem;
+  }
+  .playerControls button {
+    flex: 1 1 42%;
+  }
+  .app[data-presenting] .expression {
+    font-size: 1.5rem;
+  }
+  .app[data-presenting] .lineMath {
+    font-size: 1rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workingLine {
+    animation: none;
+  }
+}
+
+/* Keep the question near the top on a phone, and reserve the projector for maths. */
+.collectionFilter {
+  min-width: 200px;
+}
+.app[data-presenting] .heading > div:first-child {
+  display: none;
+}
+.app[data-presenting] .heading {
+  justify-content: flex-end;
+  margin-bottom: 0.7rem;
+}
+@media (max-width: 600px) {
+  :global(.studio-app-frame):has(.app) {
+    padding-top: 0.8rem;
+  }
+  :global(.studio-app-frame):has(.app) > :global(.studio-lesson-heading) {
+    padding: 0.7rem 0.9rem;
+    gap: 0.6rem;
+  }
+  :global(.studio-app-frame):has(.app) > :global(.studio-lesson-heading) h1 {
+    font-size: 1.4rem;
+    margin-top: 0.4rem;
+  }
+  :global(.studio-app-frame):has(.app) > :global(.studio-lesson-heading) p {
+    display: none;
+  }
+  :global(.studio-app-frame):has(.app)
+    > :global(.studio-lesson-heading)
+    button {
+    min-height: 38px;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.85rem;
+  }
+  :global(.studio-app-frame):has(.app) > div:has(> .app) {
+    margin-top: 0.8rem;
+  }
+  .heading > div:first-child {
+    display: none;
+  }
+  .heading {
+    margin-bottom: 0.7rem;
+  }
+  .filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 0.65rem;
+  }
+  .filters select {
+    min-width: 0;
+    width: 100%;
+  }
+  .collectionFilter {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+}

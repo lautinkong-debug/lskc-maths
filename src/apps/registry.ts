@@ -12,6 +12,8 @@ import SurfaceAreaThumbnail from "./surface-area/Thumbnail";
 
 import PolynomialsThumbnail from "./polynomials/Thumbnail";
 
+import AlgebraSimplificationThumbnail from "./algebra-simplification/Thumbnail";
+
 export interface AppEntry {
   slug: string;
   title: string;
@@ -27,6 +29,17 @@ export interface AppEntry {
 
 /** The index and detail route both use this list. New apps register here. */
 export const appRegistry: readonly AppEntry[] = [
+  {
+    slug: "algebra-simplification",
+    topicCodes: ["1A03"],
+    title: copy.algebraSimplification.title,
+    topic: copy.algebraSimplification.topic,
+    levels: ["F1"],
+    strand: "number-algebra",
+    summary: copy.algebraSimplification.summary,
+    thumbnail: AlgebraSimplificationThumbnail,
+    load: () => import("./algebra-simplification"),
+  },
   {
     slug: "polynomials",
     topicCodes: ["1A10"],
