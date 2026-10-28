@@ -39,6 +39,9 @@ export type RuleId =
   | AdditiveRuleId
   | "inner-brackets-first"
   | "mult-div-first"
+  | "powers-first"
+  | "even-power"
+  | "odd-power"
   | "left-to-right"
   | "same-sign-product"
   | "diff-sign-product"
@@ -82,6 +85,7 @@ export type Step = {
     | "quotient"
     | "reciprocal"
     | "sign"
+    | "power"
     | "mixed";
 };
 export type AdditiveStep = Step & {
@@ -149,8 +153,37 @@ function texPieces(
         text: ast.op,
         span: { start: ast.span.start, end: ast.child.span.start },
       },
-      ...texPieces(ast.child, false, style),
+      ...(ast.child.kind === "number" && ast.child.value.n < 0
+        ? [
+            {
+              text: `\\left(${toTex(ast.child.value, { style })}\\right)`,
+              span: ast.child.span,
+            },
+          ]
+        : texPieces(ast.child, false, style)),
     ];
+  if (ast.op === "^") {
+    // Keep a fractional or reduced negative base visibly inside the power.
+    const base = texPieces(ast.left, false, style);
+    const wrap =
+      (ast.left.kind === "number" &&
+        (ast.left.value.n < 0 || ast.left.value.d !== 1)) ||
+      (ast.left.kind === "group" &&
+        ast.left.child.kind === "binary" &&
+        ast.left.child.fractionBar);
+    return [
+      ...(wrap
+        ? [{ text: "\\left(", span: ast.left.span, structural: true }]
+        : []),
+      ...base,
+      ...(wrap
+        ? [{ text: "\\right)", span: ast.left.span, structural: true }]
+        : []),
+      { text: "^{", span: ast.span, structural: true },
+      ...texPieces(ast.right, false, style),
+      { text: "}", span: ast.span, structural: true },
+    ];
+  }
   if (ast.op === "/" && ast.fractionBar)
     return [
       { text: "\\dfrac{", span: ast.span, structural: true },
@@ -556,7 +589,7 @@ function convertMixed(ast: Ast): GeneralChange | null {
 }
 function reduceTier(
   ast: Ast,
-  multiply: boolean,
+  tier: "power" | "multiply" | "add",
   insideGroup: boolean,
   hasAddition: boolean,
   reciprocalWorking: boolean,
@@ -566,7 +599,7 @@ function reduceTier(
     if (atomic(ast)) return null;
     const inner = reduceTier(
       ast.child,
-      multiply,
+      tier,
       insideGroup,
       hasAddition,
       reciprocalWorking,
@@ -575,7 +608,7 @@ function reduceTier(
   }
   const left = reduceTier(
     ast.left,
-    multiply,
+    tier,
     insideGroup,
     hasAddition,
     reciprocalWorking,
@@ -583,16 +616,32 @@ function reduceTier(
   if (left) return { ...left, ast: { ...ast, left: left.ast } };
   const right = reduceTier(
     ast.right,
-    multiply,
+    tier,
     insideGroup,
     hasAddition,
     reciprocalWorking,
   );
   if (right) return { ...right, ast: { ...ast, right: right.ast } };
-  if ((ast.op === "*" || ast.op === "/") !== multiply) return null;
+  const operationTier =
+    ast.op === "^"
+      ? "power"
+      : ast.op === "*" || ast.op === "/"
+        ? "multiply"
+        : "add";
+  if (operationTier !== tier) return null;
   if (!atomic(ast.left) || !atomic(ast.right)) return null;
   const a = evaluate(ast.left),
     b = evaluate(ast.right);
+  if (ast.op === "^") {
+    const ruleId =
+      a.n < 0 ? (b.n % 2 === 0 ? "even-power" : "odd-power") : "powers-first";
+    return {
+      ast: number(evaluate(ast), ast.span),
+      sourceHighlight: ast.span,
+      ruleId,
+      kind: "power",
+    };
+  }
   if (reciprocalWorking && ast.op === "/" && b.d !== 1) {
     const reciprocal = div(rational(1), b);
     if (!reciprocal.ok) throw new RationalError(reciprocal.code);
@@ -624,7 +673,7 @@ function reduceTier(
     sourceHighlight: ast.span,
     ruleId: insideGroup
       ? "inner-brackets-first"
-      : multiply && hasAddition
+      : tier === "multiply" && hasAddition
         ? "mult-div-first"
         : "left-to-right",
     kind: ast.op === "*" ? "product" : ast.op === "/" ? "quotient" : "sum",
@@ -648,8 +697,9 @@ function reduceExpression(
 ): GeneralChange | null {
   const hasAddition = contains(ast, "+-");
   return (
-    reduceTier(ast, true, insideGroup, hasAddition, reciprocalWorking) ??
-    reduceTier(ast, false, insideGroup, hasAddition, reciprocalWorking)
+    reduceTier(ast, "power", insideGroup, hasAddition, reciprocalWorking) ??
+    reduceTier(ast, "multiply", insideGroup, hasAddition, reciprocalWorking) ??
+    reduceTier(ast, "add", insideGroup, hasAddition, reciprocalWorking)
   );
 }
 function reduceInsideGroup(
@@ -871,7 +921,7 @@ export function workOut(
     reciprocalWorking?: boolean;
   } = {},
 ): Step[] {
-  return contains(ast, "*/") || hasMixedNumber(ast)
+  return contains(ast, "*/^") || hasMixedNumber(ast)
     ? generalWorkOut(ast, signWorking, numberStyle, reciprocalWorking)
     : signWorking
       ? bracketSteps(ast, numberStyle)

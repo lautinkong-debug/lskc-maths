@@ -2,6 +2,15 @@
 
 Status legend: `[ ]` to do · `[x]` done. Work one phase at a time and stop for the owner's review at the end of each phase.
 
+## Directed Numbers challenge practice — approved publication (27/10/2026)
+
+- [x] Add 20 original no-calculator questions in a separate Challenge practice tab: ten Challenge and ten Extra challenge questions. Combine exact fractions, mixed numbers, nested brackets, mixed operations and powers 2–5, including positive/negative 3, cubes and fourth powers as requested.
+- [x] Support powers in the exact arithmetic parser, printed working and teaching sequence; distinguish a negative base from a minus outside the power. Preserve stacked fractions, sign arrows, click-to-reveal highlights, optional written steps, Previous/Replay, difficulty filters and question links. Keep the textbook bank unchanged.
+- [x] Pass all 699 Directed Numbers maths checks, including independent evaluation of every printed challenge working line; scoped lint, TypeScript and the full production build pass.
+- [x] Pass all three challenge browser scenarios: navigation/filtering/deep links and every step of all 20 questions at 390px and 1920px Projection mode, with optional steps hidden/shown. Inspect rendered fractions/powers and recheck all four existing textbook fraction-arrow browser scenarios. Evidence: ignored `out/challenge-practice-browser/` and `out/challenge-fraction-regression/`.
+- [x] Owner approved publication to GitHub and Vercel on 27/10/2026. Release includes only the 20-question challenge bank and its supporting teaching, tests and wording.
+
+
 ## Directed Numbers textbook fraction lines — approved release (26/10/2026)
 
 - [x] Follow the owner's revised sketch: numerator sign arrows now curve upward above the numerator, with the combined sign above the arrowheads; denominator diagrams remain below. Determine placement from each calculation's nearest source fraction. Verify all 31 fraction tests, all four browser scenarios (including above-numerator geometry at phone/projector sizes), scoped lint and TypeScript. Owner approved publication of this revised numerator-arrow presentation on 26/10/2026.

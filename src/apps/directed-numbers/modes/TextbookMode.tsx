@@ -10,12 +10,18 @@ import {
 import { AnimatedWorking } from "../components/AnimatedWorking";
 import { parseJourney } from "../lib/moves";
 import {
+  challengeQuestions,
+  type ChallengeQuestion,
+} from "../lib/challengePractice";
+import {
   textbookQuestions,
   simpleMove,
   type TextbookQuestion,
 } from "../lib/textbook";
 const c = copy.apps.directedNumbers.textbookLesson;
 const t = copy.apps.directedNumbers.demonstration;
+const challengeCopy = copy.apps.directedNumbers.challengeLesson;
+type PracticeQuestion = TextbookQuestion | ChallengeQuestion;
 function DemonstrationQuestion({
   question,
   hideOptional,
@@ -23,7 +29,7 @@ function DemonstrationQuestion({
   method,
   setMethod,
 }: {
-  question: TextbookQuestion;
+  question: PracticeQuestion;
   hideOptional: boolean;
   setHideOptional: (value: boolean) => void;
   method: ExplanationMethod;
@@ -34,10 +40,14 @@ function DemonstrationQuestion({
     <div className="min-w-0 space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h3 className="text-navy text-xl font-semibold">
-          {c.reference(question.exercise, question.question, question.part)}
+          {question.exercise === "challenge"
+            ? challengeCopy.reference(question.question)
+            : c.reference(question.exercise, question.question, question.part)}
         </h3>
         <p className="text-pencil text-sm">
-          {c.page(question.page)} · {c.levelName(question.level)}
+          {question.exercise === "challenge"
+            ? `${challengeCopy.source} · ${challengeCopy.levelName(question.level)}`
+            : `${c.page(question.page)} · ${c.levelName(question.level)}`}
         </p>
       </div>
       {move ? (
@@ -69,31 +79,38 @@ function DemonstrationQuestion({
 
 export default function TextbookMode({
   initialQuestion,
+  challenge = false,
 }: {
   initialQuestion?: string;
+  challenge?: boolean;
 }) {
+  const bank: PracticeQuestion[] = challenge
+    ? challengeQuestions
+    : textbookQuestions;
   const presenting = usePresentation();
   const [hideOptional, setHideOptional] = useState(false);
   const [method, setMethod] = useState<ExplanationMethod>("number-line");
-  const initial =
-    textbookQuestions.find((q) => q.id === initialQuestion) ??
-    textbookQuestions[0];
-  const [exercise, setExercise] = useState<TextbookQuestion["exercise"]>(
+  const initial = bank.find((q) => q.id === initialQuestion) ?? bank[0];
+  const [exercise, setExercise] = useState<PracticeQuestion["exercise"]>(
     initial.exercise,
   );
   const [level, setLevel] = useState("all"),
     [index, setIndex] = useState(
-      textbookQuestions
+      bank
         .filter((q) => q.exercise === initial.exercise)
         .findIndex((q) => q.id === initial.id),
     );
-  const questions = textbookQuestions.filter(
+  const questions = bank.filter(
     (q) =>
       q.exercise === exercise && (level === "all" || q.level === Number(level)),
   );
   const question = questions[index];
-  function remember(q: TextbookQuestion) {
-    window.history.replaceState(null, "", `#textbook:e=${q.id}`);
+  function remember(q: PracticeQuestion) {
+    window.history.replaceState(
+      null,
+      "",
+      `#${challenge ? "challenge" : "textbook"}:e=${q.id}`,
+    );
   }
   function choose(next: number) {
     setIndex(next);
@@ -103,37 +120,43 @@ export default function TextbookMode({
     <section className={`min-w-0 space-y-5 ${presenting ? "text-xl" : ""}`}>
       {!presenting && (
         <h2 className="font-display text-navy text-2xl font-semibold">
-          {c.title}
+          {challenge ? challengeCopy.title : c.title}
         </h2>
       )}
       {!presenting && (
-        <p className="text-pencil max-w-3xl">{t.textbookIntro}</p>
+        <p className="text-pencil max-w-3xl">
+          {challenge ? challengeCopy.intro : t.textbookIntro}
+        </p>
       )}
-      <div className={styles.questionPicker}>
-        <label>
-          {c.exercise}
-          <select
-            className={field}
-            value={exercise}
-            onChange={(e) => {
-              setExercise(e.target.value as TextbookQuestion["exercise"]);
-              setIndex(0);
-              remember(
-                textbookQuestions.find(
-                  (q) =>
-                    q.exercise === e.target.value &&
-                    (level === "all" || q.level === Number(level)),
-                )!,
-              );
-            }}
-          >
-            {["2B", "2C", "R2"].map((name) => (
-              <option key={name} value={name}>
-                {c.exerciseName(name)}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div
+        className={`${styles.questionPicker} ${challenge ? styles.challengePicker : ""}`}
+      >
+        {!challenge && (
+          <label>
+            {c.exercise}
+            <select
+              className={field}
+              value={exercise}
+              onChange={(e) => {
+                setExercise(e.target.value as TextbookQuestion["exercise"]);
+                setIndex(0);
+                remember(
+                  bank.find(
+                    (q) =>
+                      q.exercise === e.target.value &&
+                      (level === "all" || q.level === Number(level)),
+                  )!,
+                );
+              }}
+            >
+              {["2B", "2C", "R2"].map((name) => (
+                <option key={name} value={name}>
+                  {c.exerciseName(name)}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label>
           {c.level}
           <select
@@ -143,7 +166,7 @@ export default function TextbookMode({
               setLevel(e.target.value);
               setIndex(0);
               remember(
-                textbookQuestions.find(
+                bank.find(
                   (q) =>
                     q.exercise === exercise &&
                     (e.target.value === "all" ||
@@ -155,7 +178,7 @@ export default function TextbookMode({
             <option value="all">{c.all}</option>
             {[1, 2].map((n) => (
               <option key={n} value={n}>
-                {c.levelName(n)}
+                {challenge ? challengeCopy.levelName(n) : c.levelName(n)}
               </option>
             ))}
           </select>
@@ -171,7 +194,7 @@ export default function TextbookMode({
               <option
                 key={q.id}
                 value={i}
-              >{`Q${q.question}(${q.part})`}</option>
+              >{`Q${q.question}${q.part ? `(${q.part})` : ""}`}</option>
             ))}
           </select>
         </label>
@@ -206,8 +229,8 @@ export default function TextbookMode({
         </button>
       </div>
       <footer className="border-grid text-pencil space-y-2 border-t pt-4 text-sm">
-        <p>{c.coverage}</p>
-        <p>{c.source}</p>
+        <p>{challenge ? challengeCopy.coverage : c.coverage}</p>
+        {!challenge && <p>{c.source}</p>}
       </footer>
     </section>
   );

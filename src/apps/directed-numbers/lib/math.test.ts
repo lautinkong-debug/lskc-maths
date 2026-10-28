@@ -230,7 +230,7 @@ describe("expression parser", () => {
     ["2 ++ 3", "signedOperand"],
     ["2 + +3", "signedOperand"],
     ["[3)", "brackets"],
-    ["2^3", "unknown"],
+    ["2^6", "powerExponent"],
     ["alert(1)", "unknown"],
     ["1".repeat(81), "tooLong"],
     ["9007199254740992", "overflow"],

@@ -150,11 +150,12 @@ export default function DirectedNumbers() {
               initialExpression={expression}
             />
           </Suspense>
-        ) : mode === "textbook" ? (
+        ) : mode === "textbook" || mode === "challenge" ? (
           <Suspense fallback={<p>{copy.apps.loading}</p>}>
             <TextbookMode
-              key={expression ?? "default"}
+              key={`${mode}:${expression ?? "default"}`}
               initialQuestion={expression}
+              challenge={mode === "challenge"}
             />
           </Suspense>
         ) : mode === "play" ? (

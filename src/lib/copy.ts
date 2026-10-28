@@ -2146,6 +2146,7 @@ export const copy = {
         "multiply-divide": "× and ÷",
         mixed: "Mixed",
         textbook: "Textbook practice",
+        challenge: "Challenge practice",
         play: "Play ★",
       },
       mode: "Choose a mode",
@@ -2393,6 +2394,14 @@ export const copy = {
           `Number line: start at ${start}, move ${Math.abs(delta)} units ${delta < 0 ? "left" : delta > 0 ? "right" : "without changing position"}${end === undefined ? "." : `, finish at ${end}, ${Math.abs(end)} units from zero.`}`,
         textbookLink: "Practise textbook questions",
       },
+      challengeLesson: {
+        title: "Challenge practice",
+        intro: "20 original questions with fractions, mixed operations and powers from 2 to 5. Work by hand, without a calculator. Reveal one step when you are ready.",
+        source: "Original extension questions · No calculator",
+        coverage: "Start with Q1–10, then try Q11–20 for nested brackets and fraction lines. Give exact answers in simplest form.",
+        levelName: (n: number) => n === 1 ? "Challenge" : "Extra challenge",
+        reference: (n: number) => `Challenge practice · Q${n}`,
+      },
       textbookLesson: {
         title: "Textbook practice",
         intro:
@@ -2576,6 +2585,9 @@ export const copy = {
         notes: {
           "inner-brackets-first": "Work inside the innermost brackets first.",
           "mult-div-first": "Multiply or divide before adding or subtracting.",
+          "powers-first": "Calculate powers before multiplying, dividing, adding or subtracting.",
+          "even-power": "An even power of a negative number is positive. Calculate the power first.",
+          "odd-power": "An odd power of a negative number is negative. Calculate the power first.",
           "left-to-right":
             "For operations at the same level, work from left to right.",
           "same-sign-product": "Same signs make a positive product.",
@@ -2693,6 +2705,7 @@ export const copy = {
         rules: "Order of operations",
         order: [
           "Work inside the innermost brackets first.",
+          "Calculate powers before multiplying or dividing.",
           "Do × and ÷ before + and −.",
           "At the same level, work from left to right.",
         ],
@@ -2703,11 +2716,13 @@ export const copy = {
         choiceWrong: (rule: string) =>
           rule === "inner-brackets-first"
             ? "Start inside the innermost brackets. Then return to the rest."
-            : rule === "mult-div-first"
-              ? "Multiply or divide before adding or subtracting."
-              : rule === "reciprocal"
-                ? "Before dividing by a fraction, change to multiplication by its reciprocal."
-                : "At the same level, choose the operation furthest left.",
+            : ["powers-first", "even-power", "odd-power"].includes(rule)
+              ? "Calculate the power before multiplying, dividing, adding or subtracting."
+              : rule === "mult-div-first"
+                ? "Multiply or divide before adding or subtracting."
+                : rule === "reciprocal"
+                  ? "Before dividing by a fraction, change to multiplication by its reciprocal."
+                  : "At the same level, choose the operation furthest left.",
         predictPrompt:
           "Which part comes next? Choose it, or reveal the next step.",
         nextPrompt: "Read the highlighted rule, then show the next line.",
@@ -2721,7 +2736,7 @@ export const copy = {
         answerRight: "Yes. Your answer has the right sign and size.",
         wrongSign: "Your size is right. Check the sign of the final result.",
         wrongSize:
-          "Check the order: brackets first, then × and ÷, then + and −. Work left to right within each level.",
+          "Check the order: brackets first, then powers, then × and ÷, then + and −. Work left to right within each level.",
         think: "Does left to right mean adding before multiplying?",
         thought:
           "No. Multiplication and division come first. Left to right applies only to operations at the same level.",
@@ -3351,6 +3366,8 @@ export const copy = {
           "Check that every opening bracket has a matching closing bracket.",
         missingNumber: "Add the missing number to finish your expression.",
         unknown: "Check this part. Use numbers, operation signs and brackets.",
+        powerExponent: "Use a whole-number power from 2 to 5, such as (-2)^3. Put nested powers in brackets.",
+        powerBrackets: "Put a fraction or mixed-number base in brackets, such as (1/2)^3.",
         ambiguousFraction: "Use ÷ or brackets to make this clear: (6/2) ÷ 3.",
         tooLong: "Keep your expression to 80 characters or fewer.",
         journey:

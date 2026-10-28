@@ -23,6 +23,12 @@ function factors(node: Ast): Ast[] | null {
 
 /** Group only disjoint, ready products/quotients; never cross a sum or bracket dependency. */
 export function groupedSteps(ast: Ast, style: NumberStyle): Step[] | null {
+  const hasPower = (node: Ast): boolean =>
+    node.kind === "binary"
+      ? node.op === "^" || hasPower(node.left) || hasPower(node.right)
+      : node.kind !== "number" && hasPower(node.child);
+  // Resolve powers before offering a simultaneous product/quotient reveal.
+  if (hasPower(ast)) return null;
   const groups: Ast[] = [];
   function find(node: Ast) {
     if (node.kind === "binary" && factors(node) && evaluate(node).n !== 0) {

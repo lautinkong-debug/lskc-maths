@@ -78,6 +78,15 @@ export const neg = (a: Rational): Rational => ({
 export const sub = (a: Rational, b: Rational) => add(a, neg(b));
 export const mul = (a: Rational, b: Rational) =>
   normalise(BigInt(a.n) * BigInt(b.n), BigInt(a.d) * BigInt(b.d));
+/** Small whole-number powers for handwritten practice; retain exact fractions. */
+export function pow(a: Rational, exponent: number): Rational {
+  if (!Number.isInteger(exponent) || exponent < 2 || exponent > 5)
+    throw new RationalError("invalidNumber");
+  return normalise(
+    BigInt(a.n) ** BigInt(exponent),
+    BigInt(a.d) ** BigInt(exponent),
+  );
+}
 export function div(
   a: Rational,
   b: Rational,

@@ -7,6 +7,7 @@ import {
   neg,
   readNumber,
   RationalError,
+  pow,
   type Rational,
 } from "./rational";
 export type Span = { start: number; end: number };
@@ -23,7 +24,7 @@ export type Ast =
   | { kind: "group"; child: Ast; bracket: string; span: Span }
   | {
       kind: "binary";
-      op: "+" | "-" | "*" | "/";
+      op: "+" | "-" | "*" | "/" | "^";
       left: Ast;
       right: Ast;
       implicit: boolean;
@@ -61,7 +62,8 @@ export function parse(source: string): ParseResult<Ast> {
     if (text[i] === "+" || text[i] === "-") {
       if (!allowSign) fail("signedOperand");
       const op = text[i++] as "+" | "-";
-      const child = primary(false);
+      // A leading minus is outside the power: -2^2 = -(2^2).
+      const child = power(false);
       if (child.kind === "number")
         return {
           ...child,
@@ -116,8 +118,44 @@ export function parse(source: string): ParseResult<Ast> {
       span: { start, end: i },
     };
   }
+  function power(allowSign: boolean): Ast {
+    const base = primary(allowSign);
+    space();
+    if (text[i] !== "^") return base;
+    if (
+      base.kind === "number" &&
+      (base.sourceForm === "fraction" || base.sourceForm === "mixed")
+    )
+      fail("powerBrackets", base.span.start, i + 1);
+    i++;
+    space();
+    const start = i;
+    const digits = /^\d+/.exec(text.slice(i));
+    if (!digits) return fail("powerExponent", start);
+    if (!/^[2-5]$/.test(digits[0])) fail("powerExponent", start);
+    i += digits[0].length;
+    if (/[.^]/.test(text[i] ?? "")) fail("powerExponent", start, i + 1);
+    const exponent: Ast = {
+      kind: "number",
+      value: readNumber(digits[0]),
+      span: { start, end: i },
+      explicitSign: false,
+      bracketed: false,
+      sourceForm: "integer",
+    };
+    space();
+    if (text[i] === "^") fail("powerExponent", start, i + 1);
+    return {
+      kind: "binary",
+      op: "^",
+      left: base,
+      right: exponent,
+      implicit: false,
+      span: { start: base.span.start, end: exponent.span.end },
+    };
+  }
   function term(allowSign: boolean): Ast {
-    let left = primary(allowSign);
+    let left = power(allowSign);
     for (;;) {
       space();
       const token = text[i];
@@ -125,7 +163,7 @@ export function parse(source: string): ParseResult<Ast> {
       if (token !== "*" && token !== "/" && !implicit) break;
       const fractionBar = token === "/" && source[i] === "/";
       if (!implicit) i++;
-      const right = primary(false);
+      const right = power(false);
       left = {
         kind: "binary",
         op: implicit ? "*" : (token as "*" | "/"),
@@ -194,6 +232,7 @@ export function evaluate(ast: Ast): Rational {
   if (ast.op === "+") return add(a, b);
   if (ast.op === "-") return sub(a, b);
   if (ast.op === "*") return mul(a, b);
+  if (ast.op === "^") return pow(a, b.n);
   const result = div(a, b);
   if (!result.ok) throw new RationalError(result.code);
   return result.value;
