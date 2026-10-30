@@ -14,6 +14,8 @@ import PolynomialsThumbnail from "./polynomials/Thumbnail";
 
 import AlgebraSimplificationThumbnail from "./algebra-simplification/Thumbnail";
 
+import EquationVillageThumbnail from "./equation-village/Thumbnail";
+
 export interface AppEntry {
   slug: string;
   title: string;
@@ -29,6 +31,17 @@ export interface AppEntry {
 
 /** The index and detail route both use this list. New apps register here. */
 export const appRegistry: readonly AppEntry[] = [
+  {
+    slug: "equation-village",
+    topicCodes: ["1A04"],
+    title: copy.equationVillage.title,
+    topic: copy.equationVillage.topic,
+    levels: ["F1"],
+    strand: "number-algebra",
+    summary: copy.equationVillage.summary,
+    thumbnail: EquationVillageThumbnail,
+    load: () => import("./equation-village"),
+  },
   {
     slug: "algebra-simplification",
     topicCodes: ["1A03"],

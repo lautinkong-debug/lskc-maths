@@ -1,5 +1,11 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Equation Village publication (30/10/2026)
+
+- [x] Owner approved publication of the single-mission F1 harbour game. Preserve the existing production apps and isolate unrelated local drafts.
+- [x] Include original 3D artwork, exact equation operations, feedback, transfer questions, saved local progress, phone/projector layouts and fallback rendering.
+- [ ] Verify the isolated release, publish to the existing maths website and confirm the live teaching flow. No Firebase data or rules changes are required.
+
 ## Algebra Simplification publication (28/10/2026)
 
 - [x] Owner approved publication of the verified 42-question Practice/Learn app: Exercise 3A Q7-10, Quick Practice 3.4-3.6 and Revision Exercise 3 Q3-6 / Q28-29.
