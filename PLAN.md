@@ -1,5 +1,13 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Equation Studio publication (30/10/2026)
+
+- [x] Owner approved publication of the reviewed 106-question Equation Studio: all Quick Practice and Revision Exercise 4, plus separate selected Exercise 4A and 4B collections.
+- [x] Prepare the scoped release on the latest production branch, preserving the existing published apps and shared arithmetic. Retain arrow-first bracket/LCM demonstrations, red cancellation history, decimal transposition, two-column working, practice and device progress.
+- [x] Add Upload mistakes beside each topic, opening the existing upload form with the level/chapter and Student edition selected. Verify a real local upload and reading from a separate student browser; preserve teacher-only management and existing file permissions.
+- [x] Validate the isolated production build, TypeScript, scoped lint, all 253 maths checks, 16 Equation Studio browser scenarios and four emulator-backed upload scenarios. Procedure: docs/linear-equations.md and docs/mistakes-upload.md.
+- [ ] Publish to GitHub/Vercel and verify the live question pages and classroom controls.
+
 ## Equation Village publication (30/10/2026)
 
 - [x] Owner approved publication of the single-mission F1 harbour game. Preserve the existing production apps and isolate unrelated local drafts.

@@ -1,0 +1,770 @@
+{
+  "quickRows": [
+    [
+      "qp-4.1a",
+      "4.1(a)",
+      "x+15=7",
+      "-8",
+      "4.7"
+    ],
+    [
+      "qp-4.1b",
+      "4.1(b)",
+      "x-13=-42",
+      "-29",
+      "4.7"
+    ],
+    [
+      "qp-4.1c",
+      "4.1(c)",
+      "6*y=-72",
+      "-12",
+      "4.7"
+    ],
+    [
+      "qp-4.1d",
+      "4.1(d)",
+      "y/(-3)=18",
+      "-54",
+      "4.7"
+    ],
+    [
+      "qp-4.2a",
+      "4.2(a)",
+      "5*a+7=22",
+      "3",
+      "4.9"
+    ],
+    [
+      "qp-4.2b",
+      "4.2(b)",
+      "4*b-5=-13",
+      "-2",
+      "4.9"
+    ],
+    [
+      "qp-4.2c",
+      "4.2(c)",
+      "-25=3+7*c",
+      "-4",
+      "4.9"
+    ],
+    [
+      "qp-4.2d",
+      "4.2(d)",
+      "11-3*d=5",
+      "2",
+      "4.9"
+    ],
+    [
+      "qp-4.3a",
+      "4.3(a)",
+      "(p+7)/5=-1",
+      "-12",
+      "4.10"
+    ],
+    [
+      "qp-4.3b",
+      "4.3(b)",
+      "-7*(q-5)=49",
+      "-2",
+      "4.10"
+    ],
+    [
+      "qp-4.3c",
+      "4.3(c)",
+      "1-3*r/4=-8",
+      "12",
+      "4.10"
+    ],
+    [
+      "qp-4.4a",
+      "4.4(a)",
+      "8*m-3*m=15",
+      "3",
+      "4.13"
+    ],
+    [
+      "qp-4.4b",
+      "4.4(b)",
+      "7-4*n-6*n=-13",
+      "2",
+      "4.13"
+    ],
+    [
+      "qp-4.5a",
+      "4.5(a)",
+      "21-3*p=4*p",
+      "3",
+      "4.14"
+    ],
+    [
+      "qp-4.5b",
+      "4.5(b)",
+      "3*q-1=9+8*q",
+      "-2",
+      "4.14"
+    ],
+    [
+      "qp-4.6a",
+      "4.6(a)",
+      "3*p-2=5*(8+p)",
+      "-21",
+      "4.15"
+    ],
+    [
+      "qp-4.6b",
+      "4.6(b)",
+      "3*(2-q)-5*(q+4)=-6",
+      "-1",
+      "4.15"
+    ],
+    [
+      "qp-4.7",
+      "4.7",
+      "2*(n-3)=3*(9-(n+1))",
+      "6",
+      "4.16"
+    ],
+    [
+      "qp-4.8a",
+      "4.8(a)",
+      "m/4+m/3=7",
+      "12",
+      "4.18"
+    ],
+    [
+      "qp-4.8b",
+      "4.8(b)",
+      "n/9-(n+2)/6=3",
+      "-60",
+      "4.18"
+    ],
+    [
+      "qp-4.9",
+      "4.9",
+      "(2*x-5)/3=x/4",
+      "4",
+      "4.19"
+    ],
+    [
+      "qp-4.10",
+      "4.10",
+      "q/2-2=2*(q/3+1)",
+      "-24",
+      "4.19"
+    ]
+  ],
+  "quickWords": [
+    {
+      "id": "qp-4.11",
+      "reference": "4.11",
+      "page": "4.23",
+      "equation": "(x-5)/2=16",
+      "answer": "37",
+      "variable": "x",
+      "prompt": "Miss Chan gives some candies to Jessy, Polly and Kathy. Polly receives x candies. The number of candies that Jessy has is 5 less than that of Polly. The number of candies that Kathy has is half of that Jessy has. It is known that Kathy has 16 candies.\n(a) Set up an equation in x.\n(b) Find the number of candies that Polly has.",
+      "setup": "Polly: x candies; Jessy: x − 5 candies; Kathy: (x − 5) ÷ 2 candies.",
+      "responses": [
+        {
+          "label": "(a) Equation in x",
+          "kind": "equation",
+          "answer": "(x-5)/2=16"
+        },
+        {
+          "label": "(b) Polly's candies",
+          "answer": "37",
+          "unit": "candies",
+          "expression": "x"
+        }
+      ]
+    },
+    {
+      "id": "qp-4.12",
+      "reference": "4.12",
+      "page": "4.24",
+      "equation": "x+(x+400)=720",
+      "answer": "160",
+      "variable": "x",
+      "prompt": "Mr Lee has bought a chair and a desk. The price of the desk is $400 more than that of the chair. If Mr Lee pays $720 in total, how much is the chair?",
+      "setup": "Let $x be the price of the chair. The desk costs $(x + 400).",
+      "responses": [
+        {
+          "label": "Price of the chair",
+          "answer": "160",
+          "unit": "HK$",
+          "expression": "x"
+        }
+      ]
+    },
+    {
+      "id": "qp-4.13",
+      "reference": "4.13",
+      "page": "4.24",
+      "equation": "480-x=3*(120+x)",
+      "answer": "30",
+      "variable": "x",
+      "prompt": "Sally has $480 and her younger sister has $120. When Sally gives some money to her sister, the amount of money that Sally has is 3 times that her younger sister has. How much does Sally give to her sister?",
+      "setup": "Let $x be the amount Sally gives her sister. Sally then has $(480 − x); her sister has $(120 + x).",
+      "responses": [
+        {
+          "label": "Money given to her sister",
+          "answer": "30",
+          "unit": "HK$",
+          "expression": "x"
+        }
+      ]
+    },
+    {
+      "id": "qp-4.14",
+      "reference": "4.14",
+      "page": "4.25",
+      "equation": "x+(x+28)=50",
+      "answer": "11",
+      "variable": "x",
+      "prompt": "When Maggie was born, her mother was 28 years old. At present, the sum of their ages is 50. How old is Maggie now?",
+      "setup": "Let x be Maggie's present age. Her mother's age is x + 28.",
+      "responses": [
+        {
+          "label": "Maggie's present age",
+          "answer": "11",
+          "unit": "years",
+          "expression": "x"
+        }
+      ]
+    },
+    {
+      "id": "qp-4.15",
+      "reference": "4.15",
+      "page": "4.26",
+      "equation": "140*x=100*(12-x)",
+      "answer": "5",
+      "variable": "x",
+      "prompt": "Sally buys 12 bags of cookies, and each bag contains either all chocolate cookies or all butter cookies. The weights of each bag of chocolate cookies and butter cookies are 140 g and 100 g respectively. If the total weight of chocolate cookies that Sally buys is the same as that of butter cookies, find the total weight of chocolate cookies that she buys.",
+      "setup": "Let x be the number of bags of chocolate cookies. There are 12 − x bags of butter cookies. The total weights are equal.",
+      "responses": [
+        {
+          "label": "Total weight of chocolate cookies",
+          "answer": "700",
+          "unit": "g",
+          "expression": "140*x"
+        }
+      ]
+    }
+  ],
+  "revisionRows": [
+    [
+      1,
+      "3*a-2=10"
+    ],
+    [
+      2,
+      "9-4*b=-11"
+    ],
+    [
+      3,
+      "(p-3)/5=-1"
+    ],
+    [
+      4,
+      "4*(q+6)=-16"
+    ],
+    [
+      5,
+      "7-r/4=5"
+    ],
+    [
+      6,
+      "(5-3*s)/4=8"
+    ],
+    [
+      7,
+      "2*x+6*x=32"
+    ],
+    [
+      8,
+      "28-4*y=-3*y"
+    ],
+    [
+      9,
+      "10-w=2*w-23"
+    ],
+    [
+      10,
+      "3*v+12=33-4*v"
+    ],
+    [
+      11,
+      "3*(a-2)=a"
+    ],
+    [
+      12,
+      "1/2*(4*b-3)=-b"
+    ],
+    [
+      13,
+      "2*(3-c)+8=5*c"
+    ],
+    [
+      14,
+      "4*(2*p+1)=26-3*p"
+    ],
+    [
+      15,
+      "7-q/6=q"
+    ],
+    [
+      16,
+      "2*r/3-14=3*r"
+    ],
+    [
+      17,
+      "A/2+A/4=9"
+    ],
+    [
+      18,
+      "B/2-B/3=-5"
+    ],
+    [
+      19,
+      "2*C/5=C/3+4"
+    ],
+    [
+      20,
+      "3-D/2=5*D/6"
+    ],
+    [
+      31,
+      "3*(u+5)/4=-6"
+    ],
+    [
+      32,
+      "2*(1-v)/3=4"
+    ],
+    [
+      33,
+      "(x+2)/2+1=2"
+    ],
+    [
+      34,
+      "3-(y-3)/4=1"
+    ],
+    [
+      35,
+      "2*(2*a+3)=3*(9-a)"
+    ],
+    [
+      36,
+      "2*(b-3)=5*b-(10-b)"
+    ],
+    [
+      37,
+      "2*(c+5)-3*(c-3)=4"
+    ],
+    [
+      38,
+      "4*(d-7)+3*(5*d-3)=1"
+    ],
+    [
+      39,
+      "4*(2*m-3)-3*(4*m+1)=-m"
+    ],
+    [
+      40,
+      "4*(3+2*(1-2*n))=-12"
+    ],
+    [
+      41,
+      "28*x=3*(16-4*(1-x))"
+    ],
+    [
+      42,
+      "2*(y+1)/5=(y-1)/3"
+    ],
+    [
+      43,
+      "(h+1)/3+(h-2)/4=1"
+    ],
+    [
+      44,
+      "(k-9)/5+6=2*k/3"
+    ],
+    [
+      45,
+      "1/4-(2*p+1)/6=3/4"
+    ],
+    [
+      46,
+      "(q+1)/3-(2*q-3)/2=-5/6"
+    ],
+    [
+      47,
+      "(2*r+3)/4+(r+4)/6=r"
+    ],
+    [
+      48,
+      "(2-s)/5+(s+1)/2=2*s/5-1"
+    ],
+    [
+      49,
+      "x/2-2*(x-4)/3=(12-5*x)/6"
+    ],
+    [
+      50,
+      "5*(3*A+1)/2-11=2*(A+1/3)"
+    ],
+    [
+      51,
+      "-2*(3-(B/4-1))=B/5-7"
+    ],
+    [
+      52,
+      "2*(1/6-1/3*(1-2*y))=1/2-(y-1)/3"
+    ]
+  ],
+  "revisionWords": [
+    {
+      "number": 21,
+      "prompt": "The difference between two numbers is 8, and their sum is 88. Find the larger number.",
+      "equation": "x+(x-8)=88",
+      "setup": "Let x be the larger number. The smaller number is x − 8.",
+      "responses": [
+        {
+          "label": "Larger number",
+          "expression": "x"
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "prompt": "The sum of two consecutive odd numbers is 168. Find these two numbers.",
+      "equation": "x+(x+2)=168",
+      "setup": "Let x be the smaller odd number. The next odd number is x + 2.",
+      "responses": [
+        {
+          "label": "Smaller odd number",
+          "expression": "x"
+        },
+        {
+          "label": "Larger odd number",
+          "expression": "x+2"
+        }
+      ]
+    },
+    {
+      "number": 23,
+      "prompt": "David pays $32 for 2 packs of chocolate and a can of soft drink. If the price of a can of soft drink is $6, find the price of a pack of chocolate.",
+      "equation": "2*x+6=32",
+      "setup": "Let $x be the price of a pack of chocolate.",
+      "responses": [
+        {
+          "label": "Price of a pack of chocolate",
+          "expression": "x",
+          "unit": "HK$"
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "prompt": "The figure shows a triangle of perimeter 32 cm. Find the value of b.",
+      "equation": "2*b+(b+5)+15=32",
+      "variable": "b",
+      "setup": "Add the three side lengths to form the perimeter.",
+      "diagram": "triangle24",
+      "responses": [
+        {
+          "label": "b",
+          "expression": "b"
+        }
+      ]
+    },
+    {
+      "number": 25,
+      "prompt": "A can of coke costs $p. The price of a hamburger is three times that of a can of coke. Peter buys a hamburger and 2 cans of coke and pays $30.\n(a) Set up an equation in p.\n(b) Find the value of p.",
+      "equation": "3*p+2*p=30",
+      "variable": "p",
+      "setup": "A hamburger costs $3p. Two cans of coke cost $2p.",
+      "responses": [
+        {
+          "label": "(a) Equation in p",
+          "kind": "equation",
+          "answer": "3*p+2*p=30"
+        },
+        {
+          "label": "(b) p",
+          "expression": "p"
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "prompt": "Originally, there are n students in a classroom. After 18 students have left the classroom, the number of students in the classroom is halved.\n(a) Set up an equation in n.\n(b) Find the value of n.",
+      "equation": "n-18=n/2",
+      "variable": "n",
+      "setup": "After 18 leave, n − 18 students remain. This is half the original number.",
+      "responses": [
+        {
+          "label": "(a) Equation in n",
+          "kind": "equation",
+          "answer": "n-18=n/2"
+        },
+        {
+          "label": "(b) n",
+          "expression": "n"
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "prompt": "Andrew runs along a path surrounding a rectangular playground as shown in the figure.\n(a) Express the perimeter of the playground in terms of L.\n(b) If Andrew runs around the playground 3 times, the total distance he runs is 120 m. Find the value of L.",
+      "equation": "3*(2*L+14)=120",
+      "variable": "L",
+      "setup": "Perimeter = 2(L + 7). Three laps cover 120 m.",
+      "diagram": "rectangle27",
+      "responses": [
+        {
+          "label": "(a) Perimeter in terms of L",
+          "kind": "expression",
+          "answer": "2*L+14",
+          "unit": "m"
+        },
+        {
+          "label": "(b) L",
+          "expression": "L"
+        }
+      ]
+    },
+    {
+      "number": 28,
+      "prompt": "A father’s age is 3 times his son’s age. If the difference between their ages is 34, find the father’s age.",
+      "equation": "3*x-x=34",
+      "setup": "Let x be the son's age. His father is 3x years old.",
+      "responses": [
+        {
+          "label": "Father's age",
+          "expression": "3*x",
+          "unit": "years"
+        }
+      ]
+    },
+    {
+      "number": 29,
+      "prompt": "Winnie buys some apples and oranges. The number of apples bought is 1 more than twice that of oranges bought. If the total number of fruits bought is 10, how many oranges does Winnie buy?",
+      "equation": "x+(2*x+1)=10",
+      "setup": "Let x be the number of oranges. There are 2x + 1 apples.",
+      "responses": [
+        {
+          "label": "Number of oranges",
+          "expression": "x"
+        }
+      ]
+    },
+    {
+      "number": 30,
+      "prompt": "The number of stamps owned by Tony is 3 times that of stamps owned by Raymond. If Tony gives 32 stamps to Raymond, they will have the same number of stamps. Find the total number of stamps owned by them.",
+      "equation": "3*x-32=x+32",
+      "setup": "Let x be Raymond's original number of stamps. Tony originally has 3x stamps.",
+      "responses": [
+        {
+          "label": "Total number of stamps",
+          "expression": "4*x",
+          "unit": "stamps"
+        }
+      ]
+    },
+    {
+      "number": 53,
+      "prompt": "If the sum of three consecutive even numbers is 108, find the largest number.",
+      "equation": "x+(x+2)+(x+4)=108",
+      "setup": "Let x be the smallest even number. The other two are x + 2 and x + 4.",
+      "responses": [
+        {
+          "label": "Largest number",
+          "expression": "x+4"
+        }
+      ]
+    },
+    {
+      "number": 54,
+      "prompt": "An adult ticket for a drama show costs $75, while a student ticket costs $30. If 1200 tickets are sold and the total amount collected is $72 000, how many student tickets are sold?",
+      "equation": "30*x+75*(1200-x)=72000",
+      "setup": "Let x be the number of student tickets. There are 1200 − x adult tickets.",
+      "responses": [
+        {
+          "label": "Student tickets sold",
+          "expression": "x",
+          "unit": "tickets"
+        }
+      ]
+    },
+    {
+      "number": 55,
+      "prompt": "A ribbon is 2 m long. After 40 cm of the ribbon has been cut away to make a bow, the remaining portion of the ribbon is cut into two pieces such that one is 36 cm longer than the other. Find the length of the shorter piece.",
+      "equation": "x+(x+36)=200-40",
+      "setup": "Use centimetres: 2 m = 200 cm. Let x cm be the shorter piece.",
+      "responses": [
+        {
+          "label": "Length of the shorter piece",
+          "expression": "x",
+          "unit": "cm"
+        }
+      ]
+    },
+    {
+      "number": 56,
+      "prompt": "The following shows two data service plans offered by a mobile service company.\nPlan A: $128 for 4 GB; extra data: $30 for 0.5 GB.\nPlan B: $198 for 6 GB; extra data: $25 for 0.5 GB.\n(a) Calvin joined plan A and he paid $218 for data service last month. At most how much data did he use last month?\n(b) Calvin claims that the fee paid last month would be lower if he joined plan B. Do you agree? Explain your answer.",
+      "equation": "128+30*x=218",
+      "setup": "Let x be the number of extra 0.5 GB blocks in plan A. Compare the result with the 6 GB included in plan B.",
+      "responses": [
+        {
+          "label": "(a) Maximum data used",
+          "expression": "4+0.5*x",
+          "unit": "GB"
+        },
+        {
+          "label": "(b) Agree or disagree?",
+          "kind": "choice",
+          "answer": "Agree",
+          "options": [
+            "Agree",
+            "Disagree"
+          ]
+        },
+        {
+          "label": "(b) Plan B charge",
+          "answer": "198",
+          "unit": "HK$"
+        }
+      ],
+      "conclusion": "Agree. 5.5 GB is within plan B's 6 GB allowance, so the charge is $198, which is $20 less than $218."
+    },
+    {
+      "number": 57,
+      "prompt": "City A is 100 km to the west of city B. David rides a bicycle at 15 km/h from city A to the west. At the same time, Alice drives a car at y km/h from city B to the west. If Alice catches up with David after 2.5 hours, find the value of y.",
+      "equation": "2.5*y=100+15*2.5",
+      "variable": "y",
+      "setup": "Alice travels the initial 100 km gap plus the distance David travels.",
+      "responses": [
+        {
+          "label": "y",
+          "expression": "y"
+        }
+      ]
+    },
+    {
+      "number": 58,
+      "prompt": "Amy and Mary walk at constant speeds towards each other along the same path. The walking speed of Amy is two-thirds that of Mary. If they are initially 2 km apart and meet each other after 24 minutes, find their walking speeds in km/h.",
+      "equation": "(2*x/3+x)*(24/60)=2",
+      "setup": "Let x km/h be Mary's speed. Amy's speed is 2x/3 km/h. Their combined distance is 2 km.",
+      "responses": [
+        {
+          "label": "Amy's walking speed",
+          "expression": "2*x/3",
+          "unit": "km/h"
+        },
+        {
+          "label": "Mary's walking speed",
+          "expression": "x",
+          "unit": "km/h"
+        }
+      ]
+    },
+    {
+      "number": 59,
+      "prompt": "The tank of a car is fully filled with petrol. On the first day of a trip, half of the tank of petrol is used. On the second day of the trip, one-third of the remaining petrol in the tank is used. If there is 20 L of petrol left in the tank, what is the capacity of the tank of the car?",
+      "equation": "(1-1/3)*x/2=20",
+      "setup": "Let x L be the tank's capacity. After day 1, x/2 L remains; after day 2, two-thirds of that remains.",
+      "responses": [
+        {
+          "label": "Capacity of the tank",
+          "expression": "x",
+          "unit": "L"
+        }
+      ]
+    },
+    {
+      "number": 60,
+      "prompt": "John’s savings are $300 more than his sister’s. After giving $450 from his savings to his sister, John’s savings become 2/5 of his sister’s. What are their savings together?",
+      "equation": "x+300-450=2*(x+450)/5",
+      "setup": "Let $x be his sister's original savings. John's original savings are $(x + 300).",
+      "responses": [
+        {
+          "label": "Their total savings",
+          "expression": "2*x+300",
+          "unit": "HK$"
+        }
+      ]
+    },
+    {
+      "number": 61,
+      "prompt": "Ada has some new banknotes of values $20, $50 and $100 for preparing red packets. The total values of each type of banknotes are the same. Suppose Ada has n $20 banknotes.\n(a) Express the numbers of $50 and $100 banknotes in terms of n.\n(b) In each red packet, Ada puts in one banknote. Altogether 64 red packets are prepared. What is the total value of the banknotes she puts in the red packets?",
+      "equation": "n+2*n/5+n/5=64",
+      "variable": "n",
+      "setup": "Each denomination has a total value of $20n. Divide that value by each banknote's face value.",
+      "responses": [
+        {
+          "label": "(a) Number of $50 banknotes",
+          "kind": "expression",
+          "answer": "2*n/5"
+        },
+        {
+          "label": "(a) Number of $100 banknotes",
+          "kind": "expression",
+          "answer": "n/5"
+        },
+        {
+          "label": "(b) Total value",
+          "expression": "60*n",
+          "unit": "HK$"
+        }
+      ]
+    },
+    {
+      "number": 62,
+      "prompt": "In an aptitude test, there are 50 multiple choice questions. Candidates will get 2 marks for each correct answer and 1 mark will be deducted for each unanswered question or wrong answer. Sandy answered only 45 questions in the aptitude test.\n(a) If she got 64 marks, how many wrong answers did she get?\n(b) If a negative mark is allowed in the aptitude test, she claims that she would never get 0 marks. Do you agree? Explain your answer.",
+      "equation": "2*(45-x)-x-5=64",
+      "setup": "Let x be the number of wrong answers. There are 45 − x correct answers and 5 unanswered questions.",
+      "responses": [
+        {
+          "label": "(a) Wrong answers",
+          "expression": "x"
+        },
+        {
+          "label": "(b) Agree or disagree?",
+          "kind": "choice",
+          "answer": "Agree",
+          "options": [
+            "Agree",
+            "Disagree"
+          ]
+        },
+        {
+          "label": "(b) Number of correct answers needed for 0 marks",
+          "answer": "50/3"
+        }
+      ],
+      "conclusion": "Agree. With c correct answers, the score is 2c − (50 − c) = 3c − 50. A score of 0 requires c = 50/3, which is not a whole number."
+    },
+    {
+      "number": 63,
+      "prompt": "The figure on the right shows a magic square. The sums of numbers on each of its rows, columns and diagonals are the same.\n(a) Find the value of x.\n(b) Hence, find the values of A and B.",
+      "equation": "(x+1)+(2*x-18)+(2*x-23)=(2*x-23)+24+(2*x-21)",
+      "setup": "Equate the top row to the right column. Then use the common sum to find A and B.",
+      "diagram": "magic63",
+      "responses": [
+        {
+          "label": "(a) x",
+          "expression": "x"
+        },
+        {
+          "label": "(b) A",
+          "expression": "5*x-80"
+        },
+        {
+          "label": "(b) B",
+          "expression": "3*x-37"
+        }
+      ]
+    }
+  ]
+}

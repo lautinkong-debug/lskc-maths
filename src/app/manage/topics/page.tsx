@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 import {
   ACTIVE_LEVELS,
   COMPULSORY_STRANDS,
@@ -288,6 +289,16 @@ export default function TopicsPage() {
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      href={{
+                        pathname: "/manage/upload",
+                        query: { topic: topic.id, level: selectedLevel },
+                      }}
+                      aria-label={`${copy.topics.uploadMistakes} — ${topic.code} ${topic.name}`}
+                      className="border-navy text-navy hover:bg-navy-wash rounded border px-3 py-2 text-sm font-semibold"
+                    >
+                      {copy.topics.uploadMistakes}
+                    </Link>
                     <button
                       type="button"
                       disabled={busy || index === 0}

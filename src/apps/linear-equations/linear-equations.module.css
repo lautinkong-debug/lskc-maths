@@ -1,0 +1,994 @@
+.app {
+  color: var(--color-graphite);
+  min-width: 0;
+}
+.app * {
+  box-sizing: border-box;
+}
+.app button,
+.app select,
+.app input {
+  font: inherit;
+}
+.app button {
+  min-height: 44px;
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 6px;
+  padding: 9px 15px;
+  background: var(--color-paper);
+  color: var(--color-navy);
+  font-weight: 600;
+  cursor: pointer;
+}
+.app button:hover:not(:disabled) {
+  background: var(--color-navy-wash);
+}
+.app button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.app .primary {
+  background: var(--color-navy);
+  color: var(--color-paper);
+  border-color: var(--color-navy);
+}
+.app .primary:hover:not(:disabled) {
+  background: var(--color-navy-deep);
+}
+.navigation {
+  display: grid;
+  gap: 8px;
+}
+.navigation button {
+  text-align: left;
+  border-color: transparent;
+}
+.navigation button[aria-current] {
+  background: var(--color-navy);
+  color: var(--color-paper);
+}
+.navigation p {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  padding: 6px;
+}
+.intro h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  line-height: 1.2;
+  color: var(--color-navy);
+  margin: 0;
+}
+.intro p {
+  margin: 8px 0 20px;
+}
+.picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.picker label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.picker select {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  padding: 9px;
+  color: var(--color-navy);
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 5px;
+  background: var(--color-paper);
+}
+.questionHeading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 18px 0;
+}
+.reference {
+  font-weight: 600;
+  color: var(--color-navy);
+  margin: 0;
+}
+.questionHeading > span {
+  font-size: 0.85rem;
+}
+.controls,
+.helpControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.controls > span {
+  margin-left: auto;
+  font-size: 0.9rem;
+}
+.lesson > .controls {
+  position: sticky;
+  top: 8px;
+  z-index: 2;
+  padding: 10px 0;
+  background: var(--color-paper);
+}
+.lessonGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(220px, 0.85fr);
+  gap: 24px;
+  margin: 16px 0;
+  align-items: start;
+}
+.working {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 2px solid var(--color-navy);
+}
+.working li {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--color-grid);
+}
+.working li > span {
+  font-size: 0.85rem;
+  display: block;
+}
+.working li > div {
+  font-size: clamp(1.2rem, 2.1vw, 1.8rem);
+  overflow-x: auto;
+  padding: 4px 0;
+}
+.working li[data-current] {
+  background: var(--color-navy-wash);
+  border-left: 4px solid var(--color-navy);
+}
+.working :global(.katex-display) {
+  margin: 0.25em 0;
+  text-align: left;
+}
+.reason {
+  padding: 20px;
+  border: 1px solid var(--color-grid);
+  border-radius: 8px;
+}
+.reason h3 {
+  color: var(--color-navy);
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  margin: 6px 0;
+}
+.reason p {
+  font-size: 1rem;
+  line-height: 1.65;
+}
+.equals {
+  font-size: 3.3rem;
+  line-height: 1;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+.signLesson {
+  border-top: 1px solid var(--color-grid-strong);
+  padding-top: 15px;
+  margin-top: 18px;
+}
+.signLesson > div {
+  font-size: 1.15rem;
+  overflow-x: auto;
+}
+.signLesson p {
+  font-size: 0.9rem;
+}
+.check {
+  margin: 18px 0 0;
+  border-top: 2px solid var(--color-navy);
+  padding: 18px 0 4px;
+}
+.check h3 {
+  color: var(--color-navy);
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+.check > p {
+  font-size: 0.9rem;
+}
+.checkGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+.checkGrid > div {
+  min-width: 0;
+  padding: 12px;
+  background: var(--color-navy-wash);
+  border-radius: 5px;
+}
+.checkGrid > div > span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+.checkGrid [role="math"] {
+  overflow-x: auto;
+  font-size: 1.2rem;
+}
+.verified {
+  font-weight: 700;
+  color: var(--color-navy);
+}
+.practice h2 {
+  font-size: 1.4rem;
+  font-family: var(--font-display);
+  margin: 0;
+  color: var(--color-navy);
+}
+.practice > p {
+  margin: 8px 0;
+}
+.questionBoard {
+  display: grid;
+  place-items: center;
+  min-height: 140px;
+  margin: 18px 0;
+  padding: 15px;
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  border: 1px solid var(--color-grid);
+  border-radius: 6px;
+}
+.questionBoard [role="math"] {
+  font-size: clamp(1.65rem, 3.5vw, 2.8rem);
+  max-width: 100%;
+  overflow-x: auto;
+  background: var(--color-paper);
+  padding: 4px 12px;
+}
+.answerForm {
+  max-width: 660px;
+}
+.answerForm label {
+  display: block;
+  font-weight: 600;
+  margin: 8px 0;
+}
+.answerForm > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.answerForm input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 2px solid var(--color-grid-strong);
+  border-radius: 6px;
+  background: var(--color-paper);
+  color: var(--color-graphite);
+  font-size: 1.25rem;
+}
+.answerForm span {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  white-space: nowrap;
+}
+.answerForm button {
+  flex-shrink: 0;
+}
+.answerForm p {
+  font-size: 0.85rem;
+  margin: 8px 0;
+}
+.feedback {
+  min-height: 40px;
+  margin: 14px 0;
+}
+.feedback[data-result] {
+  border-left: 4px solid var(--color-highlight);
+  padding: 12px 16px;
+  background: var(--color-navy-wash);
+}
+.feedback[data-result="correct"] {
+  border-left-color: var(--color-navy);
+}
+.feedback p {
+  margin: 8px 0 0;
+}
+.helpControls button {
+  font-size: 0.9rem;
+}
+.hint {
+  padding: 14px 0;
+  max-width: 70ch;
+}
+.result {
+  padding-top: 10px;
+}
+.result > [role="math"] {
+  font-size: 2rem;
+  color: var(--color-navy);
+}
+.result .controls {
+  margin-top: 20px;
+}
+.questionNavigation {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 26px 0 18px;
+}
+.footer {
+  border-top: 1px solid var(--color-grid);
+  font-size: 0.8rem;
+  padding-top: 10px;
+}
+.footer p {
+  margin: 7px 0;
+}
+.footer button {
+  margin-top: 8px;
+  font-size: 0.8rem;
+}
+.app[data-projecting] .intro {
+  display: none;
+}
+.app[data-projecting] .working li > div {
+  font-size: 2rem;
+}
+.app[data-projecting] .reason p {
+  font-size: 1.2rem;
+}
+.app[data-projecting] .footer {
+  margin-top: 24px;
+}
+@media (max-width: 850px) {
+  .lessonGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .reason {
+    padding: 16px;
+  }
+  .equals {
+    display: none;
+  }
+}
+@media (max-width: 520px) {
+  .picker {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .intro h2 {
+    font-size: 1.8rem;
+  }
+  .questionHeading {
+    margin: 14px 0;
+  }
+  .questionBoard {
+    min-height: 110px;
+    padding: 8px;
+  }
+  .questionBoard [role="math"] {
+    font-size: 1.65rem;
+    padding: 2px;
+  }
+  .controls {
+    gap: 6px;
+  }
+  .controls button {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+  .controls > span {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+  .answerForm > div {
+    flex-wrap: wrap;
+  }
+  .answerForm input {
+    width: calc(100% - 55px);
+    flex: 1;
+  }
+  .answerForm button {
+    width: 100%;
+  }
+  .checkGrid {
+    grid-template-columns: 1fr;
+  }
+  .working li {
+    padding: 12px 9px;
+  }
+  .questionNavigation button {
+    font-size: 0.8rem;
+    padding: 9px;
+  }
+}
+
+.app[data-projecting] .working li > span {
+  font-size: 1.1rem;
+}
+.app[data-projecting] .checkGrid [role="math"] {
+  font-size: 1.4rem;
+}
+
+.speed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+.speed select,
+.answerField select {
+  min-height: 44px;
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 5px;
+  padding: 8px;
+  background: var(--color-paper);
+  color: var(--color-navy);
+}
+.animationPanel {
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 8px;
+  margin: 16px 0 20px;
+  background: var(--color-paper);
+  overflow: hidden;
+}
+.stageHeading {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--color-navy);
+  color: var(--color-paper);
+  font-size: 0.85rem;
+}
+.animationBoard {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  min-height: 240px;
+  padding: 80px 24px 48px;
+  overflow-x: auto;
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  font-size: clamp(1.5rem, 2.7vw, 2.7rem);
+}
+.animationBoard > [role="math"] {
+  white-space: nowrap;
+}
+.equationSide {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  min-width: 25px;
+}
+.fixedEquals {
+  position: absolute;
+  left: -25px;
+  font-size: 1em;
+  line-height: 1;
+}
+.term {
+  display: grid;
+  position: relative;
+  background: var(--color-paper);
+  padding: 4px 3px;
+  border-radius: 5px;
+  z-index: 1;
+  white-space: nowrap;
+}
+.term > span {
+  grid-area: 1/1;
+}
+.term[data-moving] {
+  outline: 2px solid var(--color-highlight);
+  background: color-mix(
+    in srgb,
+    var(--color-highlight) 28%,
+    var(--color-paper)
+  );
+  z-index: 3;
+}
+.oldTerm {
+  opacity: 0;
+}
+.moveExplanation {
+  padding: 18px 24px;
+  min-height: 105px;
+  border-top: 1px solid var(--color-grid);
+  line-height: 1.6;
+  background: var(--color-navy-wash);
+}
+.moveExplanation p {
+  margin: 6px 0 0;
+}
+.moveExplanation [role="math"] {
+  display: inline-block;
+  padding: 0 8px;
+  font-size: 1.3em;
+}
+.history {
+  margin: 14px 0;
+}
+.history summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding: 12px 0;
+}
+.history .working {
+  max-height: 300px;
+  overflow-y: auto;
+}
+.wordProblem {
+  padding: 18px 0;
+  max-width: 85ch;
+  line-height: 1.8;
+}
+.wordProblem > p {
+  white-space: pre-line;
+  margin: 0;
+}
+.wordProblem svg {
+  width: 360px;
+  max-width: 100%;
+  height: auto;
+  margin: 10px 0;
+}
+.wordProblem svg text {
+  font-family: var(--font-display);
+  font-size: 18px;
+  fill: var(--color-navy);
+}
+.model {
+  padding: 16px;
+  margin-top: 16px;
+  background: var(--color-navy-wash);
+  border-left: 3px solid var(--color-navy);
+}
+.model [role="math"] {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.magic {
+  border-collapse: collapse;
+  margin: 20px 0;
+  background: var(--color-navy-wash);
+}
+.magic td {
+  border: 2px solid var(--color-navy);
+  padding: 18px;
+  text-align: center;
+}
+.app .answerForm > .answerField {
+  display: block;
+  margin: 16px 0;
+}
+.answerField select,
+.answerField input {
+  width: 100%;
+}
+.fieldFeedback {
+  border-left: 3px solid var(--color-highlight);
+  padding: 8px 12px;
+  background: var(--color-navy-wash);
+}
+.fieldFeedback[data-result="correct"] {
+  border-left-color: var(--color-navy);
+}
+.answerResult {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-grid);
+}
+.answerResult p {
+  flex-basis: 100%;
+  margin: 0;
+}
+.app[data-projecting] .animationBoard {
+  font-size: 3rem;
+  min-height: 240px;
+}
+.app[data-projecting] .history .working {
+  max-height: 210px;
+}
+.app[data-projecting] .moveExplanation {
+  font-size: 1.35rem;
+}
+@media (max-width: 520px) {
+  .animationBoard {
+    justify-content: flex-start;
+    min-height: 210px;
+    font-size: 1.5rem;
+    padding: 65px 14px 40px;
+    gap: 26px;
+  }
+  .animationPanel {
+    margin-top: 10px;
+  }
+  .stageHeading {
+    font-size: 0.75rem;
+    padding: 10px;
+    flex-wrap: wrap;
+  }
+  .moveExplanation {
+    padding: 14px;
+    font-size: 0.9rem;
+  }
+  .magic td {
+    padding: 12px;
+  }
+  .app .answerForm input {
+    width: 100%;
+  }
+}
+
+/* Keep the equality sign anchored while a term crosses between sides. */
+.animationBoard {
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) minmax(max-content, 1fr);
+  column-gap: 40px;
+}
+.animationBoard > [role="math"] {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+.equationSide[data-side="left"] {
+  justify-content: flex-end;
+}
+.equationSide[data-side="right"] {
+  justify-content: flex-start;
+}
+.fixedEquals {
+  left: -31px;
+}
+
+.retainedBoard {
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 8px;
+  margin: 16px 0 20px;
+  overflow: hidden;
+  background: var(--color-paper);
+}
+.retainedSteps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background-image:
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.retainedStep {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--color-grid-strong);
+  position: relative;
+  overflow-anchor: none;
+}
+.rowReason {
+  font-size: 0.9rem;
+  margin: 0 0 8px;
+  line-height: 1.5;
+  background: var(--color-paper);
+  width: fit-content;
+  padding: 2px 6px;
+  color: var(--color-navy);
+}
+.retainedStep[data-current] {
+  border-left: 4px solid var(--color-navy);
+}
+.retainedMath {
+  font-size: clamp(1.4rem, 2vw, 2rem);
+  overflow-x: auto;
+  padding: 8px 4px;
+  max-width: 100%;
+}
+.retainedMath :global(.katex-display) {
+  margin: 0.25em 0;
+}
+.tokenEquation {
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr) minmax(max-content, 1fr);
+  column-gap: 40px;
+  align-items: center;
+  padding: 18px 5px 14px;
+  min-height: 80px;
+  font-size: clamp(1.4rem, 2vw, 2rem);
+  overflow-x: auto;
+}
+.operation {
+  min-width: 0;
+}
+.operationScroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.annotatedEquation {
+  position: relative;
+  width: max-content;
+  min-width: 100%;
+  font-size: clamp(1.4rem, 2vw, 2rem);
+  padding: 0 18px 10px;
+}
+.annotatedEquation > [role="math"] {
+  position: relative;
+  z-index: 1;
+  width: max-content;
+  margin: 0 auto;
+}
+.annotatedEquation :global(.katex-display) {
+  margin: 0.25em 0;
+}
+.distributionArrows {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  color: var(--color-navy);
+}
+.distributionArrows [data-source-highlight],
+.distributionArrows [data-target-highlight] {
+  fill: var(--color-highlight);
+  opacity: 0;
+}
+.distributionArrows > [data-arrow] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+.productStrip {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 4px 4px;
+  font-size: 1.2rem;
+}
+.productStrip > div {
+  padding: 8px 14px;
+  background: var(--color-navy-wash);
+  border-bottom: 2px solid var(--color-navy);
+  border-radius: 4px;
+}
+.lcmNote {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 8px 0;
+  font-size: 1.05rem;
+  background: var(--color-paper);
+  padding: 8px 12px;
+  border-left: 3px solid var(--color-highlight);
+}
+.lcmNote [role="math"] {
+  font-size: 1.2em;
+}
+.app[data-projecting] .retainedMath,
+.app[data-projecting] .tokenEquation,
+.app[data-projecting] .annotatedEquation {
+  font-size: 2rem;
+}
+.app[data-projecting] .rowReason {
+  font-size: 1.1rem;
+}
+.app[data-projecting] .productStrip {
+  font-size: 1.5rem;
+}
+@media (max-width: 520px) {
+  .retainedStep {
+    padding: 12px 8px;
+  }
+  .annotatedEquation {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .productStrip {
+    font-size: 1rem;
+    gap: 6px;
+  }
+  .productStrip > div {
+    padding: 6px 9px;
+  }
+  .lcmNote {
+    font-size: 0.9rem;
+  }
+  .rowReason {
+    font-size: 0.85rem;
+  }
+}
+
+/* Plain working surface, read down each column. */
+.retainedSteps,
+.questionBoard,
+.animationBoard {
+  background-image: none;
+}
+.workingViewport {
+  min-height: 0;
+}
+.workingColumns {
+  --working-scale: 1;
+}
+.rowNumber {
+  display: inline-block;
+  margin-right: 8px;
+  color: var(--color-navy);
+  font-weight: 700;
+}
+.readingOrder {
+  font-size: 0.8rem;
+}
+.completed {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+}
+.checkDialog {
+  background: var(--color-paper);
+  color: var(--color-graphite);
+  border: 1px solid var(--color-grid-strong);
+  border-radius: 10px;
+  padding: 24px;
+  margin: auto;
+  width: min(900px, 94vw);
+  max-height: 90dvh;
+  overflow: auto;
+}
+.checkDialog::backdrop {
+  background: #0007;
+}
+.checkDialog > button:first-child {
+  float: right;
+}
+@media (min-width: 900px) {
+  .lesson {
+    height: calc(100dvh - 16px);
+    display: flex;
+    flex-direction: column;
+    scroll-margin-top: 8px;
+  }
+  .lesson > .controls {
+    position: static;
+    flex: 0 0 auto;
+    padding: 6px 0;
+  }
+  .retainedBoard {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    margin: 6px 0 0;
+  }
+  .retainedBoard > .stageHeading {
+    padding: 8px 14px;
+    flex-shrink: 0;
+  }
+  .workingViewport {
+    flex: 1 1 0;
+    padding: 6px;
+    overflow: hidden;
+  }
+  .workingColumns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .retainedSteps {
+    min-width: 0;
+  }
+  .retainedSteps + .retainedSteps {
+    border-left: 1px solid var(--color-grid-strong);
+  }
+  .retainedStep {
+    padding: 5px 8px;
+  }
+  .rowReason,
+  .app[data-projecting] .rowReason {
+    font-size: max(10px, calc(12px * var(--working-scale)));
+    margin: 0 0 3px;
+    padding: 0;
+    line-height: 1.25;
+  }
+  .retainedMath,
+  .tokenEquation,
+  .annotatedEquation,
+  .app[data-projecting] .retainedMath,
+  .app[data-projecting] .tokenEquation,
+  .app[data-projecting] .annotatedEquation {
+    font-size: calc(26px * var(--working-scale));
+  }
+  .retainedMath {
+    padding: 2px 0;
+    overflow: visible;
+  }
+  .retainedMath :global(.katex-display) {
+    margin: 0.1em 0;
+  }
+  .tokenEquation {
+    min-height: 0;
+    padding: 4px 0;
+    column-gap: 28px;
+    overflow: visible;
+  }
+  .tokenEquation .fixedEquals {
+    left: -22px;
+  }
+  .equationSide {
+    gap: 4px;
+  }
+  .term {
+    padding: 1px;
+    background: transparent;
+  }
+  .annotatedEquation {
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-bottom: 3px;
+  }
+  .lcmNote {
+    margin: 3px 0;
+    padding: 3px 6px;
+    font-size: max(10px, calc(12px * var(--working-scale)));
+    gap: 8px;
+  }
+  .moveExplanation,
+  .app[data-projecting] .moveExplanation {
+    flex: 0 0 auto;
+    min-height: 0;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    line-height: 1.3;
+  }
+  .moveExplanation p {
+    margin: 3px 0 0;
+  }
+  .moveExplanation [role="math"] {
+    font-size: 1em;
+  }
+}
+@media (max-width: 899px) {
+  .readingOrder {
+    display: none;
+  }
+  .retainedSteps:empty {
+    display: none;
+  }
+  .completed {
+    align-items: start;
+    flex-direction: column;
+  }
+}
+
+.operation[data-operation="cancel"] :global(.katex svg) {
+  color: var(--color-crimson);
+}
+
+@media (min-width: 900px) {
+  .retainedStep {
+    padding: 3px 6px;
+  }
+  .retainedMath,
+  .tokenEquation,
+  .annotatedEquation {
+    line-height: 1.2;
+  }
+}

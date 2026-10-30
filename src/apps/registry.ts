@@ -1,3 +1,4 @@
+import LinearEquationsThumbnail from "./linear-equations/Thumbnail";
 import type { ComponentType } from "react";
 import type { Level, Strand } from "@/lib/constants";
 import { copy } from "@/lib/copy";
@@ -31,6 +32,17 @@ export interface AppEntry {
 
 /** The index and detail route both use this list. New apps register here. */
 export const appRegistry: readonly AppEntry[] = [
+  {
+    slug: "linear-equations",
+    topicCodes: ["1A04"],
+    title: copy.linearEquations.title,
+    topic: copy.linearEquations.topic,
+    levels: ["F1"],
+    strand: "number-algebra",
+    summary: copy.linearEquations.summary,
+    thumbnail: LinearEquationsThumbnail,
+    load: () => import("./linear-equations"),
+  },
   {
     slug: "equation-village",
     topicCodes: ["1A04"],
