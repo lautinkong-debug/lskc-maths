@@ -108,6 +108,7 @@ export default function CircleDiagram({
   parameters,
   onChange,
   showMeasurements = true,
+  showAngles = showMeasurements,
   highlightKey = 0,
   showInstructions = true,
   missionIndex,
@@ -117,6 +118,7 @@ export default function CircleDiagram({
   parameters: Parameters;
   onChange: (next: Parameters, key: DragKey) => void;
   showMeasurements?: boolean;
+  showAngles?: boolean;
   /** Increment to replay a brief emphasis without remounting the draggable SVG. */
   highlightKey?: number;
   showInstructions?: boolean;
@@ -236,7 +238,7 @@ export default function CircleDiagram({
             key={`angle-${i}`}
             angle={angle}
             scene={scene}
-            showMeasurements={showMeasurements}
+            showMeasurements={showAngles}
           />
         ))}
         {scene.rightAngles

@@ -254,3 +254,20 @@ describe("recorded mission shapes", () => {
     ).toBe(true);
   });
 });
+
+describe("independent measurement visibility", () => {
+  it("keeps both measurement types hidden when reading a legacy hidden-measurements save", () => {
+    const state = parsePlayground("bisector", { showMeasurements: false });
+    expect(state?.showMeasurements).toBe(false);
+    expect(state?.showAngles).toBe(false);
+  });
+  it("restores each visibility setting independently", () => {
+    for (const showMeasurements of [true, false]) {
+      for (const showAngles of [true, false]) {
+        const state = parsePlayground("bisector", { showMeasurements, showAngles });
+        expect(state?.showMeasurements).toBe(showMeasurements);
+        expect(state?.showAngles).toBe(showAngles);
+      }
+    }
+  });
+});

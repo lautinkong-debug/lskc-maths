@@ -44,6 +44,7 @@ export type PlaygroundState = {
   free: boolean;
   showReasons: boolean;
   showMeasurements: boolean;
+  showAngles: boolean;
   autoSnap: boolean;
   focus: boolean;
 };
@@ -54,6 +55,7 @@ export const initialPlayground = (lab: LabId): PlaygroundState => ({
   free: false,
   showReasons: false,
   showMeasurements: true,
+  showAngles: true,
   autoSnap: true,
   focus: false,
 });
@@ -189,6 +191,10 @@ export function parsePlayground(
     free: value.free === true,
     showReasons: value.showReasons === true,
     showMeasurements: value.showMeasurements !== false,
+    showAngles:
+      typeof value.showAngles === "boolean"
+        ? value.showAngles
+        : value.showMeasurements !== false,
     autoSnap: value.autoSnap !== false,
     focus: value.focus === true,
   };

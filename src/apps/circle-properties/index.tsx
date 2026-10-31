@@ -426,6 +426,7 @@ function Playground({
     free,
     showReasons,
     showMeasurements,
+    showAngles,
     autoSnap,
     focus,
   } = saved;
@@ -446,7 +447,11 @@ function Playground({
   const setFree = (next: SetStateAction<boolean>) => update("free", next);
   const setFocus = (next: SetStateAction<boolean>) => update("focus", next);
   const setShowMeasurements = (next: boolean) =>
-    update("showMeasurements", next);
+    setSaved((state) => ({
+      ...state,
+      showMeasurements: next,
+      showAngles: next,
+    }));
   const setShowReasons = (next: SetStateAction<boolean>) =>
     update("showReasons", next);
   const angleCondition = ["centre", "segment", "semicircle"].includes(labId);
@@ -601,6 +606,28 @@ function Playground({
                 {c.autoSnap}
               </label>
             )}
+            {!conditionOpen && (
+              <div
+                className={s.measurementButtons}
+                role="group"
+                aria-label="Show or hide measurements"
+              >
+                <button
+                  type="button"
+                  aria-pressed={showMeasurements}
+                  onClick={() => update("showMeasurements", !showMeasurements)}
+                >
+                  {showMeasurements ? c.hideLengths : c.showLengths}
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={showAngles}
+                  onClick={() => update("showAngles", !showAngles)}
+                >
+                  {showAngles ? c.hideAngles : c.showAngles}
+                </button>
+              </div>
+            )}
             {!conditionOpen && <InkToolbar board={ink} />}
             {conditionOpen ? (
               <button type="button" onClick={closeCondition}>
@@ -647,32 +674,39 @@ function Playground({
                   onChange={changeByHand}
                   missionIndex={snapMission}
                   showMeasurements={showMeasurements}
+                  showAngles={showAngles}
                   highlightKey={highlightKey}
                   showInstructions={false}
                   ink={conditionOpen ? undefined : ink}
                 />
               </div>
               <div className={s.snapStatus} role="status" aria-live="polite">
-                {snapLabel && (
+                {snapLabel && showMeasurements && showAngles && (
                   <span>
                     <strong>{c.snapped}: </strong>
                     <MathText>{snapLabel}</MathText>
                   </span>
                 )}
               </div>
-              {showMeasurements && (
+              {(showMeasurements || showAngles) && (
                 <div className={s.readouts} aria-label="Live measurements">
-                  {model.measurements.map((m, i) => (
-                    <div key={m.label} data-secondary={i % 2 === 1}>
-                      <span>
-                        <MathText notation>{m.label}</MathText>
-                      </span>
-                      <strong>
-                        {numeric(m.value, m.unit === "" ? 3 : 1)}
-                        <small>{m.unit}</small>
-                      </strong>
-                    </div>
-                  ))}
+                  {model.measurements
+                    .filter((m) =>
+                      m.unit === "°" || m.label === "Angle ratio"
+                        ? showAngles
+                        : showMeasurements,
+                    )
+                    .map((m, i) => (
+                      <div key={m.label} data-secondary={i % 2 === 1}>
+                        <span>
+                          <MathText notation>{m.label}</MathText>
+                        </span>
+                        <strong>
+                          {numeric(m.value, m.unit === "" ? 3 : 1)}
+                          <small>{m.unit}</small>
+                        </strong>
+                      </div>
+                    ))}
                 </div>
               )}
               {conditionOpen && (
@@ -736,7 +770,7 @@ function Playground({
                 <label>
                   <input
                     type="checkbox"
-                    checked={showMeasurements}
+                    checked={showMeasurements && showAngles}
                     onChange={(e) => setShowMeasurements(e.target.checked)}
                   />
                   {c.measurements}

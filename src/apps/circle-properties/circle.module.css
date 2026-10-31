@@ -2038,3 +2038,22 @@
 .reasonExplanation p {
   margin-top: 8px;
 }
+
+.measurementButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.boardTools .measurementButtons button {
+  min-height: 44px;
+  border: 1px solid #c5d6e8;
+  white-space: nowrap;
+}
+.boardTools .measurementButtons button[aria-pressed="true"] {
+  background: #eaf1ff;
+  border-color: #3769f4;
+  color: #1945a6;
+}
+.boardTools {
+  flex-wrap: wrap;
+}
