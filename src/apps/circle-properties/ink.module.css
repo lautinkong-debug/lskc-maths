@@ -2,34 +2,6 @@
   margin-left: auto;
   font-size: 0.88rem;
 }
-.toolbar[open] {
-  flex-basis: 100%;
-  order: 3;
-}
-.toolbar summary {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  width: fit-content;
-  margin-left: auto;
-  min-height: 44px;
-  padding: 5px 10px;
-  border: 1px solid #cbdced;
-  border-radius: 9px;
-  color: #143b68;
-  background: white;
-  cursor: pointer;
-  list-style: none;
-  font-weight: 650;
-}
-.toolbar summary::-webkit-details-marker {
-  display: none;
-}
-.toolbar summary[data-active="true"] {
-  color: white;
-  background: #2454c8;
-}
 .panel {
   display: flex;
   flex-wrap: wrap;
@@ -38,7 +10,7 @@
   gap: 6px;
   width: fit-content;
   max-width: 100%;
-  margin: 6px 0 4px auto;
+  margin: 0;
   padding: 6px;
   border: 1px solid #56616e;
   border-radius: 16px;

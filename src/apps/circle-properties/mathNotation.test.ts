@@ -203,3 +203,23 @@ describe("circle mathematical notation", () => {
     expect(fallback).toContain("C͡D");
   });
 });
+
+it("separates italic names from punctuation without altering copied text or SVG labels", () => {
+  for (const text of [
+    "Pink line ⊥ AB: always",
+    "NB; O is the centre",
+    "AB, CD",
+  ]) {
+    const html = renderToStaticMarkup(createElement(MathText, null, text));
+    expect(html).toContain(styles.beforePunctuation);
+    expect(html.replace(/<[^>]+>/g, "")).toBe(text);
+  }
+  const arc = renderToStaticMarkup(
+    createElement(MathText, null, "Arc AB: 7 cm"),
+  );
+  expect(arc).toContain(styles.beforePunctuation);
+  const svg = renderToStaticMarkup(
+    createElement(MathSvgText, null, "AB: 7 cm"),
+  );
+  expect(svg).not.toContain(styles.beforePunctuation);
+});

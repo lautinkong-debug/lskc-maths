@@ -29,6 +29,13 @@
   /* One extra word space in the maths font. The prose keeps its normal breaking space. */
   margin-inline-end: 0.25em;
 }
+.beforePunctuation {
+  /* Give italic overhang breathing room before upright punctuation. */
+  margin-inline-end: 0.16em;
+}
+.arc.beforePunctuation {
+  margin-inline-end: 0.2em;
+}
 .arc.beforeProse {
   margin-inline-end: calc(0.04em + 0.25em);
 }

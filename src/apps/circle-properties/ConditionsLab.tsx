@@ -363,7 +363,9 @@ export default function ConditionsLab({
           </svg>
           <div className={s.controls}>
             <label>
-              <MathText>Move N along AB</MathText>
+              <span>
+                <MathText>Move N along AB</MathText>
+              </span>
               <input
                 aria-label="Foot of perpendicular line"
                 type="range"

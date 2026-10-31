@@ -16,6 +16,7 @@ const variableStyle: CSSProperties = {
 // Keep ordinary units and function names next to their mathematical quantity.
 const proseFollows =
   /^\s+(?!(?:cm|mm|km|rad|sin|cos|tan)\b)(?:[A-Za-z][a-z]+|a)\b/;
+const punctuationFollows = /^[,:;]/;
 
 function variables(children: string, svg: boolean, notation: boolean) {
   const nodes = [];
@@ -52,7 +53,9 @@ function variables(children: string, svg: boolean, notation: boolean) {
           className={
             !notation && proseFollows.test(children.slice(index + token.length))
               ? s.beforeProse
-              : undefined
+              : punctuationFollows.test(children.slice(index + token.length))
+                ? s.beforePunctuation
+                : undefined
           }
         >
           {token}
@@ -69,13 +72,21 @@ function variables(children: string, svg: boolean, notation: boolean) {
 export function MathArc({
   children,
   beforeProse = false,
+  beforePunctuation = false,
 }: {
   children: string;
   beforeProse?: boolean;
+  beforePunctuation?: boolean;
 }) {
   return (
     <span
-      className={beforeProse ? `${s.arc} ${s.beforeProse}` : s.arc}
+      className={
+        beforeProse
+          ? `${s.arc} ${s.beforeProse}`
+          : beforePunctuation
+            ? `${s.arc} ${s.beforePunctuation}`
+            : s.arc
+      }
       role="math"
       aria-label={`arc ${children}`}
       data-math-arc={children}
@@ -154,6 +165,9 @@ function inline(
             key={index}
             beforeProse={
               !notation && next?.kind === "text" && proseFollows.test(next.text)
+            }
+            beforePunctuation={
+              next?.kind === "text" && punctuationFollows.test(next.text)
             }
           >
             {part.name}

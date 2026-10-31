@@ -10,6 +10,7 @@ import { circleCopy as c } from "@/lib/copy";
 import { labs, reasons, type LabId } from "./content";
 import CircleDiagram from "./CircleDiagram";
 import ReasonExplorer from "./ReasonExplorer";
+import CircleQuest from "./CircleQuest";
 import InkToolbar from "./InkToolbar";
 import { useInkBoard } from "./useInkBoard";
 import {
@@ -190,6 +191,13 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
           </button>
           <button
             type="button"
+            aria-pressed={mode === "quest"}
+            onClick={() => setMode("quest")}
+          >
+            {c.games}
+          </button>
+          <button
+            type="button"
             aria-pressed={mode === "relay"}
             onClick={() => setMode("relay")}
           >
@@ -358,7 +366,18 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
           onCollect={(id) => collect("reasons", id)}
         />
       )}
-      {mode === "check" && <TransferCheck onExplore={explore} />}
+      {mode === "quest" && <CircleQuest onExplore={explore} />}
+      {mode === "check" && (
+        <>
+          <div className={s.questEntry}>
+            <span>{c.questInvitation}</span>
+            <button type="button" onClick={() => setMode("quest")}>
+              {c.playQuest}
+            </button>
+          </div>
+          <TransferCheck onExplore={explore} />
+        </>
+      )}
       <footer className={s.footer}>
         <span role="status">
           {workspaceFailed || progressFailed ? c.storageFailed : c.saveNotice}

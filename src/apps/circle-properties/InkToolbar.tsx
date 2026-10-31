@@ -34,15 +34,7 @@ function Icon({ name }: { name: keyof typeof icons }) {
 
 export default function InkToolbar({ board }: { board: InkBoardController }) {
   return (
-    <details className={s.toolbar}>
-      <summary aria-label="Pen tools" data-active={board.mode !== "move"}>
-        <Icon name={board.mode === "erase" ? "erase" : "pen"} />
-        {board.mode === "move"
-          ? "Pen"
-          : board.mode === "pen"
-            ? "Pen on"
-            : "Eraser on"}
-      </summary>
+    <div className={s.toolbar}>
       <div className={s.panel} role="group" aria-label="Drawing tools">
         <div className={s.group} role="group" aria-label="Whiteboard mode">
           {(
@@ -151,6 +143,6 @@ export default function InkToolbar({ board }: { board: InkBoardController }) {
           This browser could not save the ink. You can keep drawing.
         </p>
       )}
-    </details>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import { evaluateMission, missions } from "./missions";
 
 export const sessionPrefix = "lskc-circle-workspace-v3:";
 export type WorkspaceState = {
-  mode: "explore" | "relay" | "check";
+  mode: "explore" | "quest" | "relay" | "check";
   labId: LabId;
   focusLab: LabId | null;
   focusToken: number;
@@ -24,7 +24,7 @@ export function parseWorkspace(raw: unknown): WorkspaceState | undefined {
   if (!raw || typeof raw !== "object") return;
   const value = raw as Partial<WorkspaceState>;
   return {
-    mode: ["explore", "relay", "check"].includes(value.mode ?? "")
+    mode: ["explore", "quest", "relay", "check"].includes(value.mode ?? "")
       ? value.mode!
       : "explore",
     labId: labIds.includes(value.labId!) ? value.labId! : "bisector",
