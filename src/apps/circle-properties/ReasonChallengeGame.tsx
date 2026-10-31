@@ -347,10 +347,14 @@ export default function ReasonChallenge({
             {key === "reason" ? (
               <span className={s.skillBody}>
                 <small>{c.reasonCard}</small>
-                <MathText>{labelFor(value)}</MathText>
+                <span className={s.choiceText}>
+                  <MathText>{labelFor(value)}</MathText>
+                </span>
               </span>
             ) : (
-              <MathText>{value}</MathText>
+              <span className={s.choiceText}>
+                <MathText>{value}</MathText>
+              </span>
             )}
           </button>
         ))}

@@ -51,3 +51,16 @@ The pen toolbar uses the requested light-blue background and remains directly ab
 - Toolbar checks verify the light-blue colour, position above the circle, pen/move controls, and independent length/angle visibility through refresh.
 
 Browser emulation is not a physical-phone test. No classroom backend or student-data upload is introduced.
+
+## Live publication
+
+Published commit `ed3ff7eee3cd8e80d0627411392eb0c601c8cd32` to main. Vercel deployment `dpl_C31kmqEwpc2LaDnk8K3LhkxSPtgP` reached READY and was promoted to https://lskc-maths.vercel.app/apps/circle-properties on 31/10/2026.
+
+Live checks completed all 17 reasons through touch controls, independently verified each wrong-field feedback path, checked both the reasoning lock and diagram emphasis, and restored submitted Q1 answers and Q2 drafts after navigation/reload. The independent chain did not inflate on revisits. Speed expiry, untimed recovery and the 120-point cap passed. All five level counts and 360/390/1640 px layouts passed with no browser errors.
+
+A separate live audit of all 51 diagrams found no text-label overlaps. The light-blue toolbar, position above the circle, Pen/Move and independent persistent length/angle controls also passed. Evidence is local under `out/reason-game-qa-live-result.json`, `out/reason-game-diagram-live-result.json`, and `out/circle-toolbar-live-result.json`. These checks use browser phone emulation, not a physical device.
+
+## Phone typography follow-up
+
+Final live visual inspection found that mixed prose and mathematical names inside choice buttons could become separate flex/grid items. Although scoring and SVG-label checks passed, sentences could split into columns and AB could wrap into two letters. Condition/target text and formal reason-card text now stay in a single inline text container. Rechecking covers full choice text, not only diagram labels.
+Phone typography validation passed at360/390px across all17 reasons:102 choice groups,306 buttons and288 mathematical-name instances. Persistent r3 browser regressions passed at both widths, checking word reading order, one-line variable tokens and horizontal fit.

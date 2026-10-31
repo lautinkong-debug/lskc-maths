@@ -388,6 +388,12 @@
   line-height: 1.65;
   font-size: 1.03em;
 }
+.choiceText {
+  min-width: 0;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
 .small {
   color: #59718d;
   font-size: 0.8rem;
@@ -627,6 +633,7 @@
 }
 .skillBody {
   display: grid;
+  min-width: 0;
   gap: 12px;
 }
 .skillBody small {
