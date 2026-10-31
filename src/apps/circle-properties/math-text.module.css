@@ -1,0 +1,59 @@
+.arc.arc {
+  display: inline-block;
+  position: relative;
+  padding-top: 0.13em;
+  margin-inline: 0.04em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.arcMark {
+  position: absolute;
+  width: 100%;
+  height: 0.24em;
+  inset-inline: 0;
+  top: -0.02em;
+  overflow: visible;
+  pointer-events: none;
+}
+.arcMark path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2px;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.arc var {
+  display: inline;
+}
+.beforeProse {
+  /* One extra word space in the maths font. The prose keeps its normal breaking space. */
+  margin-inline-end: 0.25em;
+}
+.arc.beforeProse {
+  margin-inline-end: calc(0.04em + 0.25em);
+}
+.fraction.fraction {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+  vertical-align: middle;
+  margin: 0.12em 0.2em;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 0.93em;
+}
+.fraction > .numerator,
+.fraction > .denominator {
+  display: block;
+  padding: 0.1em 0.22em;
+  font-size: inherit;
+  line-height: inherit;
+}
+.fraction > .numerator {
+  border-bottom: 0.065em solid currentColor;
+  padding-bottom: 0.14em;
+}
+.fraction > .denominator {
+  padding-top: 0.13em;
+}

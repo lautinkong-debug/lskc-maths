@@ -1,7 +1,8 @@
+import CirclePropertiesThumbnail from "./circle-properties/Thumbnail";
 import LinearEquationsThumbnail from "./linear-equations/Thumbnail";
 import type { ComponentType } from "react";
 import type { Level, Strand } from "@/lib/constants";
-import { copy } from "@/lib/copy";
+import { copy, circleCopy } from "@/lib/copy";
 import QuadraticThumbnail from "./quadratic-explorer/Thumbnail";
 import UnitCircleThumbnail from "./unit-circle/Thumbnail";
 import InequalityThumbnail from "./inequality-number-line/Thumbnail";
@@ -32,6 +33,17 @@ export interface AppEntry {
 
 /** The index and detail route both use this list. New apps register here. */
 export const appRegistry: readonly AppEntry[] = [
+  {
+    slug: "circle-properties",
+    topicCodes: ["Ch16"],
+    title: circleCopy.title,
+    topic: circleCopy.topic,
+    levels: ["F5"],
+    strand: "measures-shape-space",
+    summary: circleCopy.summary,
+    thumbnail: CirclePropertiesThumbnail,
+    load: () => import("./circle-properties"),
+  },
   {
     slug: "linear-equations",
     topicCodes: ["1A04"],

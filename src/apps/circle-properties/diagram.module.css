@@ -1,0 +1,204 @@
+.diagram {
+  width: 100%;
+  min-width: 0;
+  color: var(--circle-graphite, #262a2e);
+}
+.diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 510px;
+  overflow: visible;
+  user-select: none;
+}
+.grid {
+  display: none;
+}
+.circumference {
+  fill: var(--circle-paper, #fbfcf8);
+  fill-opacity: 0.88;
+  stroke: var(--circle-navy, #0f4574);
+  stroke-width: 2.5;
+}
+.navy {
+  color: var(--circle-navy, #0f4574);
+}
+.red {
+  color: var(--circle-red, #da2127);
+}
+.muted {
+  color: #8597a6;
+}
+.line {
+  stroke: currentColor;
+  stroke-linecap: round;
+  fill: none;
+}
+.arc {
+  stroke: currentColor;
+  stroke-width: 7;
+  stroke-linecap: round;
+  fill: none;
+  opacity: 0.85;
+}
+.angleWedge {
+  fill: currentColor;
+  fill-opacity: 0.1;
+  stroke: currentColor;
+  stroke-width: 1.4;
+}
+.angleSquare {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.squareHalo {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 7;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.red .angleSquare {
+  stroke: #b12d54;
+}
+.angleLabel {
+  fill: currentColor;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-plex-sans, "Arial"), sans-serif;
+  paint-order: stroke;
+  stroke: var(--circle-paper, #fbfcf8);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+.rightAngle {
+  fill: none;
+  stroke: var(--circle-navy, #0f4574);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.pointDot {
+  fill: currentColor;
+  stroke: var(--circle-paper, #fbfcf8);
+  stroke-width: 1.5;
+}
+.pointLabel {
+  fill: currentColor;
+  font-family: var(--font-plex-sans, "Arial"), sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  paint-order: stroke;
+  stroke: var(--circle-paper, #fbfcf8);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.red .pointLabel,
+.red .angleLabel {
+  fill: #b12d54;
+}
+.focusPulse {
+  pointer-events: none;
+  animation: geometryFocus 1.6s ease-out both;
+}
+.focusLine,
+.focusArc {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 13px;
+  stroke-linecap: round;
+}
+.focusPulse .angleWedge {
+  fill-opacity: 0.55;
+  stroke-width: 4px;
+}
+.focusPulse .angleSquare {
+  stroke-width: 6px;
+}
+.focusNote {
+  margin: 0 10px 6px;
+  padding: 7px 10px;
+  border-left: 3px solid #3769f4;
+  color: #143b68;
+  background: #edf4ff;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+@keyframes geometryFocus {
+  0% {
+    opacity: 0;
+  }
+  25%,
+  60% {
+    opacity: 0.42;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .focusPulse {
+    animation: none;
+    opacity: 0.22;
+  }
+}
+.draggable {
+  cursor: grab;
+  touch-action: none;
+}
+.draggable:active {
+  cursor: grabbing;
+}
+.hitTarget {
+  fill: transparent;
+}
+.handleRing {
+  fill: currentColor;
+  fill-opacity: 0.18;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+.draggable:hover .handleRing {
+  fill-opacity: 0.2;
+  stroke-width: 2.5;
+}
+.instruction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 3px 8px 12px;
+  color: #526879;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+.legendHandle {
+  flex-shrink: 0;
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--circle-navy, #0f4574);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--circle-navy, #0f4574) 0 3px,
+    transparent 3.5px
+  );
+}
+@media (max-width: 480px) {
+  .pointLabel,
+  .angleLabel {
+    font-size: 22px;
+  }
+  .hitTarget {
+    r: 32px;
+  }
+  .instruction {
+    font-size: 12px;
+  }
+}

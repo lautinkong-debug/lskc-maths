@@ -1,0 +1,474 @@
+.explorer {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid #cbdced;
+  border-radius: 18px;
+  background: #fff;
+  color: #143b68;
+}
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 17px;
+}
+.header h3 {
+  margin: 0 0 5px;
+  font-size: 1.3rem;
+}
+.header p {
+  margin: 0;
+  line-height: 1.5;
+  color: #526879;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px 14px;
+  font-size: 0.82rem;
+}
+.givenKey,
+.resultKey {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+.givenKey {
+  color: #2454c8;
+}
+.resultKey {
+  color: #167047;
+}
+.givenKey::before,
+.resultKey::before {
+  content: "";
+  width: 16px;
+  height: 4px;
+  border-radius: 2px;
+  background: currentColor;
+}
+.scale {
+  color: #526879;
+}
+.selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 9px;
+  margin-bottom: 18px;
+}
+.explorer button {
+  min-height: 44px;
+  font: inherit;
+  cursor: pointer;
+  color: #143b68;
+  border: 1px solid #bacde0;
+  border-radius: 10px;
+  background: #fff;
+}
+.explorer button:focus-visible,
+.comparison summary:focus-visible {
+  outline: 3px solid #3769f4;
+  outline-offset: 3px;
+}
+.selector button {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  line-height: 1.4;
+}
+.selector button[aria-pressed="true"] {
+  border-color: #3769f4;
+  box-shadow: inset 0 0 0 1px #3769f4;
+  background: #f0f3f6;
+}
+.number {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 750;
+  line-height: 1.75;
+  color: #143b68;
+}
+.stages {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.stage {
+  min-width: 0;
+  border: 1px solid #ccdded;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fbfdff;
+}
+.stage h4 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 1.1rem;
+}
+.stage h4 > span {
+  display: inline-grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  color: #fff;
+  background: #2454c8;
+  font-size: 0.9rem;
+}
+.stage svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 330px;
+  margin: 8px auto 0;
+}
+.fact {
+  min-height: 2.9em;
+  margin: 10px 0 0;
+  line-height: 1.45;
+}
+.givenStage h4,
+.givenStage .fact {
+  color: #2454c8;
+}
+.resultStage {
+  background: #f7fcf8;
+  border-color: #b5d9c5;
+}
+.resultStage h4,
+.resultStage .fact {
+  color: #167047;
+}
+.resultStage h4 > span {
+  background: #167047;
+}
+.questionStage {
+  display: grid;
+  place-items: center;
+  background: #fffdf5;
+  border-style: dashed;
+}
+.question {
+  width: min(100%, 300px);
+  padding: 20px 0;
+  text-align: center;
+}
+.question h4 {
+  justify-content: center;
+}
+.question p {
+  margin: 12px 0 18px;
+  line-height: 1.5;
+}
+.questionMark {
+  display: block;
+  margin-bottom: 12px;
+  color: #a96b08;
+  font-size: 2.6rem;
+  font-weight: 700;
+}
+.explorer .primary {
+  padding: 11px 17px;
+  background: #3769f4;
+  border-color: #3769f4;
+  color: #fff;
+  font-weight: 700;
+}
+.explanation {
+  margin-top: 16px;
+}
+.direction {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 12px;
+  border-bottom: 1px solid #dce7ef;
+  line-height: 1.5;
+}
+.direction > span:first-child {
+  color: #2454c8;
+}
+.direction strong {
+  color: #167047;
+}
+.arrow {
+  font-size: 1.4rem;
+}
+.reasonText {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 26px;
+}
+.reasonText h4 {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  color: #526879;
+}
+.reasonText p {
+  margin: 0;
+  line-height: 1.55;
+}
+.formalReason {
+  font-weight: 700;
+}
+.contrast {
+  margin: 16px 0;
+  padding: 10px 13px;
+  border-left: 3px solid #d4aa41;
+  background: #fff9e9;
+  line-height: 1.5;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.actions button {
+  padding: 9px 13px;
+}
+.comparison {
+  margin-top: 20px;
+  border-top: 1px solid #dce7ef;
+  padding-top: 13px;
+}
+.comparison summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding: 10px 0;
+  font-weight: 700;
+}
+.comparison p {
+  margin: 4px 0 12px;
+  line-height: 1.5;
+}
+.comparison table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.comparison th,
+.comparison td {
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid #dce7ef;
+}
+.comparison th:first-child {
+  width: 80px;
+}
+.comparison td:nth-child(2),
+.comparison thead th:nth-child(2) {
+  color: #2454c8;
+}
+.comparison td:nth-child(3),
+.comparison thead th:nth-child(3) {
+  color: #167047;
+}
+.comparison tr[data-selected="true"] {
+  background: #f0f5ff;
+}
+.comparison tbody button {
+  padding: 5px 8px;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (max-width: 700px) {
+  .explorer {
+    padding: 14px;
+  }
+  .stages,
+  .reasonText {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .stage {
+    padding: 13px;
+  }
+  .question {
+    padding: 4px 0;
+  }
+  .questionMark {
+    display: none;
+  }
+  .fact {
+    min-height: 0;
+  }
+  .comparison th,
+  .comparison td {
+    padding: 8px 5px;
+  }
+  .comparison th:first-child {
+    width: 60px;
+  }
+  .direction {
+    justify-content: flex-start;
+  }
+}
+.exploreInstructions {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-left: 3px solid #3769f4;
+  background: #f1f6fd;
+  border-radius: 0 10px 10px 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.exploreInstructions p + p {
+  margin-top: 7px;
+}
+.experimentActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.experimentActions button {
+  padding: 7px 11px;
+  font-size: 0.85rem;
+}
+.experimentActions button:disabled {
+  cursor: default;
+  color: #526879;
+  background: #e9eff4;
+}
+.caseRecall {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin-top: 8px;
+}
+.caseRecall button {
+  padding: 5px 10px;
+  font-size: 0.83rem;
+}
+.caseRecall button[aria-pressed="true"] {
+  border-color: #2454c8;
+  color: #194397;
+  background: #e5edff;
+  box-shadow: inset 0 0 0 1px #2454c8;
+}
+.caseRecall [role="status"] {
+  color: #365976;
+  font-size: 0.83rem;
+}
+.trailHint {
+  color: #365976;
+}
+.liveMeasurements {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 12px;
+}
+.liveMeasurements > div {
+  padding: 7px;
+  border-radius: 7px;
+  background: #edf4ff;
+  line-height: 1.35;
+  min-width: 0;
+}
+.liveMeasurements span {
+  display: block;
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+.liveMeasurements strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 1.02rem;
+  color: #2454c8;
+}
+.liveMeasurements small {
+  font-size: 0.75em;
+  font-weight: 500;
+}
+.syncHint {
+  margin-top: 12px;
+  color: #316747;
+  line-height: 1.5;
+}
+.fineTune,
+.savedCases {
+  margin-top: 14px;
+  border: 1px solid #d5e3f2;
+  border-radius: 10px;
+  padding: 10px 13px;
+}
+.fineTune summary,
+.savedCases summary {
+  cursor: pointer;
+  min-height: 36px;
+  padding: 6px 0;
+  font-weight: 650;
+}
+.fineTune p,
+.savedCases p {
+  color: #526879;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 8px 0;
+}
+.controlGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px 20px;
+}
+.controlGrid label > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+.controlGrid output {
+  white-space: nowrap;
+}
+.controlGrid input {
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  accent-color: #3769f4;
+}
+.tableScroll {
+  overflow-x: auto;
+}
+.savedCases table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.savedCases th,
+.savedCases td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #d5e3f2;
+  text-align: left;
+  min-width: 70px;
+}
+.savedCases tbody tr:last-child {
+  background: #edf4ff;
+}
+.observationLabel {
+  margin: 12px 0 0;
+  color: #526879;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}

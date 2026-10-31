@@ -1,0 +1,63 @@
+.diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 390px;
+}
+.diagram[data-dragging="true"] {
+  touch-action: none;
+  cursor: grabbing;
+}
+.savedLines {
+  stroke: #65788e;
+  stroke-width: 1.7px;
+  stroke-dasharray: 6 5;
+  opacity: 0.55;
+  pointer-events: none;
+}
+.squareHalo {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 7px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.handle {
+  cursor: grab;
+  touch-action: none;
+  outline: none;
+}
+.hitTarget {
+  fill: transparent;
+  stroke: none;
+  touch-action: none;
+}
+.ring {
+  fill: #3769f4;
+  fill-opacity: 0.08;
+  stroke: #2454c6;
+  stroke-width: 1.8px;
+  pointer-events: none;
+}
+.handle:hover .ring {
+  fill-opacity: 0.17;
+  stroke-width: 2.5px;
+}
+.handle:focus-visible .ring {
+  fill: #f1d54a;
+  fill-opacity: 0.32;
+  stroke: #143b68;
+  stroke-width: 3px;
+}
+.handle:active {
+  cursor: grabbing;
+}
+@media (max-width: 700px) {
+  .hitTarget {
+    r: 35px;
+  }
+  .ring {
+    r: 14px;
+  }
+}

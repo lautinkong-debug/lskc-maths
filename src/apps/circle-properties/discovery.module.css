@@ -1,0 +1,280 @@
+.coach {
+  display: grid;
+  gap: 10px;
+  line-height: 1.5;
+}
+.coach p {
+  margin: 0;
+}
+.steps {
+  display: flex;
+  gap: 8px;
+}
+.coach .steps button {
+  flex: 1;
+  text-align: center;
+  padding: 8px;
+  font-weight: 700;
+  min-height: 44px;
+}
+.steps button[aria-current="step"] {
+  background: #ffdf8d;
+  border-color: #a87817;
+}
+.status {
+  padding: 0;
+  font-size: 0.88rem;
+  color: #405975;
+}
+.status[data-ready="true"] {
+  color: #21563f;
+}
+.recorded {
+  color: #21563f;
+  font-weight: 700;
+  padding: 7px 0;
+}
+.coach .recall {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #79ac95;
+  border-radius: 9px;
+  background: #e8f6ee;
+  color: #15553b;
+  font-weight: 700;
+  text-align: center;
+}
+.coach .primary {
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  background: #315de1;
+  border-color: #2348b9;
+  font-weight: 750;
+  box-shadow: 0 3px 0 #2348b9;
+  min-height: 44px;
+}
+.coach .primary:disabled {
+  background: #e8edf5;
+  color: #4c607a;
+  border-color: #c5d2e4;
+  box-shadow: none;
+  opacity: 1;
+}
+.precision {
+  font-size: 0.8rem;
+  color: #526478;
+}
+.precisionDetails,
+.moreOptions,
+.feedbackDetails {
+  font-size: 0.88rem;
+}
+.precisionDetails summary,
+.moreOptions summary,
+.feedbackDetails summary {
+  display: list-item;
+  min-height: 44px;
+  padding: 11px 0;
+  cursor: pointer;
+  color: #264d77;
+}
+.coach summary:focus-visible {
+  outline: 3px solid #315de1;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+.extraContent {
+  display: grid;
+  gap: 8px;
+}
+.moreOptions {
+  border-top: 1px solid #d6e0eb;
+}
+.coach[data-simple="true"] .extraContent {
+  padding: 3px 0 10px;
+}
+.coach .diagramLink {
+  padding: 8px 10px;
+  min-height: 44px;
+  font-size: 0.88rem;
+  border-color: #9bb2cc;
+  color: #143b68;
+  background: white;
+}
+.conditionEntry {
+  display: grid;
+  gap: 5px;
+  border-left: 3px solid #407b60;
+  padding: 8px 0 8px 11px;
+}
+.conditionEntry > span {
+  font-size: 0.8rem;
+  color: #345f4d;
+  font-weight: 700;
+}
+.coach .conditionEntry button {
+  background: #edf8f1;
+  color: #164d35;
+  border-color: #86b39b;
+  min-height: 44px;
+  font-size: 0.92rem;
+  font-weight: 650;
+  padding: 9px 11px;
+}
+.hintControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.coach .hintControls button {
+  padding: 7px 10px;
+  font-size: 0.85rem;
+  min-height: 44px;
+}
+.hints {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 0.9rem;
+}
+.hints li + li {
+  margin-top: 8px;
+}
+.coach .openCheck {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: #e9f0ff;
+  border-color: #abc1ed;
+  font-weight: 750;
+  min-height: 44px;
+}
+.coach .openCheck[data-recommended="true"] {
+  border-color: #315de1;
+}
+.check {
+  display: grid;
+  gap: 12px;
+  padding-top: 3px;
+  border-top: 1px solid #d9e0e8;
+}
+.levels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.coach .levels button {
+  flex: 1;
+  text-align: center;
+  padding: 8px 6px;
+  font-size: 0.83rem;
+  min-height: 44px;
+}
+.coach .levels button[aria-pressed="true"] {
+  background: #173e6a;
+  border-color: #173e6a;
+  color: white;
+}
+.kind {
+  font-size: 0.8rem;
+  color: #586c85;
+}
+.prompt {
+  font-weight: 650;
+}
+.choices {
+  display: grid;
+  gap: 8px;
+}
+.coach .choices button {
+  font-size: 0.9rem;
+}
+.coach .choices button[aria-pressed="true"] {
+  border-color: #315de1;
+  background: #edf3ff;
+}
+.answer {
+  display: grid;
+  gap: 6px;
+}
+.answer label {
+  font-weight: 650;
+  font-size: 0.9rem;
+}
+.answer > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.answer input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  background: #fff;
+  border: 1.5px solid #98aecb;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #143b68;
+  font: inherit;
+}
+.coach .answer button {
+  width: 100%;
+  text-align: center;
+  font-weight: 650;
+}
+.coach .checkHint summary {
+  font-size: 0.85rem;
+  padding: 8px 0;
+}
+.checkHint p {
+  font-size: 0.9rem;
+  padding-bottom: 8px;
+}
+.response {
+  border-left: 4px solid #c39229;
+  background: #fff9e8;
+  padding: 11px 12px;
+}
+.response[data-correct="true"] {
+  border-color: #3e8665;
+  background: #edf8f0;
+}
+.response strong {
+  font-size: 0.9rem;
+}
+.response p {
+  margin-top: 5px;
+  font-size: 0.9rem;
+}
+.followActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.coach .followActions button {
+  font-size: 0.85rem;
+  padding: 8px 10px;
+  min-height: 44px;
+}
+.coach .related {
+  border-color: #8ba9d1;
+  font-weight: 700;
+  min-height: 44px;
+}
+.coach .next {
+  text-align: center;
+  background: #fff6d9;
+  border-color: #ddc478;
+  font-weight: 700;
+  min-height: 44px;
+}
+@media (max-width: 700px) {
+  .coach {
+    font-size: 1rem;
+  }
+  .precision,
+  .kind {
+    font-size: 0.85rem;
+  }
+}

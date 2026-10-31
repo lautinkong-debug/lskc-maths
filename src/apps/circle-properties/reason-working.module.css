@@ -1,0 +1,155 @@
+.working {
+  margin: 18px 0;
+  border: 1px solid #c5d7eb;
+  border-radius: 13px;
+  padding: 17px;
+  background: #fff;
+  color: #143b68;
+}
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.header > span {
+  color: #526879;
+  font-size: 0.8rem;
+}
+.intro {
+  margin: 9px 0 14px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.steps > li {
+  padding: 14px;
+  border-radius: 9px;
+}
+.steps > li + li {
+  margin-top: 10px;
+}
+.given {
+  background: #edf4ff;
+}
+.conditions {
+  background: #fff8e5;
+}
+.conclusion {
+  background: #edf8f0;
+}
+.steps h5 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 11px;
+  font-size: 0.93rem;
+}
+.steps h5 > span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 25px;
+  height: 25px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 0.8rem;
+}
+.mathLine {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  line-height: 1.65;
+}
+.symbol {
+  font-family: "Cambria Math", serif;
+  font-size: 1.25rem;
+}
+.mathLine p {
+  margin: 0;
+}
+.source {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: #526879;
+  white-space: nowrap;
+}
+.conditions ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.conditions ul li + li {
+  margin-top: 5px;
+}
+.fullCondition {
+  margin-top: 10px;
+  color: #536176;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.fullCondition summary {
+  cursor: pointer;
+  padding: 5px 0;
+}
+.fullCondition p {
+  margin: 5px 0 0;
+}
+.result {
+  font-weight: 700;
+  color: #18623f;
+}
+.reason {
+  color: #245a43;
+  font-size: 0.92rem;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 9px;
+  margin-top: 14px;
+}
+.working .controls button {
+  min-height: 42px;
+  padding: 8px 13px;
+  border: 1px solid #c5d7eb;
+  border-radius: 8px;
+  color: #143b68;
+  background: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.working .controls .next {
+  color: #fff;
+  background: #2454c8;
+  border-color: #2454c8;
+}
+.working :focus-visible {
+  outline: 3px solid #3769f4;
+  outline-offset: 3px;
+}
+@media (max-width: 520px) {
+  .working {
+    padding: 12px;
+  }
+  .steps > li {
+    padding: 11px;
+  }
+  .source {
+    display: none;
+  }
+  .controls button {
+    flex: 1 1 auto;
+  }
+}

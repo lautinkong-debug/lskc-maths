@@ -1,0 +1,167 @@
+.lab {
+  color: #143b68;
+  font-size: 1rem;
+}
+.lab h3 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+}
+.lab p {
+  margin: 8px 0;
+  max-width: 72ch;
+}
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 15px 0;
+}
+.lab button {
+  min-height: 44px;
+  padding: 9px 13px;
+  background: white;
+  border: 1.5px solid #b9cce1;
+  border-radius: 9px;
+  color: #143b68;
+  font: inherit;
+  cursor: pointer;
+}
+.tabs button[aria-pressed="true"],
+.lab .primary {
+  background: #143b68;
+  color: white;
+}
+.lab button:focus-visible,
+.lab input:focus-visible,
+.diagram:focus-visible {
+  outline: 3px solid #d99e21;
+  outline-offset: 3px;
+}
+.diagram {
+  width: 100%;
+  max-height: 380px;
+  display: block;
+  background: white;
+  border-radius: 12px;
+  touch-action: none;
+}
+.circlePair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.diagram text {
+  font:
+    17px Arial,
+    sans-serif;
+  fill: #143b68;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.diagram .pink {
+  fill: #bc2e59;
+}
+.controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin: 14px 0;
+}
+.controls label {
+  display: grid;
+  gap: 7px;
+  font-size: 0.95rem;
+}
+.controls input {
+  width: 100%;
+  accent-color: #3769f4;
+  min-height: 30px;
+}
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin: 14px 0;
+}
+.choices label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+.choices input {
+  width: 20px;
+  height: 20px;
+}
+.readouts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 13px;
+  background: #eff5fb;
+  border-radius: 10px;
+}
+.readouts div {
+  display: grid;
+  gap: 5px;
+}
+.readouts strong {
+  font-size: 1.1rem;
+}
+.feedback {
+  padding: 13px;
+  border-left: 4px solid #3769f4;
+  background: #eff5fb;
+}
+.small {
+  font-size: 0.85rem;
+  color: #52677d;
+}
+@media (max-width: 600px) {
+  .circlePair {
+    grid-template-columns: 1fr;
+  }
+  .circlePair .diagram {
+    max-height: 280px;
+  }
+  .readouts {
+    grid-template-columns: 1fr;
+  }
+  .diagram text {
+    font-size: 20px;
+  }
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .tabs button {
+    text-align: left;
+  }
+}
+
+.lab[data-compact="true"] {
+  padding: 12px;
+  margin: 0;
+  border: 0;
+}
+.compactChooser {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+.compactChooser select {
+  min-height: 44px;
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #b8cde5;
+  border-radius: 8px;
+  padding: 8px;
+  background: white;
+  color: #143b68;
+  font: inherit;
+}
