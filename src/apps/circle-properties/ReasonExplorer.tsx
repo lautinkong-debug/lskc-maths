@@ -5,6 +5,7 @@ import { labs, reasons, type LabId } from "./content";
 import MathText from "./MathText";
 import ReasonFlowDiagram from "./ReasonFlowDiagram";
 import ReasonWorking from "./ReasonWorking";
+import { reasonWorking } from "./reasonWorkingData";
 import { reasonFlow } from "./reasonFlow";
 import {
   initialReasonParameters,
@@ -252,6 +253,17 @@ export default function ReasonExplorer({
               Drag either diagram. The blue givens stay true; the green marks
               show the conclusion.
             </p>
+            <p className={s.direction} aria-label="Given to conclusion">
+              <span>
+                <MathText>{flow.startingFact}</MathText>
+              </span>
+              <span className={s.arrow} aria-label="therefore">
+                →
+              </span>
+              <strong>
+                <MathText>{flow.resultFact}</MathText>
+              </strong>
+            </p>
           </div>
         ) : (
           <div className={`${s.stage} ${s.questionStage}`}>
@@ -361,17 +373,31 @@ export default function ReasonExplorer({
 
       {revealed && (
         <div className={s.explanation}>
-          <p className={s.direction} role="status">
-            <span>
-              <MathText>{flow.startingFact}</MathText>
-            </span>
-            <span className={s.arrow} aria-label="therefore">
-              →
-            </span>
-            <strong>
-              <MathText>{flow.resultFact}</MathText>
-            </strong>
-          </p>
+          <div
+            className={s.writtenSummary}
+            role="region"
+            aria-label="Written deduction"
+          >
+            <p className={s.givenLine}>
+              <span className={s.proofSymbol} aria-label="because">
+                ∵
+              </span>
+              <span>
+                <MathText>{flow.startingFact}</MathText>
+              </span>
+            </p>
+            <p className={s.conclusionLine}>
+              <span className={s.proofSymbol} aria-label="therefore">
+                ∴
+              </span>
+              <span>
+                <MathText>{reasonWorking[reason.id].conclusion}</MathText>{" "}
+                <span className={s.inlineReason}>
+                  (<MathText>{reason.label}</MathText>)
+                </span>
+              </span>
+            </p>
+          </div>
           <div className={s.reasonText}>
             <div>
               <h4>Write the reason</h4>

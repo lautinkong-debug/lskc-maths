@@ -472,3 +472,35 @@
   font-size: 0.8rem;
   line-height: 1.4;
 }
+
+.writtenSummary {
+  margin: 18px 0;
+  padding: 4px 16px;
+  border: 1px solid #d5e3f2;
+  border-radius: 10px;
+  background: #fbfdff;
+}
+.writtenSummary p {
+  display: grid;
+  grid-template-columns: 1.4em minmax(0, 1fr);
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 0;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.givenLine {
+  color: #2454c8;
+}
+.conclusionLine {
+  color: #167047;
+  border-top: 1px solid #d5e3f2;
+}
+.proofSymbol {
+  font-size: 1.3em;
+}
+.inlineReason {
+  margin-left: 0.5em;
+  font-size: 0.94em;
+}
