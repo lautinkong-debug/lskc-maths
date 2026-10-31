@@ -10,7 +10,7 @@ import { circleCopy as c } from "@/lib/copy";
 import { labs, reasons, type LabId } from "./content";
 import CircleDiagram from "./CircleDiagram";
 import ReasonExplorer from "./ReasonExplorer";
-import CircleQuest from "./CircleQuest";
+import ReasonChallenge from "./ReasonChallengeGame";
 import InkToolbar from "./InkToolbar";
 import { useInkBoard } from "./useInkBoard";
 import {
@@ -25,7 +25,6 @@ import { missions } from "./missions";
 import DiscoveryCoach from "./DiscoveryCoach";
 import { missionPrompt } from "./discovery";
 import ReasonPractice from "./ReasonPractice";
-import TransferCheck from "./TransferCheck";
 import ConditionsLab from "./ConditionsLab";
 import type { Experiment } from "./conditions";
 import { useLocalSession, clearLocalSessions } from "./useLocalSession";
@@ -188,13 +187,6 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
             onClick={() => setMode("explore")}
           >
             {c.explore}
-          </button>
-          <button
-            type="button"
-            aria-pressed={mode === "quest"}
-            onClick={() => setMode("quest")}
-          >
-            {c.games}
           </button>
           <button
             type="button"
@@ -366,18 +358,7 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
           onCollect={(id) => collect("reasons", id)}
         />
       )}
-      {mode === "quest" && <CircleQuest onExplore={explore} />}
-      {mode === "check" && (
-        <>
-          <div className={s.questEntry}>
-            <span>{c.questInvitation}</span>
-            <button type="button" onClick={() => setMode("quest")}>
-              {c.playQuest}
-            </button>
-          </div>
-          <TransferCheck onExplore={explore} />
-        </>
-      )}
+      {mode === "check" && <ReasonChallenge onExplore={explore} />}
       <footer className={s.footer}>
         <span role="status">
           {workspaceFailed || progressFailed ? c.storageFailed : c.saveNotice}

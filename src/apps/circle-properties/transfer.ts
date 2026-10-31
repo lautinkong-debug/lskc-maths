@@ -402,6 +402,12 @@ export type TransferSession = {
   response: TransferResponse;
   submitted: boolean;
   attempts: TransferAttempt[];
+  /** Question IDs include the numeric variant. Missing only in older saved sessions. */
+  drafts?: Record<string, TransferDraft>;
+};
+export type TransferDraft = {
+  response: TransferResponse;
+  submitted: boolean;
 };
 export const blankTransferResponse = (): TransferResponse => ({
   value: "",
@@ -415,14 +421,59 @@ export const initialTransfer = (): TransferSession => ({
   response: blankTransferResponse(),
   submitted: false,
   attempts: [],
+  drafts: {},
 });
+
+function legacyTransferDrafts(
+  attempts: TransferAttempt[],
+): Record<string, TransferDraft> {
+  const drafts: Record<string, TransferDraft> = {};
+  for (const attempt of attempts) {
+    drafts[attempt.questionId] = {
+      response: { ...attempt.response },
+      submitted: true,
+    };
+  }
+  return drafts;
+}
+
+/** Moving between questions preserves edits and feedback without adding a graded attempt. */
+export function navigateTransfer(
+  state: TransferSession,
+  index: number,
+): TransferSession {
+  if (!Object.hasOwn(transferRoutes, state.route)) return state;
+  const route = transferRoutes[state.route];
+  if (!Number.isInteger(index) || index < 0 || index > route.length)
+    return state;
+  const drafts = { ...(state.drafts ?? legacyTransferDrafts(state.attempts)) };
+  const currentReason = route[state.index];
+  if (currentReason) {
+    const current = transferQuestion(currentReason, state.variant);
+    drafts[current.id] = {
+      response: { ...state.response },
+      submitted: state.submitted,
+    };
+  }
+  const nextReason = route[index];
+  const next = nextReason
+    ? drafts[transferQuestion(nextReason, state.variant).id]
+    : undefined;
+  return {
+    ...state,
+    index,
+    drafts,
+    response: next ? { ...next.response } : blankTransferResponse(),
+    submitted: next?.submitted ?? false,
+  };
+}
 export function parseTransfer(value: unknown): TransferSession | undefined {
   if (!value || typeof value !== "object") return undefined;
   const v = value as Partial<TransferSession>;
   if (typeof v.route !== "string" || !Object.hasOwn(transferRoutes, v.route))
     return undefined;
   const index = Number.isInteger(v.index)
-    ? Math.max(0, Math.min(7, v.index!))
+    ? Math.max(0, Math.min(transferRoutes[v.route].length, v.index!))
     : 0;
   const variant = Number.isInteger(v.variant) ? Math.max(0, v.variant!) % 3 : 0;
   const parseResponse = (r: unknown): TransferResponse => {
@@ -466,6 +517,31 @@ export function parseTransfer(value: unknown): TransferSession | undefined {
         ];
       })
     : [];
+  const drafts: Record<string, TransferDraft> =
+    v.drafts === undefined ? legacyTransferDrafts(attempts) : {};
+  if (v.drafts && typeof v.drafts === "object" && !Array.isArray(v.drafts)) {
+    // Only the 17 known reasons and their three variants are accepted.
+    for (const reason of reasons) {
+      for (let draftVariant = 0; draftVariant < 3; draftVariant++) {
+        const key = transferQuestion(reason.id, draftVariant).id;
+        const draft = v.drafts[key];
+        if (
+          !draft ||
+          typeof draft !== "object" ||
+          Array.isArray(draft) ||
+          typeof draft.submitted !== "boolean" ||
+          !draft.response ||
+          typeof draft.response !== "object" ||
+          Array.isArray(draft.response)
+        )
+          continue;
+        drafts[key] = {
+          response: parseResponse(draft.response),
+          submitted: draft.submitted,
+        };
+      }
+    }
+  }
   return {
     route: v.route,
     index,
@@ -473,6 +549,7 @@ export function parseTransfer(value: unknown): TransferSession | undefined {
     response: parseResponse(v.response),
     submitted: v.submitted === true,
     attempts,
+    drafts,
   };
 }
 export function transferSummary(attempts: TransferAttempt[]) {

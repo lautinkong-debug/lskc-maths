@@ -386,3 +386,35 @@
     animation: none;
   }
 }
+
+.questionNavigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px;
+}
+.questionNumbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.questionNumbers button {
+  min-width: 44px;
+  padding: 8px;
+}
+.questionNumbers button[aria-current="step"] {
+  background: #2454c8;
+  color: white;
+  border-color: #2454c8;
+  font-weight: 700;
+}
+@media (max-width: 600px) {
+  .questionNavigation {
+    justify-content: space-between;
+  }
+  .questionNumbers {
+    order: 1;
+    flex-basis: 100%;
+  }
+}

@@ -264,10 +264,20 @@ describe("independent measurement visibility", () => {
   it("restores each visibility setting independently", () => {
     for (const showMeasurements of [true, false]) {
       for (const showAngles of [true, false]) {
-        const state = parsePlayground("bisector", { showMeasurements, showAngles });
+        const state = parsePlayground("bisector", {
+          showMeasurements,
+          showAngles,
+        });
         expect(state?.showMeasurements).toBe(showMeasurements);
         expect(state?.showAngles).toBe(showAngles);
       }
     }
+  });
+});
+
+it("opens Apply & check for an old removed-game workspace without carrying quest mastery", () => {
+  expect(parseWorkspace({ mode: "quest", labId: "chords" })).toMatchObject({
+    mode: "check",
+    labId: "chords",
   });
 });

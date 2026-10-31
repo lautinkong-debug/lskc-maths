@@ -2058,23 +2058,10 @@
   flex-wrap: wrap;
 }
 
-.questEntry {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin: 12px auto 24px;
-  padding: 16px;
-  max-width: 1200px;
-  border: 1px solid #b6cef7;
-  border-radius: 16px;
-  background: #eaf1ff;
-}
 @media (max-width: 600px) {
   .tabs {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     width: 100%;
   }
   .tabs button {

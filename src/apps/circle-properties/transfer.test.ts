@@ -10,6 +10,8 @@ import {
   transferSummary,
   transferReport,
   transferArcConstruction,
+  navigateTransfer,
+  blankTransferResponse,
 } from "./transfer";
 
 describe("new-diagram transfer check", () => {
@@ -187,5 +189,150 @@ describe("new-diagram transfer check", () => {
     expect(transferReport(state)).toContain("1/17 reasons sampled");
     expect(transferReport(state)).toContain("not a mastery judgement");
     expect(transferReport(state)).toContain("reason r2");
+  });
+});
+
+describe("transfer question navigation", () => {
+  const first = transferQuestion("r1");
+  const answered = {
+    value: "7",
+    reason: "r1",
+    condition: first.condition,
+  };
+  const attempt = {
+    questionId: first.id,
+    reasonId: first.reasonId,
+    variant: 0,
+    response: answered,
+    grade: gradeTransfer(first, answered),
+    at: "2026-10-31T18:00:00Z",
+  };
+
+  it("returns from Q2 to submitted Q1 with the same feedback and no extra grade", () => {
+    const initial = {
+      ...initialTransfer(),
+      response: answered,
+      submitted: true,
+      attempts: [attempt],
+    };
+    const second = navigateTransfer(initial, 1);
+    expect(second.index).toBe(1);
+    expect(second.response).toEqual(blankTransferResponse());
+    expect(second.submitted).toBe(false);
+    const returned = navigateTransfer(second, 0);
+    expect(returned.response).toEqual(answered);
+    expect(returned.submitted).toBe(true);
+    expect(gradeTransfer(first, returned.response)).toEqual(attempt.grade);
+    expect(returned.attempts).toBe(initial.attempts);
+    expect(initial.drafts).toEqual({});
+  });
+
+  it("keeps unfinished edits to Q2 through back, refresh and forward", () => {
+    const second = navigateTransfer(initialTransfer(), 1);
+    second.response = { value: "2.", reason: "r5", condition: "" };
+    const firstAgain = navigateTransfer(second, 0);
+    const refreshed = parseTransfer(JSON.parse(JSON.stringify(firstAgain)))!;
+    const returned = navigateTransfer(refreshed, 1);
+    expect(returned.response).toEqual(second.response);
+    expect(returned.submitted).toBe(false);
+    expect(returned.attempts).toEqual([]);
+  });
+
+  it("prefers the latest unsubmitted edit over an earlier submitted attempt", () => {
+    const edited = {
+      ...initialTransfer(),
+      response: { ...answered, value: "8" },
+      submitted: false,
+      attempts: [attempt],
+    };
+    const returned = navigateTransfer(navigateTransfer(edited, 1), 0);
+    expect(returned.response.value).toBe("8");
+    expect(returned.submitted).toBe(false);
+    expect(returned.attempts).toHaveLength(1);
+  });
+
+  it("migrates legacy submitted answers once, preserving the most recent attempt", () => {
+    const state = {
+      ...initialTransfer(),
+      index: 1,
+      drafts: undefined,
+      attempts: [
+        attempt,
+        { ...attempt, response: { ...answered, value: "14" } },
+      ],
+    };
+    const parsed = parseTransfer(state)!;
+    expect(parsed.drafts?.[first.id]?.response.value).toBe("14");
+    const returned = navigateTransfer(parsed, 0);
+    expect(returned.response.value).toBe("14");
+    expect(returned.submitted).toBe(true);
+    expect(returned.attempts).toHaveLength(2);
+  });
+
+  it("does not revive old answers after an explicit new-round draft reset", () => {
+    const fresh = parseTransfer({
+      ...initialTransfer(),
+      index: 1,
+      drafts: {},
+      attempts: [attempt],
+    })!;
+    const returned = navigateTransfer(fresh, 0);
+    expect(returned.response).toEqual(blankTransferResponse());
+    expect(returned.submitted).toBe(false);
+    expect(returned.attempts).toHaveLength(1);
+  });
+
+  it("keeps the three question variants separate", () => {
+    const firstVariant = navigateTransfer(
+      { ...initialTransfer(), response: answered, submitted: true },
+      1,
+    );
+    const otherVariant = navigateTransfer({ ...firstVariant, variant: 1 }, 0);
+    expect(otherVariant.response).toEqual(blankTransferResponse());
+    expect(otherVariant.submitted).toBe(false);
+    expect(otherVariant.drafts?.[first.id]?.response).toEqual(answered);
+  });
+
+  it("can review a question from the round-complete screen", () => {
+    const filled = {
+      ...initialTransfer(),
+      response: answered,
+      submitted: true,
+    };
+    const complete = navigateTransfer(filled, 7);
+    expect(complete.index).toBe(7);
+    expect(navigateTransfer(complete, 0).response).toEqual(answered);
+    for (const index of [-1, 8, NaN, 0.5])
+      expect(navigateTransfer(filled, index)).toBe(filled);
+  });
+
+  it("sanitises malformed drafts, accepts only known questions and caps response sizes", () => {
+    const parsed = parseTransfer({
+      ...initialTransfer(),
+      drafts: {
+        "r1-0": {
+          response: {
+            value: "x".repeat(100),
+            reason: "missing",
+            condition: "x".repeat(500),
+          },
+          submitted: true,
+        },
+        "r1-1": { response: null, submitted: true },
+        "r1-2": { response: answered, submitted: "true" },
+        "r2-0": [],
+        "r99-0": { response: answered, submitted: true },
+        "r1-3": { response: answered, submitted: true },
+      },
+    })!;
+    expect(Object.keys(parsed.drafts!)).toEqual(["r1-0"]);
+    expect(parsed.drafts?.["r1-0"].response).toEqual({
+      value: "x".repeat(30),
+      reason: "",
+      condition: "x".repeat(250),
+    });
+    expect(parseTransfer({ ...initialTransfer(), drafts: [] })?.drafts).toEqual(
+      {},
+    );
   });
 });

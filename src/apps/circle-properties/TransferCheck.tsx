@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { circleCopy as c } from "@/lib/copy";
 import { reasons, type LabId } from "./content";
 import { useLocalSession } from "./useLocalSession";
 import MathText, { MathSvgText } from "./MathText";
@@ -10,6 +11,7 @@ import {
   gradeTransfer,
   initialTransfer,
   parseTransfer,
+  navigateTransfer,
   blankTransferResponse,
   transferSummary,
   transferReport,
@@ -222,6 +224,16 @@ export function CheckDiagram({
       e = polar(150 + turn),
       m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 },
       n = { x: (c.x + e.x) / 2, y: (c.y + e.y) / 2 };
+    const chordLength = Math.hypot(c.x - e.x, c.y - e.y),
+      distanceLabel = {
+        x: (C.x + n.x) / 2 - (48 * (c.x - e.x)) / chordLength,
+        y: (C.y + n.y) / 2 - (48 * (c.y - e.y)) / chordLength,
+      },
+      lowerCalloutAnchor = { x: (n.x + e.x) / 2, y: (n.y + e.y) / 2 },
+      lowerCalloutElbow = {
+        x: lowerCalloutAnchor.x + (30 * (n.x - C.x)) / (R / 2),
+        y: lowerCalloutAnchor.y + (30 * (n.y - C.y)) / (R / 2),
+      };
     drawing = (
       <>
         <polyline
@@ -264,17 +276,44 @@ export function CheckDiagram({
               text={`${d.value} cm`}
               dx={-28}
             />
-            <Label
-              p={{ x: (C.x + n.x) / 2, y: (C.y + n.y) / 2 }}
-              text="x cm"
-              dx={32}
-              angle
-            />
+            <Label p={distanceLabel} text="x cm" angle />
           </>
         ) : (
           <>
-            <Label p={m} text={`${d.value} cm`} dy={-30} />
-            <Label p={n} text="x cm" dy={30} angle />
+            <path
+              d={`M ${m.x} ${m.y} L 240 42`}
+              fill="none"
+              stroke="#8197ad"
+              strokeWidth="1.2"
+              strokeDasharray="3 4"
+            />
+            <path
+              d={`M ${lowerCalloutAnchor.x} ${lowerCalloutAnchor.y} L ${lowerCalloutElbow.x} ${lowerCalloutElbow.y} L 240 327`}
+              fill="none"
+              stroke="#8197ad"
+              strokeWidth="1.2"
+              strokeDasharray="3 4"
+            />
+            <rect
+              x="158"
+              y="7"
+              width="164"
+              height="34"
+              rx="6"
+              fill="white"
+              stroke="#b9c9f5"
+            />
+            <Label p={{ x: 240, y: 24 }} text={`AB = ${d.value} cm`} />
+            <rect
+              x="158"
+              y="327"
+              width="164"
+              height="34"
+              rx="6"
+              fill="white"
+              stroke="#e9b6c6"
+            />
+            <Label p={{ x: 240, y: 344 }} text="CD = x cm" angle />
           </>
         )}
       </>
@@ -467,7 +506,7 @@ export function CheckDiagram({
               stroke={pink}
               strokeWidth="1.8"
             />
-            <Label p={C} text="O" dy={18} />
+            <Label p={C} text="O" dx={-24} />
             {!["r14", "r15"].includes(q.reasonId) && (
               <>
                 <Label p={firstCentre} text={`${d.angle}°`} angle />
@@ -506,7 +545,7 @@ export function CheckDiagram({
         )}
         {["r11", "r15"].includes(q.reasonId) && (
           <Label
-            p={{ x: 240, y: q.reasonId === "r15" ? 355 : 335 }}
+            p={{ x: 240, y: q.reasonId === "r15" ? 375 : 335 }}
             text="Minor arc AB = minor arc CD"
           />
         )}
@@ -520,7 +559,7 @@ export function CheckDiagram({
     <svg
       className={s.diagram}
       data-reviewed={reviewed}
-      viewBox="0 0 480 390"
+      viewBox={q.reasonId === "r15" ? "0 0 480 425" : "0 0 480 390"}
       role="img"
       aria-label={`Question diagram. ${q.given} ${q.ask}`}
     >
@@ -533,7 +572,12 @@ export function CheckDiagram({
         strokeWidth="2"
       />
       {drawing}
-      <text x="240" y="380" textAnchor="middle" className={s.note}>
+      <text
+        x="240"
+        y={q.reasonId === "r15" ? 415 : 380}
+        textAnchor="middle"
+        className={s.note}
+      >
         Schematic diagram — use the given information.
       </text>
     </svg>
@@ -557,6 +601,14 @@ export default function TransferCheck({
     q = id ? transferQuestion(id, state.variant) : null;
   const summary = transferSummary(state.attempts);
   const grade = q && state.submitted ? gradeTransfer(q, state.response) : null;
+  function goToQuestion(index: number) {
+    setState((previous) => navigateTransfer(previous, index));
+    setReviewPulse(0);
+    requestAnimationFrame(() => {
+      figureRef.current?.scrollIntoView({ block: "start", behavior: "auto" });
+      figureRef.current?.focus({ preventScroll: true });
+    });
+  }
   function showGeometry() {
     setReviewPulse((value) => value + 1);
     figureRef.current?.scrollIntoView({ block: "start", behavior: "auto" });
@@ -577,6 +629,7 @@ export default function TransferCheck({
             variant: (v.variant + 1) % 3,
             response: blankTransferResponse(),
             submitted: false,
+            drafts: {},
           },
     );
   }
@@ -636,6 +689,35 @@ export default function TransferCheck({
           </select>
         </label>
       </div>
+      <nav className={s.questionNavigation} aria-label={c.questionNavigation}>
+        <button
+          type="button"
+          disabled={state.index === 0}
+          onClick={() => goToQuestion(state.index - 1)}
+        >
+          ← {c.previousQuestion}
+        </button>
+        <div className={s.questionNumbers}>
+          {route.map((reasonId, index) => (
+            <button
+              type="button"
+              key={reasonId}
+              aria-label={`Go to question ${index + 1}`}
+              aria-current={state.index === index ? "step" : undefined}
+              onClick={() => goToQuestion(index)}
+            >
+              Q{index + 1}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          disabled={state.index >= route.length - 1}
+          onClick={() => goToQuestion(state.index + 1)}
+        >
+          {c.nextQuestion} →
+        </button>
+      </nav>
       {q ? (
         <>
           <div className={s.layout}>
@@ -799,14 +881,7 @@ export default function TransferCheck({
                     <button
                       className={s.primary}
                       type="button"
-                      onClick={() =>
-                        setState((v) => ({
-                          ...v,
-                          index: v.index + 1,
-                          response: blankTransferResponse(),
-                          submitted: false,
-                        }))
-                      }
+                      onClick={() => goToQuestion(state.index + 1)}
                     >
                       Next new diagram
                     </button>
@@ -814,7 +889,7 @@ export default function TransferCheck({
                       type="button"
                       onClick={() =>
                         setState((v) => ({
-                          ...v,
+                          ...navigateTransfer(v, v.index),
                           variant: (v.variant + 1) % 3,
                           response: blankTransferResponse(),
                           submitted: false,
@@ -834,11 +909,8 @@ export default function TransferCheck({
         </>
       ) : (
         <div className={s.form}>
-          <h3>This route is complete</h3>
-          <p>
-            Your evidence is below. Try another route to practise a different
-            direction of reasoning, or revisit a property that needs attention.
-          </p>
+          <h3>{c.routeEndTitle}</h3>
+          <p>{c.routeEndHelp}</p>
           <button
             type="button"
             onClick={() =>
@@ -848,6 +920,7 @@ export default function TransferCheck({
                 variant: (v.variant + 1) % 3,
                 response: blankTransferResponse(),
                 submitted: false,
+                drafts: {},
               }))
             }
           >
