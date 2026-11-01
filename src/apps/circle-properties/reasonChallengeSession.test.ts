@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { CheckDiagram } from "./TransferCheck";
 import {
   challengeGroups,
   createChallengeQueue,
@@ -11,6 +14,11 @@ import {
   parseChallengeSession,
   updateChallengeChain,
   challengeSpeedBonus,
+  archiveChallengeRun,
+  challengeVariant,
+  startChallengeSet,
+  similarChallengeQuestion,
+  viewChallengeSet,
   type ChallengeSession,
 } from "./reasonChallengeSession";
 
@@ -28,7 +36,10 @@ function session(seconds: ChallengeSession["seconds"] = 0): ChallengeSession {
 }
 
 function correctResponse(state: ChallengeSession, index = state.index) {
-  const c = getReasonChallenge(state.queue[index], (state.seed + index) % 3);
+  const c = getReasonChallenge(
+    state.queue[index],
+    challengeVariant(state, index),
+  );
   return {
     value: String(c.q.answer),
     condition: c.q.condition,
@@ -38,6 +49,222 @@ function correctResponse(state: ChallengeSession, index = state.index) {
 }
 
 describe("reason challenge saved sessions", () => {
+  it("keeps original five-question chord levels and archived answers reviewable", () => {
+    let state = startChallengeSet(
+      { ...initialChallengeSession, group: "chords" },
+      1793460000000,
+    );
+    expect(state.queue).toHaveLength(5);
+    const id = state.queue[0];
+    state.drafts[id] = {
+      ...state.drafts[id],
+      response: correctResponse(state),
+      checked: true,
+      complete: true,
+      tries: 1,
+      bestScore: 100,
+    };
+    state = startChallengeSet(state, 1793460000001, "topic-bisector");
+    const restored = parseChallengeSession({ ...state, reviewSet: 1 })!;
+    expect(restored.queue).toHaveLength(3);
+    expect(viewChallengeSet(restored).queue).toHaveLength(5);
+    expect(viewChallengeSet(restored).drafts[id].complete).toBe(true);
+  });
+  it.each(challengeGroups)(
+    "keeps a wrong attempt and changes only that question in $id",
+    (group) => {
+      const time = 1793460000000;
+      const state = startChallengeSet(
+        { ...initialChallengeSession, group: group.id, seconds: 60 },
+        time,
+      );
+      const id = state.queue[0];
+      state.drafts[id] = {
+        ...state.drafts[id],
+        response: { ...correctResponse(state), value: "-1" },
+        checked: true,
+        tries: 1,
+        bestScore: 75,
+      };
+      if (state.queue[1])
+        state.drafts[state.queue[1]] = {
+          ...newChallengeDraft(60, time),
+          response: { ...emptyChallengeResponse(), value: "12" },
+        };
+      const saved = JSON.parse(JSON.stringify(state));
+      const next = similarChallengeQuestion(state, time + 10000);
+      expect(next.group).toBe(state.group);
+      expect(next.queue).toEqual(state.queue);
+      expect(next.index).toBe(state.index);
+      expect(next.setNumber).toBe(2);
+      expect(challengeVariant(next)).not.toBe(challengeVariant(state));
+      expect(next.drafts[id]).toEqual({
+        ...newChallengeDraft(60, time + 10000),
+        helped: true,
+        bestScore: 75,
+      });
+      expect(next.drafts[state.queue[1]]).toEqual(saved.drafts[state.queue[1]]);
+      expect(next.archive[0].drafts[id]).toEqual(saved.drafts[id]);
+      expect(state).toEqual(saved);
+      const restored = parseChallengeSession(JSON.parse(JSON.stringify(next)))!;
+      expect(restored).toEqual(next);
+      expect(
+        viewChallengeSet({ ...restored, reviewSet: 1, reviewIndex: 0 }).drafts[
+          id
+        ],
+      ).toEqual(saved.drafts[id]);
+      expect(
+        similarChallengeQuestion({ ...restored, reviewSet: 1 }, time),
+      ).toEqual({ ...restored, reviewSet: 1 });
+      expect(similarChallengeQuestion(next, time)).toBe(next);
+      expect(
+        similarChallengeQuestion(
+          {
+            ...state,
+            drafts: { [id]: { ...state.drafts[id], complete: true } },
+          },
+          time,
+        ).setNumber,
+      ).toBe(1);
+      expect(similarChallengeQuestion(state, NaN)).toBe(state);
+    },
+  );
+  it.each(challengeGroups)(
+    "changes every numerical case at the same level $id and keeps the prior set through reload",
+    (group) => {
+      let state = startChallengeSet(
+        { ...initialChallengeSession, group: group.id, seconds: 90 },
+        1793460000000,
+      );
+      for (const id of state.queue) {
+        const index = state.queue.indexOf(id);
+        const challenge = getReasonChallenge(
+          id,
+          challengeVariant(state, index),
+        );
+        state.drafts[id] = {
+          ...newChallengeDraft(90, 1793460000000),
+          response: {
+            value: String(challenge.q.answer),
+            condition: challenge.q.condition,
+            target: challenge.target,
+            reason: challenge.q.reasonId,
+          },
+          checked: true,
+          complete: true,
+          tries: 1,
+          bestScore: 110,
+        };
+      }
+      const old = JSON.parse(JSON.stringify(state));
+      state = startChallengeSet(state, 1793460000001);
+      expect(state.group).toBe(group.id);
+      expect(state.seconds).toBe(90);
+      expect(state.queue).toHaveLength(group.reasonIds.length);
+      for (const id of state.queue) {
+        const oldIndex = old.queue.indexOf(id),
+          newIndex = state.queue.indexOf(id);
+        expect(challengeVariant(state, newIndex)).not.toBe(
+          challengeVariant(old, oldIndex),
+        );
+        const nextQuestion = getReasonChallenge(
+          id,
+          challengeVariant(state, newIndex),
+        ).q;
+        const oldQuestion = getReasonChallenge(
+          id,
+          challengeVariant(old, oldIndex),
+        ).q;
+        if (id === "r8") {
+          // A semicircle angle stays 90 degrees, but its actual drawing must change.
+          const points = (q: typeof nextQuestion) =>
+            renderToStaticMarkup(createElement(CheckDiagram, { q })).match(
+              /points="[^"]+"/g,
+            );
+          expect(points(nextQuestion)).not.toEqual(points(oldQuestion));
+        } else expect(nextQuestion.given).not.toBe(oldQuestion.given);
+      }
+      const parsed = parseChallengeSession({
+        ...state,
+        reviewSet: 1,
+        reviewIndex: old.queue.length - 1,
+      })!;
+      const reviewed = viewChallengeSet(parsed);
+      expect(reviewed.queue).toEqual(old.queue);
+      expect(reviewed.drafts).toEqual(old.drafts);
+      expect(reviewed.variants).toEqual(old.variants);
+      expect(reviewed.index).toBe(old.queue.length - 1);
+      expect(parsed.drafts).toEqual(state.drafts);
+      expect(
+        updateChallengeChain(parsed, state.queue[0], 1793460000100),
+      ).toEqual({ streak: 0, bestStreak: 0 });
+    },
+  );
+
+  it("migrates original seed-based sessions and keeps checked wrong choices with their original grade", () => {
+    const state = session();
+    const id = state.queue[0];
+    const challenge = getReasonChallenge(id, state.seed % 3);
+    state.drafts[id] = {
+      ...state.drafts[id],
+      response: {
+        value: "wrong",
+        condition: challenge.q.wrongConditions[0],
+        target: challenge.wrongTargets[0],
+        reason: challenge.reasonChoices.find((r) => r !== id)!,
+      },
+      checked: true,
+      tries: 1,
+    };
+    const legacy = {
+      ...state,
+      variants: undefined,
+      setNumber: undefined,
+      archive: undefined,
+      reviewSet: undefined,
+      reviewIndex: undefined,
+    };
+    const migrated = parseChallengeSession(legacy)!;
+    expect(challengeVariant(migrated)).toBe(state.seed % 3);
+    const next = startChallengeSet(migrated, 1793460000100);
+    const restored = parseChallengeSession({
+      ...next,
+      reviewSet: 1,
+      reviewIndex: 0,
+    })!;
+    expect(viewChallengeSet(restored).drafts[id]).toEqual(state.drafts[id]);
+    expect(viewChallengeSet(restored).drafts[id].complete).toBe(false);
+  });
+
+  it("keeps bounded archives and the last same-level variant when changing levels or pace", () => {
+    let state = startChallengeSet(initialChallengeSession, 1793460000000);
+    const first = state;
+    state = { ...archiveChallengeRun(state), group: "angles", seconds: 60 };
+    state = startChallengeSet(state, 1793460000001);
+    state = startChallengeSet(state, 1793460000002, "topic-bisector", 0);
+    for (const id of first.queue)
+      expect(challengeVariant(state, state.queue.indexOf(id))).not.toBe(
+        challengeVariant(first, first.queue.indexOf(id)),
+      );
+    expect(state.archive.map((run) => run.group)).toEqual(["topic-bisector", "angles"]);
+    expect(state.archive.map((run) => run.seconds)).toEqual([0, 60]);
+    for (let i = 3; i < 20; i++)
+      state = startChallengeSet(state, 1793460000000 + i);
+    expect(state.archive).toHaveLength(10);
+    expect(parseChallengeSession(JSON.parse(JSON.stringify(state)))).toEqual(
+      state,
+    );
+    expect(
+      parseChallengeSession({ ...state, reviewSet: -1, reviewIndex: 999 })
+        ?.reviewSet,
+    ).toBeNull();
+    expect(
+      parseChallengeSession({
+        ...state,
+        archive: [null, "bad", { queue: ["fake"] }],
+      })?.archive,
+    ).toEqual([]);
+  });
   it("starts cleanly and does not import scores from the removed three-game schema", () => {
     expect(parseChallengeSession(undefined)).toBeUndefined();
     expect(parseChallengeSession(null)).toBeUndefined();

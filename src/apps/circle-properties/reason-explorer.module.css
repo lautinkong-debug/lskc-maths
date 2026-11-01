@@ -130,7 +130,8 @@
   max-height: 330px;
   margin: 8px auto 0;
 }
-.givenStage {
+.givenStage,
+.givenProof {
   --proof-ink: #183f88;
   --proof-edge: #527fde;
   --proof-tint: #eaf1ff;
@@ -139,11 +140,13 @@
   color: #2454c8;
 }
 .resultStage {
+  background: #f7fcf8;
+  border-color: #b5d9c5;
+}
+.conclusionProof {
   --proof-ink: #125638;
   --proof-edge: #369166;
   --proof-tint: #e6f6ec;
-  background: #f7fcf8;
-  border-color: #b5d9c5;
 }
 .resultStage h4 {
   color: #167047;
@@ -399,12 +402,17 @@
 .savedCases tbody tr:last-child {
   background: #edf4ff;
 }
+.writtenProof {
+  width: min(100%, 960px);
+  display: grid;
+  gap: 12px;
+  margin: 18px auto;
+}
 .proofCaption {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: 0.65rem;
-  margin-top: 0.4rem;
   padding: clamp(0.7rem, 1.2vw, 1.1rem);
   border-inline-start: 4px solid var(--proof-edge);
   border-radius: 10px;
@@ -424,19 +432,10 @@
   line-height: 1.42;
   overflow-wrap: anywhere;
 }
-.proofCaption .proofReason {
-  margin: 0.7rem 0 0;
-  padding-top: 0.65rem;
-  border-top: 1px solid #b6d9c4;
-}
-.proofReason > span {
-  display: block;
-  margin-bottom: 0.15rem;
-  font-size: 0.84rem;
-  font-weight: 700;
-}
-.proofReason strong {
+.proofReason {
+  margin-inline-start: 0.35em;
   font-size: clamp(1.12rem, 1rem + 0.4vw, 1.35rem);
+  font-weight: 750;
   line-height: 1.45;
   overflow-wrap: anywhere;
 }

@@ -1,5 +1,8 @@
 import {
   challengeGroups,
+  challengeGroup,
+  savedChallengeGroups,
+  createChallengeQueue,
   getReasonChallenge,
   gradeReasonChallenge,
   type ChallengeGroupId,
@@ -21,17 +24,24 @@ export type ChallengeDraft = {
   helped: boolean;
   bestScore: number;
 };
-export type ChallengeSession = {
+export type ChallengeRun = {
   group: ChallengeGroupId;
   seconds: 0 | 60 | 90 | 120;
   seed: number;
   queue: string[];
   index: number;
-  started: boolean;
   drafts: Record<string, ChallengeDraft>;
-  best: Record<string, { score: number; solved: number }>;
+  variants: Record<string, number>;
+  setNumber: number;
   streak: number;
+};
+export type ChallengeSession = ChallengeRun & {
+  started: boolean;
+  best: Record<string, { score: number; solved: number }>;
   bestStreak: number;
+  archive: ChallengeRun[];
+  reviewSet: number | null;
+  reviewIndex: number;
 };
 export const emptyChallengeResponse = (): ChallengeResponse => ({
   value: "",
@@ -53,17 +63,148 @@ export const newChallengeDraft = (
   bestScore: 0,
 });
 export const initialChallengeSession: ChallengeSession = {
-  group: "chords",
+  group: "topic-bisector",
   seconds: 0,
   seed: 0,
   queue: [],
   index: 0,
   started: false,
   drafts: {},
+  variants: {},
+  setNumber: 1,
   best: {},
   streak: 0,
   bestStreak: 0,
+  archive: [],
+  reviewSet: null,
+  reviewIndex: 0,
 };
+const archiveLimit = 10;
+
+export function challengeVariant(run: ChallengeRun, index = run.index): number {
+  return run.variants[run.queue[index]] ?? (run.seed + index) % 3;
+}
+
+/** Keep the question parameters with the answers so later sets cannot alter them. */
+export function archiveChallengeRun(state: ChallengeSession): ChallengeSession {
+  if (!state.queue.length) return state;
+  const {
+    group,
+    seconds,
+    seed,
+    queue,
+    index,
+    drafts,
+    variants,
+    setNumber,
+    streak,
+  } = state;
+  return {
+    ...state,
+    archive: [
+      ...state.archive,
+      {
+        group,
+        seconds,
+        seed,
+        queue,
+        index,
+        drafts,
+        variants,
+        setNumber,
+        streak,
+      },
+    ].slice(-archiveLimit),
+    queue: [],
+    drafts: {},
+    variants: {},
+    index: 0,
+    streak: 0,
+    started: false,
+    setNumber: setNumber + 1,
+    reviewSet: null,
+    reviewIndex: 0,
+  };
+}
+
+export function startChallengeSet(
+  state: ChallengeSession,
+  time: number,
+  group = state.group,
+  seconds = state.seconds,
+): ChallengeSession {
+  const saved = archiveChallengeRun(state);
+  const seed = Math.floor(time) % 2147483647;
+  const queue = createChallengeQueue(group, seed);
+  const previous = [...saved.archive]
+    .reverse()
+    .find((run) => run.group === group);
+  const variants = Object.fromEntries(
+    queue.map((id, index) => [
+      id,
+      previous
+        ? (challengeVariant(previous, previous.queue.indexOf(id)) + 1) %
+          2147483647
+        : (seed + index) % 3,
+    ]),
+  );
+  return {
+    ...saved,
+    group,
+    seconds,
+    seed,
+    queue,
+    variants,
+    index: 0,
+    started: true,
+    reviewSet: null,
+    reviewIndex: 0,
+    drafts: { [queue[0]]: newChallengeDraft(seconds, time) },
+  };
+}
+
+export function viewChallengeSet(state: ChallengeSession): ChallengeRun {
+  const archived = state.archive.find(
+    (run) => run.setNumber === state.reviewSet,
+  );
+  return archived ? { ...archived, index: state.reviewIndex } : state;
+}
+
+/** Save the checked attempt, then practise the same reason with a new case. */
+export function similarChallengeQuestion(
+  state: ChallengeSession,
+  time: number,
+): ChallengeSession {
+  const id = state.queue[state.index];
+  const draft = state.drafts[id];
+  if (
+    state.reviewSet !== null ||
+    !state.started ||
+    !draft?.checked ||
+    draft.complete ||
+    !Number.isFinite(time)
+  )
+    return state;
+  const saved = archiveChallengeRun(state);
+  return {
+    ...state,
+    archive: saved.archive,
+    setNumber: saved.setNumber,
+    variants: {
+      ...state.variants,
+      [id]: (challengeVariant(state) + 1) % 2147483647,
+    },
+    drafts: {
+      ...state.drafts,
+      [id]: {
+        ...newChallengeDraft(state.seconds, time),
+        helped: true,
+        bestScore: draft.bestScore,
+      },
+    },
+    streak: 0,
+  };
+}
 const count = (v: unknown, max: number): v is number =>
   typeof v === "number" && Number.isInteger(v) && v >= 0 && v <= max;
 const maximumStreak = Math.max(
@@ -79,6 +220,7 @@ export function updateChallengeChain(
   const unchanged = { streak: state.streak, bestStreak: state.bestStreak };
   const draft = state.drafts[reasonId];
   if (
+    state.reviewSet !== null ||
     !state.started ||
     state.queue[state.index] !== reasonId ||
     !draft ||
@@ -92,10 +234,7 @@ export function updateChallengeChain(
   if (!Object.values(draft.response).every((value) => value.trim()))
     return unchanged;
 
-  const challenge = getReasonChallenge(
-    reasonId,
-    (state.seed + state.index) % 3,
-  );
+  const challenge = getReasonChallenge(reasonId, challengeVariant(state));
   const independent =
     gradeReasonChallenge(challenge, draft.response).correct &&
     draft.tries === 0 &&
@@ -133,20 +272,17 @@ export function challengeSpeedBonus(
   );
 }
 
-export function parseChallengeSession(
-  raw: unknown,
-): ChallengeSession | undefined {
+function parseChallengeRun(raw: unknown): ChallengeSession | undefined {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return;
   const value = raw as Partial<ChallengeSession>;
-  const group =
-    challengeGroups.find((g) => g.id === value.group) ?? challengeGroups[0];
+  const group = challengeGroup(value.group);
   const seconds = [0, 60, 90, 120].includes(value.seconds!)
     ? value.seconds!
     : 0;
   const seed = count(value.seed, 2147483647) ? value.seed : 0;
   const best: ChallengeSession["best"] = {};
   if (value.best && typeof value.best === "object") {
-    for (const g of challengeGroups) {
+    for (const g of savedChallengeGroups) {
       const r = value.best[g.id];
       if (
         r &&
@@ -166,11 +302,19 @@ export function parseChallengeSession(
       ? value.queue
       : [];
   const drafts: ChallengeSession["drafts"] = {};
+  const variants: Record<string, number> = {};
+  for (const id of queue) {
+    if (count(value.variants?.[id], 2147483646))
+      variants[id] = value.variants![id];
+  }
   queue.forEach((id, index) => {
     const draft = value.drafts?.[id];
     if (!draft || typeof draft !== "object") return;
     const response = draft.response;
-    const challenge = getReasonChallenge(id, (seed + index) % 3);
+    const challenge = getReasonChallenge(
+      id,
+      variants[id] ?? (seed + index) % 3,
+    );
     if (
       !response ||
       typeof response.value !== "string" ||
@@ -231,8 +375,67 @@ export function parseChallengeSession(
     started:
       value.started === true && queue.length > 0 && !!drafts[queue[index]],
     drafts,
+    variants,
+    setNumber:
+      count(value.setNumber, Number.MAX_SAFE_INTEGER) && value.setNumber > 0
+        ? value.setNumber
+        : 1,
     best,
     streak,
     bestStreak,
+    archive: [],
+    reviewSet: null,
+    reviewIndex: 0,
   };
+}
+
+export function parseChallengeSession(
+  raw: unknown,
+): ChallengeSession | undefined {
+  const state = parseChallengeRun(raw);
+  if (!state) return;
+  const value = raw as Partial<ChallengeSession>;
+  if (Array.isArray(value.archive))
+    for (const entry of value.archive.slice(-archiveLimit)) {
+      const parsed = parseChallengeRun(entry);
+      if (
+        !parsed?.queue.length ||
+        !Object.keys(parsed.drafts).length ||
+        parsed.setNumber >= state.setNumber ||
+        parsed.setNumber <= (state.archive.at(-1)?.setNumber ?? 0)
+      )
+        continue;
+      const {
+        group,
+        seconds,
+        seed,
+        queue,
+        index,
+        drafts,
+        variants,
+        setNumber,
+        streak,
+      } = parsed;
+      state.archive.push({
+        group,
+        seconds,
+        seed,
+        queue,
+        index,
+        drafts,
+        variants,
+        setNumber,
+        streak,
+      });
+    }
+  const reviewing = state.archive.find(
+    (run) => run.setNumber === value.reviewSet,
+  );
+  if (reviewing) {
+    state.reviewSet = reviewing.setNumber;
+    state.reviewIndex = count(value.reviewIndex, reviewing.queue.length - 1)
+      ? value.reviewIndex
+      : 0;
+  }
+  return state;
 }

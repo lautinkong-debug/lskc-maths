@@ -143,7 +143,8 @@ export function CheckDiagram({
   reviewed?: boolean;
 }) {
   const d = q.diagram,
-    turn = [0, 25, -28][d.variant],
+    turn =
+      d.variant < 3 ? [0, 25, -28][d.variant] : ((d.variant * 17) % 61) - 30,
     blue = "#3769f4",
     pink = "#bc2e59";
   let drawing: React.ReactNode;

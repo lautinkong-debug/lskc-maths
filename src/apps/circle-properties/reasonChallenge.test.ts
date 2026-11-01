@@ -160,18 +160,12 @@ describe("numerical circle reason challenge", () => {
 describe("progressive and mixed reason queues", () => {
   it("groups the confusing directions together and covers every reason", () => {
     expect(challengeGroups.map((group) => group.reasonIds.length)).toEqual([
-      5, 4, 6, 2, 17,
+      3, 2, 1, 1, 2, 6, 2, 17,
     ]);
-    expect(challengeGroups[0].reasonIds).toEqual([
-      "r1",
-      "r2",
-      "r3",
-      "r4",
-      "r5",
-    ]);
-    expect(challengeGroups[3].reasonIds).toEqual(["r16", "r17"]);
+    expect(challengeGroups[0].reasonIds).toEqual(["r1", "r2", "r3"]);
+    expect(challengeGroups[6].reasonIds).toEqual(["r16", "r17"]);
     expect(
-      new Set(challengeGroups.slice(0, 4).flatMap((group) => group.reasonIds)),
+      new Set(challengeGroups.slice(0, 7).flatMap((group) => group.reasonIds)),
     ).toEqual(new Set(reasons.map((reason) => reason.id)));
   });
 

@@ -8,11 +8,10 @@ import MathText from "./MathText";
 import { useLocalSession } from "./useLocalSession";
 import {
   challengeGroups,
-  createChallengeQueue,
+  challengeGroup,
   getReasonChallenge,
   gradeReasonChallenge,
   shuffleChallengeChoices,
-  type ChallengeGroupId,
 } from "./reasonChallenge";
 import {
   initialChallengeSession,
@@ -20,6 +19,11 @@ import {
   parseChallengeSession,
   updateChallengeChain,
   challengeSpeedBonus,
+  archiveChallengeRun,
+  challengeVariant,
+  startChallengeSet,
+  similarChallengeQuestion,
+  viewChallengeSet,
   type ChallengeResponse,
   type ChallengeSession,
 } from "./reasonChallengeSession";
@@ -59,35 +63,49 @@ export default function ReasonChallenge({
   );
   const [now, setNow] = useState(() => Date.now());
   const [hint, setHint] = useState("");
+  const [confirmRecord, setConfirmRecord] = useState<"reset" | "delete" | null>(
+    null,
+  );
   const top = useRef<HTMLElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
-  const reasonId = state.queue[state.index];
+  const review = state.reviewSet !== null;
+  const view = viewChallengeSet(state);
+  const reasonId = view.queue[view.index];
   const challenge = reasonId
-    ? getReasonChallenge(reasonId, (state.seed + state.index) % 3)
+    ? getReasonChallenge(reasonId, challengeVariant(view))
     : null;
-  const draft = reasonId ? state.drafts[reasonId] : undefined;
+  const draft = reasonId
+    ? (view.drafts[reasonId] ?? (review ? newChallengeDraft(0, 0) : undefined))
+    : undefined;
+  const activeDraft = state.drafts[state.queue[state.index]];
   const grade =
     challenge && draft?.checked
       ? gradeReasonChallenge(challenge, draft.response)
       : null;
   const reasoningValid =
     !!grade && grade.condition && grade.target && grade.reason;
-  const group = challengeGroups.find((g) => g.id === state.group)!;
-  const solved = state.queue.filter((id) => state.drafts[id]?.complete).length;
-  const score = Object.values(state.drafts).reduce(
+  const group = challengeGroup(view.group);
+  const solved = view.queue.filter((id) => view.drafts[id]?.complete).length;
+  const score = Object.values(view.drafts).reduce(
     (total, d) => total + d.bestScore,
     0,
   );
   const remaining = draft?.deadline
     ? Math.max(0, Math.ceil((draft.deadline - now) / 1000))
     : 0;
-  const locked = !!draft && (draft.complete || draft.checked || draft.expired);
+  const locked =
+    review || (!!draft && (draft.complete || draft.checked || draft.expired));
   const allAnswered =
     !!draft && Object.values(draft.response).every((v) => v.trim().length > 0);
-  const finished = state.started && solved === state.queue.length;
+  const finished = !review && state.started && solved === state.queue.length;
 
   useEffect(() => {
-    if (!state.started || !draft?.deadline || draft.complete || draft.expired)
+    if (
+      !state.started ||
+      !activeDraft?.deadline ||
+      activeDraft.complete ||
+      activeDraft.expired
+    )
       return;
     const tick = () => {
       const time = Date.now();
@@ -121,9 +139,9 @@ export default function ReasonChallenge({
   }, [
     state.started,
     state.index,
-    draft?.deadline,
-    draft?.complete,
-    draft?.expired,
+    activeDraft?.deadline,
+    activeDraft?.complete,
+    activeDraft?.expired,
   ]);
 
   function scrollTop() {
@@ -131,30 +149,30 @@ export default function ReasonChallenge({
       top.current?.scrollIntoView({ block: "start", behavior: "auto" }),
     );
   }
-  function start(groupId: ChallengeGroupId = state.group) {
-    // This clock read happens only in a start/restart button event.
+  function start() {
+    // Called only from button events to start a real-time deadline.
+    // eslint-disable-next-line react-hooks/purity
     const time = Date.now();
-    const seed = time % 2147483647,
-      queue = createChallengeQueue(groupId, seed);
     setNow(time);
     setHint("");
-    setState((previous) => ({
-      ...previous,
-      group: groupId,
-      seed,
-      queue,
-      index: 0,
-      started: true,
-      streak: 0,
-      drafts: { [queue[0]]: newChallengeDraft(previous.seconds, time) },
-    }));
+    setState((previous) =>
+      startChallengeSet(previous, time, view.group, view.seconds),
+    );
     scrollTop();
   }
   function navigate(index: number) {
+    // Called only from navigation events, never while rendering.
+    // eslint-disable-next-line react-hooks/purity
     const time = Date.now();
     setNow(time);
     setHint("");
     setState((previous) => {
+      if (previous.reviewSet !== null) {
+        const archived = viewChallengeSet(previous);
+        return archived.queue[index]
+          ? { ...previous, reviewIndex: index }
+          : previous;
+      }
       const id = previous.queue[index];
       if (!id) return previous;
       return {
@@ -169,9 +187,19 @@ export default function ReasonChallenge({
     });
     scrollTop();
   }
+  function trySimilar() {
+    // This handler creates a new deadline only after a student clicks the button.
+    // eslint-disable-next-line react-hooks/purity
+    const time = Date.now();
+    setNow(time);
+    setHint(c.similarReady);
+    setState((previous) => similarChallengeQuestion(previous, time));
+    scrollTop();
+  }
   function respond(key: keyof ChallengeResponse, value: string) {
     setHint("");
     setState((previous) => {
+      if (previous.reviewSet !== null) return previous;
       if (previous.queue[previous.index] !== reasonId) return previous;
       const current = previous.drafts[reasonId];
       if (!current || current.checked || current.complete || current.expired)
@@ -200,6 +228,7 @@ export default function ReasonChallenge({
   function submit() {
     if (!challenge) return;
     setState((previous) => {
+      if (previous.reviewSet !== null) return previous;
       if (previous.queue[previous.index] !== reasonId) return previous;
       const current = previous.drafts[reasonId];
       if (
@@ -222,7 +251,7 @@ export default function ReasonChallenge({
         };
       const currentChallenge = getReasonChallenge(
         reasonId,
-        (previous.seed + previous.index) % 3,
+        challengeVariant(previous),
       );
       const result = gradeReasonChallenge(currentChallenge, current.response);
       const bonus = challengeSpeedBonus(
@@ -269,6 +298,7 @@ export default function ReasonChallenge({
     setNow(time);
     setHint("");
     setState((previous) => {
+      if (previous.reviewSet !== null) return previous;
       if (previous.queue[previous.index] !== reasonId) return previous;
       const current = previous.drafts[reasonId];
       if (!current || current.complete) return previous;
@@ -295,6 +325,7 @@ export default function ReasonChallenge({
     if (!challenge || !draft || locked) return;
     setHint(c.hint);
     setState((previous) => {
+      if (previous.reviewSet !== null) return previous;
       const current = previous.drafts[reasonId];
       if (
         previous.queue[previous.index] !== reasonId ||
@@ -315,6 +346,12 @@ export default function ReasonChallenge({
   }
   function choices(key: "condition" | "target" | "reason", values: string[]) {
     if (!draft) return null;
+    const correctChoice =
+      key === "condition"
+        ? challenge?.q.condition
+        : key === "target"
+          ? challenge?.target
+          : challenge?.q.reasonId;
     return (
       <div
         className={key === "reason" ? `${s.choices} ${s.skillHand}` : s.choices}
@@ -329,7 +366,7 @@ export default function ReasonChallenge({
       >
         {shuffleChallengeChoices(
           values,
-          state.seed + state.index * 37 + key.length,
+          view.seed + view.index * 37 + key.length,
         ).map((value) => (
           <button
             type="button"
@@ -337,6 +374,7 @@ export default function ReasonChallenge({
             className={key === "reason" ? s.skillCard : undefined}
             aria-label={key === "reason" ? labelFor(value) : undefined}
             data-choice={value}
+            data-correct-choice={review ? value === correctChoice : undefined}
             aria-pressed={draft.response[key] === value}
             disabled={locked}
             onClick={() => respond(key, value)}
@@ -350,10 +388,30 @@ export default function ReasonChallenge({
                 <span className={s.choiceText}>
                   <MathText>{labelFor(value)}</MathText>
                 </span>
+                {review && (
+                  <small className={s.reviewChoice}>
+                    {[
+                      draft.response[key] === value && c.savedChoice,
+                      value === correctChoice && c.correctChoice,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </small>
+                )}
               </span>
             ) : (
               <span className={s.choiceText}>
                 <MathText>{value}</MathText>
+                {review && (
+                  <small className={s.reviewChoice}>
+                    {[
+                      draft.response[key] === value && c.savedChoice,
+                      value === correctChoice && c.correctChoice,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </small>
+                )}
               </span>
             )}
           </button>
@@ -381,7 +439,7 @@ export default function ReasonChallenge({
         aria-label={c.perfectChain}
       >
         <span aria-hidden="true">✦</span>
-        <strong>{c.chainCount(state.streak)}</strong>
+        <strong>{c.chainCount(view.streak)}</strong>
         <span>{c.bestChain(state.bestStreak)}</span>
       </div>
       {saveFailed && (
@@ -389,7 +447,123 @@ export default function ReasonChallenge({
           {c.saveFailed}
         </p>
       )}
-      {!state.started || !challenge || !draft ? (
+      {(state.queue.length > 0 || state.archive.length > 0) && (
+        <div className={s.setToolbar}>
+          <label>
+            <span>{c.viewSet}</span>
+            <select
+              aria-label={c.viewSet}
+              value={review || state.queue.length ? view.setNumber : ""}
+              onChange={(event) => {
+                const number = Number(event.target.value);
+                setHint("");
+                setState((previous) => ({
+                  ...previous,
+                  reviewSet: number === previous.setNumber ? null : number,
+                  reviewIndex: 0,
+                }));
+                scrollTop();
+              }}
+            >
+              {!state.queue.length && (
+                <option value="" disabled>
+                  {c.selectOldSet}
+                </option>
+              )}
+              {state.queue.length > 0 && (
+                <option value={state.setNumber}>
+                  {c.currentSet(
+                    state.setNumber,
+                    challengeGroup(state.group).title,
+                  )}
+                </option>
+              )}
+              {[...state.archive].reverse().map((run) => (
+                <option key={run.setNumber} value={run.setNumber}>
+                  {c.savedSet(run.setNumber, challengeGroup(run.group).title)}
+                </option>
+              ))}
+            </select>
+          </label>
+          {(review || state.started) && (
+            <button type="button" className={s.primary} onClick={() => start()}>
+              {c.newSetSameLevel}
+            </button>
+          )}
+        </div>
+      )}
+      {review && (
+        <div className={s.reviewBanner}>
+          <span>{c.reviewingSet(view.setNumber)}</span>
+          <button
+            type="button"
+            onClick={() => {
+              setHint("");
+              setState((previous) => ({
+                ...previous,
+                reviewSet: null,
+                started: previous.queue.length > 0,
+              }));
+              scrollTop();
+            }}
+          >
+            {state.queue.length ? c.backToSet : c.levels}
+          </button>
+        </div>
+      )}
+      <div className={s.recordTools}>
+        <button type="button" onClick={() => setConfirmRecord("reset")}>
+          {c.resetRecord}
+        </button>
+        {review && (
+          <button type="button" onClick={() => setConfirmRecord("delete")}>
+            {c.deleteSet}
+          </button>
+        )}
+        {confirmRecord && (
+          <div
+            className={s.reviewBanner}
+            role="group"
+            aria-label={c.manageRecord}
+          >
+            <p>
+              {confirmRecord === "reset"
+                ? c.resetPrompt
+                : c.deletePrompt(view.setNumber)}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setState((previous) =>
+                  confirmRecord === "reset"
+                    ? {
+                        ...initialChallengeSession,
+                        group: previous.group,
+                        seconds: previous.seconds,
+                      }
+                    : {
+                        ...previous,
+                        archive: previous.archive.filter(
+                          (run) => run.setNumber !== previous.reviewSet,
+                        ),
+                        reviewSet: null,
+                        reviewIndex: 0,
+                      },
+                );
+                setConfirmRecord(null);
+                setHint("");
+                scrollTop();
+              }}
+            >
+              {confirmRecord === "reset" ? c.confirmReset : c.confirmDelete}
+            </button>
+            <button type="button" onClick={() => setConfirmRecord(null)}>
+              {c.keepRecord}
+            </button>
+          </div>
+        )}
+      </div>
+      {(!state.started && !review) || !challenge || !draft ? (
         <>
           <div className={s.levels} role="group" aria-label={c.chooseLevel}>
             {challengeGroups.map((g, i) => (
@@ -398,18 +572,26 @@ export default function ReasonChallenge({
                 key={g.id}
                 aria-pressed={state.group === g.id}
                 onClick={() =>
-                  setState((previous) => ({
-                    ...previous,
-                    group: g.id,
-                    streak: previous.group === g.id ? previous.streak : 0,
-                    queue: previous.group === g.id ? previous.queue : [],
-                    drafts: previous.group === g.id ? previous.drafts : {},
-                    index: previous.group === g.id ? previous.index : 0,
-                  }))
+                  setState((previous) =>
+                    previous.group === g.id
+                      ? previous
+                      : {
+                          ...archiveChallengeRun(previous),
+                          group: g.id,
+                        },
+                  )
                 }
               >
                 <span className={s.levelNumber}>{i + 1}</span>
                 <strong>{g.title}</strong>
+                <span className={s.small}>
+                  {c.reasonNumbers(
+                    g.reasonIds.map(
+                      (id) =>
+                        reasons.find((reason) => reason.id === id)!.number,
+                    ),
+                  )}
+                </span>
                 <small>
                   {c.levelProgress(
                     g.reasonIds.length,
@@ -429,18 +611,19 @@ export default function ReasonChallenge({
               <select
                 aria-label={c.challengePace}
                 value={state.seconds}
-                onChange={(e) =>
-                  setState((previous) => ({
-                    ...previous,
-                    seconds: Number(
-                      e.target.value,
-                    ) as ChallengeSession["seconds"],
-                    streak: 0,
-                    queue: [],
-                    drafts: {},
-                    index: 0,
-                  }))
-                }
+                onChange={(e) => {
+                  const seconds = Number(
+                    e.target.value,
+                  ) as ChallengeSession["seconds"];
+                  setState((previous) =>
+                    previous.seconds === seconds
+                      ? previous
+                      : {
+                          ...archiveChallengeRun(previous),
+                          seconds,
+                        },
+                  );
+                }}
               >
                 <option value={0}>{c.practiceOption}</option>
                 <option value={120}>{c.speed120}</option>
@@ -472,58 +655,64 @@ export default function ReasonChallenge({
             <button
               type="button"
               onClick={() =>
-                setState((previous) => ({ ...previous, started: false }))
+                setState((previous) => ({
+                  ...previous,
+                  started: false,
+                  reviewSet: null,
+                }))
               }
             >
               {c.levels}
             </button>
             <strong>
-              {c.runProgress(group.title, solved, state.queue.length)}
+              {c.runProgress(group.title, solved, view.queue.length)}
             </strong>
             <span
               className={s.timer}
-              data-urgent={!!draft.deadline && remaining <= 20}
+              data-urgent={!review && !!draft.deadline && remaining <= 20}
             >
-              {draft.complete
-                ? c.solved
-                : draft.deadline
-                  ? c.seconds(remaining)
-                  : c.practice}
+              {review
+                ? c.reviewMode
+                : draft.complete
+                  ? c.solved
+                  : draft.deadline
+                    ? c.seconds(remaining)
+                    : c.practice}
             </span>
           </div>
           <progress
             className={s.progress}
             value={solved}
-            max={state.queue.length}
+            max={view.queue.length}
             aria-label={c.missionsSolved}
           />
           <nav className={s.navigation} aria-label={c.questionNavigation}>
             <button
               type="button"
-              disabled={state.index === 0}
-              onClick={() => navigate(state.index - 1)}
+              disabled={view.index === 0}
+              onClick={() => navigate(view.index - 1)}
             >
               {c.previous}
             </button>
             <div>
-              {state.queue.map((id, i) => (
+              {view.queue.map((id, i) => (
                 <button
                   type="button"
                   key={id}
                   aria-label={c.goToQuestion(i + 1)}
-                  aria-current={i === state.index ? "step" : undefined}
-                  data-solved={state.drafts[id]?.complete}
+                  aria-current={i === view.index ? "step" : undefined}
+                  data-solved={view.drafts[id]?.complete}
                   onClick={() => navigate(i)}
                 >
                   {i + 1}
-                  {state.drafts[id]?.complete ? " ✓" : ""}
+                  {view.drafts[id]?.complete ? " ✓" : ""}
                 </button>
               ))}
             </div>
             <button
               type="button"
-              disabled={state.index === state.queue.length - 1}
-              onClick={() => navigate(state.index + 1)}
+              disabled={view.index === view.queue.length - 1}
+              onClick={() => navigate(view.index + 1)}
             >
               {c.next}
             </button>
@@ -537,7 +726,7 @@ export default function ReasonChallenge({
           <div className={s.layout}>
             <div className={s.figure} data-question-id={challenge.q.id}>
               <span className={s.questionCount}>
-                {c.mission(state.index + 1, state.queue.length)}
+                {c.mission(view.index + 1, view.queue.length)}
               </span>
               <h3>
                 <MathText>{challenge.q.ask}</MathText>
@@ -626,6 +815,11 @@ export default function ReasonChallenge({
                     {grade.value ? c.valueCorrect : c.valueRetry}
                   </p>
                 )}
+                {review && (
+                  <p className={s.fieldFeedback}>
+                    {c.correctValue(challenge.q.answer, challenge.q.unit)}
+                  </p>
+                )}
               </fieldset>
               <fieldset className={s.step}>
                 <legend>
@@ -680,7 +874,7 @@ export default function ReasonChallenge({
                         <MathText>{message}</MathText>
                       </p>
                     ))}
-                    {grade.correct && (
+                    {(grade.correct || review) && (
                       <div className={s.working}>
                         <p>
                           ∵ <MathText>{challenge.q.given}</MathText>
@@ -694,27 +888,47 @@ export default function ReasonChallenge({
                         </p>
                       </div>
                     )}
-                    {!grade.correct && !draft.expired && (
-                      <button
-                        type="button"
-                        className={s.primary}
-                        onClick={() => retry()}
-                      >
-                        {c.retry}
-                      </button>
+                    {!review && !grade.correct && !draft.expired && (
+                      <div className={s.actions}>
+                        <button
+                          type="button"
+                          className={s.primary}
+                          onClick={trySimilar}
+                        >
+                          {c.similarQuestion}
+                        </button>
+                        <button type="button" onClick={() => retry()}>
+                          {c.retry}
+                        </button>
+                      </div>
                     )}
-                    {grade.correct && state.index < state.queue.length - 1 && (
+                    {grade.correct && view.index < view.queue.length - 1 && (
                       <button
                         type="button"
                         className={s.primary}
-                        onClick={() => navigate(state.index + 1)}
+                        onClick={() => navigate(view.index + 1)}
                       >
                         {c.nextMission}
                       </button>
                     )}
                   </div>
                 )}
-                {draft.expired && !draft.complete && (
+                {review && !grade && (
+                  <div className={s.working}>
+                    <p>{c.uncheckedSaved}</p>
+                    <p>
+                      ∵ <MathText>{challenge.q.given}</MathText>
+                    </p>
+                    <p>
+                      ∴ <MathText>{challenge.target}</MathText> (
+                      <MathText>{labelFor(challenge.q.reasonId)}</MathText>)
+                    </p>
+                    <p>
+                      <MathText>{challenge.q.explanation}</MathText>
+                    </p>
+                  </div>
+                )}
+                {!review && draft.expired && !draft.complete && (
                   <div className={s.review} role="status">
                     <h4>{c.timeUp}</h4>
                     <p>{c.timeUpBody}</p>
@@ -734,7 +948,7 @@ export default function ReasonChallenge({
             </div>
           </div>
           <div className={s.footer}>
-            <span>{c.persistence}</span>
+            <span>{c.setPersistence}</span>
             <button type="button" onClick={() => start()}>
               {c.restart}
             </button>

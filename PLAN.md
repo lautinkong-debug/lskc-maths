@@ -1,5 +1,14 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab Reasons Relay topic practice (01/11/2026)
+
+- [x] Rename the reason-choice activity Reasons Play and the four-step activity Reasons Relay. Group Relay into the seven exploration topics plus all-reasons mixed practice.
+- [x] Generate further numerical cases, offer similar-question retries after mistakes, and retain checked answers and feedback in ten previous sets. Keep earlier saved levels readable and retain timed deadlines while reviewing.
+- [x] Add previous/next question navigation, same-level new sets, confirmed saved-set deletion and Relay record reset. Add a separate Reasons Play record reset.
+- [x] Dismiss Settings on outside pointer/focus or Escape. Place bold given/conclusion proof rows below both diagrams for all 17 reasons.
+- [x] Prepare the scoped production release after 711 unit tests, phone navigation/reset checks, all 17 generated cases, and an emulator-configured production build.
+
+
 ## Circle Lab: diagram captions and Reason relay review (01/11/2026)
 
 - [x] Show the written given and conclusion below their respective diagrams for all 17 reasons. Keep optional measurements available without the duplicate row of tiles.

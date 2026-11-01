@@ -99,6 +99,17 @@
   display: block;
   font-weight: 700;
 }
+.recordActions {
+  margin-bottom: 16px;
+}
+.recordActions button {
+  margin: 6px 8px 6px 0;
+  min-height: 44px;
+}
+.recordActions p {
+  max-width: 65ch;
+  line-height: 1.5;
+}
 @media (max-width: 600px) {
   .questionNav {
     display: grid;

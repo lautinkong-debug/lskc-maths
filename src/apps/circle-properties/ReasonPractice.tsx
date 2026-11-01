@@ -43,11 +43,13 @@ export default function ReasonPractice({
   focusToken,
   collected,
   onCollect,
+  onResetRecord,
 }: {
   focusLab: LabId | null;
   focusToken: number;
   collected: string[];
   onCollect: (id: string) => void;
+  onResetRecord: () => void;
 }) {
   const [state, setState, storageFailed] = useLocalSession(
     PRACTICE_KEY,
@@ -57,6 +59,7 @@ export default function ReasonPractice({
   const [openedAt] = useState(clock);
   const [notice, setNotice] = useState("");
   const [highlightKey, setHighlightKey] = useState(0);
+  const [confirmReset, setConfirmReset] = useState(false);
   useEffect(() => {
     if (focusLab && focusToken > state.lastFocusToken) {
       // An explicit request from a different playground starts its related examples.
@@ -126,7 +129,7 @@ export default function ReasonPractice({
     <section className={styles.root} aria-label="Reason practice">
       <header className={styles.header}>
         <div>
-          <h2>Reason relay</h2>
+          <h2>{c.title}</h2>
           <p>
             Use the diagram. Recall a reason. Check which conditions make it
             work.
@@ -153,7 +156,8 @@ export default function ReasonPractice({
           disabled={cursor <= 0}
           onClick={() => visit(positions[cursor - 1])}
         >
-          <span aria-hidden="true">← </span>{c.previous}
+          <span aria-hidden="true">← </span>
+          {c.previous}
         </button>
         <label>
           <span>{c.goTo}</span>
@@ -176,10 +180,12 @@ export default function ReasonPractice({
           disabled={!review && answer === null}
           onClick={advance}
         >
-          {c.next}<span aria-hidden="true"> →</span>
+          {c.next}
+          <span aria-hidden="true"> →</span>
         </button>
         <button type="button" className={styles.newSet} onClick={startMixed}>
-          <span aria-hidden="true">↻ </span>{c.newSet}
+          <span aria-hidden="true">↻ </span>
+          {c.newSet}
         </button>
       </nav>
       {review && (
@@ -254,9 +260,7 @@ export default function ReasonPractice({
             </div>
             <h3>Which reason connects the two?</h3>
             {review && answer === null && (
-              <p className={styles.archivedNote}>
-                {c.noAnswer}
-              </p>
+              <p className={styles.archivedNote}>{c.noAnswer}</p>
             )}
             {!review && state.recall && !state.revealed && answer === null ? (
               <div className={styles.recall}>
@@ -399,6 +403,36 @@ export default function ReasonPractice({
       )}
       <details className={styles.history}>
         <summary>Your reason review record · {summary.seen} tried</summary>
+        <div className={styles.recordActions}>
+          {confirmReset ? (
+            <div role="group" aria-label={c.resetRecord}>
+              <p>{c.resetRecordPrompt}</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setState({
+                    ...initialPractice(),
+                    recall: state.recall,
+                    lastFocusToken: Math.max(state.lastFocusToken, focusToken),
+                  });
+                  onResetRecord();
+                  setNotice(c.recordReset);
+                  setHighlightKey(0);
+                  setConfirmReset(false);
+                }}
+              >
+                {c.confirmReset}
+              </button>
+              <button type="button" onClick={() => setConfirmReset(false)}>
+                {c.cancelReset}
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setConfirmReset(true)}>
+              {c.resetRecord}
+            </button>
+          )}
+        </div>
         <div className={styles.stats} aria-label="Practice evidence">
           <span>
             <b>{summary.seen}</b> Tried

@@ -15,6 +15,40 @@ import {
 } from "./transfer";
 
 describe("new-diagram transfer check", () => {
+  it.each(reasons)(
+    "generates reproducible additional cases with valid measures for $id",
+    (reason) => {
+      const samples = new Set<string>();
+      for (let variant = 3; variant < 80; variant++) {
+        const q = transferQuestion(reason.id, variant);
+        expect(q).toEqual(transferQuestion(reason.id, variant));
+        expect(Number.isFinite(q.answer)).toBe(true);
+        expect(
+          gradeTransfer(q, {
+            value: String(q.answer),
+            reason: reason.id,
+            condition: q.condition,
+          }).correct,
+        ).toBe(true);
+        samples.add(JSON.stringify([q.given, q.diagram]));
+        if (q.lab === "ratios") {
+          const arcs = transferArcConstruction(q);
+          expect(arcs.firstSweep + arcs.secondSweep).toBeLessThan(360);
+          expect(q.answer / q.diagram.other).toBeCloseTo(
+            arcs.firstSweep / arcs.secondSweep,
+            10,
+          );
+        }
+        if (reason.id === "r1") expect(q.answer * 2).toBe(q.diagram.value);
+        if (reason.id === "r3")
+          expect(q.answer * 2).toBe(q.diagram.value + q.diagram.other);
+        if (reason.id === "r6") expect(q.answer * 2).toBe(q.diagram.angle);
+        if (reason.id === "r9") expect(q.answer).toBe(2 * q.diagram.value);
+        if (reason.id === "r2" || reason.id === "r8") expect(q.answer).toBe(90);
+      }
+      expect(samples.size).toBeGreaterThan(60);
+    },
+  );
   const expected: Record<string, number[]> = {
     r1: [7, 11, 9],
     r2: [90, 90, 90],

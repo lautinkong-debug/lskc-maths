@@ -12,10 +12,10 @@ test("reason game keeps four-step drafts and checked answers when returning to q
   page,
 }) => {
   await open(page);
-  await page.getByRole("button", { name: "Reason game", exact: true }).click();
+  await page.getByRole("button", { name: "Reasons Relay", exact: true }).click();
   await page.getByRole("button", { name: "Start level", exact: true }).click();
   const game = page.getByRole("region", {
-    name: "Reason challenge",
+    name: "Reasons Relay",
     exact: true,
   });
   const questionId = (await game
@@ -66,7 +66,7 @@ test("reason game keeps four-step drafts and checked answers when returning to q
   ).toHaveAttribute("data-choice", wrongReason);
 
   await page.getByRole("button", { name: "Explore", exact: true }).click();
-  await page.getByRole("button", { name: "Reason game", exact: true }).click();
+  await page.getByRole("button", { name: "Reasons Relay", exact: true }).click();
   await expect(answer).toHaveValue(String(challenge.q.answer));
   await game
     .getByRole("button", { name: "Check all four steps", exact: true })
@@ -118,13 +118,13 @@ for (const width of [360, 390]) {
     }) => {
       await open(page);
       await page
-        .getByRole("button", { name: "Reason game", exact: true })
+        .getByRole("button", { name: "Reasons Relay", exact: true })
         .tap();
       await page
         .getByRole("button", { name: "Start level", exact: true })
         .tap();
       const game = page.getByRole("region", {
-        name: "Reason challenge",
+        name: "Reasons Relay",
         exact: true,
       });
       const readQueue = () =>
@@ -134,7 +134,7 @@ for (const width of [360, 390]) {
           );
           return raw ? (JSON.parse(raw).queue as string[]) : [];
         });
-      await expect.poll(readQueue).toHaveLength(5);
+      await expect.poll(readQueue).toHaveLength(3);
       const questionIndex = (await readQueue()).indexOf("r3");
       expect(questionIndex).toBeGreaterThanOrEqual(0);
       await game

@@ -1,4 +1,5 @@
-import { reasons } from "./content";
+import { labs, reasons, type LabId } from "./content";
+import { circleReasonGameCopy as c } from "@/lib/copy";
 import {
   gradeTransfer,
   transferQuestion,
@@ -6,13 +7,28 @@ import {
 } from "./transfer";
 
 export type ChallengeGroupId =
-  "chords" | "angles" | "arcs" | "ratios" | "mixed";
+  `topic-${LabId}` | "chords" | "angles" | "arcs" | "ratios" | "mixed";
 export type ChallengeGroup = {
   id: ChallengeGroupId;
   title: string;
   reasonIds: string[];
 };
 export const challengeGroups: ChallengeGroup[] = [
+  ...labs.map((lab, index): ChallengeGroup => ({
+    id: `topic-${lab.id}`,
+    title: c.topicTitle(index + 1, lab.id),
+    reasonIds: lab.reasonIds,
+  })),
+  {
+    id: "mixed",
+    title: c.mixedTopic,
+    reasonIds: reasons.map((reason) => reason.id),
+  },
+];
+
+/** Original saved levels remain reviewable after introducing the seven topic groups. */
+export const savedChallengeGroups: ChallengeGroup[] = [
+  ...challengeGroups,
   {
     id: "chords",
     title: "Level 1 · Chords and mid-points",
@@ -29,12 +45,13 @@ export const challengeGroups: ChallengeGroup[] = [
     reasonIds: ["r10", "r11", "r12", "r13", "r14", "r15"],
   },
   { id: "ratios", title: "Level 4 · Arc ratios", reasonIds: ["r16", "r17"] },
-  {
-    id: "mixed",
-    title: "Level 5 · All 17 reasons mixed",
-    reasonIds: reasons.map((reason) => reason.id),
-  },
 ];
+
+export function challengeGroup(id: string | undefined): ChallengeGroup {
+  return (
+    savedChallengeGroups.find((group) => group.id === id) ?? challengeGroups[0]
+  );
+}
 
 export type ReasonChallenge = {
   q: TransferQuestion;
@@ -233,7 +250,6 @@ export function createChallengeQueue(
   groupId: ChallengeGroupId,
   seed: number,
 ): string[] {
-  const group =
-    challengeGroups.find((item) => item.id === groupId) ?? challengeGroups[0];
+  const group = challengeGroup(groupId);
   return shuffleChallengeChoices(group.reasonIds, seed);
 }

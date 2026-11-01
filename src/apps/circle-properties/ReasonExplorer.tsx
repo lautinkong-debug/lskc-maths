@@ -211,14 +211,6 @@ export default function ReasonExplorer({
             onChange={change}
             trails={experiment.samples}
           />
-          <div className={s.proofCaption}>
-            <span className={s.proofSymbol} aria-hidden="true">
-              ∵
-            </span>
-            <p className={s.proofStatement}>
-              <MathText>{flow.startingFact}</MathText>
-            </p>
-          </div>
           <details className={s.observations}>
             <summary>{c.compare}</summary>
             <p>These measurements are observations, not extra givens.</p>
@@ -240,22 +232,6 @@ export default function ReasonExplorer({
               onChange={change}
               trails={experiment.samples}
             />
-            <div className={s.proofCaption}>
-              <span className={s.proofSymbol} aria-hidden="true">
-                ∴
-              </span>
-              <div>
-                <p className={s.proofStatement}>
-                  <MathText>{reasonWorking[reason.id].conclusion}</MathText>
-                </p>
-                <p className={s.proofReason}>
-                  <span>{c.reason(reason.number)}</span>
-                  <strong>
-                    (<MathText>{reason.label}</MathText>)
-                  </strong>
-                </p>
-              </div>
-            </div>
           </div>
         ) : (
           <div className={`${s.stage} ${s.questionStage}`}>
@@ -276,6 +252,30 @@ export default function ReasonExplorer({
                 Reveal the conclusion
               </button>
             </div>
+          </div>
+        )}
+      </div>
+
+      <div className={s.writtenProof} role="region" aria-label={c.writtenProof}>
+        <div className={`${s.proofCaption} ${s.givenProof}`}>
+          <span className={s.proofSymbol} aria-hidden="true">
+            ∵
+          </span>
+          <p className={s.proofStatement}>
+            <MathText>{flow.startingFact}</MathText>
+          </p>
+        </div>
+        {revealed && (
+          <div className={`${s.proofCaption} ${s.conclusionProof}`}>
+            <span className={s.proofSymbol} aria-hidden="true">
+              ∴
+            </span>
+            <p className={s.proofStatement}>
+              <MathText>{reasonWorking[reason.id].conclusion}</MathText>{" "}
+              <strong className={s.proofReason}>
+                (<MathText>{reason.label}</MathText>)
+              </strong>
+            </p>
           </div>
         )}
       </div>

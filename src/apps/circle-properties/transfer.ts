@@ -28,9 +28,22 @@ export function transferQuestion(
   variant = 0,
 ): TransferQuestion {
   const r = definition(reasonId) ?? definition("r1");
-  const v = Math.max(0, Math.floor(Number.isFinite(variant) ? variant : 0)) % 3;
+  const caseNumber =
+    Math.max(0, Math.floor(Number.isFinite(variant) ? variant : 0)) %
+    2147483647;
+  const v = caseNumber % 3;
+  // Keep the three original cases stable so saved answers remain meaningful.
+  const number = (
+    original: number[],
+    minimum: number,
+    count: number,
+    step = 1,
+  ) =>
+    caseNumber < 3
+      ? variants(original, v)
+      : minimum + ((caseNumber - 3) % count) * step;
   const base: TransferQuestion = {
-    id: `${r.id}-${v}`,
+    id: `${r.id}-${caseNumber}`,
     reasonId: r.id,
     lab: r.lab,
     title: "Find the missing value and justify your step",
@@ -45,11 +58,11 @@ export function transferQuestion(
     ],
     reasonChoices: [],
     explanation: "",
-    diagram: { angle: 70, value: 0, other: 0, variant: v },
+    diagram: { angle: 70, value: 0, other: 0, variant: caseNumber },
   };
   switch (r.id) {
     case "r1": {
-      const ab = variants([14, 22, 18], v);
+      const ab = number([14, 22, 18], 10, 23, 2);
       Object.assign(base, {
         given: `O is the centre. N is on chord AB, ON ⊥ AB and AB = ${ab} cm.`,
         ask: "Find AN = x.",
@@ -65,7 +78,7 @@ export function transferQuestion(
       break;
     }
     case "r2": {
-      const half = variants([6, 8, 7], v);
+      const half = number([6, 8, 7], 4, 19);
       Object.assign(base, {
         given: `O is the centre. N is on non-diameter chord AB and AN = NB = ${half} cm.`,
         ask: "Find ∠ONB = x.",
@@ -84,8 +97,11 @@ export function transferQuestion(
       break;
     }
     case "r3": {
-      const a = variants([2, -4, 1], v),
-        b = variants([10, 6, 13], v);
+      const a = number([2, -4, 1], -12, 25),
+        b =
+          caseNumber < 3
+            ? variants([10, 6, 13], v)
+            : a + number([8, 10, 12], 8, 13, 2);
       Object.assign(base, {
         given: `A and B lie on the circle, with A = (${a}, 0) and B = (${b}, 0). The dashed line is the perpendicular bisector of AB. O is the centre.`,
         ask: "Find the horizontal coordinate x of O.",
@@ -103,7 +119,7 @@ export function transferQuestion(
       break;
     }
     case "r4": {
-      const d = variants([3, 5, 4], v);
+      const d = number([3, 5, 4], 2, 17, 0.5);
       Object.assign(base, {
         given: `O is the centre. AB and CD are equal chords of this circle. OM ⊥ AB, ON ⊥ CD and OM = ${d} cm.`,
         ask: "Find ON = x.",
@@ -120,7 +136,7 @@ export function transferQuestion(
       break;
     }
     case "r5": {
-      const length = variants([12, 16, 14], v);
+      const length = number([12, 16, 14], 8, 19);
       Object.assign(base, {
         given: `O is the centre, and AB and CD are chords of this circle. OM ⊥ AB and ON ⊥ CD. OM = ON and AB = ${length} cm.`,
         ask: "Find CD = x.",
@@ -137,7 +153,7 @@ export function transferQuestion(
       break;
     }
     case "r6": {
-      const a = variants([86, 118, 142], v);
+      const a = number([86, 118, 142], 54, 57, 2);
       Object.assign(base, {
         given: `O is the centre and ∠AOB = ${a}°. P lies on the major arc AB.`,
         ask: "Find ∠APB = x.",
@@ -155,7 +171,7 @@ export function transferQuestion(
       break;
     }
     case "r7": {
-      const a = variants([47, 62, 38], v);
+      const a = number([47, 62, 38], 25, 51);
       Object.assign(base, {
         given: `A, B, P and Q lie on this circle. P and Q are on the same side of AB, and ∠APB = ${a}°.`,
         ask: "Find ∠AQB = x.",
@@ -193,7 +209,7 @@ export function transferQuestion(
       break;
     }
     case "r9": {
-      const radius = variants([7, 9, 6], v);
+      const radius = number([7, 9, 6], 3, 19);
       Object.assign(base, {
         given: `A, B and P lie on the circle, ∠APB = 90°, and the radius is ${radius} cm.`,
         ask: "Find AB = x.",
@@ -212,9 +228,8 @@ export function transferQuestion(
     }
     case "r10":
     case "r12": {
-      const value =
-          r.id === "r10" ? variants([9, 12, 7], v) : variants([8, 11, 9], v),
-        a = variants([64, 88, 108], v),
+      const value = number(r.id === "r10" ? [9, 12, 7] : [8, 11, 9], 5, 23),
+        a = number([64, 88, 108], 50, 61, 2),
         arc = r.id === "r10";
       Object.assign(base, {
         given: `O is the centre. ∠AOB = ∠COD = ${a}°. The ${arc ? "minor arc" : "chord"} AB has length ${value} cm.`,
@@ -234,7 +249,7 @@ export function transferQuestion(
     }
     case "r11":
     case "r13": {
-      const a = variants([72, 104, 126], v),
+      const a = number([72, 104, 126], 54, 57, 2),
         arc = r.id === "r11";
       Object.assign(base, {
         given: `The ${arc ? "minor arcs" : "chords"} AB and CD are equal in this circle. ∠AOB = ${a}° and O is the centre.`,
@@ -255,7 +270,7 @@ export function transferQuestion(
     }
     case "r14":
     case "r15": {
-      const value = variants([8, 10, 13], v),
+      const value = number([8, 10, 13], 5, 23),
         toArc = r.id === "r14";
       Object.assign(base, {
         given: `The ${toArc ? "chords" : "minor arcs"} AB and CD are equal in this circle. The ${toArc ? "minor arc" : "chord"} AB has length ${value} cm.`,
@@ -270,15 +285,18 @@ export function transferQuestion(
         ],
         explanation: `Equal ${toArc ? "chords give equal corresponding minor arcs" : "arcs give equal chords"} in the same circle, so x = ${value} cm.`,
       });
-      base.diagram.angle = variants([64, 80, 106], v);
+      base.diagram.angle = number([64, 80, 106], 50, 61, 2);
       base.diagram.value = value;
       break;
     }
     case "r16":
     case "r17": {
-      const small = variants([30, 35, 40], v),
-        ratio = variants([2, 3, 2.5], v),
-        length = variants([6, 4, 8], v),
+      const small = number([30, 35, 40], 16, 19),
+        ratio =
+          caseNumber < 3
+            ? variants([2, 3, 2.5], v)
+            : variants([1.5, 2, 2.5, 3], caseNumber - 3),
+        length = number([6, 4, 8], 4, 17, 2),
         circ = r.id === "r17",
         large = small * ratio;
       Object.assign(base, {

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -138,6 +139,31 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
   const [resetError, setResetError] = useState(false);
   const [propertyMenu, setPropertyMenu] = useState(false);
   const settingsRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    function dismissOutside(event: Event) {
+      const settings = settingsRef.current;
+      if (
+        settings?.open &&
+        event.target instanceof Node &&
+        !settings.contains(event.target)
+      )
+        settings.open = false;
+    }
+    function dismissOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape" && settingsRef.current?.open) {
+        settingsRef.current.open = false;
+        settingsRef.current.querySelector("summary")?.focus();
+      }
+    }
+    document.addEventListener("pointerdown", dismissOutside, true);
+    document.addEventListener("focusin", dismissOutside);
+    document.addEventListener("keydown", dismissOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", dismissOutside, true);
+      document.removeEventListener("focusin", dismissOutside);
+      document.removeEventListener("keydown", dismissOnEscape);
+    };
+  }, []);
   const { mode, labId } = workspace;
   const setMode = (mode: typeof workspace.mode) => {
     setPropertyMenu(false);
@@ -204,16 +230,7 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
             {c.apply}
           </button>
         </nav>
-        <details
-          className={s.settings}
-          ref={settingsRef}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              event.currentTarget.open = false;
-              event.currentTarget.querySelector("summary")?.focus();
-            }
-          }}
-        >
+        <details className={s.settings} ref={settingsRef}>
           <summary>Settings</summary>
           <div className={s.settingsPanel}>
             <label>
@@ -357,6 +374,9 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
           focusToken={workspace.focusToken}
           collected={progress.reasons}
           onCollect={(id) => collect("reasons", id)}
+          onResetRecord={() =>
+            setProgress((previous) => ({ ...previous, reasons: [] }))
+          }
         />
       )}
       {mode === "check" && <ReasonChallenge onExplore={explore} />}

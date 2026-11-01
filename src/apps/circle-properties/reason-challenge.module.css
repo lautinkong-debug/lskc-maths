@@ -80,9 +80,18 @@
 }
 .levels {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin: 22px 0;
+}
+.recordTools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
+.recordTools .reviewBanner {
+  width: 100%;
 }
 .game .levels button {
   display: flex;
@@ -170,6 +179,54 @@
   gap: 10px;
   margin: 18px 0 10px;
   font-size: 0.86rem;
+}
+.setToolbar,
+.reviewBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+}
+.setToolbar label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  flex: 1 1 300px;
+  font-weight: 700;
+}
+.setToolbar select {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid #bcd0eb;
+  border-radius: 10px;
+  background: white;
+  color: var(--ink);
+  padding: 10px;
+}
+.reviewBanner {
+  padding: 12px 16px;
+  border: 1px solid #b8cff4;
+  border-radius: 12px;
+  background: #eaf2ff;
+  font-weight: 650;
+}
+.reviewBanner > span {
+  flex: 1 1 250px;
+}
+.reviewChoice {
+  display: block;
+  font-weight: 750;
+  margin-top: 4px;
+}
+.reviewChoice:empty {
+  display: none;
+}
+.game .choices button[data-correct-choice="true"] {
+  border-color: #3a8d60;
+  background: #eaf8ef;
+  color: #155737;
 }
 .timer {
   padding: 9px 14px;
