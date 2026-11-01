@@ -53,13 +53,24 @@ function LockIcon({ unlocked }: { unlocked: boolean }) {
 
 export default function ReasonChallenge({
   onExplore,
+  practiceRequest,
 }: {
   onExplore: (lab: LabId) => void;
+  practiceRequest?: { lab: LabId; at: number } | null;
 }) {
+  // Applied once on mount. Ordinary tab visits restore the current saved set.
+  function restoreSession(raw: unknown): ChallengeSession {
+    const saved = parseChallengeSession(raw) ?? initialChallengeSession;
+    if (!practiceRequest) return saved;
+    const group = `topic-${practiceRequest.lab}` as const;
+    if (saved.group === group && saved.queue.length)
+      return { ...saved, started: true, reviewSet: null, reviewIndex: 0 };
+    return startChallengeSet(saved, practiceRequest.at, group);
+  }
   const [state, setState, saveFailed] = useLocalSession(
     "reason-challenge-v1",
-    initialChallengeSession,
-    parseChallengeSession,
+    () => restoreSession(initialChallengeSession),
+    restoreSession,
   );
   const [now, setNow] = useState(() => Date.now());
   const [hint, setHint] = useState("");

@@ -2,6 +2,8 @@
 
 ## Circle Lab Reasons Relay topic practice (01/11/2026)
 
+- [x] Order the activity tabs Explore, Reasons Relay, Reasons Play. Route both exploration practice buttons into the matching Relay topic, resuming existing drafts or archiving the prior topic when starting a different one.
+
 - [x] Rename the reason-choice activity Reasons Play and the four-step activity Reasons Relay. Group Relay into the seven exploration topics plus all-reasons mixed practice.
 - [x] Generate further numerical cases, offer similar-question retries after mistakes, and retain checked answers and feedback in ten previous sets. Keep earlier saved levels readable and retain timed deadlines while reviewing.
 - [x] Add previous/next question navigation, same-level new sets, confirmed saved-set deletion and Relay record reset. Add a separate Reasons Play record reset.

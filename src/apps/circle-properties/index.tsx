@@ -138,6 +138,11 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
   const [resetPrompt, setResetPrompt] = useState(false);
   const [resetError, setResetError] = useState(false);
   const [propertyMenu, setPropertyMenu] = useState(false);
+  const [relayRequest, setRelayRequest] = useState<{
+    lab: LabId;
+    at: number;
+  } | null>(null);
+  const appRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
     function dismissOutside(event: Event) {
@@ -166,22 +171,24 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
   }, []);
   const { mode, labId } = workspace;
   const setMode = (mode: typeof workspace.mode) => {
+    setRelayRequest(null);
     setPropertyMenu(false);
     if (settingsRef.current) settingsRef.current.open = false;
     setWorkspace((p) => ({ ...p, mode }));
   };
   const explore = (labId: LabId) => {
+    setRelayRequest(null);
     setPropertyMenu(false);
     if (settingsRef.current) settingsRef.current.open = false;
     setWorkspace((p) => ({ ...p, labId, mode: "explore" }));
   };
-  const practise = (focusLab: LabId) =>
-    setWorkspace((p) => ({
-      ...p,
-      mode: "relay",
-      focusLab,
-      focusToken: p.focusToken + 1,
-    }));
+  const practise = (lab: LabId) => {
+    setMode("check");
+    setRelayRequest({ lab, at: Date.now() });
+    requestAnimationFrame(() =>
+      appRef.current?.scrollIntoView({ block: "start" }),
+    );
+  };
   function collect(kind: "missions" | "reasons", id: string) {
     setProgress((p) =>
       p[kind].includes(id) ? p : { ...p, [kind]: [...p[kind], id] },
@@ -197,7 +204,7 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
     }
   }
   return (
-    <div className={s.app} data-appearance={workspace.appearance}>
+    <div className={s.app} data-appearance={workspace.appearance} ref={appRef}>
       <header className={s.header}>
         <div className={s.brand}>
           <div className={s.brandOrb}>
@@ -217,17 +224,17 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
           </button>
           <button
             type="button"
-            aria-pressed={mode === "relay"}
-            onClick={() => setMode("relay")}
-          >
-            {c.relay}
-          </button>
-          <button
-            type="button"
             aria-pressed={mode === "check"}
             onClick={() => setMode("check")}
           >
             {c.apply}
+          </button>
+          <button
+            type="button"
+            aria-pressed={mode === "relay"}
+            onClick={() => setMode("relay")}
+          >
+            {c.relay}
           </button>
         </nav>
         <details className={s.settings} ref={settingsRef}>
@@ -379,7 +386,9 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
           }
         />
       )}
-      {mode === "check" && <ReasonChallenge onExplore={explore} />}
+      {mode === "check" && (
+        <ReasonChallenge onExplore={explore} practiceRequest={relayRequest} />
+      )}
       <footer className={s.footer}>
         <span role="status">
           {workspaceFailed || progressFailed ? c.storageFailed : c.saveNotice}
