@@ -1,15 +1,17 @@
 "use client";
 
 import MathText from "./MathText";
+import { circleReviewCopy as c } from "@/lib/copy";
 
 import { useEffect, useState } from "react";
-import { reasons, reasonQuestions, type LabId } from "./content";
+import { reasons, type LabId } from "./content";
 import { useLocalSession } from "./useLocalSession";
 import {
   answerCard,
   cardKey,
   feedbackFor,
   focusPractice,
+  freshPracticeRound,
   initialPractice,
   nextCard,
   nextRound,
@@ -17,6 +19,9 @@ import {
   practiceSummary,
   questionFor,
   reasonLabel,
+  relayPositions,
+  relayView,
+  visitQuestion,
   PRACTICE_KEY,
 } from "./practice";
 import ReasonDiagram from "./ReasonDiagram";
@@ -59,28 +64,30 @@ export default function ReasonPractice({
       setState((current) => focusPractice(current, focusLab, focusToken));
     }
   }, [focusLab, focusToken, setState, state.lastFocusToken]);
-  const card = state.queue[state.index],
-    question = card ? questionFor(card) : undefined;
-  const correct = question && state.answer === question.reasonId;
+  const view = relayView(state);
+  const { card, answer, review } = view;
+  const positions = relayPositions(state);
+  const cursor = positions.findIndex(
+    (p) => p.round === view.round && p.index === view.index,
+  );
+  const question = card ? questionFor(card) : undefined;
+  const correct = question && answer === question.reasonId;
   const summary = practiceSummary(
     state.history,
     Math.max(openedAt, state.lastActivity),
   );
-  const related = state.focusLab
-    ? topicNames[state.focusLab]
+  const related = view.focusLab
+    ? topicNames[view.focusLab]
     : "Mixed circle reasons";
   const ids = question ? [question.reasonId, ...question.distractorIds] : [];
   const offset =
-    (state.index + state.round + (card?.variant ?? 0)) %
-    Math.max(1, ids.length);
+    (view.index + view.round + (card?.variant ?? 0)) % Math.max(1, ids.length);
   const options = ids.slice(offset).concat(ids.slice(0, offset));
   const feedback =
-    question && state.answer !== null
-      ? feedbackFor(question, state.answer)
-      : "";
+    question && answer !== null ? feedbackFor(question, answer) : "";
   const shortFeedback = feedback.split(/(?<=\.)\s/)[0];
   function choose(id: string) {
-    if (!question || state.answer !== null) return;
+    if (!question || review || answer !== null) return;
     setState(answerCard(state, id, clock()));
     if (id === question.reasonId) onCollect(id);
   }
@@ -97,21 +104,23 @@ export default function ReasonPractice({
     setState(nextRound(state, now, review));
   }
   function startMixed() {
+    setNotice(c.generated);
+    setHighlightKey(0);
+    setState(freshPracticeRound(state, clock()));
+  }
+  function visit(position: (typeof positions)[number]) {
+    if (!position) return;
     setNotice("");
     setHighlightKey(0);
-    setState(
-      nextRound(
-        {
-          ...state,
-          focusLab: null,
-          remaining: reasonQuestions.map((q) => ({
-            questionId: q.id,
-            variant: state.history[q.reasonId]?.seen ? 1 : 0,
-          })),
-        },
-        clock(),
-      ),
-    );
+    setState(visitQuestion(state, position));
+  }
+  function advance() {
+    if (review) visit(positions[cursor + 1]);
+    else if (answer !== null) {
+      setNotice("");
+      setHighlightKey(0);
+      setState(nextCard(state));
+    }
   }
   return (
     <section className={styles.root} aria-label="Reason practice">
@@ -138,6 +147,52 @@ export default function ReasonPractice({
           </div>
         </details>
       </div>
+      <nav className={styles.questionNav} aria-label={c.navigation}>
+        <button
+          type="button"
+          disabled={cursor <= 0}
+          onClick={() => visit(positions[cursor - 1])}
+        >
+          <span aria-hidden="true">← </span>{c.previous}
+        </button>
+        <label>
+          <span>{c.goTo}</span>
+          <select
+            value={cursor}
+            onChange={(e) => visit(positions[Number(e.target.value)])}
+          >
+            {positions.map((p, i) => (
+              <option key={`${p.round}-${p.index}`} value={i}>
+                Round {p.round} ·{" "}
+                {p.round === state.round && p.index === state.queue.length
+                  ? "Round review"
+                  : `Q${p.index + 1}`}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          type="button"
+          disabled={!review && answer === null}
+          onClick={advance}
+        >
+          {c.next}<span aria-hidden="true"> →</span>
+        </button>
+        <button type="button" className={styles.newSet} onClick={startMixed}>
+          <span aria-hidden="true">↻ </span>{c.newSet}
+        </button>
+      </nav>
+      {review && (
+        <div className={styles.reviewBar}>
+          <span>{c.reviewing(view.round, view.index + 1)}</span>
+          <button
+            type="button"
+            onClick={() => visit(positions[positions.length - 1])}
+          >
+            {c.resume}
+          </button>
+        </div>
+      )}
       {storageFailed && (
         <p className={styles.saveNote} role="status">
           This browser could not save your practice. Keep this page open to
@@ -149,23 +204,24 @@ export default function ReasonPractice({
           {notice}
         </p>
       )}
-      {question ? (
-        <div className={styles.layout} key={cardKey(card)}>
+      {question && card ? (
+        <div className={styles.layout} key={`${view.round}-${cardKey(card)}`}>
           <ReasonDiagram
             question={question}
-            emphasise={state.answer !== null}
+            emphasise={answer !== null}
             highlightKey={highlightKey}
           />
           <div className={styles.question}>
             <div className={styles.topline}>
               <span>
-                Question {state.index + 1} of {state.queue.length} · Round{" "}
-                {state.round}
+                Question {view.index + 1} of {view.queue.length} · Round{" "}
+                {view.round}
               </span>
               <label>
                 <input
                   type="checkbox"
                   checked={state.recall}
+                  disabled={review}
                   onChange={(e) =>
                     setState({
                       ...state,
@@ -178,12 +234,12 @@ export default function ReasonPractice({
               </label>
             </div>
             <progress
-              value={state.index}
-              max={state.queue.length}
+              value={view.index}
+              max={view.queue.length}
               aria-label="Relay progress"
             />
             <div
-              className={`${styles.given} ${state.answer !== null && !correct ? styles.highlight : ""}`}
+              className={`${styles.given} ${answer !== null && !correct ? styles.highlight : ""}`}
             >
               <span>Given</span>
               <p>
@@ -197,7 +253,12 @@ export default function ReasonPractice({
               </p>
             </div>
             <h3>Which reason connects the two?</h3>
-            {state.recall && !state.revealed && state.answer === null ? (
+            {review && answer === null && (
+              <p className={styles.archivedNote}>
+                {c.noAnswer}
+              </p>
+            )}
+            {!review && state.recall && !state.revealed && answer === null ? (
               <div className={styles.recall}>
                 <p>Say or write the reason before looking at the choices.</p>
                 <small>Your spoken answer is not automatically marked.</small>
@@ -215,25 +276,38 @@ export default function ReasonPractice({
                   <button
                     key={id}
                     type="button"
-                    disabled={state.answer !== null}
+                    disabled={review || answer !== null}
                     data-result={
-                      state.answer === null
+                      answer === null && !review
                         ? undefined
                         : id === question.reasonId
                           ? "correct"
-                          : id === state.answer
+                          : id === answer
                             ? "incorrect"
                             : undefined
                     }
                     onClick={() => choose(id)}
                   >
                     <span>{String.fromCharCode(65 + i)}</span>
-                    <span>({reasonLabel(id)})</span>
+                    <span>
+                      ({reasonLabel(id)})
+                      {review &&
+                        (id === answer || id === question.reasonId) && (
+                          <small className={styles.reviewChoice}>
+                            {[
+                              id === answer && c.yourAnswer,
+                              id === question.reasonId && c.correctReason,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </small>
+                        )}
+                    </span>
                   </button>
                 ))}
               </div>
             )}
-            {state.answer !== null && (
+            {answer !== null && (
               <div
                 className={styles.feedback}
                 role="status"
@@ -263,7 +337,7 @@ export default function ReasonPractice({
                   <summary>Why this reason works</summary>
                   {!correct && (
                     <p>
-                      <b>Your choice:</b> ({reasonLabel(state.answer)})
+                      <b>Your choice:</b> ({reasonLabel(answer)})
                     </p>
                   )}
                   {feedback !== shortFeedback && (
@@ -289,12 +363,9 @@ export default function ReasonPractice({
                 <button
                   type="button"
                   className={styles.primary}
-                  onClick={() => {
-                    setHighlightKey(0);
-                    setState(nextCard(state));
-                  }}
+                  onClick={advance}
                 >
-                  {state.index + 1 === state.queue.length
+                  {!review && view.index + 1 === view.queue.length
                     ? "See round review"
                     : "Next question"}
                 </button>

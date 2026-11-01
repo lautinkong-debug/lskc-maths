@@ -9,6 +9,15 @@ import {
 export const PRACTICE_KEY = "reason-practice-v3";
 export const DAY = 86_400_000;
 export type PracticeCard = { questionId: string; variant: number };
+type Position = { round: number; index: number };
+type PastRound = {
+  round: number;
+  queue: PracticeCard[];
+  visited: number;
+  answers: Record<string, string>;
+  focusLab: LabId | null;
+};
+const archiveLimit = 10;
 export type ReasonHistory = {
   seen: number;
   correct: number;
@@ -26,6 +35,9 @@ export type PracticeState = {
   remaining: PracticeCard[];
   index: number;
   answer: string | null;
+  answers: Record<string, string>;
+  archive: PastRound[];
+  viewing: Position | null;
   revealed: boolean;
   recall: boolean;
   round: number;
@@ -286,6 +298,9 @@ export function initialPractice(collected: string[] = []): PracticeState {
     remaining: deck.slice(5),
     index: 0,
     answer: null,
+    answers: {},
+    archive: [],
+    viewing: null,
     revealed: false,
     recall: true,
     round: 1,
@@ -296,6 +311,77 @@ export function initialPractice(collected: string[] = []): PracticeState {
     focusLab: null,
     lastFocusToken: 0,
     lastActivity: 0,
+  };
+}
+
+function closeRound(state: PracticeState) {
+  return {
+    archive: [
+      ...state.archive,
+      {
+        round: state.round,
+        queue: state.queue,
+        visited: Math.min(state.index + 1, state.queue.length),
+        answers: state.answers,
+        focusLab: state.focusLab,
+      },
+    ].slice(-archiveLimit),
+    answers: {},
+    viewing: null,
+    round: state.round + 1,
+  };
+}
+
+/** The live question remains separate from the read-only history cursor. */
+export function relayPositions(state: PracticeState): Position[] {
+  return [
+    ...state.archive.flatMap((r) =>
+      Array.from({ length: r.visited }, (_, index) => ({
+        round: r.round,
+        index,
+      })),
+    ),
+    ...Array.from({ length: state.index + 1 }, (_, index) => ({
+      round: state.round,
+      index,
+    })),
+  ];
+}
+
+export function visitQuestion(
+  state: PracticeState,
+  position: Position,
+): PracticeState {
+  if (
+    !relayPositions(state).some(
+      (p) => p.round === position.round && p.index === position.index,
+    )
+  )
+    return state;
+  return {
+    ...state,
+    viewing:
+      position.round === state.round && position.index === state.index
+        ? null
+        : position,
+  };
+}
+
+export function relayView(state: PracticeState) {
+  const { round, index } = state.viewing ?? state;
+  const source = state.archive.find((r) => r.round === round) ?? state;
+  const card = source.queue[index];
+  return {
+    round,
+    index,
+    card,
+    queue: source.queue,
+    focusLab: source.focusLab,
+    answer:
+      state.viewing && card
+        ? (source.answers[cardKey(card)] ?? null)
+        : state.answer,
+    review: state.viewing !== null,
   };
 }
 export function focusPractice(
@@ -316,6 +402,7 @@ export function focusPractice(
     .map(toCard);
   return {
     ...state,
+    ...closeRound(state),
     queue: related.slice(0, 5),
     remaining: [...related.slice(5), ...others],
     index: 0,
@@ -332,7 +419,7 @@ export function answerCard(
   now: number,
 ): PracticeState {
   const card = state.queue[state.index];
-  if (!card || state.answer !== null) return state;
+  if (!card || state.answer !== null || state.viewing) return state;
   const q = questionFor(card);
   if (![q.reasonId, ...q.distractorIds].includes(selected)) return state;
   const previous = state.history[q.reasonId] ?? blankHistory(),
@@ -359,6 +446,7 @@ export function answerCard(
   return {
     ...state,
     answer: selected,
+    answers: { ...state.answers, [cardKey(card)]: selected },
     answeredCount,
     roundCorrect: state.roundCorrect + Number(correct),
     history: { ...state.history, [q.reasonId]: history },
@@ -439,6 +527,7 @@ export function nextRound(
     }
   return {
     ...state,
+    ...closeRound(state),
     queue,
     remaining: pool.filter(
       (c) => !queue.some((chosen) => cardKey(chosen) === cardKey(c)),
@@ -446,7 +535,6 @@ export function nextRound(
     index: 0,
     answer: null,
     revealed: false,
-    round: state.round + 1,
     roundCorrect: 0,
     focusLab:
       !review &&
@@ -457,6 +545,70 @@ export function nextRound(
       )
         ? state.focusLab
         : null,
+    lastActivity: now,
+  };
+}
+
+/** Explicit regeneration draws five different question families, not just a
+ * different order. The adaptive Next round / Due review schedules stay intact. */
+export function freshPracticeRound(
+  state: PracticeState,
+  now: number,
+  random = Math.random,
+): PracticeState {
+  const previousIds = new Set(
+    [...state.queue, ...relayView(state).queue].map((c) => c.questionId),
+  );
+  const past = [...state.archive.flatMap((r) => r.queue), ...state.queue];
+  const pastIds = past.map((c) => c.questionId);
+  const waiting = new Set(
+    state.missed
+      .filter((m) => m.after > state.answeredCount)
+      .map((c) => c.questionId),
+  );
+  const deck = reasonQuestions
+    .filter((q) => !previousIds.has(q.id))
+    .map((q) => {
+      const variants = past
+        .filter((c) => c.questionId === q.id)
+        .map((c) => c.variant);
+      const leastRecent = Math.min(
+        ...[0, 1, 2].map((v) => variants.lastIndexOf(v)),
+      );
+      const available = [0, 1, 2].filter(
+        (v) => variants.lastIndexOf(v) === leastRecent,
+      );
+      return {
+        card: {
+          questionId: q.id,
+          variant: available[Math.floor(random() * available.length)],
+        },
+        last: pastIds.lastIndexOf(q.id),
+        wait: Number(waiting.has(q.id)),
+        tie: random(),
+      };
+    })
+    .sort((a, b) => a.wait - b.wait || a.last - b.last || a.tie - b.tie);
+  const seenReasons = new Set<string>();
+  const queue: PracticeCard[] = [];
+  for (const { card } of deck) {
+    const reasonId = byId.get(card.questionId)!.reasonId;
+    if (!seenReasons.has(reasonId)) {
+      seenReasons.add(reasonId);
+      queue.push(card);
+    }
+    if (queue.length === 5) break;
+  }
+  return {
+    ...state,
+    ...closeRound(state),
+    queue,
+    remaining: deck.map((d) => d.card).filter((c) => !queue.includes(c)),
+    index: 0,
+    answer: null,
+    revealed: false,
+    roundCorrect: 0,
+    focusLab: null,
     lastActivity: now,
   };
 }
@@ -524,15 +676,59 @@ export function parsePractice(value: unknown): PracticeState | undefined {
     [current.reasonId, ...current.distractorIds].includes(v.answer)
       ? v.answer
       : null;
-  return {
+  const validAnswers = (cards: PracticeCard[], raw: unknown) => {
+    const result: Record<string, string> = {};
+    if (raw && typeof raw === "object")
+      for (const card of cards) {
+        const q = byId.get(card.questionId)!;
+        const pick = (raw as Record<string, unknown>)[cardKey(card)];
+        if (
+          typeof pick === "string" &&
+          [q.reasonId, ...q.distractorIds].includes(pick)
+        )
+          result[cardKey(card)] = pick;
+      }
+    return result;
+  };
+  const answers = validAnswers(queue.slice(0, index + 1), v.answers);
+  if (answer) answers[cardKey(queue[index])] = answer;
+  const round = Math.max(1, bounded(v.round));
+  const archive: PastRound[] = [];
+  if (Array.isArray(v.archive))
+    for (const r of v.archive.slice(-archiveLimit)) {
+      if (
+        !r ||
+        !Number.isInteger(r.round) ||
+        r.round < 1 ||
+        r.round >= round ||
+        r.round <= (archive[archive.length - 1]?.round ?? 0) ||
+        !Array.isArray(r.queue)
+      )
+        continue;
+      const cards = r.queue.slice(0, 5);
+      if (!cards.length || !cards.every(isCard)) continue;
+      const visited = bounded(r.visited, cards.length);
+      if (visited)
+        archive.push({
+          round: r.round,
+          queue: cards,
+          visited,
+          answers: validAnswers(cards.slice(0, visited), r.answers),
+          focusLab: labs.some((l) => l.id === r.focusLab) ? r.focusLab : null,
+        });
+    }
+  const restored: PracticeState = {
     ...initialPractice(),
     queue,
     remaining: v.remaining.filter(isCard).slice(0, 23),
     index,
     answer,
+    answers,
+    archive,
+    viewing: null,
     revealed: v.revealed === true,
     recall: v.recall !== false,
-    round: Math.max(1, bounded(v.round)),
+    round,
     roundCorrect: bounded(v.roundCorrect, 5),
     answeredCount: bounded(v.answeredCount),
     history,
@@ -549,6 +745,7 @@ export function parsePractice(value: unknown): PracticeState | undefined {
     lastFocusToken: bounded(v.lastFocusToken, Number.MAX_SAFE_INTEGER),
     lastActivity: time(v.lastActivity) ?? 0,
   };
+  return v.viewing ? visitQuestion(restored, v.viewing) : restored;
 }
 export function readPracticeHistory(): PracticeHistory {
   try {

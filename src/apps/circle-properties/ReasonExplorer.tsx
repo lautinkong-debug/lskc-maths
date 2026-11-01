@@ -1,8 +1,10 @@
 "use client";
 
 import { useId, useState } from "react";
+import { circleReviewCopy as c } from "@/lib/copy";
 import { labs, reasons, type LabId } from "./content";
 import MathText from "./MathText";
+import MeasurementList from "./MeasurementList";
 import ReasonFlowDiagram from "./ReasonFlowDiagram";
 import ReasonWorking from "./ReasonWorking";
 import { reasonWorking } from "./reasonWorkingData";
@@ -202,9 +204,6 @@ export default function ReasonExplorer({
           <h4>
             <span aria-hidden="true">1</span> Given
           </h4>
-          <p className={s.fact}>
-            <MathText>{reason.given}</MathText>
-          </p>
           <ReasonFlowDiagram
             reasonId={reason.id}
             reveal={false}
@@ -212,36 +211,28 @@ export default function ReasonExplorer({
             onChange={change}
             trails={experiment.samples}
           />
-          <p className={s.observationLabel}>
-            <strong>Observe while dragging</strong>
-            <br />
-            These measurements are observations, not extra givens.
-          </p>
-          <div
-            className={s.liveMeasurements}
-            aria-label="Reason exploration measurements"
-          >
-            {measurements.map((m) => (
-              <div key={m.label}>
-                <span>
-                  <MathText>{m.label}</MathText>
-                </span>
-                <strong>
-                  {format(m.value, m.unit)}
-                  <small> {m.unit}</small>
-                </strong>
-              </div>
-            ))}
+          <div className={s.proofCaption}>
+            <span className={s.proofSymbol} aria-hidden="true">
+              ∵
+            </span>
+            <p className={s.proofStatement}>
+              <MathText>{flow.startingFact}</MathText>
+            </p>
           </div>
+          <details className={s.observations}>
+            <summary>{c.compare}</summary>
+            <p>These measurements are observations, not extra givens.</p>
+            <MeasurementList
+              label="Reason exploration measurements"
+              measurements={measurements}
+            />
+          </details>
         </div>
         {revealed ? (
           <div className={`${s.stage} ${s.resultStage}`}>
             <h4>
               <span aria-hidden="true">2</span> Therefore
             </h4>
-            <p className={s.fact}>
-              <MathText>{reason.conclusion}</MathText>
-            </p>
             <ReasonFlowDiagram
               reasonId={reason.id}
               reveal
@@ -249,21 +240,22 @@ export default function ReasonExplorer({
               onChange={change}
               trails={experiment.samples}
             />
-            <p className={s.syncHint}>
-              Drag either diagram. The blue givens stay true; the green marks
-              show the conclusion.
-            </p>
-            <p className={s.direction} aria-label="Given to conclusion">
-              <span>
-                <MathText>{flow.startingFact}</MathText>
+            <div className={s.proofCaption}>
+              <span className={s.proofSymbol} aria-hidden="true">
+                ∴
               </span>
-              <span className={s.arrow} aria-label="therefore">
-                →
-              </span>
-              <strong>
-                <MathText>{flow.resultFact}</MathText>
-              </strong>
-            </p>
+              <div>
+                <p className={s.proofStatement}>
+                  <MathText>{reasonWorking[reason.id].conclusion}</MathText>
+                </p>
+                <p className={s.proofReason}>
+                  <span>{c.reason(reason.number)}</span>
+                  <strong>
+                    (<MathText>{reason.label}</MathText>)
+                  </strong>
+                </p>
+              </div>
+            </div>
           </div>
         ) : (
           <div className={`${s.stage} ${s.questionStage}`}>
@@ -373,44 +365,11 @@ export default function ReasonExplorer({
 
       {revealed && (
         <div className={s.explanation}>
-          <div
-            className={s.writtenSummary}
-            role="region"
-            aria-label="Written deduction"
-          >
-            <p className={s.givenLine}>
-              <span className={s.proofSymbol} aria-label="because">
-                ∵
-              </span>
-              <span>
-                <MathText>{flow.startingFact}</MathText>
-              </span>
-            </p>
-            <p className={s.conclusionLine}>
-              <span className={s.proofSymbol} aria-label="therefore">
-                ∴
-              </span>
-              <span>
-                <MathText>{reasonWorking[reason.id].conclusion}</MathText>{" "}
-                <span className={s.inlineReason}>
-                  (<MathText>{reason.label}</MathText>)
-                </span>
-              </span>
-            </p>
-          </div>
           <div className={s.reasonText}>
-            <div>
-              <h4>Write the reason</h4>
-              <p className={s.formalReason}>
-                <MathText>{reason.label}</MathText>
-              </p>
-            </div>
-            <div>
-              <h4>Check the conditions</h4>
-              <p>
-                <MathText>{reason.condition}</MathText>
-              </p>
-            </div>
+            <h4>Check the conditions</h4>
+            <p>
+              <MathText>{reason.condition}</MathText>
+            </p>
           </div>
           <p className={s.contrast}>
             <MathText>{flow.contrast}</MathText>

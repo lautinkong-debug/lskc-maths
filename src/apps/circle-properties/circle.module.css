@@ -397,39 +397,6 @@
   flex-shrink: 0;
   font-size: 0.68rem;
 }
-.readouts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  gap: 8px;
-  margin: 0 16px 12px;
-}
-.readouts > div {
-  background: #edf3ff;
-  border-radius: 11px;
-  padding: 10px 12px;
-  min-width: 0;
-}
-.readouts > div[data-secondary="true"] {
-  background: #fff0f4;
-}
-.readouts span {
-  display: block;
-  font-size: 0.7rem;
-  color: #4b6180;
-}
-.readouts strong {
-  font-size: 1.35rem;
-  color: #244dc6;
-  font-variant-numeric: tabular-nums;
-}
-.readouts > div[data-secondary="true"] strong {
-  color: #ba3b63;
-}
-.readouts small {
-  font-size: 0.75rem;
-  margin-left: 3px;
-  font-weight: 500;
-}
 .boardActions {
   display: flex;
   flex-wrap: wrap;
@@ -696,9 +663,6 @@
 }
 .focused .canvas svg {
   max-height: 65vh;
-}
-.focused .readouts {
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
 }
 .actions {
   display: flex;
@@ -1186,23 +1150,6 @@
   .boardCaption {
     margin-inline: 12px;
   }
-  .readouts {
-    margin-inline: 11px;
-    gap: 6px;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .readouts > div {
-    padding: 8px;
-  }
-  .readouts strong {
-    font-size: 1.17rem;
-  }
-  .readouts span {
-    font-size: 0.61rem;
-  }
-  .readouts small {
-    font-size: 0.65rem;
-  }
   .boardActions {
     padding-inline: 11px;
     gap: 6px;
@@ -1378,13 +1325,8 @@
 .boardTools button {
   font-size: 0.8rem;
 }
-.boardCaption,
-.readouts span,
-.readouts small {
+.boardCaption {
   font-size: 0.8rem;
-}
-.readouts {
-  margin-bottom: 12px;
 }
 .precision {
   font-size: 0.82rem;
@@ -1507,9 +1449,7 @@
   .boardTools button {
     max-width: none;
   }
-  .boardCaption,
-  .readouts span,
-  .readouts small {
+  .boardCaption {
     font-size: 0.8rem;
   }
   .boardActions button {
@@ -1701,25 +1641,6 @@
 }
 .playground:not(.focused) .canvas svg {
   max-height: min(400px, 47vh);
-}
-.readouts {
-  grid-template-columns: repeat(auto-fit, minmax(76px, 1fr));
-  margin: 2px 10px 10px;
-  gap: 5px;
-}
-.readouts > div {
-  padding: 7px 9px;
-  border-radius: 7px;
-}
-.readouts strong {
-  font-size: 1.2rem;
-}
-.readouts span,
-.readouts small {
-  font-size: 0.8rem;
-}
-.readouts > div[data-secondary="true"] strong {
-  color: #b12d54;
 }
 .boardOptions {
   border-top: 1px solid var(--line);
@@ -1948,20 +1869,6 @@
   }
   .canvas {
     padding: 0;
-  }
-  .readouts {
-    margin: 0 8px 8px;
-    grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
-  }
-  .readouts > div {
-    padding: 5px 7px;
-  }
-  .readouts strong {
-    font-size: 1.12rem;
-  }
-  .readouts span,
-  .readouts small {
-    font-size: 0.8rem;
   }
   .boardOptions > summary {
     min-height: 40px;

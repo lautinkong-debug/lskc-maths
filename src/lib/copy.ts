@@ -3989,6 +3989,24 @@ export const circleCopy = {
   teacherPrivacy: "Diagrams, drafts and game results stay in this browser. Reopen a question to discuss your choices with your teacher. No class leaderboard or student upload is involved.",
 } as const;
 
+/** Navigation for the practice relay and the diagram captions. */
+export const circleReviewCopy = {
+  navigation: "Question navigation",
+  previous: "Previous",
+  next: "Next",
+  goTo: "Go to question",
+  newSet: "New set",
+  generated: "Five new questions. Use Previous or Go to question to revisit an earlier set.",
+  reviewing: (round: number, question: number) =>
+    `Reviewing round ${round}, question ${question}. Your score stays the same.`,
+  resume: "Back to current round",
+  noAnswer: "No answer was saved for this question. The correct reason is marked below.",
+  yourAnswer: "Your answer",
+  correctReason: "Correct reason",
+  compare: "Compare live measurements",
+  reason: (number: string) => `Reason ${number}`,
+} as const;
+
 /** Interface wording for the four-step numerical circle reason game. */
 export const circleReasonGameCopy = {
   hint: "Look at what is already marked. Decide which new fact you need before choosing the reason.",

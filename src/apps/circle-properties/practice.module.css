@@ -53,6 +53,73 @@
   flex-wrap: wrap;
   padding-top: 8px;
 }
+.questionNav,
+.reviewBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.questionNav label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+.questionNav select,
+.root .questionNav button,
+.root .reviewBar button {
+  min-height: 44px;
+  padding: 7px 12px;
+  border: 1px solid #bacfe7;
+  border-radius: 9px;
+  background: #fff;
+  color: #153f6e;
+  font: inherit;
+}
+.root .questionNav .newSet {
+  margin-inline-start: auto;
+  background: #e7f0ff;
+  border-color: #90b3f0;
+  font-weight: 700;
+}
+.root .questionNav button:disabled {
+  opacity: 0.48;
+}
+.reviewBar,
+.archivedNote {
+  padding: 8px 12px;
+  background: #eef5ff;
+  border-radius: 10px;
+  font-size: 0.93rem;
+}
+.reviewChoice {
+  display: block;
+  font-weight: 700;
+}
+@media (max-width: 600px) {
+  .questionNav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .questionNav label {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+  .questionNav select {
+    flex: 1;
+    min-width: 0;
+  }
+  .root .questionNav button {
+    padding-inline: 4px;
+    text-align: center;
+  }
+  .root .questionNav .newSet {
+    margin: 0;
+  }
+}
 .roundMenu summary {
   cursor: pointer;
   min-height: 44px;

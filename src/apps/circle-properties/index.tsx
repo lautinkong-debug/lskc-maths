@@ -46,6 +46,7 @@ import {
 import { LabIcon, Orb, Star } from "./LabSprites";
 import s from "./circle.module.css";
 import MathText from "./MathText";
+import MeasurementList from "./MeasurementList";
 import ExactNumberInput from "./ExactNumberInput";
 
 const places: Record<LabId, { name: string; subtitle: string; tone: string }> =
@@ -461,6 +462,9 @@ function Playground({
       : parameters;
   const model = getModel(labId, displayedParameters),
     params = normalise(labId, parameters);
+  const visibleMeasurements = model.measurements.filter((m) =>
+    m.unit === "°" || m.label === "Angle ratio" ? showAngles : showMeasurements,
+  );
   const mission = missions[labId][missionIndex];
   const snapMission = free || conditionOpen ? undefined : missionIndex;
   const snapContext = `${free}:${missionIndex}:${conditionOpen}`;
@@ -688,27 +692,6 @@ function Playground({
                   </span>
                 )}
               </div>
-              {(showMeasurements || showAngles) && (
-                <div className={s.readouts} aria-label="Live measurements">
-                  {model.measurements
-                    .filter((m) =>
-                      m.unit === "°" || m.label === "Angle ratio"
-                        ? showAngles
-                        : showMeasurements,
-                    )
-                    .map((m, i) => (
-                      <div key={m.label} data-secondary={i % 2 === 1}>
-                        <span>
-                          <MathText notation>{m.label}</MathText>
-                        </span>
-                        <strong>
-                          {numeric(m.value, m.unit === "" ? 3 : 1)}
-                          <small>{m.unit}</small>
-                        </strong>
-                      </div>
-                    ))}
-                </div>
-              )}
               {conditionOpen && (
                 <div className={s.angleExperiment}>
                   <p>
@@ -776,6 +759,10 @@ function Playground({
                   {c.measurements}
                 </label>
               </div>
+              <MeasurementList
+                label="Live measurements"
+                measurements={visibleMeasurements}
+              />
               <p className={s.snapHelp}>{c.snapHelp}</p>
               <div className={s.boardActions}>
                 <button type="button" onClick={newShape}>

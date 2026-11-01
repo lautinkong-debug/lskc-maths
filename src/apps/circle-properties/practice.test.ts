@@ -6,12 +6,16 @@ import {
   DAY,
   feedbackFor,
   focusPractice,
+  freshPracticeRound,
   initialPractice,
   nextCard,
   nextRound,
   parsePractice,
   practiceSummary,
   questionFor,
+  relayPositions,
+  relayView,
+  visitQuestion,
 } from "./practice";
 import { pairedDiagramGeometry } from "./ReasonDiagram";
 
@@ -132,6 +136,55 @@ describe("reason diagram geometry", () => {
 });
 
 describe("practice queue and evidence", () => {
+  it("restores the original wrong choice after moving backwards, refreshing and generating a new set", () => {
+    const first = answerCard(initialPractice(), "r2", 1000);
+    const live = nextCard(first);
+    const back = visitQuestion(live, { round: 1, index: 0 });
+    expect(relayView(back)).toMatchObject({ answer: "r2", review: true });
+    expect(answerCard(back, "r1", 1200)).toBe(back);
+    expect(visitQuestion(back, { round: 1, index: 1 })).toEqual(live);
+    const newSet = freshPracticeRound(back, 1500, () => 0.5);
+    expect(newSet.answeredCount).toBe(1);
+    expect(newSet.history).toEqual(first.history);
+    const review = visitQuestion(newSet, { round: 1, index: 0 });
+    expect(
+      relayView(parsePractice(JSON.parse(JSON.stringify(review)))!),
+    ).toMatchObject({
+      card: first.queue[0],
+      answer: "r2",
+      review: true,
+    });
+  });
+  it("generates five distinct reasons without any previous-set question, including when viewing an older set", () => {
+    let s = initialPractice();
+    for (let i = 0; i < 12; i++) {
+      const viewed = visitQuestion(s, relayPositions(s)[0]);
+      const old = new Set(
+        [...s.queue, ...relayView(viewed).queue].map((c) => c.questionId),
+      );
+      s = freshPracticeRound(viewed, i + 1, () => 0.5);
+      expect(s.queue).toHaveLength(5);
+      expect(new Set(s.queue.map((c) => questionFor(c).reasonId)).size).toBe(5);
+      expect(s.queue.every((c) => !old.has(c.questionId))).toBe(true);
+      expect(s.archive.length).toBeLessThanOrEqual(10);
+      expect(parsePractice(JSON.parse(JSON.stringify(s)))).toEqual(s);
+    }
+  });
+  it("opens old saved rounds without inventing earlier answers or accepting an invalid review cursor", () => {
+    const legacy = {
+      ...nextCard(answerCard(initialPractice(), "r1", 1000)),
+      answers: undefined,
+      archive: undefined,
+      viewing: { round: 1, index: 4 },
+    };
+    const s = parsePractice(legacy)!;
+    expect(s.viewing).toBeNull();
+    expect(relayView(visitQuestion(s, { round: 1, index: 0 }))).toMatchObject({
+      answer: null,
+      review: true,
+    });
+    expect(s.roundCorrect).toBe(1);
+  });
   it("preserves a current question, revealed choices and error record on restoration", () => {
     let s = initialPractice();
     s = { ...s, revealed: true };

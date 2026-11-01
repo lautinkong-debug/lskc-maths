@@ -1,5 +1,10 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab: diagram captions and Reason relay review (01/11/2026)
+
+- [x] Show the written given and conclusion below their respective diagrams for all 17 reasons. Keep optional measurements available without the duplicate row of tiles.
+- [x] Let pupils return to visited questions, review their original answers without scoring again, and generate five different mixed questions. Keep the active set and ten earlier rounds in the same browser.
+
 ## Equation Studio publication (30/10/2026)
 
 - [x] Owner approved publication of the reviewed 106-question Equation Studio: all Quick Practice and Revision Exercise 4, plus separate selected Exercise 4A and 4B collections.

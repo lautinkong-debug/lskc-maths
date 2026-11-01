@@ -123,28 +123,29 @@
   background: #2454c8;
   font-size: 0.9rem;
 }
-.stage svg {
+.stage > svg {
   display: block;
   width: 100%;
   height: auto;
   max-height: 330px;
   margin: 8px auto 0;
 }
-.fact {
-  min-height: 2.9em;
-  margin: 10px 0 0;
-  line-height: 1.45;
+.givenStage {
+  --proof-ink: #183f88;
+  --proof-edge: #527fde;
+  --proof-tint: #eaf1ff;
 }
-.givenStage h4,
-.givenStage .fact {
+.givenStage h4 {
   color: #2454c8;
 }
 .resultStage {
+  --proof-ink: #125638;
+  --proof-edge: #369166;
+  --proof-tint: #e6f6ec;
   background: #f7fcf8;
   border-color: #b5d9c5;
 }
-.resultStage h4,
-.resultStage .fact {
+.resultStage h4 {
   color: #167047;
 }
 .resultStage h4 > span {
@@ -185,31 +186,6 @@
 .explanation {
   margin-top: 16px;
 }
-.direction {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 0 0 18px;
-  padding: 12px;
-  border-bottom: 1px solid #dce7ef;
-  line-height: 1.5;
-}
-.direction > span:first-child {
-  color: #2454c8;
-}
-.direction strong {
-  color: #167047;
-}
-.arrow {
-  font-size: 1.4rem;
-}
-.reasonText {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 26px;
-}
 .reasonText h4 {
   margin: 0 0 6px;
   font-size: 0.85rem;
@@ -218,9 +194,6 @@
 .reasonText p {
   margin: 0;
   line-height: 1.55;
-}
-.formalReason {
-  font-weight: 700;
 }
 .contrast {
   margin: 16px 0;
@@ -296,8 +269,7 @@
   .explorer {
     padding: 14px;
   }
-  .stages,
-  .reasonText {
+  .stages {
     grid-template-columns: minmax(0, 1fr);
   }
   .stage {
@@ -309,18 +281,12 @@
   .questionMark {
     display: none;
   }
-  .fact {
-    min-height: 0;
-  }
   .comparison th,
   .comparison td {
     padding: 8px 5px;
   }
   .comparison th:first-child {
     width: 60px;
-  }
-  .direction {
-    justify-content: flex-start;
   }
 }
 .exploreInstructions {
@@ -373,39 +339,6 @@
 }
 .trailHint {
   color: #365976;
-}
-.liveMeasurements {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  margin-top: 12px;
-}
-.liveMeasurements > div {
-  padding: 7px;
-  border-radius: 7px;
-  background: #edf4ff;
-  line-height: 1.35;
-  min-width: 0;
-}
-.liveMeasurements span {
-  display: block;
-  font-size: 0.78rem;
-  overflow-wrap: anywhere;
-}
-.liveMeasurements strong {
-  display: block;
-  margin-top: 5px;
-  font-size: 1.02rem;
-  color: #2454c8;
-}
-.liveMeasurements small {
-  font-size: 0.75em;
-  font-weight: 500;
-}
-.syncHint {
-  margin-top: 12px;
-  color: #316747;
-  line-height: 1.5;
 }
 .fineTune,
 .savedCases {
@@ -466,41 +399,58 @@
 .savedCases tbody tr:last-child {
   background: #edf4ff;
 }
-.observationLabel {
-  margin: 12px 0 0;
-  color: #526879;
-  font-size: 0.8rem;
-  line-height: 1.4;
-}
-
-.writtenSummary {
-  margin: 18px 0;
-  padding: 4px 16px;
-  border: 1px solid #d5e3f2;
-  border-radius: 10px;
-  background: #fbfdff;
-}
-.writtenSummary p {
+.proofCaption {
   display: grid;
-  grid-template-columns: 1.4em minmax(0, 1fr);
-  align-items: baseline;
-  gap: 8px;
-  margin: 0;
-  padding: 12px 0;
-  line-height: 1.8;
-  overflow-wrap: anywhere;
-}
-.givenLine {
-  color: #2454c8;
-}
-.conclusionLine {
-  color: #167047;
-  border-top: 1px solid #d5e3f2;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.65rem;
+  margin-top: 0.4rem;
+  padding: clamp(0.7rem, 1.2vw, 1.1rem);
+  border-inline-start: 4px solid var(--proof-edge);
+  border-radius: 10px;
+  background: var(--proof-tint);
+  color: var(--proof-ink);
 }
 .proofSymbol {
-  font-size: 1.3em;
+  font-family: "Cambria Math", Georgia, serif;
+  font-size: clamp(1.7rem, 2.25vw, 2.05rem);
+  font-weight: bold;
+  line-height: 1.12;
 }
-.inlineReason {
-  margin-left: 0.5em;
-  font-size: 0.94em;
+.proofCaption .proofStatement {
+  margin: 0;
+  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.6rem);
+  font-weight: 750;
+  line-height: 1.42;
+  overflow-wrap: anywhere;
+}
+.proofCaption .proofReason {
+  margin: 0.7rem 0 0;
+  padding-top: 0.65rem;
+  border-top: 1px solid #b6d9c4;
+}
+.proofReason > span {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+.proofReason strong {
+  font-size: clamp(1.12rem, 1rem + 0.4vw, 1.35rem);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.observations {
+  margin-top: 0.35rem;
+}
+.observations summary {
+  min-height: 44px;
+  padding: 0.65rem 0;
+  cursor: pointer;
+  color: #2f5280;
+  font-weight: 650;
+}
+.observations p {
+  color: #526879;
+  line-height: 1.5;
 }
