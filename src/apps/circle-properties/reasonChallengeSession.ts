@@ -163,6 +163,67 @@ export function startChallengeSet(
   };
 }
 
+/**
+ * Move to another question in the current set. Practice questions open at once;
+ * a timed question stays unopened until openChallengeQuestion, so looking ahead
+ * never starts a clock.
+ */
+export function navigateChallengeSet(
+  state: ChallengeSession,
+  index: number,
+  time: number,
+): ChallengeSession {
+  if (state.reviewSet !== null) {
+    return viewChallengeSet(state).queue[index]
+      ? { ...state, reviewIndex: index }
+      : state;
+  }
+  const id = state.queue[index];
+  if (!id) return state;
+  const next = { ...state, index };
+  return state.seconds ? next : openChallengeQuestion(next, time);
+}
+
+/** Start the current question's timer the first time it is opened. */
+export function openChallengeQuestion(
+  state: ChallengeSession,
+  time: number,
+): ChallengeSession {
+  const id = state.queue[state.index];
+  if (state.reviewSet !== null || !id || state.drafts[id]) return state;
+  return {
+    ...state,
+    drafts: { ...state.drafts, [id]: newChallengeDraft(state.seconds, time) },
+  };
+}
+
+/** A set with unsolved questions that the student has started. */
+export function unfinishedChallengeSet(state: ChallengeRun): boolean {
+  return (
+    state.queue.length > 0 &&
+    Object.keys(state.drafts).length > 0 &&
+    state.queue.some((id) => !state.drafts[id]?.complete)
+  );
+}
+
+/**
+ * Open a topic from an Explore practice link. The same topic resumes, or starts
+ * afresh once solved. An unfinished set from another level is never replaced
+ * silently: `waiting` asks the student to start the topic or resume that set.
+ */
+export function routeChallengePractice(
+  state: ChallengeSession,
+  group: ChallengeGroupId,
+  time: number,
+): { state: ChallengeSession; waiting: boolean } {
+  const reviewing = { ...state, reviewSet: null, reviewIndex: 0 };
+  if (state.group === group && unfinishedChallengeSet(state))
+    return { state: { ...reviewing, started: true }, waiting: false };
+  if (state.group !== group && unfinishedChallengeSet(state))
+    return { state: { ...reviewing, started: false }, waiting: true };
+  return { state: startChallengeSet(state, time, group), waiting: false };
+}
+
 export function viewChallengeSet(state: ChallengeSession): ChallengeRun {
   const archived = state.archive.find(
     (run) => run.setNumber === state.reviewSet,
@@ -479,8 +540,12 @@ function parseChallengeRun(raw: unknown): ChallengeSession | undefined {
     seed,
     queue,
     index,
+    // A timed question waits unopened (no draft) until the student starts its timer.
     started:
-      value.started === true && queue.length > 0 && !!drafts[queue[index]],
+      value.started === true &&
+      queue.length > 0 &&
+      (!!drafts[queue[index]] ||
+        (seconds > 0 && Object.keys(drafts).length > 0)),
     drafts,
     variants,
     setNumber:

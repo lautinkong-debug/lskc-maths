@@ -360,13 +360,29 @@ export type TransferGrade = {
   correct: boolean;
   messages: string[];
 };
+/**
+ * Reads a typed answer as students write it: full-width digits from a Chinese
+ * keyboard, a − sign, the question's own unit ("7 cm", "90°") or a simple
+ * fraction ("15/2"). Any other unit or text is not a number.
+ */
+export function answerNumber(raw: string, unit: string): number | null {
+  let text = raw.normalize("NFKC").replace(/−/g, "-").trim();
+  if (unit === "cm") text = text.replace(/\s*cm$/i, "");
+  if (unit === "°") text = text.replace(/\s*(?:°|degrees?)$/i, "");
+  const fraction = /^([+-]?\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/.exec(text);
+  if (fraction) {
+    const denominator = Number(fraction[2]);
+    return denominator ? Number(fraction[1]) / denominator : null;
+  }
+  return /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(text) ? Number(text) : null;
+}
 export function gradeTransfer(
   q: TransferQuestion,
   response: TransferResponse,
 ): TransferGrade {
-  const number = Number(response.value.trim());
+  const number = answerNumber(response.value, q.unit);
   const value =
-    /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(response.value.trim()) &&
+    number !== null &&
     Number.isFinite(number) &&
     Math.abs(number - q.answer) < 0.001;
   const reason = response.reason === q.reasonId,

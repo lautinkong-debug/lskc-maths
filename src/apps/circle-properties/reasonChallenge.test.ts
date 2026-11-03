@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { reasons } from "./content";
 import { parseNotation } from "./mathNotation";
-import { allowsNegativeAnswer } from "./transfer";
+import { allowsNegativeAnswer, answerNumber, gradeTransfer } from "./transfer";
 import {
   blankReasonChallengeResponse,
   challengeGroups,
@@ -133,6 +133,25 @@ describe("numerical circle reason challenge", () => {
         }
       }
     }
+  });
+
+  it("accepts the question's unit, full-width digits, a minus sign and simple fractions", () => {
+    const cm = getReasonChallenge("r1").q; // AN = 7 cm
+    const degrees = getReasonChallenge("r2").q; // 90°
+    const coordinate = getReasonChallenge("r3", 3).q; // -8
+    for (const value of ["7", "7 cm", "7cm", "７", "14/2", "7.0"])
+      expect(
+        gradeTransfer(cm, { value, reason: "", condition: "" }).value,
+      ).toBe(true);
+    for (const value of ["7°", "7 m", "seven", "7/0", ""])
+      expect(
+        gradeTransfer(cm, { value, reason: "", condition: "" }).value,
+      ).toBe(false);
+    for (const value of ["90", "90°", "90 °", "90 degrees", "９０"])
+      expect(answerNumber(value, degrees.unit)).toBe(90);
+    expect(answerNumber("90 cm", degrees.unit)).toBeNull();
+    for (const value of ["-8", "−8", "－８"])
+      expect(answerNumber(value, coordinate.unit)).toBe(-8);
   });
 
   it("offers a keyboard with a minus sign for every generated negative answer", () => {

@@ -1,5 +1,14 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab Reasons Relay fairness and usability (03/11/2026)
+
+- [x] A timed question's clock starts only when the student presses "Open question", so looking ahead never starts a timer. Explore shows that a running timer keeps going.
+- [x] Picking a level or pace only selects it. "Start level" saves the unfinished set (with a warning), and "Resume" names the saved set. An Explore practice link no longer replaces an unfinished set from another level.
+- [x] Hints are specific to each reason and stay visible while the student answers. Answers accept the question's unit ("7 cm", "90°"), full-width digits, a − sign and simple fractions.
+- [x] Focus moves to the result after Check and to the question after navigation. Screen readers hear the chain count and review notes, the three choice lists use separate shuffles, correct answers no longer repeat the explanation, and labels use sentence case.
+- [x] A finished level shows points, first-try solves and the chain with New set / Choose another level. The record reset moves to a "Manage Reasons Relay record" section at the bottom.
+- [x] 718 Circle unit tests, typecheck, scoped lint and the three Relay browser tests pass. Gate and level picker checked by hand. Not yet published.
+
 ## Circle Lab Reasons Relay bug fixes (02/11/2026)
 
 - [x] Repair feedback no longer shows a false "x over AN" fraction, and each embedded given, conclusion and target ends with a full stop.

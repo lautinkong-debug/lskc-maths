@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { circleReasonGameCopy as c } from "@/lib/copy";
+import { circleDiagramCues, circleReasonGameCopy as c } from "@/lib/copy";
 import { type LabId, reasons } from "./content";
 import { CheckDiagram } from "./TransferCheck";
 import { allowsNegativeAnswer } from "./transfer";
@@ -13,6 +13,7 @@ import {
   getReasonChallenge,
   gradeReasonChallenge,
   shuffleChallengeChoices,
+  type ChallengeGroupId,
 } from "./reasonChallenge";
 import {
   initialChallengeSession,
@@ -20,12 +21,15 @@ import {
   parseChallengeSession,
   updateChallengeChain,
   challengeSpeedBonus,
-  archiveChallengeRun,
   challengeVariant,
   expireChallengeDraft,
+  navigateChallengeSet,
+  openChallengeQuestion,
   retryChallengeQuestion,
+  routeChallengePractice,
   startChallengeSet,
   similarChallengeQuestion,
+  unfinishedChallengeSet,
   viewChallengeSet,
   type ChallengeResponse,
   type ChallengeSession,
@@ -33,6 +37,8 @@ import {
 import s from "./reason-challenge.module.css";
 
 const labelFor = (id: string) => reasons.find((r) => r.id === id)?.label ?? id;
+/** Separate seeds keep the three choice lists from sharing one shuffle pattern. */
+const choiceSalt = { condition: 101, target: 211, reason: 307 } as const;
 
 function LockIcon({ unlocked }: { unlocked: boolean }) {
   return (
@@ -61,19 +67,37 @@ export default function ReasonChallenge({
   onExplore: (lab: LabId) => void;
   practiceRequest?: { lab: LabId; at: number } | null;
 }) {
+  const requestedGroup: ChallengeGroupId | null = practiceRequest
+    ? `topic-${practiceRequest.lab}`
+    : null;
   // Applied once on mount. Ordinary tab visits restore the current saved set.
   function restoreSession(raw: unknown): ChallengeSession {
     const saved = parseChallengeSession(raw) ?? initialChallengeSession;
-    if (!practiceRequest) return saved;
-    const group = `topic-${practiceRequest.lab}` as const;
-    if (saved.group === group && saved.queue.length)
-      return { ...saved, started: true, reviewSet: null, reviewIndex: 0 };
-    return startChallengeSet(saved, practiceRequest.at, group);
+    if (!practiceRequest || !requestedGroup) return saved;
+    return routeChallengePractice(saved, requestedGroup, practiceRequest.at)
+      .state;
   }
   const [state, setState, saveFailed] = useLocalSession(
     "reason-challenge-v1",
     () => restoreSession(initialChallengeSession),
     restoreSession,
+  );
+  // An Explore link that met another unfinished set selects its topic and waits.
+  const [practiceWaiting] = useState(
+    () => !!requestedGroup && !state.started && state.group !== requestedGroup,
+  );
+  // Choosing a level or pace only selects it; the current set changes on Start.
+  const [picked, setPicked] = useState(() => ({
+    group: practiceWaiting && requestedGroup ? requestedGroup : state.group,
+    seconds: state.seconds,
+  }));
+  const [notice, setNotice] = useState(() =>
+    practiceWaiting && requestedGroup
+      ? c.practiceWaiting(
+          challengeGroup(requestedGroup).title,
+          challengeGroup(state.group).title,
+        )
+      : "",
   );
   const [now, setNow] = useState(() => Date.now());
   const [hint, setHint] = useState("");
@@ -82,6 +106,7 @@ export default function ReasonChallenge({
   );
   const top = useRef<HTMLElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
+  const questionHeading = useRef<HTMLHeadingElement>(null);
   const review = state.reviewSet !== null;
   const view = viewChallengeSet(state);
   const reasonId = view.queue[view.index];
@@ -112,6 +137,16 @@ export default function ReasonChallenge({
   const allAnswered =
     !!draft && Object.values(draft.response).every((v) => v.trim().length > 0);
   const finished = !review && state.started && solved === state.queue.length;
+  // A timed question that has not been opened yet: its clock has not started.
+  const awaitingStart = !review && state.started && !!challenge && !draft;
+  const firstTry = view.queue.filter((id) => {
+    const d = view.drafts[id];
+    return d?.complete && d.tries === 1 && !d.helped;
+  }).length;
+  const timerRunning =
+    !review && !!draft?.deadline && !draft.complete && !draft.expired;
+  const liveSet =
+    state.queue.length > 0 && Object.keys(state.drafts).length > 0;
 
   useEffect(() => {
     if (
@@ -142,52 +177,43 @@ export default function ReasonChallenge({
     activeDraft?.expired,
   ]);
 
+  /** Scroll to the game and move keyboard focus to the question (or its Open button). */
   function scrollTop() {
-    requestAnimationFrame(() =>
-      top.current?.scrollIntoView({ block: "start", behavior: "auto" }),
-    );
+    requestAnimationFrame(() => {
+      top.current?.scrollIntoView({ block: "start", behavior: "auto" });
+      questionHeading.current?.focus({ preventScroll: true });
+    });
   }
-  function start() {
+  function start(
+    group: ChallengeGroupId = state.group,
+    seconds: ChallengeSession["seconds"] = state.seconds,
+  ) {
     // Called only from button events to start a real-time deadline.
-    // eslint-disable-next-line react-hooks/purity
     const time = Date.now();
     setNow(time);
     setHint("");
-    setState((previous) =>
-      startChallengeSet(previous, time, view.group, view.seconds),
-    );
+    setNotice("");
+    setPicked({ group, seconds });
+    setState((previous) => startChallengeSet(previous, time, group, seconds));
     scrollTop();
   }
   function navigate(index: number) {
     // Called only from navigation events, never while rendering.
-    // eslint-disable-next-line react-hooks/purity
     const time = Date.now();
     setNow(time);
     setHint("");
-    setState((previous) => {
-      if (previous.reviewSet !== null) {
-        const archived = viewChallengeSet(previous);
-        return archived.queue[index]
-          ? { ...previous, reviewIndex: index }
-          : previous;
-      }
-      const id = previous.queue[index];
-      if (!id) return previous;
-      return {
-        ...previous,
-        index,
-        drafts: {
-          ...previous.drafts,
-          [id]:
-            previous.drafts[id] ?? newChallengeDraft(previous.seconds, time),
-        },
-      };
-    });
+    setState((previous) => navigateChallengeSet(previous, index, time));
+    scrollTop();
+  }
+  function openQuestion() {
+    // The timer starts only when the student chooses to open this question.
+    const time = Date.now();
+    setNow(time);
+    setState((previous) => openChallengeQuestion(previous, time));
     scrollTop();
   }
   function trySimilar() {
     // This handler creates a new deadline only after a student clicks the button.
-    // eslint-disable-next-line react-hooks/purity
     const time = Date.now();
     setNow(time);
     setHint(c.similarReady);
@@ -195,7 +221,7 @@ export default function ReasonChallenge({
     scrollTop();
   }
   function respond(key: keyof ChallengeResponse, value: string) {
-    setHint("");
+    // A hint stays visible while the student answers; it clears on a new question.
     setState((previous) => {
       if (previous.reviewSet !== null) return previous;
       if (previous.queue[previous.index] !== reasonId) return previous;
@@ -287,9 +313,13 @@ export default function ReasonChallenge({
         },
       };
     });
-    requestAnimationFrame(() =>
-      resultRef.current?.scrollIntoView({ block: "nearest", behavior: "auto" }),
-    );
+    // The Check button disappears once checked, so move focus to the result.
+    requestAnimationFrame(() => {
+      resultRef.current?.scrollIntoView({ block: "nearest", behavior: "auto" });
+      resultRef.current
+        ?.querySelector<HTMLElement>("h4")
+        ?.focus({ preventScroll: true });
+    });
   }
   function retry(practice = false) {
     const time = Date.now();
@@ -298,10 +328,16 @@ export default function ReasonChallenge({
     setState((previous) =>
       retryChallengeQuestion(previous, reasonId, time, practice),
     );
+    // The retry buttons disappear, so return focus to the first answer field.
+    requestAnimationFrame(() =>
+      document
+        .getElementById("reason-challenge-value")
+        ?.focus({ preventScroll: true }),
+    );
   }
   function useHint() {
     if (!challenge || !draft || locked) return;
-    setHint(c.hint);
+    setHint(c.hint(circleDiagramCues[challenge.q.reasonId] ?? ""));
     setState((previous) => {
       if (previous.reviewSet !== null) return previous;
       const current = previous.drafts[reasonId];
@@ -330,6 +366,13 @@ export default function ReasonChallenge({
         : key === "target"
           ? challenge?.target
           : challenge?.q.reasonId;
+    const reviewNote = (value: string) =>
+      [
+        draft.response[key] === value && c.savedChoice,
+        value === correctChoice && c.correctChoice,
+      ]
+        .filter(Boolean)
+        .join(" · ");
     return (
       <div
         className={key === "reason" ? `${s.choices} ${s.skillHand}` : s.choices}
@@ -344,13 +387,20 @@ export default function ReasonChallenge({
       >
         {shuffleChallengeChoices(
           values,
-          view.seed + view.index * 37 + key.length,
+          view.seed + view.index * 37 + choiceSalt[key],
         ).map((value) => (
           <button
             type="button"
             key={value}
             className={key === "reason" ? s.skillCard : undefined}
-            aria-label={key === "reason" ? labelFor(value) : undefined}
+            // The name skips the decorative "Reason card" label but keeps the review note.
+            aria-label={
+              key !== "reason"
+                ? undefined
+                : review && reviewNote(value)
+                  ? `${labelFor(value)}. ${reviewNote(value)}`
+                  : labelFor(value)
+            }
             data-choice={value}
             data-correct-choice={review ? value === correctChoice : undefined}
             aria-pressed={draft.response[key] === value}
@@ -367,28 +417,14 @@ export default function ReasonChallenge({
                   <MathText>{labelFor(value)}</MathText>
                 </span>
                 {review && (
-                  <small className={s.reviewChoice}>
-                    {[
-                      draft.response[key] === value && c.savedChoice,
-                      value === correctChoice && c.correctChoice,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </small>
+                  <small className={s.reviewChoice}>{reviewNote(value)}</small>
                 )}
               </span>
             ) : (
               <span className={s.choiceText}>
                 <MathText>{value}</MathText>
                 {review && (
-                  <small className={s.reviewChoice}>
-                    {[
-                      draft.response[key] === value && c.savedChoice,
-                      value === correctChoice && c.correctChoice,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </small>
+                  <small className={s.reviewChoice}>{reviewNote(value)}</small>
                 )}
               </span>
             )}
@@ -397,6 +433,46 @@ export default function ReasonChallenge({
       </div>
     );
   }
+
+  /** Confirms a record reset (beside its button) or a saved-set deletion (beside the review banner). */
+  const confirmPanel = confirmRecord && (
+    <div className={s.reviewBanner} role="group" aria-label={c.manageRecord}>
+      <p>
+        {confirmRecord === "reset"
+          ? c.resetPrompt
+          : c.deletePrompt(view.setNumber)}
+      </p>
+      <button
+        type="button"
+        onClick={() => {
+          setState((previous) =>
+            confirmRecord === "reset"
+              ? {
+                  ...initialChallengeSession,
+                  group: previous.group,
+                  seconds: previous.seconds,
+                }
+              : {
+                  ...previous,
+                  archive: previous.archive.filter(
+                    (run) => run.setNumber !== previous.reviewSet,
+                  ),
+                  reviewSet: null,
+                  reviewIndex: 0,
+                },
+          );
+          setConfirmRecord(null);
+          setHint("");
+          scrollTop();
+        }}
+      >
+        {confirmRecord === "reset" ? c.confirmReset : c.confirmDelete}
+      </button>
+      <button type="button" onClick={() => setConfirmRecord(null)}>
+        {c.keepRecord}
+      </button>
+    </div>
+  );
 
   return (
     <section className={s.game} aria-label={c.region} ref={top}>
@@ -411,11 +487,7 @@ export default function ReasonChallenge({
           <span>{c.levelPoints}</span>
         </div>
       </header>
-      <div
-        className={s.chainBadge}
-        title={c.chainHelp}
-        aria-label={c.perfectChain}
-      >
+      <div className={s.chainBadge} title={c.chainHelp}>
         <span aria-hidden="true">✦</span>
         <strong>{c.chainCount(view.streak)}</strong>
         <span>{c.bestChain(state.bestStreak)}</span>
@@ -487,78 +559,31 @@ export default function ReasonChallenge({
           >
             {state.queue.length ? c.backToSet : c.levels}
           </button>
-        </div>
-      )}
-      <div className={s.recordTools}>
-        <button type="button" onClick={() => setConfirmRecord("reset")}>
-          {c.resetRecord}
-        </button>
-        {review && (
           <button type="button" onClick={() => setConfirmRecord("delete")}>
             {c.deleteSet}
           </button>
-        )}
-        {confirmRecord && (
-          <div
-            className={s.reviewBanner}
-            role="group"
-            aria-label={c.manageRecord}
-          >
-            <p>
-              {confirmRecord === "reset"
-                ? c.resetPrompt
-                : c.deletePrompt(view.setNumber)}
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setState((previous) =>
-                  confirmRecord === "reset"
-                    ? {
-                        ...initialChallengeSession,
-                        group: previous.group,
-                        seconds: previous.seconds,
-                      }
-                    : {
-                        ...previous,
-                        archive: previous.archive.filter(
-                          (run) => run.setNumber !== previous.reviewSet,
-                        ),
-                        reviewSet: null,
-                        reviewIndex: 0,
-                      },
-                );
-                setConfirmRecord(null);
-                setHint("");
-                scrollTop();
-              }}
-            >
-              {confirmRecord === "reset" ? c.confirmReset : c.confirmDelete}
-            </button>
-            <button type="button" onClick={() => setConfirmRecord(null)}>
-              {c.keepRecord}
-            </button>
-          </div>
-        )}
-      </div>
-      {(!state.started && !review) || !challenge || !draft ? (
+        </div>
+      )}
+      {confirmRecord === "delete" && confirmPanel}
+      {(!state.started && !review) ||
+      !challenge ||
+      (!draft && !awaitingStart) ? (
         <>
+          {notice && (
+            <p className={s.notice} role="status">
+              {notice}
+            </p>
+          )}
           <div className={s.levels} role="group" aria-label={c.chooseLevel}>
             {challengeGroups.map((g, i) => (
               <button
                 type="button"
                 key={g.id}
-                aria-pressed={state.group === g.id}
-                onClick={() =>
-                  setState((previous) =>
-                    previous.group === g.id
-                      ? previous
-                      : {
-                          ...archiveChallengeRun(previous),
-                          group: g.id,
-                        },
-                  )
-                }
+                aria-pressed={picked.group === g.id}
+                onClick={() => {
+                  setNotice("");
+                  setPicked((previous) => ({ ...previous, group: g.id }));
+                }}
               >
                 <span className={s.levelNumber}>{i + 1}</span>
                 <strong>{g.title}</strong>
@@ -581,26 +606,19 @@ export default function ReasonChallenge({
           </div>
           <div className={s.setup}>
             <div>
-              <h3>{group.title}</h3>
+              <h3>{challengeGroup(picked.group).title}</h3>
               <p>{c.setup}</p>
             </div>
             <label>
               {c.pace}
               <select
                 aria-label={c.challengePace}
-                value={state.seconds}
+                value={picked.seconds}
                 onChange={(e) => {
                   const seconds = Number(
                     e.target.value,
                   ) as ChallengeSession["seconds"];
-                  setState((previous) =>
-                    previous.seconds === seconds
-                      ? previous
-                      : {
-                          ...archiveChallengeRun(previous),
-                          seconds,
-                        },
-                  );
+                  setPicked((previous) => ({ ...previous, seconds }));
                 }}
               >
                 <option value={0}>{c.practiceOption}</option>
@@ -609,22 +627,32 @@ export default function ReasonChallenge({
                 <option value={60}>{c.speed60}</option>
               </select>
             </label>
-            <button type="button" className={s.primary} onClick={() => start()}>
+            <button
+              type="button"
+              className={s.primary}
+              onClick={() => start(picked.group, picked.seconds)}
+            >
               {c.start}
             </button>
-            {state.queue.length > 0 &&
-              state.drafts[state.queue[state.index]] && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setState((previous) => ({ ...previous, started: true }));
-                    scrollTop();
-                  }}
-                >
-                  {c.resume}
-                </button>
-              )}
+            {liveSet && (
+              <button
+                type="button"
+                onClick={() => {
+                  setNotice("");
+                  setState((previous) => ({ ...previous, started: true }));
+                  scrollTop();
+                }}
+              >
+                {c.resume(challengeGroup(state.group).title)}
+              </button>
+            )}
           </div>
+          {liveSet &&
+            unfinishedChallengeSet(state) &&
+            (picked.group !== state.group ||
+              picked.seconds !== state.seconds) && (
+              <p className={s.small}>{c.startSavesSet}</p>
+            )}
           <p className={s.guide}>{c.scoring}</p>
         </>
       ) : (
@@ -632,13 +660,14 @@ export default function ReasonChallenge({
           <div className={s.roundBar}>
             <button
               type="button"
-              onClick={() =>
+              onClick={() => {
+                setPicked({ group: state.group, seconds: state.seconds });
                 setState((previous) => ({
                   ...previous,
                   started: false,
                   reviewSet: null,
-                }))
-              }
+                }));
+              }}
             >
               {c.levels}
             </button>
@@ -647,15 +676,19 @@ export default function ReasonChallenge({
             </strong>
             <span
               className={s.timer}
-              data-urgent={!review && !!draft.deadline && remaining <= 20}
+              data-urgent={!review && !!draft?.deadline && remaining <= 20}
             >
               {review
                 ? c.reviewMode
-                : draft.complete
-                  ? c.solved
-                  : draft.deadline
-                    ? c.seconds(remaining)
-                    : c.practice}
+                : !draft
+                  ? view.seconds
+                    ? c.timerReady(view.seconds)
+                    : c.practice
+                  : draft.complete
+                    ? c.solved
+                    : draft.deadline
+                      ? c.seconds(remaining)
+                      : c.practice}
             </span>
           </div>
           <progress
@@ -699,164 +732,262 @@ export default function ReasonChallenge({
             <div className={s.finish} role="status">
               <strong>{c.levelComplete}</strong>
               <span>{c.levelFinished(state.queue.length)}</span>
-            </div>
-          )}
-          <div className={s.layout}>
-            <div className={s.figure} data-question-id={challenge.q.id}>
-              <span className={s.questionCount}>
-                {c.mission(view.index + 1, view.queue.length)}
+              <span>
+                {c.levelSummary(
+                  score,
+                  firstTry,
+                  state.queue.length,
+                  state.streak,
+                )}
               </span>
-              <h3>
-                <MathText>{challenge.q.ask}</MathText>
-              </h3>
-              <div className={s.given}>
-                <strong>{c.given}</strong>
-                <p>
-                  <MathText>{challenge.q.given}</MathText>
-                </p>
-              </div>
-              <div
-                className={s.reasonLock}
-                role="region"
-                aria-label={c.reasonLock}
-                data-unlocked={reasoningValid}
-              >
-                <div>
-                  <LockIcon unlocked={reasoningValid} />
-                  <strong>
-                    {reasoningValid ? c.conclusionUnlocked : c.reasonLock}
-                  </strong>
-                </div>
-                {reasoningValid ? (
-                  <p>
-                    <MathText>{challenge.target}</MathText>
-                  </p>
-                ) : (
-                  <p>{c.unlockInstruction}</p>
-                )}
-              </div>
-              <CheckDiagram q={challenge.q} reviewed={reasoningValid} />
-              <div className={s.figureTools}>
-                <button
-                  type="button"
-                  onClick={() => onExplore(challenge.q.lab)}
-                >
-                  {c.explore}
-                </button>
-                <button type="button" onClick={useHint} disabled={locked}>
-                  {c.smallHint}
-                </button>
-              </div>
-              {hint && (
-                <p role="status" className={s.notice}>
-                  {hint}
-                </p>
-              )}
-            </div>
-            <div className={s.answerPanel}>
-              <div className={s.gates} aria-label={c.answerProgress}>
-                {(["value", "condition", "target", "reason"] as const).map(
-                  (key) => (
-                    <span
-                      key={key}
-                      data-ready={!!draft.response[key]}
-                      data-correct={grade?.[key]}
-                      aria-label={c.gateState(c.stepNames[key], !!grade?.[key])}
-                    >
-                      <LockIcon unlocked={!!grade?.[key]} />
-                      <small>{c.stepNames[key]}</small>
-                    </span>
-                  ),
-                )}
-              </div>
-              <fieldset className={s.step}>
-                <legend>
-                  <b>1</b> {c.findValue} <MathText>x</MathText>
-                </legend>
-                <label htmlFor="reason-challenge-value">
-                  {c.myValue} <MathText>x</MathText>{" "}
-                  {challenge.q.unit && `(${challenge.q.unit})`}
-                </label>
-                <input
-                  id="reason-challenge-value"
-                  type="text"
-                  // iPhone decimal keypads have no minus key.
-                  inputMode={
-                    allowsNegativeAnswer(challenge.q) ? "text" : "decimal"
-                  }
-                  autoComplete="off"
-                  value={draft.response.value}
-                  disabled={locked}
-                  onChange={(e) =>
-                    respond("value", e.target.value.slice(0, 40))
-                  }
-                />
-                {grade && (
-                  <p className={s.fieldFeedback}>
-                    {grade.value ? c.valueCorrect : c.valueRetry}
-                  </p>
-                )}
-                {review && (
-                  <p className={s.fieldFeedback}>
-                    {c.correctValue(challenge.q.answer, challenge.q.unit)}
-                  </p>
-                )}
-              </fieldset>
-              <fieldset className={s.step}>
-                <legend>
-                  <b>2</b> {c.checkCondition}
-                </legend>
-                <p>{c.conditionPrompt}</p>
-                {choices("condition", [
-                  challenge.q.condition,
-                  ...challenge.q.wrongConditions,
-                ])}
-              </fieldset>
-              <fieldset className={s.step}>
-                <legend>
-                  <b>3</b> {c.identifyTarget}
-                </legend>
-                <p>{c.targetPrompt}</p>
-                {choices("target", [
-                  challenge.target,
-                  ...challenge.wrongTargets,
-                ])}
-              </fieldset>
-              <fieldset className={s.step}>
-                <legend>
-                  <b>4</b> {c.chooseReason}
-                </legend>
-                <p>{c.reasonPrompt}</p>
-                {choices("reason", challenge.reasonChoices)}
-              </fieldset>
-              {!locked && (
+              <div className={s.actions}>
                 <button
                   type="button"
                   className={s.primary}
-                  disabled={!allAnswered}
-                  onClick={submit}
+                  onClick={() => start()}
                 >
-                  {c.submit}
+                  {c.newSetSameLevel}
                 </button>
-              )}
-              {!allAnswered && !locked && (
-                <p className={s.small}>{c.incomplete}</p>
-              )}
-              <div ref={resultRef} aria-live="polite">
-                {grade && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPicked({ group: state.group, seconds: state.seconds });
+                    setState((previous) => ({ ...previous, started: false }));
+                    scrollTop();
+                  }}
+                >
+                  {c.chooseAnotherLevel}
+                </button>
+              </div>
+            </div>
+          )}
+          {!draft ? (
+            <div className={s.ready}>
+              <span className={s.questionCount}>
+                {c.mission(view.index + 1, view.queue.length)}
+              </span>
+              <h3 ref={questionHeading} tabIndex={-1}>
+                {c.readyTitle}
+              </h3>
+              <p>{c.readyBody(view.seconds)}</p>
+              <button
+                type="button"
+                className={s.primary}
+                onClick={openQuestion}
+              >
+                {c.openQuestion(view.index + 1)}
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className={s.layout}>
+                <div className={s.figure} data-question-id={challenge.q.id}>
+                  <span className={s.questionCount}>
+                    {c.mission(view.index + 1, view.queue.length)}
+                  </span>
+                  <h3 ref={questionHeading} tabIndex={-1}>
+                    <MathText>{challenge.q.ask}</MathText>
+                  </h3>
+                  <div className={s.given}>
+                    <strong>{c.given}</strong>
+                    <p>
+                      <MathText>{challenge.q.given}</MathText>
+                    </p>
+                  </div>
                   <div
-                    className={grade.correct ? s.success : s.review}
-                    role="status"
+                    className={s.reasonLock}
+                    role="region"
+                    aria-label={c.reasonLock}
+                    data-unlocked={reasoningValid}
                   >
-                    <h4>{grade.correct ? c.correct : c.repair}</h4>
-                    <p>{c.answerScore(grade.score, draft.bestScore)}</p>
-                    {grade.messages.map((message) => (
-                      <p key={message}>
-                        <MathText>{message}</MathText>
+                    <div>
+                      <LockIcon unlocked={reasoningValid} />
+                      <strong>
+                        {reasoningValid ? c.conclusionUnlocked : c.reasonLock}
+                      </strong>
+                    </div>
+                    {reasoningValid ? (
+                      <p>
+                        <MathText>{challenge.target}</MathText>
                       </p>
-                    ))}
-                    {(grade.correct || review) && (
+                    ) : (
+                      <p>{c.unlockInstruction}</p>
+                    )}
+                  </div>
+                  <CheckDiagram q={challenge.q} reviewed={reasoningValid} />
+                  <div className={s.figureTools}>
+                    <button
+                      type="button"
+                      onClick={() => onExplore(challenge.q.lab)}
+                    >
+                      {c.explore}
+                    </button>
+                    <button type="button" onClick={useHint} disabled={locked}>
+                      {c.smallHint}
+                    </button>
+                  </div>
+                  {timerRunning && (
+                    <p className={s.small}>{c.exploreTimerNote}</p>
+                  )}
+                  {hint && (
+                    <p role="status" className={s.notice}>
+                      {hint}
+                    </p>
+                  )}
+                </div>
+                <div className={s.answerPanel}>
+                  <div className={s.gates} aria-label={c.answerProgress}>
+                    {(["value", "condition", "target", "reason"] as const).map(
+                      (key) => (
+                        <span
+                          key={key}
+                          data-ready={!!draft.response[key]}
+                          data-correct={grade?.[key]}
+                          aria-label={c.gateState(
+                            c.stepNames[key],
+                            !!grade?.[key],
+                          )}
+                        >
+                          <LockIcon unlocked={!!grade?.[key]} />
+                          <small>{c.stepNames[key]}</small>
+                        </span>
+                      ),
+                    )}
+                  </div>
+                  <fieldset className={s.step}>
+                    <legend>
+                      <b>1</b> {c.findValue} <MathText>x</MathText>
+                    </legend>
+                    <label htmlFor="reason-challenge-value">
+                      {c.myValue} <MathText>x</MathText>{" "}
+                      {challenge.q.unit && `(${challenge.q.unit})`}
+                    </label>
+                    <input
+                      id="reason-challenge-value"
+                      type="text"
+                      // iPhone decimal keypads have no minus key.
+                      inputMode={
+                        allowsNegativeAnswer(challenge.q) ? "text" : "decimal"
+                      }
+                      autoComplete="off"
+                      value={draft.response.value}
+                      disabled={locked}
+                      onChange={(e) =>
+                        respond("value", e.target.value.slice(0, 40))
+                      }
+                    />
+                    {grade && (
+                      <p className={s.fieldFeedback}>
+                        {grade.value ? c.valueCorrect : c.valueRetry}
+                      </p>
+                    )}
+                    {review && (
+                      <p className={s.fieldFeedback}>
+                        {c.correctValue(challenge.q.answer, challenge.q.unit)}
+                      </p>
+                    )}
+                  </fieldset>
+                  <fieldset className={s.step}>
+                    <legend>
+                      <b>2</b> {c.checkCondition}
+                    </legend>
+                    <p>{c.conditionPrompt}</p>
+                    {choices("condition", [
+                      challenge.q.condition,
+                      ...challenge.q.wrongConditions,
+                    ])}
+                  </fieldset>
+                  <fieldset className={s.step}>
+                    <legend>
+                      <b>3</b> {c.identifyTarget}
+                    </legend>
+                    <p>{c.targetPrompt}</p>
+                    {choices("target", [
+                      challenge.target,
+                      ...challenge.wrongTargets,
+                    ])}
+                  </fieldset>
+                  <fieldset className={s.step}>
+                    <legend>
+                      <b>4</b> {c.chooseReason}
+                    </legend>
+                    <p>{c.reasonPrompt}</p>
+                    {choices("reason", challenge.reasonChoices)}
+                  </fieldset>
+                  {!locked && (
+                    <button
+                      type="button"
+                      className={s.primary}
+                      disabled={!allAnswered}
+                      onClick={submit}
+                    >
+                      {c.submit}
+                    </button>
+                  )}
+                  {!allAnswered && !locked && (
+                    <p className={s.small}>{c.incomplete}</p>
+                  )}
+                  <div ref={resultRef} aria-live="polite">
+                    {grade && (
+                      <div
+                        className={grade.correct ? s.success : s.review}
+                        role="status"
+                      >
+                        <h4 tabIndex={-1}>
+                          {grade.correct ? c.correct : c.repair}
+                        </h4>
+                        <p>{c.answerScore(grade.score, draft.bestScore)}</p>
+                        {grade.messages.map((message) => (
+                          <p key={message}>
+                            <MathText>{message}</MathText>
+                          </p>
+                        ))}
+                        {(grade.correct || review) && (
+                          <div className={s.working}>
+                            <p>
+                              ∵ <MathText>{challenge.q.given}</MathText>
+                            </p>
+                            <p>
+                              ∴ <MathText>{challenge.target}</MathText> (
+                              <MathText>
+                                {labelFor(challenge.q.reasonId)}
+                              </MathText>
+                              )
+                            </p>
+                            <p>
+                              <MathText>{challenge.q.explanation}</MathText>
+                            </p>
+                          </div>
+                        )}
+                        {!review && !grade.correct && !draft.expired && (
+                          <div className={s.actions}>
+                            <button
+                              type="button"
+                              className={s.primary}
+                              onClick={trySimilar}
+                            >
+                              {c.similarQuestion}
+                            </button>
+                            <button type="button" onClick={() => retry()}>
+                              {c.retry}
+                            </button>
+                          </div>
+                        )}
+                        {grade.correct &&
+                          view.index < view.queue.length - 1 && (
+                            <button
+                              type="button"
+                              className={s.primary}
+                              onClick={() => navigate(view.index + 1)}
+                            >
+                              {c.nextMission}
+                            </button>
+                          )}
+                      </div>
+                    )}
+                    {review && !grade && (
                       <div className={s.working}>
+                        <p>{c.uncheckedSaved}</p>
                         <p>
                           ∵ <MathText>{challenge.q.given}</MathText>
                         </p>
@@ -869,65 +1000,27 @@ export default function ReasonChallenge({
                         </p>
                       </div>
                     )}
-                    {!review && !grade.correct && !draft.expired && (
-                      <div className={s.actions}>
+                    {!review && draft.expired && !draft.complete && (
+                      <div className={s.review} role="status">
+                        <h4 tabIndex={-1}>{c.timeUp}</h4>
+                        <p>{c.timeUpBody}</p>
                         <button
                           type="button"
                           className={s.primary}
-                          onClick={trySimilar}
+                          onClick={() => retry(true)}
                         >
-                          {c.similarQuestion}
+                          {c.continuePractice}
                         </button>
                         <button type="button" onClick={() => retry()}>
-                          {c.retry}
+                          {c.retryTimer}
                         </button>
                       </div>
                     )}
-                    {grade.correct && view.index < view.queue.length - 1 && (
-                      <button
-                        type="button"
-                        className={s.primary}
-                        onClick={() => navigate(view.index + 1)}
-                      >
-                        {c.nextMission}
-                      </button>
-                    )}
                   </div>
-                )}
-                {review && !grade && (
-                  <div className={s.working}>
-                    <p>{c.uncheckedSaved}</p>
-                    <p>
-                      ∵ <MathText>{challenge.q.given}</MathText>
-                    </p>
-                    <p>
-                      ∴ <MathText>{challenge.target}</MathText> (
-                      <MathText>{labelFor(challenge.q.reasonId)}</MathText>)
-                    </p>
-                    <p>
-                      <MathText>{challenge.q.explanation}</MathText>
-                    </p>
-                  </div>
-                )}
-                {!review && draft.expired && !draft.complete && (
-                  <div className={s.review} role="status">
-                    <h4>{c.timeUp}</h4>
-                    <p>{c.timeUpBody}</p>
-                    <button
-                      type="button"
-                      className={s.primary}
-                      onClick={() => retry(true)}
-                    >
-                      {c.continuePractice}
-                    </button>
-                    <button type="button" onClick={() => retry()}>
-                      {c.retryTimer}
-                    </button>
-                  </div>
-                )}
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
           <div className={s.footer}>
             <span>{c.setPersistence}</span>
             <button type="button" onClick={() => start()}>
@@ -936,6 +1029,13 @@ export default function ReasonChallenge({
           </div>
         </>
       )}
+      <details className={s.recordTools}>
+        <summary>{c.manageRecord}</summary>
+        <button type="button" onClick={() => setConfirmRecord("reset")}>
+          {c.resetRecord}
+        </button>
+        {confirmRecord === "reset" && confirmPanel}
+      </details>
     </section>
   );
 }

@@ -176,8 +176,11 @@ export function getReasonChallenge(
   for (const choiceId of q.reasonChoices) {
     if (choiceId === q.reasonId) continue;
     const choice = reasons.find((reason) => reason.id === choiceId)!;
-    feedbackByReasonId[choiceId] =
-      `This reason starts with: ${sentence(choice.given)} It directly establishes: ${sentence(choice.conclusion)} For this question, match the given information to the target ${sentence(definition.target)} A different route may need extra steps.`;
+    feedbackByReasonId[choiceId] = c.reasonMessage(
+      sentence(choice.given),
+      sentence(choice.conclusion),
+      sentence(definition.target),
+    );
   }
   return {
     q,
@@ -202,23 +205,16 @@ export function gradeReasonChallenge(
   const base = gradeTransfer(challenge.q, response);
   const target = response.target === challenge.target;
   const messages: string[] = [];
-  if (!base.value)
-    messages.push(`Check the value of x. ${challenge.q.explanation}`);
-  if (!base.condition)
-    messages.push(`Check the required condition: ${challenge.q.condition}`);
-  // "x:" followed by a name would be read as the ratio x : AN, so x ends a sentence here.
-  if (!target)
-    messages.push(
-      `Choose the relation needed to find x. Target: ${sentence(challenge.target)} A given fact or a different consequence does not identify this target.`,
-    );
+  if (!base.value) messages.push(c.valueMessage(challenge.q.explanation));
+  if (!base.condition) messages.push(c.conditionMessage(challenge.q.condition));
+  if (!target) messages.push(c.targetMessage(sentence(challenge.target)));
   if (!base.reason)
     messages.push(
-      challenge.feedbackByReasonId[response.reason] ??
-        "Choose the circle reason that directly connects the givens to this target.",
+      challenge.feedbackByReasonId[response.reason] ?? c.reasonFallback,
     );
   const correct = base.value && base.condition && target && base.reason;
-  if (correct)
-    messages.push(`All four parts agree. ${challenge.q.explanation}`);
+  // The worked lines under a correct answer already give the explanation.
+  if (correct) messages.push(c.allCorrect);
   return {
     value: base.value,
     condition: base.condition,

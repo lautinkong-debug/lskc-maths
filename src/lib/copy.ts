@@ -4053,12 +4053,41 @@ export const circleReasonGameCopy = {
   correctValue: (value: number, unit: string) => `Correct value = ${value}${unit === "cm" ? " cm" : unit}`,
   uncheckedSaved: "This question was not checked. Compare your saved choices with the worked answer.",
   setPersistence: "This browser keeps your current set and the previous 10 sets, including your answers and feedback. Active speed timers continue while you review.",
-  hint: "Look at what is already marked. Decide which new fact you need before choosing the reason.",
+  hint: (cue: string) =>
+    `${cue} Decide which new fact you need before choosing the reason.`.trim(),
+  practiceWaiting: (topic: string, current: string) =>
+    `${topic} is selected. Start it, or resume your unfinished set first: ${current}.`,
+  startSavesSet:
+    "Starting a different level or pace saves your unfinished set. You can review it later in View question set.",
+  timerReady: (seconds: number) => `◷ ${seconds}s · not started`,
+  readyTitle: "Ready when you are",
+  readyBody: (seconds: number) =>
+    seconds
+      ? `This question has a ${seconds}-second timer. It starts when you open the question, so you can look through the set first.`
+      : "Open the question when you are ready.",
+  openQuestion: (number: number) => `Open question ${number}`,
+  exploreTimerNote:
+    "Your timer keeps running if you leave to explore this property.",
+  levelSummary: (score: number, firstTry: number, total: number, chain: number) =>
+    `${score} points · ${firstTry} of ${total} solved on the first try without help · perfect chain ${chain}`,
+  chooseAnotherLevel: "Choose another level",
+  valueMessage: (explanation: string) =>
+    `Check the value of x. ${explanation}`,
+  conditionMessage: (condition: string) =>
+    `Check the required condition: ${condition}`,
+  // "x:" followed by a name would be read as the ratio x : AN, so x ends a sentence here.
+  targetMessage: (target: string) =>
+    `Choose the relation needed to find x. Target: ${target} A given fact or a different consequence does not identify this target.`,
+  reasonMessage: (given: string, conclusion: string, target: string) =>
+    `This reason starts with: ${given} It directly establishes: ${conclusion} For this question, match the given information to the target ${target} A different route may need extra steps.`,
+  reasonFallback:
+    "Choose the circle reason that directly connects the givens to this target.",
+  allCorrect: "All four parts agree.",
   conditionChoices: "Condition choices",
   targetChoices: "Target choices",
   reasonChoices: "Reason choices",
   region: "Reasons Relay",
-  kicker: "FOUR STEPS · ONE JUSTIFIED ANSWER",
+  kicker: "Four steps · one justified answer",
   title: "Reasons Relay",
   intro:
     "Find the value. Check the givens. Name your target. Choose the reason.",
@@ -4075,7 +4104,7 @@ export const circleReasonGameCopy = {
   speed90: "Speed · 90 seconds per question",
   speed60: "Speed · 60 seconds per question",
   start: "Start level",
-  resume: "Resume saved level",
+  resume: (title: string) => `Resume saved set · ${title}`,
   scoring:
     "100 points per fully justified answer. Target and reason are worth 30 points each; value and condition are worth 20 each. Independent first-try speed answers earn up to 20 time-bonus points. Rechecking improves your best score without adding duplicate points.",
   levels: "Levels",
@@ -4090,8 +4119,7 @@ export const circleReasonGameCopy = {
   explore: "Explore this property",
   smallHint: "A small hint",
   answerProgress: "Answer progress",
-  reasonCard: "REASON CARD",
-  perfectChain: "Perfect chain",
+  reasonCard: "Reason card",
   chainHelp: "Consecutive first-try answers with all four steps correct, without hints.",
   chainCount: (count: number) => `Perfect chain · ${count}`,
   bestChain: (count: number) => `Best ${count}`,
@@ -4142,3 +4170,24 @@ export const circleReasonGameCopy = {
   answerScore: (score: number, best: number) =>
     `${score}/100 for this answer · ${best} best points for this mission`,
 } as const;
+
+/** One diagram cue per circle reason: the Relay hint, and the new-diagram check after submitting. */
+export const circleDiagramCues: Record<string, string> = {
+  r1: "Follow ON through O: it meets AB at 90°.",
+  r2: "Compare AN and NB, then follow the line from O.",
+  r3: "The perpendicular bisector passes through both the midpoint and O.",
+  r4: "Compare the two perpendicular distances OM and ON.",
+  r5: "The equal perpendicular distances connect the two highlighted chords.",
+  r6: "Both highlighted angles meet the same arc AB.",
+  r7: "Follow both circumference angles to the same chord AB.",
+  r8: "Check that AB passes through O: it is a diameter.",
+  r9: "The right angle at P points to AB as a diameter.",
+  r10: "Compare each centre angle with its highlighted arc.",
+  r11: "Follow the equal arcs back to their centre angles.",
+  r12: "Follow each centre angle to its highlighted chord.",
+  r13: "Follow the equal chords back to their centre angles.",
+  r14: "Each highlighted chord matches the arc between its endpoints.",
+  r15: "Each highlighted arc matches the chord between its endpoints.",
+  r16: "Match each centre angle to its highlighted arc before comparing ratios.",
+  r17: "Match each circumference angle to the arc that excludes its vertex.",
+};

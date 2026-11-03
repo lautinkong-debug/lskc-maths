@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { circleCopy as c } from "@/lib/copy";
+import { circleCopy as c, circleDiagramCues } from "@/lib/copy";
 import { reasons, type LabId } from "./content";
 import { useLocalSession } from "./useLocalSession";
 import MathText, { MathSvgText } from "./MathText";
@@ -114,26 +114,6 @@ function Point({ p, label }: { p: P; label: string }) {
     </g>
   );
 }
-
-const diagramCues: Record<string, string> = {
-  r1: "Follow ON through O: it meets AB at 90°.",
-  r2: "Compare AN and NB, then follow the line from O.",
-  r3: "The perpendicular bisector passes through both the midpoint and O.",
-  r4: "Compare the two perpendicular distances OM and ON.",
-  r5: "The equal perpendicular distances connect the two highlighted chords.",
-  r6: "Both highlighted angles meet the same arc AB.",
-  r7: "Follow both circumference angles to the same chord AB.",
-  r8: "Check that AB passes through O: it is a diameter.",
-  r9: "The right angle at P points to AB as a diameter.",
-  r10: "Compare each centre angle with its highlighted arc.",
-  r11: "Follow the equal arcs back to their centre angles.",
-  r12: "Follow each centre angle to its highlighted chord.",
-  r13: "Follow the equal chords back to their centre angles.",
-  r14: "Each highlighted chord matches the arc between its endpoints.",
-  r15: "Each highlighted arc matches the chord between its endpoints.",
-  r16: "Match each centre angle to its highlighted arc before comparing ratios.",
-  r17: "Match each circumference angle to the arc that excludes its vertex.",
-};
 
 export function CheckDiagram({
   q,
@@ -749,7 +729,7 @@ export default function TransferCheck({
               />
               {state.submitted && (
                 <p className={s.diagramCue}>
-                  <MathText>{diagramCues[q.reasonId]}</MathText>
+                  <MathText>{circleDiagramCues[q.reasonId]}</MathText>
                 </p>
               )}
             </div>

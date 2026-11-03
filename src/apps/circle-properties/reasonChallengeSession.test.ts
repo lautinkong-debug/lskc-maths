@@ -17,7 +17,11 @@ import {
   archiveChallengeRun,
   challengeVariant,
   expireChallengeDraft,
+  navigateChallengeSet,
+  openChallengeQuestion,
   retryChallengeQuestion,
+  routeChallengePractice,
+  unfinishedChallengeSet,
   startChallengeSet,
   similarChallengeQuestion,
   viewChallengeSet,
@@ -356,6 +360,59 @@ describe("reason challenge saved sessions", () => {
       retryChallengeQuestion(checked, id, late, true).drafts[id],
     ).toMatchObject({ helped: true, deadline: null });
     expect(retryChallengeQuestion(checked, "r99", late)).toBe(checked);
+  });
+  it("starts a timed question's clock only when the student opens it", () => {
+    const time = 1793460000000;
+    const state = startChallengeSet(
+      { ...initialChallengeSession, group: "topic-bisector", seconds: 60 },
+      time,
+    );
+    const second = state.queue[1];
+    const looked = navigateChallengeSet(state, 1, time + 5000);
+    expect(looked.index).toBe(1);
+    expect(looked.drafts[second]).toBeUndefined();
+    expect(parseChallengeSession(JSON.parse(JSON.stringify(looked)))?.started).toBe(
+      true,
+    );
+    const opened = openChallengeQuestion(looked, time + 9000);
+    expect(opened.drafts[second].deadline).toBe(time + 69000);
+    expect(openChallengeQuestion(opened, time + 20000)).toBe(opened);
+    // Practice questions have no clock, so they open straight away.
+    const practice = startChallengeSet(initialChallengeSession, time);
+    expect(
+      navigateChallengeSet(practice, 1, time).drafts[practice.queue[1]],
+    ).toMatchObject({ deadline: null });
+    expect(navigateChallengeSet(practice, 9, time)).toBe(practice);
+  });
+  it("never replaces an unfinished set from another level through an Explore link", () => {
+    const time = 1793460000000;
+    const mixed = startChallengeSet(
+      { ...initialChallengeSession, group: "mixed" },
+      time,
+    );
+    const waiting = routeChallengePractice(mixed, "topic-centre", time + 1);
+    expect(waiting.waiting).toBe(true);
+    expect(waiting.state.queue).toEqual(mixed.queue);
+    expect(waiting.state.started).toBe(false);
+    const same = routeChallengePractice(mixed, "mixed", time + 1);
+    expect(same).toMatchObject({ waiting: false, state: { started: true } });
+    expect(same.state.queue).toEqual(mixed.queue);
+    const solved: ChallengeSession = {
+      ...mixed,
+      drafts: Object.fromEntries(
+        mixed.queue.map((id) => [
+          id,
+          { ...newChallengeDraft(0, time), checked: true, complete: true },
+        ]),
+      ),
+    };
+    expect(unfinishedChallengeSet(solved)).toBe(false);
+    const fresh = routeChallengePractice(solved, "mixed", time + 2);
+    expect(fresh.state.archive.at(-1)?.setNumber).toBe(solved.setNumber);
+    expect(
+      routeChallengePractice(initialChallengeSession, "topic-centre", time)
+        .state,
+    ).toMatchObject({ group: "topic-centre", started: true });
   });
   it("starts cleanly and does not import scores from the removed three-game schema", () => {
     expect(parseChallengeSession(undefined)).toBeUndefined();
