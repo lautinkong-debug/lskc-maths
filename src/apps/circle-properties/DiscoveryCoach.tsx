@@ -1,9 +1,9 @@
 "use client";
 
-import type { LabId } from "./content";
+import { circleCopy as c } from "@/lib/copy";
+import { labs, type LabId } from "./content";
 import type { Parameters } from "./geometry";
 import { evaluateMission, missions } from "./missions";
-import { samePlaygroundShape } from "./session";
 import {
   checkDiscovery,
   discoveryChallenge,
@@ -17,6 +17,11 @@ import { useLocalSession } from "./useLocalSession";
 import s from "./discovery.module.css";
 import MathText from "./MathText";
 
+/**
+ * The task panel for every topic: one status line, a clear result when the
+ * task is done, then optional extras under "More to try". Stars are recorded
+ * by the playground as soon as a shape meets its task.
+ */
 export default function DiscoveryCoach({
   labId,
   parameters,
@@ -25,13 +30,11 @@ export default function DiscoveryCoach({
   onMissionChange,
   collected,
   recordedShape,
-  onComplete,
   onShowRecordedShape,
   onPractice,
   onCondition,
   conditionPrompt = "What changes if a condition is removed?",
   onExplain,
-  simple = false,
 }: {
   labId: LabId;
   parameters: Parameters;
@@ -40,36 +43,23 @@ export default function DiscoveryCoach({
   onMissionChange: (index: number) => void;
   collected: string[];
   recordedShape?: Parameters;
-  onComplete: (id: string) => void;
   onShowRecordedShape: () => void;
   onPractice: () => void;
   onCondition?: () => void;
   conditionPrompt?: string;
   onExplain?: () => void;
-  simple?: boolean;
 }) {
   const [session, setSession, storageFailed] = useLocalSession(
     `discovery-${labId}`,
     emptyDiscoverySession,
     parseDiscoverySession,
   );
-  const mission = missions[labId][missionIndex];
+  const lab = labs.find((item) => item.id === labId)!;
+  const taskList = missions[labId];
+  const mission = taskList[missionIndex];
   const result = evaluateMission(mission, parameters);
   const earned = collected.includes(mission.id) || !!recordedShape;
-  const showingRecording =
-    !!recordedShape && samePlaygroundShape(labId, parameters, recordedShape);
-  let recordingHint = result.complete
-    ? "Target reached. Record this shape to reopen it later."
-    : "Move a ringed point to meet the task.";
-  if (recordedShape) {
-    recordingHint = showingRecording
-      ? `The board shows your saved circle for Task ${missionIndex + 1}. You can keep dragging.`
-      : `You can return to the circle you saved for Task ${missionIndex + 1}.`;
-  } else if (earned) {
-    recordingHint = result.complete
-      ? "This task already has a star. Record this shape to save its point positions."
-      : "Your earlier star has no saved diagram. Match the task to record a circle.";
-  }
+  const last = missionIndex === taskList.length - 1;
   const hints = missionHints(mission);
   const hintLevel = session.hints[mission.id] ?? 0;
   const card = discoveryChallenge(labId, session.level, missionIndex);
@@ -82,8 +72,6 @@ export default function DiscoveryCoach({
     ? checkDiscovery(card, check.draft)
     : undefined;
   const open = session.open[mission.id] ?? false;
-  const readyForCondition =
-    result.complete || earned || check.checked || check.revealed;
   const feedback = check.revealed ? card.explanation : evaluation?.feedback;
   const [firstFeedback = "", ...moreFeedback] =
     feedback?.split(/(?<=[.!?])\s+/) ?? [];
@@ -103,100 +91,53 @@ export default function DiscoveryCoach({
       },
     }));
   }
-  function capture() {
-    if (!result.complete) return;
-    onComplete(mission.id);
-    setSession((previous) => ({
-      ...previous,
-      open: { ...previous.open, [mission.id]: true },
-    }));
-  }
   function setLevel(level: ChallengeLevel) {
     setSession((previous) => ({ ...previous, level }));
   }
-  const taskChoices = (
-    <div className={s.steps} aria-label="Choose mission">
-      {missions[labId].map((item, i) => (
-        <button
-          type="button"
-          key={item.id}
-          aria-label={`Mission ${i + 1}: ${item.title}`}
-          aria-current={i === missionIndex ? "step" : undefined}
-          onClick={() => onMissionChange(i)}
-        >
-          <span aria-hidden="true">
-            {collected.includes(item.id) ? "★" : "☆"}
-          </span>{" "}
-          {i + 1}
-        </button>
-      ))}
-    </div>
-  );
-  const extraTools = (
-    <div className={s.extraContent}>
-      {simple && taskChoices}
-      {onCondition && !readyForCondition && (
-        <button type="button" className={s.related} onClick={onCondition}>
-          <MathText>{conditionPrompt}</MathText>
-        </button>
-      )}
-      <details className={s.precisionDetails}>
-        <summary>About the measurements</summary>
-        <p className={s.precision}>
-          Drag targets allow about 0.6° or 0.08 cm of error (ratio targets:
-          0.015). Recording a shape does not prove a theorem.
-        </p>
-      </details>
-      {earned && !simple && (
-        <button
-          type="button"
-          className={s.next}
-          onClick={() => onMissionChange((missionIndex + 1) % 3)}
-        >
-          {missionIndex === 2 ? "Revisit a task" : "Next task"}
-        </button>
-      )}
-      {(!open || (!check.checked && !check.revealed)) && (
-        <button type="button" className={s.related} onClick={onPractice}>
-          Practise this reason
-        </button>
-      )}
-    </div>
-  );
   return (
-    <div className={s.coach} data-simple={simple}>
-      {!recordedShape ? (
+    <div className={s.coach}>
+      <div className={s.steps} role="group" aria-label={c.chooseTask}>
+        {taskList.map((item, i) => (
+          <button
+            type="button"
+            key={item.id}
+            aria-label={c.taskChoice(i + 1, item.title)}
+            aria-current={i === missionIndex ? "step" : undefined}
+            onClick={() => onMissionChange(i)}
+          >
+            <span aria-hidden="true">
+              {collected.includes(item.id) ? "★" : "☆"}
+            </span>{" "}
+            {i + 1}
+          </button>
+        ))}
+      </div>
+      {result.complete ? (
+        <div className={s.done} role="status">
+          <strong>{c.taskDone}</strong>
+          <p>
+            {c.youFound} <MathText>{lab.discovery}</MathText>
+          </p>
+          {onExplain && (
+            <button type="button" className={s.diagramLink} onClick={onExplain}>
+              {c.highlight}
+            </button>
+          )}
+        </div>
+      ) : (
+        <p className={s.status} role="status">
+          {earned ? c.earnedBefore : c.keepDragging}
+        </p>
+      )}
+      {(result.complete || earned) && (
         <button
           type="button"
           className={s.primary}
-          disabled={!result.complete}
-          onClick={capture}
+          onClick={() => onMissionChange(last ? 0 : missionIndex + 1)}
         >
-          Record this shape
-        </button>
-      ) : (
-        <p className={s.recorded} role="status">
-          {showingRecording ? "✓ Shape recorded" : "Recorded earlier"}
-        </p>
-      )}
-      <p className={s.status} data-ready={result.complete} role="status">
-        {recordingHint}
-      </p>
-      {recordedShape && (
-        <button
-          type="button"
-          className={s.recall}
-          onClick={onShowRecordedShape}
-        >
-          Show recorded circle
+          {last ? c.firstTask : c.nextTask}
         </button>
       )}
-      {result.complete && onExplain && (
-        <button type="button" className={s.diagramLink} onClick={onExplain}>
-          Highlight this property
-        </button>
-      )}
-      {!simple && taskChoices}
       <div className={s.hintControls}>
         <button
           type="button"
@@ -212,10 +153,10 @@ export default function DiscoveryCoach({
           }
         >
           {hintLevel === 0
-            ? "A small hint"
+            ? c.hint
             : hintLevel < hints.length
-              ? "Another hint"
-              : "All hints shown"}
+              ? c.anotherHint
+              : c.allHints}
         </button>
         {hintLevel > 0 && (
           <button
@@ -227,7 +168,7 @@ export default function DiscoveryCoach({
               }))
             }
           >
-            Hide hints
+            {c.hideHints}
           </button>
         )}
       </div>
@@ -240,198 +181,189 @@ export default function DiscoveryCoach({
           ))}
         </ol>
       )}
-      <button
-        type="button"
-        className={s.openCheck}
-        data-recommended={earned}
-        aria-expanded={open}
-        onClick={() =>
-          setSession((previous) => ({
-            ...previous,
-            open: { ...previous.open, [mission.id]: !open },
-          }))
-        }
-      >
-        {open ? "New-case challenge" : "Predict a new case"}
-        <span aria-hidden="true">{open ? "−" : "+"}</span>
-      </button>
-      {open && (
-        <section className={s.check} aria-label="Predict a new case">
-          <div className={s.levels} aria-label="Choose challenge support">
-            {(["support", "core", "stretch"] as const).map((level) => (
-              <button
-                type="button"
-                key={level}
-                aria-pressed={session.level === level}
-                onClick={() => setLevel(level)}
+      <details className={s.moreOptions}>
+        <summary>{c.moreToTry}</summary>
+        <div className={s.extraContent}>
+          <button
+            type="button"
+            className={s.openCheck}
+            data-recommended={earned}
+            aria-expanded={open}
+            onClick={() =>
+              setSession((previous) => ({
+                ...previous,
+                open: { ...previous.open, [mission.id]: !open },
+              }))
+            }
+          >
+            {c.predict}
+            <span aria-hidden="true">{open ? "−" : "+"}</span>
+          </button>
+          {open && (
+            <section className={s.check} aria-label={c.predict}>
+              <div
+                className={s.levels}
+                role="group"
+                aria-label={c.predictCheck.levelsLabel}
               >
-                {level === "support"
-                  ? "Support"
-                  : level === "core"
-                    ? "Core"
-                    : "Stretch"}
-              </button>
-            ))}
-          </div>
-          <p className={s.kind}>{card.kind} · a different case</p>
-          <p className={s.prompt}>
-            <MathText>{card.prompt}</MathText>
-          </p>
-          {card.choices ? (
-            <div className={s.choices}>
-              {card.choices.map((option) => (
-                <button
-                  type="button"
-                  key={option.id}
-                  aria-pressed={check.draft === option.id}
-                  onClick={() =>
-                    updateCheck({ draft: option.id, checked: true })
-                  }
-                >
-                  <MathText>{option.label}</MathText>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <form
-              className={s.answer}
-              onSubmit={(event) => {
-                event.preventDefault();
-                updateCheck({ checked: true });
-              }}
-            >
-              <label htmlFor={`discovery-${card.id}`}>
-                Your prediction {card.unit ? `(${card.unit})` : "(ratio)"}
-              </label>
-              <div>
-                <input
-                  id={`discovery-${card.id}`}
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  value={check.draft}
-                  maxLength={48}
-                  onChange={(event) =>
-                    updateCheck({ draft: event.target.value, checked: false })
-                  }
-                />
-                <button type="submit">Check prediction</button>
+                {(["support", "core", "stretch"] as const).map((level) => (
+                  <button
+                    type="button"
+                    key={level}
+                    aria-pressed={session.level === level}
+                    onClick={() => setLevel(level)}
+                  >
+                    {c.predictCheck.levels[level]}
+                  </button>
+                ))}
               </div>
-            </form>
-          )}
-          <details className={s.checkHint}>
-            <summary>Hint for this new case</summary>
-            <p>
-              <MathText>{card.hint}</MathText>
-            </p>
-          </details>
-          {(evaluation || check.revealed) && (
-            <div
-              className={s.response}
-              data-correct={evaluation?.correct === true && !check.revealed}
-              role="status"
-            >
-              <strong>
-                {check.revealed
-                  ? "Answer viewed"
-                  : evaluation?.correct
-                    ? "Prediction supported"
-                    : "Check this condition"}
-              </strong>
-              <p>
-                <MathText>{firstFeedback}</MathText>
+              <p className={s.kind}>{c.predictCheck.kind(card.kind)}</p>
+              <p className={s.prompt}>
+                <MathText>{card.prompt}</MathText>
               </p>
-              {moreFeedback.length > 0 && (
-                <details className={s.feedbackDetails}>
-                  <summary>Why?</summary>
-                  <p>
-                    <MathText>{moreFeedback.join(" ")}</MathText>
-                  </p>
-                </details>
+              {card.choices ? (
+                <div className={s.choices}>
+                  {card.choices.map((option) => (
+                    <button
+                      type="button"
+                      key={option.id}
+                      aria-pressed={check.draft === option.id}
+                      onClick={() =>
+                        updateCheck({ draft: option.id, checked: true })
+                      }
+                    >
+                      <MathText>{option.label}</MathText>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <form
+                  className={s.answer}
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    updateCheck({ checked: true });
+                  }}
+                >
+                  <label htmlFor={`discovery-${card.id}`}>
+                    {c.predictCheck.yourPrediction(card.unit)}
+                  </label>
+                  <div>
+                    <input
+                      id={`discovery-${card.id}`}
+                      type="text"
+                      inputMode="decimal"
+                      autoComplete="off"
+                      value={check.draft}
+                      maxLength={48}
+                      onChange={(event) =>
+                        updateCheck({
+                          draft: event.target.value,
+                          checked: false,
+                        })
+                      }
+                    />
+                    <button type="submit">{c.predictCheck.check}</button>
+                  </div>
+                </form>
               )}
-            </div>
+              <details className={s.checkHint}>
+                <summary>{c.predictCheck.hint}</summary>
+                <p>
+                  <MathText>{card.hint}</MathText>
+                </p>
+              </details>
+              {(evaluation || check.revealed) && (
+                <div
+                  className={s.response}
+                  data-correct={evaluation?.correct === true && !check.revealed}
+                  role="status"
+                >
+                  <strong>
+                    {check.revealed
+                      ? c.predictCheck.viewed
+                      : evaluation?.correct
+                        ? c.predictCheck.supported
+                        : c.predictCheck.notYet}
+                  </strong>
+                  <p>
+                    <MathText>{firstFeedback}</MathText>
+                  </p>
+                  {moreFeedback.length > 0 && (
+                    <details className={s.feedbackDetails}>
+                      <summary>{c.predictCheck.why}</summary>
+                      <p>
+                        <MathText>{moreFeedback.join(" ")}</MathText>
+                      </p>
+                    </details>
+                  )}
+                </div>
+              )}
+              <div className={s.followActions}>
+                {!check.revealed && !evaluation?.correct && (
+                  <button
+                    type="button"
+                    onClick={() => updateCheck({ revealed: true })}
+                  >
+                    {c.predictCheck.reveal}
+                  </button>
+                )}
+                {card.experiment && (check.checked || check.revealed) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onChange(card.experiment!);
+                      updateCheck({ tried: true });
+                      onExplain?.();
+                    }}
+                  >
+                    {c.predictCheck.tryCase}
+                  </button>
+                )}
+                {(check.checked || check.revealed) && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      updateCheck({
+                        draft: "",
+                        checked: false,
+                        revealed: false,
+                        tried: false,
+                      })
+                    }
+                  >
+                    {c.predictCheck.again}
+                  </button>
+                )}
+              </div>
+              {check.tried && (
+                <p className={s.precision}>{c.predictCheck.tried}</p>
+              )}
+            </section>
           )}
-          <div className={s.followActions}>
-            {!check.revealed && !evaluation?.correct && (
-              <button
-                type="button"
-                onClick={() => updateCheck({ revealed: true })}
-              >
-                Show the reasoning
-              </button>
-            )}
-            {card.experiment && (check.checked || check.revealed) && (
-              <button
-                type="button"
-                onClick={() => {
-                  onChange(card.experiment!);
-                  updateCheck({ tried: true });
-                  onExplain?.();
-                }}
-              >
-                Try this case on the circle
-              </button>
-            )}
-            {(check.checked || check.revealed) && (
-              <button
-                type="button"
-                onClick={() =>
-                  updateCheck({
-                    draft: "",
-                    checked: false,
-                    revealed: false,
-                    tried: false,
-                  })
-                }
-              >
-                Try prediction again
-              </button>
-            )}
-          </div>
-          {check.tried && (
-            <p className={s.precision}>
-              The board now shows the new case. Move its points to test your
-              prediction further; the operation mission above is unchanged.
-            </p>
-          )}
-          {(check.checked || check.revealed) && (
-            <button type="button" className={s.related} onClick={onPractice}>
-              Practise this reason
+          {onCondition && (
+            <button type="button" className={s.related} onClick={onCondition}>
+              <MathText>{conditionPrompt}</MathText>
             </button>
           )}
-        </section>
-      )}
-      {onCondition && readyForCondition && (
-        <div className={s.conditionEntry}>
-          <span>Test a condition</span>
-          <button type="button" onClick={onCondition}>
-            <MathText>{conditionPrompt}</MathText>
+          <button type="button" className={s.related} onClick={onPractice}>
+            {c.practiseReason}
           </button>
+          {recordedShape && (
+            <button
+              type="button"
+              className={s.recall}
+              onClick={onShowRecordedShape}
+            >
+              {c.showSaved}
+            </button>
+          )}
+          <details className={s.precisionDetails}>
+            <summary>{c.aboutMeasurements}</summary>
+            <p className={s.precision}>{c.measurementNote}</p>
+          </details>
         </div>
-      )}
-      {simple && earned && (
-        <button
-          type="button"
-          className={s.next}
-          onClick={() => onMissionChange((missionIndex + 1) % 3)}
-        >
-          {missionIndex === 2 ? "Revisit a task" : "Next task"}
-        </button>
-      )}
-      {simple ? (
-        <details className={s.moreOptions}>
-          <summary>More options</summary>
-          {extraTools}
-        </details>
-      ) : (
-        extraTools
-      )}
-      {storageFailed && (
-        <p role="status">
-          This browser could not save the current prediction. You can continue
-          exploring.
-        </p>
-      )}
+      </details>
+      {storageFailed && <p role="status">{c.predictCheck.storageFailed}</p>}
     </div>
   );
 }

@@ -3,14 +3,13 @@
 import MathText from "./MathText";
 import { circleReviewCopy as c } from "@/lib/copy";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { reasons, type LabId } from "./content";
 import { useLocalSession } from "./useLocalSession";
 import {
   answerCard,
   cardKey,
   feedbackFor,
-  focusPractice,
   freshPracticeRound,
   initialPractice,
   nextCard,
@@ -39,14 +38,10 @@ const topicNames: Record<LabId, string> = {
 };
 
 export default function ReasonPractice({
-  focusLab,
-  focusToken,
   collected,
   onCollect,
   onResetRecord,
 }: {
-  focusLab: LabId | null;
-  focusToken: number;
   collected: string[];
   onCollect: (id: string) => void;
   onResetRecord: () => void;
@@ -60,13 +55,6 @@ export default function ReasonPractice({
   const [notice, setNotice] = useState("");
   const [highlightKey, setHighlightKey] = useState(0);
   const [confirmReset, setConfirmReset] = useState(false);
-  useEffect(() => {
-    if (focusLab && focusToken > state.lastFocusToken) {
-      // An explicit request from a different playground starts its related examples.
-      // Ordinary remounts restore the saved token and current question unchanged.
-      setState((current) => focusPractice(current, focusLab, focusToken));
-    }
-  }, [focusLab, focusToken, setState, state.lastFocusToken]);
   const view = relayView(state);
   const { card, answer, review } = view;
   const positions = relayPositions(state);
@@ -413,7 +401,7 @@ export default function ReasonPractice({
                   setState({
                     ...initialPractice(),
                     recall: state.recall,
-                    lastFocusToken: Math.max(state.lastFocusToken, focusToken),
+                    lastFocusToken: state.lastFocusToken,
                   });
                   onResetRecord();
                   setNotice(c.recordReset);

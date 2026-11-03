@@ -1,5 +1,14 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab: clear instructions and the 16.1 vs 16.2 guided lesson (03/11/2026)
+
+- [x] Owner request: students must be able to explore without a teacher, with short, clear instructions. Lesson observation on 09/11/2026 focuses on when to use 16.1 and 16.2. Owner chose guided steps in Topic 1 and the tidy layout for all seven topics.
+- [x] Topic 1 opens on a four-step guided lesson (Lesson Worksheet 16.1, Part A; Book 5A pp. 16.1–16.4): make ON ⊥ AB to reveal AN = NB (16.1); make AN = NB on a new chord to reveal 90° (16.2); sort six questions by what is given; choose the reason in three written lines. Each result shows Given → You get → Write.
+- [x] Every topic: one task line above the circle, Pen and Focus as the only board buttons, all other tools in one Tools section, and a short task panel. A star is recorded automatically when a task is met, with "You found" and "Next task". Extras sit under "More to try".
+- [x] Tabs carry one-line descriptions and a dismissible three-step "How to use" strip opens Explore. Presentation mode hides the property list and enlarges the task and lesson text.
+- [x] Renamed the saved activity names (old saves migrate) and removed Reasons Play's unreachable focus wiring.
+- [x] 722 Circle unit tests, typecheck, lint and four Circle browser tests (including the guided lesson) pass. Checked by hand at 1366, 1920 (projector) and 375 px. Not committed or published.
+
 ## Circle Lab Reasons Relay fairness and usability (03/11/2026)
 
 - [x] A timed question's clock starts only when the student presses "Open question", so looking ahead never starts a timer. Explore shows that a running timer keeps going.

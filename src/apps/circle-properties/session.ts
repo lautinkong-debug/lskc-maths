@@ -3,39 +3,40 @@ import { labs, type LabId } from "./content";
 import { evaluateMission, missions } from "./missions";
 
 export const sessionPrefix = "lskc-circle-workspace-v3:";
+export type WorkspaceMode = "explore" | "reasons-relay" | "reasons-play";
 export type WorkspaceState = {
-  mode: "explore" | "relay" | "check";
+  mode: WorkspaceMode;
   labId: LabId;
-  focusLab: LabId | null;
-  focusToken: number;
   appearance: "playful" | "calm";
   welcomeDismissed: boolean;
 };
 export const initialWorkspace: WorkspaceState = {
   mode: "explore",
   labId: "bisector",
-  focusLab: null,
-  focusToken: 0,
   appearance: "playful",
   welcomeDismissed: false,
 };
 const labIds = labs.map((lab) => lab.id);
+/** Earlier saves used "relay" for Reasons Play and "check"/"quest" for Reasons Relay. */
+const legacyModes: Record<string, WorkspaceMode> = {
+  relay: "reasons-play",
+  check: "reasons-relay",
+  quest: "reasons-relay",
+};
+const workspaceModes: WorkspaceMode[] = [
+  "explore",
+  "reasons-relay",
+  "reasons-play",
+];
 export function parseWorkspace(raw: unknown): WorkspaceState | undefined {
   if (!raw || typeof raw !== "object") return;
   const value = raw as Partial<WorkspaceState>;
+  const mode = String(value.mode ?? "");
   return {
-    mode:
-      (value.mode as string) === "quest"
-        ? "check"
-        : ["explore", "relay", "check"].includes(value.mode ?? "")
-          ? value.mode!
-          : "explore",
+    mode: workspaceModes.includes(mode as WorkspaceMode)
+      ? (mode as WorkspaceMode)
+      : (legacyModes[mode] ?? "explore"),
     labId: labIds.includes(value.labId!) ? value.labId! : "bisector",
-    focusLab: labIds.includes(value.focusLab!) ? value.focusLab! : null,
-    focusToken:
-      Number.isSafeInteger(value.focusToken) && value.focusToken! >= 0
-        ? value.focusToken!
-        : 0,
     appearance: value.appearance === "calm" ? "calm" : "playful",
     welcomeDismissed: value.welcomeDismissed === true,
   };

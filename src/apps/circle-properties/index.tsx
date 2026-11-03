@@ -7,7 +7,7 @@ import {
   useSyncExternalStore,
   type SetStateAction,
 } from "react";
-import { circleCopy as c } from "@/lib/copy";
+import { circleCopy as c, circleLessonCopy } from "@/lib/copy";
 import { labs, reasons, type LabId } from "./content";
 import CircleDiagram from "./CircleDiagram";
 import ReasonExplorer from "./ReasonExplorer";
@@ -22,7 +22,16 @@ import {
   type DragKey,
 } from "./geometry";
 import { snapParameters, type SnapResult } from "./snapping";
-import { missions } from "./missions";
+import { allMissions, evaluateMission, missions } from "./missions";
+import ChordLesson from "./ChordLesson";
+import {
+  chordLessonDisplay,
+  chordLessonStarts,
+  initialChordLesson,
+  nAtMidpoint,
+  parseChordLesson,
+  type ChordLessonState,
+} from "./chordLessonData";
 import DiscoveryCoach from "./DiscoveryCoach";
 import { missionPrompt } from "./discovery";
 import ReasonPractice from "./ReasonPractice";
@@ -36,6 +45,7 @@ import {
   parsePlayground,
   storeMissionShape,
   type PlaygroundState,
+  type WorkspaceMode,
 } from "./session";
 import {
   emptyProgress,
@@ -112,7 +122,7 @@ export default function CircleLab() {
   return hydrated ? (
     <CircleWorkspace key={epoch} onReset={() => setEpoch((x) => x + 1)} />
   ) : (
-    <p role="status">Opening your playground…</p>
+    <p role="status">{c.loading}</p>
   );
 }
 function CircleWorkspace({ onReset }: { onReset: () => void }) {
@@ -170,7 +180,7 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
     };
   }, []);
   const { mode, labId } = workspace;
-  const setMode = (mode: typeof workspace.mode) => {
+  const setMode = (mode: WorkspaceMode) => {
     setRelayRequest(null);
     setPropertyMenu(false);
     if (settingsRef.current) settingsRef.current.open = false;
@@ -183,7 +193,9 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
     setWorkspace((p) => ({ ...p, labId, mode: "explore" }));
   };
   const practise = (lab: LabId) => {
-    setMode("check");
+    setMode("reasons-relay");
+    // Called only from practice buttons, never while rendering.
+    // eslint-disable-next-line react-hooks/purity
     setRelayRequest({ lab, at: Date.now() });
     requestAnimationFrame(() =>
       appRef.current?.scrollIntoView({ block: "start" }),
@@ -214,31 +226,31 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
             <h1>{c.title}</h1>
           </div>
         </div>
-        <nav className={s.tabs} aria-label="Circle Lab activities">
-          <button
-            type="button"
-            aria-pressed={mode === "explore"}
-            onClick={() => setMode("explore")}
-          >
-            {c.explore}
-          </button>
-          <button
-            type="button"
-            aria-pressed={mode === "check"}
-            onClick={() => setMode("check")}
-          >
-            {c.apply}
-          </button>
-          <button
-            type="button"
-            aria-pressed={mode === "relay"}
-            onClick={() => setMode("relay")}
-          >
-            {c.relay}
-          </button>
+        <nav className={s.tabs} aria-label={c.activities}>
+          {(
+            [
+              ["explore", c.explore, c.tabHints.explore],
+              ["reasons-relay", c.reasonsRelay, c.tabHints.relay],
+              ["reasons-play", c.reasonsPlay, c.tabHints.play],
+            ] as const
+          ).map(([id, label, hint]) => (
+            <button
+              type="button"
+              key={id}
+              aria-pressed={mode === id}
+              aria-label={label}
+              aria-describedby={`circle-tab-${id}`}
+              onClick={() => setMode(id)}
+            >
+              {label}
+              <small id={`circle-tab-${id}`} className={s.tabHint}>
+                {hint}
+              </small>
+            </button>
+          ))}
         </nav>
         <details className={s.settings} ref={settingsRef}>
-          <summary>Settings</summary>
+          <summary>{c.settings}</summary>
           <div className={s.settingsPanel}>
             <label>
               {c.appearance}
@@ -255,21 +267,25 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
                 <option value="calm">{c.calm}</option>
               </select>
             </label>
-            <div className={s.collection} aria-label="Your game progress">
+            <div className={s.collection} aria-label={c.progress}>
               <span>
                 <Star />
                 {progress.missions.length}
-                <small>/21 {c.tasks}</small>
+                <small>
+                  /{allMissions.length} {c.tasks}
+                </small>
               </span>
               <span>
                 <b aria-hidden="true">▱</b>
                 {progress.reasons.length}
-                <small>/17 {c.once}</small>
+                <small>
+                  /{reasons.length} {c.once}
+                </small>
               </span>
             </div>
             <p>{c.savedShape}</p>
             <details className={s.quickGuide}>
-              <summary>New here?</summary>
+              <summary>{c.newHere}</summary>
               <p>{c.startBody}</p>
               <button
                 type="button"
@@ -287,6 +303,24 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
       </header>
       {mode === "explore" && (
         <>
+          {!workspace.welcomeDismissed && (
+            <div className={s.howTo} role="note" aria-label={c.howTo}>
+              <strong>{c.howTo}</strong>
+              <ol>
+                {c.howToSteps.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+              <button
+                type="button"
+                onClick={() =>
+                  setWorkspace((p) => ({ ...p, welcomeDismissed: true }))
+                }
+              >
+                {c.gotIt}
+              </button>
+            </div>
+          )}
           <div
             className={s.mobileProperty}
             onKeyDown={(event) => {
@@ -302,14 +336,14 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
               aria-controls="circle-property-menu"
               onClick={() => setPropertyMenu((v) => !v)}
             >
-              <span>Property</span>
+              <span>{c.property}</span>
               <strong>{places[labId].subtitle}</strong>
               <span aria-hidden="true">{propertyMenu ? "−" : "+"}</span>
             </button>
             {propertyMenu && (
               <nav
                 id="circle-property-menu"
-                aria-label="Choose a property"
+                aria-label={c.chooseProperty}
                 className={s.propertyMenu}
               >
                 {labs.map((lab) => (
@@ -328,8 +362,7 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
           <div className={s.explorer}>
             <aside className={s.rail}>
               <div className={s.railHeading}>
-                <h2>Choose a property</h2>
-                <span>All unlocked</span>
+                <h2>{c.chooseProperty}</h2>
               </div>
               <div className={s.labButtons}>
                 {labs.map((lab) => (
@@ -349,7 +382,7 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
                       <small>{places[lab.id].name}</small>
                       <span
                         className={s.miniStars}
-                        aria-label={`${missions[lab.id].filter((m) => progress.missions.includes(m.id)).length} of 3 tasks`}
+                        aria-label={`${missions[lab.id].filter((m) => progress.missions.includes(m.id)).length} of ${missions[lab.id].length} ${c.tasks}`}
                       >
                         {missions[lab.id].map((m) => (
                           <Star
@@ -370,15 +403,12 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
               collected={progress.missions}
               onCollect={(id) => collect("missions", id)}
               onRelay={() => practise(labId)}
-              simple={workspace.appearance === "calm"}
             />
           </div>
         </>
       )}
-      {mode === "relay" && (
+      {mode === "reasons-play" && (
         <ReasonPractice
-          focusLab={workspace.focusLab}
-          focusToken={workspace.focusToken}
           collected={progress.reasons}
           onCollect={(id) => collect("reasons", id)}
           onResetRecord={() =>
@@ -386,7 +416,7 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
           }
         />
       )}
-      {mode === "check" && (
+      {mode === "reasons-relay" && (
         <ReasonChallenge onExplore={explore} practiceRequest={relayRequest} />
       )}
       <footer className={s.footer}>
@@ -425,13 +455,11 @@ function Playground({
   collected,
   onCollect,
   onRelay,
-  simple,
 }: {
   labId: LabId;
   collected: string[];
   onCollect: (id: string) => void;
   onRelay: () => void;
-  simple: boolean;
 }) {
   const lab = labs.find((l) => l.id === labId)!;
   const [saved, setSaved, saveFailed] = useLocalSession<PlaygroundState>(
@@ -439,10 +467,17 @@ function Playground({
     () => initialPlayground(labId),
     (raw) => parsePlayground(labId, raw),
   );
+  // Only Topic 1 has the guided 16.1 / 16.2 lesson; other topics never read this record.
+  const [lesson, setLesson] = useLocalSession<ChordLessonState>(
+    "lesson-chords-16-1-16-2",
+    initialChordLesson,
+    parseChordLesson,
+  );
   const boardRef = useRef<HTMLDivElement>(null);
   const ink = useInkBoard(`playground-${labId}`);
   const reasonRef = useRef<HTMLDivElement>(null);
   const sliderKeyboard = useRef(false);
+  const [penOpen, setPenOpen] = useState(false);
   const [conditionOpen, setConditionOpen] = useState(false);
   const [conditionParameters, setConditionParameters] =
     useState<Parameters | null>(null);
@@ -476,14 +511,10 @@ function Playground({
     update("parameters", next);
   const setFree = (next: SetStateAction<boolean>) => update("free", next);
   const setFocus = (next: SetStateAction<boolean>) => update("focus", next);
-  const setShowMeasurements = (next: boolean) =>
-    setSaved((state) => ({
-      ...state,
-      showMeasurements: next,
-      showAngles: next,
-    }));
   const setShowReasons = (next: SetStateAction<boolean>) =>
     update("showReasons", next);
+  const lessonMode = labId === "bisector" && lesson.open;
+  const tasks = !free && !lessonMode;
   const angleCondition = ["centre", "segment", "semicircle"].includes(labId);
   const displayedParameters =
     conditionOpen && angleCondition && conditionParameters
@@ -491,12 +522,19 @@ function Playground({
       : parameters;
   const model = getModel(labId, displayedParameters),
     params = normalise(labId, parameters);
+  // The lesson decides which readings are visible: the given first, the result once found.
+  const display =
+    lessonMode && !conditionOpen
+      ? chordLessonDisplay(lesson)
+      : { lengths: showMeasurements, angles: showAngles };
   const visibleMeasurements = model.measurements.filter((m) =>
-    m.unit === "°" || m.label === "Angle ratio" ? showAngles : showMeasurements,
+    m.unit === "°" || m.label === "Angle ratio"
+      ? display.angles
+      : display.lengths,
   );
   const mission = missions[labId][missionIndex];
-  const snapMission = free || conditionOpen ? undefined : missionIndex;
-  const snapContext = `${free}:${missionIndex}:${conditionOpen}`;
+  const snapMission = tasks && !conditionOpen ? missionIndex : undefined;
+  const snapContext = `${free}:${lessonMode}:${missionIndex}:${conditionOpen}`;
   const snapLabel =
     autoSnap &&
     snapResult?.context === snapContext &&
@@ -504,6 +542,26 @@ function Playground({
       JSON.stringify(displayedParameters)
       ? snapResult.label
       : null;
+  /** A shape the student made by hand: a task records its star, a lesson step notes what was found. */
+  function applyShape(next: Parameters) {
+    setSaved((previous) => {
+      const shaped = { ...previous, parameters: next };
+      return tasks ? storeMissionShape(labId, shaped, mission.id) : shaped;
+    });
+    if (tasks && evaluateMission(mission, next).complete) onCollect(mission.id);
+    const step = lesson.step;
+    if (
+      lessonMode &&
+      (step === 0 || step === 1) &&
+      !lesson.found[step] &&
+      nAtMidpoint(next)
+    )
+      setLesson((previous) => {
+        const found: [boolean, boolean] = [...previous.found];
+        found[step] = true;
+        return { ...previous, found };
+      });
+  }
   function changeByHand(next: Parameters, key: DragKey) {
     const result = autoSnap
       ? snapParameters(labId, next, key, snapMission)
@@ -511,11 +569,28 @@ function Playground({
     setSnapResult({ ...result, context: snapContext });
     if (conditionOpen && angleCondition)
       setConditionParameters(result.parameters);
-    else setParameters(result.parameters);
+    else applyShape(result.parameters);
   }
   function changeCondition(next: (p: Parameters) => Parameters) {
     setConditionParameters((p) => normalise(labId, next(p ?? parameters)));
     setHighlightKey((n) => n + 1);
+  }
+  function chooseStyle(freePlay: boolean) {
+    setSnapResult(null);
+    if (labId === "bisector")
+      setLesson((previous) => ({ ...previous, open: false }));
+    setFree(freePlay);
+  }
+  function openLesson() {
+    setSnapResult(null);
+    if ((lesson.step === 0 || lesson.step === 1) && !lesson.found[lesson.step])
+      setParameters({ ...chordLessonStarts[lesson.step] });
+    setLesson((previous) => ({ ...previous, open: true }));
+  }
+  function togglePen() {
+    // A hidden pen must never keep capturing drags meant for the circle.
+    if (penOpen) ink.setMode("move");
+    setPenOpen(!penOpen);
   }
   const conditionPrompt =
     labId === "bisector"
@@ -535,6 +610,17 @@ function Playground({
       : labId === "segment"
         ? "Compare ∠APB and ∠AQB on opposite sides of AB. Then move Q back. Which position is needed for equal angles?"
         : "Compare the angle at P when AB is a diameter and when it misses O. Drag P too: what changes?";
+  const boardTask = conditionOpen
+    ? conditionPrompt
+    : lessonMode
+      ? lesson.step === 0
+        ? circleLessonCopy.perpendicular.task
+        : lesson.step === 1
+          ? circleLessonCopy.midpoint.task
+          : c.lessonBoardTask
+      : free
+        ? lab.question
+        : missionPrompt(mission);
   function showBoard() {
     requestAnimationFrame(() =>
       boardRef.current?.scrollIntoView({ block: "nearest", behavior: "auto" }),
@@ -554,10 +640,6 @@ function Playground({
   function explain() {
     setHighlightKey((n) => n + 1);
     showBoard();
-  }
-  function recordShape(id: string) {
-    setSaved((previous) => storeMissionShape(labId, previous, id));
-    onCollect(id);
   }
   function showRecordedShape() {
     const recorded = saved.recordedShapes[mission.id];
@@ -579,6 +661,8 @@ function Playground({
   function newShape() {
     setParameters(randomShape(labId));
   }
+  const slide = (key: DragKey, value: number) =>
+    normalise(labId, { ...parameters, [key]: value });
   return (
     <section
       className={`${s.playground} ${focus ? s.focused : ""}`}
@@ -596,86 +680,74 @@ function Playground({
           <h2>{places[labId].subtitle}</h2>
           <p className={s.propertyName}>{places[labId].name}</p>
         </div>
-        <div className={s.playSwitch} aria-label="Play style">
+        <div className={s.playSwitch} role="group" aria-label={c.playStyle}>
+          {labId === "bisector" && (
+            <button
+              type="button"
+              aria-pressed={lessonMode}
+              onClick={openLesson}
+            >
+              {circleLessonCopy.mode}
+            </button>
+          )}
           <button
             type="button"
-            aria-pressed={!free}
-            onClick={() => setFree(false)}
+            aria-pressed={tasks}
+            onClick={() => chooseStyle(false)}
           >
             {c.missions}
           </button>
           <button
             type="button"
-            aria-pressed={free}
-            onClick={() => setFree(true)}
+            aria-pressed={free && !lessonMode}
+            onClick={() => chooseStyle(true)}
           >
             {c.free}
           </button>
         </div>
       </div>
       <div
-        className={`${s.playArea} ${conditionOpen ? s.testingCondition : ""}`}
+        className={`${s.playArea} ${conditionOpen ? s.testingCondition : ""} ${lessonMode ? s.lessonArea : ""}`}
       >
         <div
           className={s.board}
           ref={boardRef}
           tabIndex={-1}
           role="region"
-          aria-label="Circle construction board"
+          aria-label={c.board}
         >
           <div className={s.boardTools}>
-            {conditionOpen && !angleCondition ? (
-              <span>Change one condition</span>
-            ) : (
-              <label className={s.snapToggle} title={c.snapHelp}>
-                <input
-                  type="checkbox"
-                  checked={autoSnap}
-                  onChange={(e) => {
-                    update("autoSnap", e.target.checked);
-                    setSnapResult(null);
-                  }}
-                />
-                {c.autoSnap}
-              </label>
-            )}
-            {!conditionOpen && (
-              <div
-                className={s.measurementButtons}
-                role="group"
-                aria-label="Show or hide measurements"
-              >
-                <button
-                  type="button"
-                  aria-pressed={showMeasurements}
-                  onClick={() => update("showMeasurements", !showMeasurements)}
-                >
-                  {showMeasurements ? c.hideLengths : c.showLengths}
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={showAngles}
-                  onClick={() => update("showAngles", !showAngles)}
-                >
-                  {showAngles ? c.hideAngles : c.showAngles}
-                </button>
-              </div>
-            )}
-            {!conditionOpen && <InkToolbar board={ink} />}
             {conditionOpen ? (
-              <button type="button" onClick={closeCondition}>
-                Back to my circle
-              </button>
+              <>
+                {!angleCondition && <span>{c.changeCondition}</span>}
+                <button type="button" onClick={closeCondition}>
+                  {c.backToCircle}
+                </button>
+              </>
             ) : (
-              <button
-                type="button"
-                onClick={() => setFocus((x) => !x)}
-                aria-pressed={focus}
-              >
-                {focus ? c.unfocus : c.focus}
-              </button>
+              <>
+                <button
+                  type="button"
+                  aria-pressed={penOpen}
+                  onClick={togglePen}
+                >
+                  {penOpen ? c.hidePen : c.pen}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFocus((x) => !x)}
+                  aria-pressed={focus}
+                >
+                  {focus ? c.unfocus : c.focus}
+                </button>
+              </>
             )}
           </div>
+          {penOpen && !conditionOpen && (
+            <div className={s.penBar}>
+              <InkToolbar board={ink} />
+            </div>
+          )}
           {conditionOpen && !angleCondition ? (
             <ConditionsLab
               labId={labId}
@@ -687,16 +759,12 @@ function Playground({
               {!focus && (
                 <div className={s.currentTask}>
                   <strong>
-                    <MathText>
-                      {conditionOpen
-                        ? conditionPrompt
-                        : free
-                          ? lab.question
-                          : missionPrompt(mission)}
-                    </MathText>
+                    <MathText>{boardTask}</MathText>
                   </strong>
-                  {!conditionOpen && !free && (
-                    <span>Task {missionIndex + 1} of 3</span>
+                  {tasks && !conditionOpen && (
+                    <span>
+                      {c.taskOf(missionIndex + 1, missions[labId].length)}
+                    </span>
                   )}
                 </div>
               )}
@@ -706,15 +774,15 @@ function Playground({
                   parameters={displayedParameters}
                   onChange={changeByHand}
                   missionIndex={snapMission}
-                  showMeasurements={showMeasurements}
-                  showAngles={showAngles}
+                  showMeasurements={display.lengths}
+                  showAngles={display.angles}
                   highlightKey={highlightKey}
                   showInstructions={false}
                   ink={conditionOpen ? undefined : ink}
                 />
               </div>
               <div className={s.snapStatus} role="status" aria-live="polite">
-                {snapLabel && showMeasurements && showAngles && (
+                {snapLabel && display.lengths && display.angles && (
                   <span>
                     <strong>{c.snapped}: </strong>
                     <MathText>{snapLabel}</MathText>
@@ -772,24 +840,51 @@ function Playground({
           )}
           {!conditionOpen && (
             <details className={s.boardOptions}>
-              <summary>
-                {simple ? "Tools and more options" : "Adjust the circle"}
-              </summary>
+              <summary>{c.tools}</summary>
+              <div className={s.toolSwitches}>
+                <label className={s.snapToggle} title={c.snapHelp}>
+                  <input
+                    type="checkbox"
+                    checked={autoSnap}
+                    onChange={(e) => {
+                      update("autoSnap", e.target.checked);
+                      setSnapResult(null);
+                    }}
+                  />
+                  {c.autoSnap}
+                </label>
+                {!lessonMode && (
+                  <div
+                    className={s.measurementButtons}
+                    role="group"
+                    aria-label={c.measurementButtons}
+                  >
+                    <button
+                      type="button"
+                      aria-pressed={showMeasurements}
+                      onClick={() =>
+                        update("showMeasurements", !showMeasurements)
+                      }
+                    >
+                      {showMeasurements ? c.hideLengths : c.showLengths}
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={showAngles}
+                      onClick={() => update("showAngles", !showAngles)}
+                    >
+                      {showAngles ? c.hideAngles : c.showAngles}
+                    </button>
+                  </div>
+                )}
+              </div>
               <div className={s.boardCaption}>
                 <span>
                   <MathText>{model.description}</MathText>
                 </span>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={showMeasurements && showAngles}
-                    onChange={(e) => setShowMeasurements(e.target.checked)}
-                  />
-                  {c.measurements}
-                </label>
               </div>
               <MeasurementList
-                label="Live measurements"
+                label={c.liveMeasurements}
                 measurements={visibleMeasurements}
               />
               <p className={s.snapHelp}>{c.snapHelp}</p>
@@ -833,17 +928,11 @@ function Playground({
                         }}
                         onChange={(e) =>
                           sliderKeyboard.current
-                            ? setParameters(
-                                normalise(labId, {
-                                  ...parameters,
-                                  [control.key]: Number(e.target.value),
-                                }),
+                            ? applyShape(
+                                slide(control.key, Number(e.target.value)),
                               )
                             : changeByHand(
-                                normalise(labId, {
-                                  ...parameters,
-                                  [control.key]: Number(e.target.value),
-                                }),
+                                slide(control.key, Number(e.target.value)),
                                 control.key,
                               )
                         }
@@ -856,9 +945,7 @@ function Playground({
                         value={params[control.key]}
                         onCommit={(value) => {
                           setSnapResult(null);
-                          setParameters((p) =>
-                            normalise(labId, { ...p, [control.key]: value }),
-                          );
+                          applyShape(slide(control.key, value));
                         }}
                       />
                     </label>
@@ -871,10 +958,7 @@ function Playground({
                     type="checkbox"
                     checked={parameters.alternate}
                     onChange={(e) =>
-                      setParameters((p) => ({
-                        ...p,
-                        alternate: e.target.checked,
-                      }))
+                      applyShape({ ...parameters, alternate: e.target.checked })
                     }
                   />
                   <MathText>{model.toggleLabel}</MathText>
@@ -892,20 +976,27 @@ function Playground({
         </div>
         {!conditionOpen && (
           <aside className={s.missionPanel}>
-            <div className={s.missionTop}>
-              <div>
-                <h3>{free ? "Explore further" : "Your next step"}</h3>
-              </div>
-            </div>
-            {free ? (
+            {lessonMode ? (
+              <ChordLesson
+                state={lesson}
+                onState={setLesson}
+                onShape={(shape) => {
+                  setSnapResult(null);
+                  setParameters(shape);
+                }}
+                onPractice={onRelay}
+                onFreePlay={() => chooseStyle(true)}
+              />
+            ) : free ? (
               <div className={s.freeInstructions}>
-                <p>Try a different shape. Look for what stays the same.</p>
+                <h3>{c.freeTitle}</h3>
+                <p>{c.freeBody}</p>
                 <button
                   type="button"
                   className={s.primary}
-                  onClick={() => setFree(false)}
+                  onClick={() => chooseStyle(false)}
                 >
-                  Try a mission
+                  {c.tryTask}
                 </button>
                 <button type="button" onClick={openCondition}>
                   <MathText>{conditionPrompt}</MathText>
@@ -920,13 +1011,11 @@ function Playground({
                 onMissionChange={selectMission}
                 collected={collected}
                 recordedShape={saved.recordedShapes[mission.id]}
-                onComplete={recordShape}
                 onShowRecordedShape={showRecordedShape}
                 onPractice={onRelay}
                 onCondition={openCondition}
                 conditionPrompt={conditionPrompt}
                 onExplain={explain}
-                simple={simple}
               />
             )}
             {saveFailed && <p role="status">{c.storageFailed}</p>}
@@ -958,7 +1047,7 @@ function Playground({
         <div ref={reasonRef} className={s.reasonWorkspace}>
           <ReasonExplorer labId={labId} onPractice={onRelay} />
           <details className={s.reasonExplanation}>
-            <summary>Why does it work?</summary>
+            <summary>{c.whyItWorks}</summary>
             <p>
               <MathText>{lab.explanation}</MathText>
             </p>

@@ -12,7 +12,9 @@ test("reason game keeps four-step drafts and checked answers when returning to q
   page,
 }) => {
   await open(page);
-  await page.getByRole("button", { name: "Reasons Relay", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Reasons Relay", exact: true })
+    .click();
   await page.getByRole("button", { name: "Start level", exact: true }).click();
   const game = page.getByRole("region", {
     name: "Reasons Relay",
@@ -66,7 +68,9 @@ test("reason game keeps four-step drafts and checked answers when returning to q
   ).toHaveAttribute("data-choice", wrongReason);
 
   await page.getByRole("button", { name: "Explore", exact: true }).click();
-  await page.getByRole("button", { name: "Reasons Relay", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Reasons Relay", exact: true })
+    .click();
   await expect(answer).toHaveValue(String(challenge.q.answer));
   await game
     .getByRole("button", { name: "Check all four steps", exact: true })
@@ -102,6 +106,56 @@ test("reason game keeps four-step drafts and checked answers when returning to q
   ).toBeVisible();
   await expect(
     game.getByText("100/100 for this answer", { exact: false }),
+  ).toBeVisible();
+});
+
+test("topic 1 guided lesson reveals the result only after the given fact is made true", async ({
+  page,
+}) => {
+  await open(page);
+  const lesson = page.getByRole("region", { name: "Guided lesson" });
+  await expect(lesson).toBeVisible();
+  await expect(
+    lesson.getByText("AN and NB appear when the angle is 90°."),
+  ).toBeVisible();
+  const diagram = page.getByTestId("circle-diagram");
+  await expect(diagram).not.toContainText("AN =");
+
+  async function placeNAtMidpoint() {
+    const tools = page.getByText("Tools: measurements, snapping and sliders");
+    const fine = page.getByText("Fine-tune / keyboard controls");
+    if (!(await fine.isVisible())) await tools.click();
+    if (
+      !(await page
+        .getByLabel("Position of N along AB: exact value")
+        .isVisible())
+    )
+      await fine.click();
+    const exact = page.getByLabel("Position of N along AB: exact value");
+    await exact.fill("0");
+    await exact.press("Enter");
+  }
+
+  await placeNAtMidpoint();
+  await expect(lesson.getByText("You found: AN = NB")).toBeVisible();
+  await expect(diagram).toContainText("AN =");
+  await lesson.getByRole("button", { name: "Next step →" }).click();
+  await expect(
+    lesson.getByText("16.2 · Start with the mid-point"),
+  ).toBeVisible();
+  await expect(diagram).not.toContainText("90°");
+
+  await placeNAtMidpoint();
+  await expect(lesson.getByText("You found: ∠ONB = 90°")).toBeVisible();
+  await lesson.getByRole("button", { name: "Next step →" }).click();
+  const first = lesson.getByRole("group", { name: "Question 1", exact: true });
+  await first.getByRole("button", { name: "16.2", exact: true }).click();
+  await expect(
+    lesson.getByText("Look again: ⊥ is given, so use 16.1."),
+  ).toBeVisible();
+  await first.getByRole("button", { name: "16.1", exact: true }).click();
+  await expect(
+    lesson.getByText("✓ ⊥ is given, so the chord is cut in half."),
   ).toBeVisible();
 });
 

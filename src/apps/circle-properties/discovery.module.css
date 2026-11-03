@@ -278,3 +278,15 @@
     font-size: 0.85rem;
   }
 }
+.done {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #a8ceba;
+  border-radius: 12px;
+  background: #e4f6eb;
+  color: #174f36;
+}
+.done strong {
+  font-size: 1.05rem;
+}

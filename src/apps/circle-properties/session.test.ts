@@ -16,28 +16,31 @@ describe("circle workspace restoration", () => {
       false,
     );
   });
-  it("restores the selected activity and its contextual practice", () => {
+  it("restores the selected activity, moving old saved names to the renamed activities", () => {
     expect(
       parseWorkspace({
-        mode: "relay",
+        mode: "reasons-play",
         labId: "centre",
-        focusLab: "centre",
-        focusToken: 4,
         appearance: "calm",
         welcomeDismissed: true,
       }),
-    ).toMatchObject({
-      mode: "relay",
+    ).toEqual({
+      mode: "reasons-play",
       labId: "centre",
-      focusLab: "centre",
-      focusToken: 4,
       appearance: "calm",
+      welcomeDismissed: true,
     });
+    expect(parseWorkspace({ mode: "relay" })?.mode).toBe("reasons-play");
+    expect(parseWorkspace({ mode: "check" })?.mode).toBe("reasons-relay");
+    expect(parseWorkspace({ mode: "reasons-relay" })?.mode).toBe(
+      "reasons-relay",
+    );
   });
-  it("rejects unknown routes and malicious counters", () => {
-    expect(
-      parseWorkspace({ mode: "admin", labId: "x", focusToken: -1 }),
-    ).toMatchObject({ mode: "explore", labId: "bisector", focusToken: 0 });
+  it("rejects unknown routes", () => {
+    expect(parseWorkspace({ mode: "admin", labId: "x" })).toMatchObject({
+      mode: "explore",
+      labId: "bisector",
+    });
     expect(parseWorkspace(null)).toBeUndefined();
   });
   it.each(labs.map((lab) => [lab.id] as const))(
@@ -275,9 +278,9 @@ describe("independent measurement visibility", () => {
   });
 });
 
-it("opens Apply & check for an old removed-game workspace without carrying quest mastery", () => {
+it("opens Reasons Relay for an old removed-game workspace without carrying quest mastery", () => {
   expect(parseWorkspace({ mode: "quest", labId: "chords" })).toMatchObject({
-    mode: "check",
+    mode: "reasons-relay",
     labId: "chords",
   });
 });
