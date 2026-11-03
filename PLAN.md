@@ -1,5 +1,13 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab Reasons Relay bug fixes (02/11/2026)
+
+- [x] Repair feedback no longer shows a false "x over AN" fraction, and each embedded given, conclusion and target ends with a full stop.
+- [x] Repeated "Try a similar question" retries in one set share a single saved entry. It keeps the latest replaced attempt for each retried question, so the retries no longer push earlier sets out of the ten-set history.
+- [x] 16.3 coordinate questions open a keyboard with a minus key, because some generated answers are negative.
+- [x] A checked wrong answer keeps its feedback and retry buttons after its timer ends. "Try the steps again" after the deadline gives a fresh timer and counts as helped.
+- [x] 715 Circle unit tests, typecheck, scoped lint and the three Relay browser tests pass. The four fixes were also checked by hand in the standalone build. Not yet published.
+
 ## Circle Lab Reasons Relay topic practice (01/11/2026)
 
 - [x] Order the activity tabs Explore, Reasons Relay, Reasons Play. Route both exploration practice buttons into the matching Relay topic, resuming existing drafts or archiving the prior topic when starting a different one.

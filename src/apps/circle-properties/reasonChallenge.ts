@@ -161,6 +161,10 @@ const targets: Record<string, TargetDefinition> = {
   },
 };
 
+/** Ends an embedded given, conclusion or relation so the next feedback sentence starts cleanly. */
+const sentence = (text: string) =>
+  /[.!?]$/.test(text.trim()) ? text.trim() : `${text.trim()}.`;
+
 /** The target is the direct relation used to find x, not every other true consequence of the givens. */
 export function getReasonChallenge(
   reasonId: string,
@@ -173,7 +177,7 @@ export function getReasonChallenge(
     if (choiceId === q.reasonId) continue;
     const choice = reasons.find((reason) => reason.id === choiceId)!;
     feedbackByReasonId[choiceId] =
-      `This reason starts with: ${choice.given} It directly establishes: ${choice.conclusion} For this question, match the given information to the target ${definition.target} A different route may need extra steps.`;
+      `This reason starts with: ${sentence(choice.given)} It directly establishes: ${sentence(choice.conclusion)} For this question, match the given information to the target ${sentence(definition.target)} A different route may need extra steps.`;
   }
   return {
     q,
@@ -202,9 +206,10 @@ export function gradeReasonChallenge(
     messages.push(`Check the value of x. ${challenge.q.explanation}`);
   if (!base.condition)
     messages.push(`Check the required condition: ${challenge.q.condition}`);
+  // "x:" followed by a name would be read as the ratio x : AN, so x ends a sentence here.
   if (!target)
     messages.push(
-      `Choose the relation needed to find x: ${challenge.target} A given fact or a different consequence does not identify this target.`,
+      `Choose the relation needed to find x. Target: ${sentence(challenge.target)} A given fact or a different consequence does not identify this target.`,
     );
   if (!base.reason)
     messages.push(

@@ -342,6 +342,12 @@ export function transferQuestion(
   base.reasonChoices = choices.slice(offset).concat(choices.slice(0, offset));
   return base;
 }
+/**
+ * Only the 16.3 coordinate answers can be negative. Decided by question type, never by the
+ * answer's sign, so the keyboard does not give the answer away.
+ */
+export const allowsNegativeAnswer = (q: TransferQuestion) =>
+  q.reasonId === "r3";
 export type TransferResponse = {
   value: string;
   reason: string;

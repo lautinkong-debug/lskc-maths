@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { reasons } from "./content";
+import { parseNotation } from "./mathNotation";
+import { allowsNegativeAnswer } from "./transfer";
 import {
   blankReasonChallengeResponse,
   challengeGroups,
@@ -100,6 +102,51 @@ describe("numerical circle reason challenge", () => {
     expect(gradeReasonChallenge(c, blankReasonChallengeResponse()).score).toBe(
       0,
     );
+  });
+
+  it("keeps repair feedback in separate sentences without a false x ratio", () => {
+    for (const reason of reasons) {
+      for (let variant = 0; variant < 6; variant++) {
+        const c = getReasonChallenge(reason.id, variant);
+        const wrongReasons = c.reasonChoices.filter(
+          (id) => id !== c.q.reasonId,
+        );
+        const messages = wrongReasons.flatMap(
+          (wrongReason) =>
+            gradeReasonChallenge(c, {
+              value: "",
+              condition: "",
+              target: c.wrongTargets[0],
+              reason: wrongReason,
+            }).messages,
+        );
+        for (const message of messages) {
+          // Each embedded given, conclusion or target ends before the next sentence.
+          expect(message).not.toMatch(
+            /[^.!?]\s+(?:It directly establishes|For this question|A different route|A given fact)/,
+          );
+          for (const part of parseNotation(message))
+            if (part.kind === "fraction") {
+              expect(part.numerator).not.toBe("x");
+              expect(part.denominator).not.toBe("x");
+            }
+        }
+      }
+    }
+  });
+
+  it("offers a keyboard with a minus sign for every generated negative answer", () => {
+    let negatives = 0;
+    for (const reason of reasons)
+      for (let variant = 0; variant < 200; variant++) {
+        const { q } = getReasonChallenge(reason.id, variant);
+        if (q.answer < 0) {
+          negatives++;
+          expect(allowsNegativeAnswer(q)).toBe(true);
+        }
+      }
+    expect(negatives).toBeGreaterThan(0);
+    expect(allowsNegativeAnswer(getReasonChallenge("r1").q)).toBe(false);
   });
 
   it("distinguishes a given fact from the direct relation being established", () => {

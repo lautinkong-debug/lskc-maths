@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { circleReasonGameCopy as c } from "@/lib/copy";
 import { type LabId, reasons } from "./content";
 import { CheckDiagram } from "./TransferCheck";
+import { allowsNegativeAnswer } from "./transfer";
 import MathText from "./MathText";
 import { useLocalSession } from "./useLocalSession";
 import {
@@ -21,6 +22,8 @@ import {
   challengeSpeedBonus,
   archiveChallengeRun,
   challengeVariant,
+  expireChallengeDraft,
+  retryChallengeQuestion,
   startChallengeSet,
   similarChallengeQuestion,
   viewChallengeSet,
@@ -121,23 +124,7 @@ export default function ReasonChallenge({
     const tick = () => {
       const time = Date.now();
       setNow(time);
-      setState((previous) => {
-        const id = previous.queue[previous.index],
-          current = previous.drafts[id];
-        if (
-          !current ||
-          current.complete ||
-          current.expired ||
-          !current.deadline ||
-          time < current.deadline
-        )
-          return previous;
-        return {
-          ...previous,
-          streak: 0,
-          drafts: { ...previous.drafts, [id]: { ...current, expired: true } },
-        };
-      });
+      setState((previous) => expireChallengeDraft(previous, time));
     };
     const timer = window.setInterval(tick, 250);
     document.addEventListener("visibilitychange", tick);
@@ -308,29 +295,9 @@ export default function ReasonChallenge({
     const time = Date.now();
     setNow(time);
     setHint("");
-    setState((previous) => {
-      if (previous.reviewSet !== null) return previous;
-      if (previous.queue[previous.index] !== reasonId) return previous;
-      const current = previous.drafts[reasonId];
-      if (!current || current.complete) return previous;
-      return {
-        ...previous,
-        drafts: {
-          ...previous.drafts,
-          [reasonId]: {
-            ...current,
-            checked: false,
-            expired: false,
-            helped: current.helped || practice || current.expired,
-            deadline: practice
-              ? null
-              : current.expired && previous.seconds
-                ? time + previous.seconds * 1000
-                : current.deadline,
-          },
-        },
-      };
-    });
+    setState((previous) =>
+      retryChallengeQuestion(previous, reasonId, time, practice),
+    );
   }
   function useHint() {
     if (!challenge || !draft || locked) return;
@@ -813,7 +780,10 @@ export default function ReasonChallenge({
                 <input
                   id="reason-challenge-value"
                   type="text"
-                  inputMode="decimal"
+                  // iPhone decimal keypads have no minus key.
+                  inputMode={
+                    allowsNegativeAnswer(challenge.q) ? "text" : "decimal"
+                  }
                   autoComplete="off"
                   value={draft.response.value}
                   disabled={locked}

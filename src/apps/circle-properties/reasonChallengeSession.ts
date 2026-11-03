@@ -170,7 +170,49 @@ export function viewChallengeSet(state: ChallengeSession): ChallengeRun {
   return archived ? { ...archived, index: state.reviewIndex } : state;
 }
 
-/** Save the checked attempt, then practise the same reason with a new case. */
+/** A set's earlier attempts share its seed, level and question order. */
+function sameSet(a: ChallengeRun, b: ChallengeRun): boolean {
+  return (
+    a.group === b.group &&
+    a.seed === b.seed &&
+    a.seconds === b.seconds &&
+    a.queue.length === b.queue.length &&
+    a.queue.every((id, index) => b.queue[index] === id)
+  );
+}
+
+/** Keep each question's latest replaced attempt; a changed variant marks an earlier retry. */
+function mergeEarlierAttempt(
+  earlier: ChallengeRun,
+  state: ChallengeSession,
+  retried: string,
+): ChallengeRun {
+  const variants: Record<string, number> = {};
+  const drafts: Record<string, ChallengeDraft> = {};
+  state.queue.forEach((id, index) => {
+    const source =
+      id !== retried &&
+      challengeVariant(earlier, index) !== challengeVariant(state, index)
+        ? earlier
+        : state;
+    variants[id] = challengeVariant(source, index);
+    if (source.drafts[id]) drafts[id] = source.drafts[id];
+  });
+  return {
+    ...earlier,
+    index: state.index,
+    drafts,
+    variants,
+    streak: state.streak,
+  };
+}
+
+/**
+ * Save the checked attempt, then practise the same reason with a new case.
+ * Repeated retries in one set update a single saved entry, so they never push
+ * genuine earlier sets out of the ten-set archive. That entry keeps the latest
+ * replaced attempt for each retried question and the current state of the rest.
+ */
 export function similarChallengeQuestion(
   state: ChallengeSession,
   time: number,
@@ -185,11 +227,21 @@ export function similarChallengeQuestion(
     !Number.isFinite(time)
   )
     return state;
-  const saved = archiveChallengeRun(state);
+  const earlier = state.archive.at(-1);
+  const { archive, setNumber } =
+    earlier && sameSet(earlier, state)
+      ? {
+          archive: [
+            ...state.archive.slice(0, -1),
+            mergeEarlierAttempt(earlier, state, id),
+          ],
+          setNumber: state.setNumber,
+        }
+      : archiveChallengeRun(state);
   return {
     ...state,
-    archive: saved.archive,
-    setNumber: saved.setNumber,
+    archive,
+    setNumber,
     variants: {
       ...state.variants,
       [id]: (challengeVariant(state) + 1) % 2147483647,
@@ -203,6 +255,61 @@ export function similarChallengeQuestion(
       },
     },
     streak: 0,
+  };
+}
+
+/** Time out the current question at its deadline; a checked answer keeps its feedback and retry choices. */
+export function expireChallengeDraft(
+  state: ChallengeSession,
+  time: number,
+): ChallengeSession {
+  const id = state.queue[state.index],
+    current = state.drafts[id];
+  if (
+    !current ||
+    current.complete ||
+    current.expired ||
+    current.checked ||
+    !current.deadline ||
+    time < current.deadline
+  )
+    return state;
+  return {
+    ...state,
+    streak: 0,
+    drafts: { ...state.drafts, [id]: { ...current, expired: true } },
+  };
+}
+
+/** Reopen the current question. A passed deadline gives a fresh timer and counts as helped. */
+export function retryChallengeQuestion(
+  state: ChallengeSession,
+  reasonId: string,
+  time: number,
+  practice = false,
+): ChallengeSession {
+  if (state.reviewSet !== null || state.queue[state.index] !== reasonId)
+    return state;
+  const current = state.drafts[reasonId];
+  if (!current || current.complete) return state;
+  const timedOut =
+    current.expired || (current.deadline !== null && time >= current.deadline);
+  return {
+    ...state,
+    drafts: {
+      ...state.drafts,
+      [reasonId]: {
+        ...current,
+        checked: false,
+        expired: false,
+        helped: current.helped || practice || timedOut,
+        deadline: practice
+          ? null
+          : timedOut && state.seconds
+            ? time + state.seconds * 1000
+            : current.deadline,
+      },
+    },
   };
 }
 const count = (v: unknown, max: number): v is number =>

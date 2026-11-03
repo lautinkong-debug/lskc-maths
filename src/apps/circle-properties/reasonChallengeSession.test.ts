@@ -16,6 +16,8 @@ import {
   challengeSpeedBonus,
   archiveChallengeRun,
   challengeVariant,
+  expireChallengeDraft,
+  retryChallengeQuestion,
   startChallengeSet,
   similarChallengeQuestion,
   viewChallengeSet,
@@ -264,6 +266,96 @@ describe("reason challenge saved sessions", () => {
         archive: [null, "bad", { queue: ["fake"] }],
       })?.archive,
     ).toEqual([]);
+  });
+  it("keeps genuine earlier sets when one set has many similar-question retries", () => {
+    const time = 1793460000000;
+    let state = startChallengeSet(
+      { ...initialChallengeSession, group: "mixed" },
+      time,
+    );
+    state = startChallengeSet(state, time + 1);
+    const genuine = state.archive.map((run) => run.setNumber);
+    const wrong = (s: ChallengeSession, index: number): ChallengeSession => {
+      const id = s.queue[index];
+      return {
+        ...s,
+        index,
+        drafts: {
+          ...s.drafts,
+          [id]: {
+            ...(s.drafts[id] ?? newChallengeDraft(0, time)),
+            response: { ...correctResponse(s, index), value: "-1" },
+            checked: true,
+            tries: 1,
+          },
+        },
+      };
+    };
+    const firstWrong = wrong(state, 0);
+    state = similarChallengeQuestion(firstWrong, time + 2);
+    const secondWrong = wrong(state, 1);
+    state = similarChallengeQuestion(secondWrong, time + 3);
+    for (let i = 0; i < 11; i++)
+      state = similarChallengeQuestion(wrong(state, 0), time + 4 + i);
+    // One saved entry holds this set's earlier attempts; the live set number moves once.
+    expect(state.archive.map((run) => run.setNumber)).toEqual([...genuine, 2]);
+    expect(state.setNumber).toBe(3);
+    const earlier = parseChallengeSession(
+      JSON.parse(JSON.stringify({ ...state, reviewSet: 2 })),
+    )!;
+    expect(viewChallengeSet(earlier).drafts[state.queue[1]]).toEqual(
+      secondWrong.drafts[state.queue[1]],
+    );
+    expect(challengeVariant(viewChallengeSet(earlier), 1)).toBe(
+      challengeVariant(secondWrong, 1),
+    );
+    expect(viewChallengeSet(earlier).drafts[state.queue[0]].checked).toBe(true);
+    // A new set after the retries is still archived as its own entry.
+    state = startChallengeSet(state, time + 100);
+    expect(state.archive.map((run) => run.setNumber)).toEqual([
+      ...genuine,
+      2,
+      3,
+    ]);
+  });
+  it("keeps a checked timed answer open after its deadline and retries with a fresh timer", () => {
+    const time = 1793460000000;
+    const state = startChallengeSet(
+      { ...initialChallengeSession, group: "topic-bisector", seconds: 60 },
+      time,
+    );
+    const id = state.queue[0];
+    const checked: ChallengeSession = {
+      ...state,
+      drafts: {
+        [id]: { ...state.drafts[id], checked: true, tries: 1 },
+      },
+    };
+    const late = time + 61000;
+    expect(expireChallengeDraft(checked, late)).toBe(checked);
+    const unchecked: ChallengeSession = {
+      ...checked,
+      streak: 2,
+      drafts: { [id]: { ...checked.drafts[id], checked: false } },
+    };
+    expect(expireChallengeDraft(unchecked, time + 30000)).toBe(unchecked);
+    expect(expireChallengeDraft(unchecked, late)).toMatchObject({
+      streak: 0,
+      drafts: { [id]: { expired: true } },
+    });
+    expect(retryChallengeQuestion(checked, id, late).drafts[id]).toMatchObject({
+      checked: false,
+      expired: false,
+      helped: true,
+      deadline: late + 60000,
+    });
+    expect(
+      retryChallengeQuestion(checked, id, time + 30000).drafts[id],
+    ).toMatchObject({ checked: false, helped: false, deadline: time + 60000 });
+    expect(
+      retryChallengeQuestion(checked, id, late, true).drafts[id],
+    ).toMatchObject({ helped: true, deadline: null });
+    expect(retryChallengeQuestion(checked, "r99", late)).toBe(checked);
   });
   it("starts cleanly and does not import scores from the removed three-game schema", () => {
     expect(parseChallengeSession(undefined)).toBeUndefined();
