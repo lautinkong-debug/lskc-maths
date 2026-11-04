@@ -59,6 +59,15 @@
   border: 1px dashed #d9c58f;
   color: #6b5a33;
 }
+.condition {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid #b4c9ee;
+  background: #eef4ff;
+  font-size: 1.08em;
+}
 .found,
 .complete {
   display: grid;

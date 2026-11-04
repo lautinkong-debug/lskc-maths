@@ -47,10 +47,12 @@ function AngleMark({
   angle,
   scene,
   showMeasurements,
+  showMark,
 }: {
   angle: Scene["angles"][number];
   scene: Scene;
   showMeasurements: boolean;
+  showMark: boolean;
 }) {
   const { right, label, value, wedge, squarePath, leader } = getAngleLayout(
     scene,
@@ -73,7 +75,7 @@ function AngleMark({
           data-angle-label-leader={angle.at}
         />
       )}
-      {right ? (
+      {!showMark ? null : right ? (
         <g>
           <path
             d={squarePath}
@@ -110,6 +112,7 @@ export default function CircleDiagram({
   onChange,
   showMeasurements = true,
   showAngles = showMeasurements,
+  showAngleMarks = true,
   highlightKey = 0,
   showInstructions = true,
   missionIndex,
@@ -120,6 +123,8 @@ export default function CircleDiagram({
   onChange: (next: Parameters, key: DragKey) => void;
   showMeasurements?: boolean;
   showAngles?: boolean;
+  /** False also hides the arc or right-angle square, which would give a result away. */
+  showAngleMarks?: boolean;
   /** Increment to replay a brief emphasis without remounting the draggable SVG. */
   highlightKey?: number;
   showInstructions?: boolean;
@@ -241,6 +246,7 @@ export default function CircleDiagram({
             angle={angle}
             scene={scene}
             showMeasurements={showAngles}
+            showMark={showAngleMarks}
           />
         ))}
         {scene.rightAngles
@@ -305,6 +311,7 @@ export default function CircleDiagram({
                 angle={angle}
                 scene={scene}
                 showMeasurements={false}
+                showMark={showAngleMarks}
               />
             ))}
           </g>

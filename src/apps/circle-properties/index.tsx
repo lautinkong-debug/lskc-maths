@@ -517,6 +517,7 @@ function Playground({
   const lessonMode = labId === "bisector" && lesson.open;
   // Steps 3 and 4 put their questions across the full width below the circle.
   const lessonQuestions = lessonMode && lesson.step >= 2;
+  const conditionMet = lessonMode && nAtMidpoint(parameters);
   const tasks = !free && !lessonMode;
   const angleCondition = ["centre", "segment", "semicircle"].includes(labId);
   const displayedParameters =
@@ -571,21 +572,18 @@ function Playground({
       return tasks ? storeMissionShape(labId, shaped, mission.id) : shaped;
     });
     if (tasks && evaluateMission(mission, next).complete) onCollect(mission.id);
+  }
+  /** The result stays hidden until the class has seen the condition on its own. */
+  function revealDeduction() {
     const step = lesson.step;
-    if (
-      lessonMode &&
-      (step === 0 || step === 1) &&
-      !lesson.found[step] &&
-      nAtMidpoint(next)
-    ) {
-      // The reveal always shows, even if a reading was hidden by hand.
-      setLessonReadings({ step: -1 });
-      setLesson((previous) => {
-        const found: [boolean, boolean] = [...previous.found];
-        found[step] = true;
-        return { ...previous, found };
-      });
-    }
+    if (step !== 0 && step !== 1) return;
+    // The reveal always shows, even if a reading was hidden by hand.
+    setLessonReadings({ step: -1 });
+    setLesson((previous) => {
+      const found: [boolean, boolean] = [...previous.found];
+      found[step] = true;
+      return { ...previous, found };
+    });
   }
   function changeByHand(next: Parameters, key: DragKey) {
     const result = autoSnap
@@ -639,14 +637,20 @@ function Playground({
       : labId === "segment"
         ? "Compare ∠APB and ∠AQB on opposite sides of AB. Then move Q back. Which position is needed for equal angles?"
         : "Compare the angle at P when AB is a diameter and when it misses O. Drag P too: what changes?";
+  const lessonStep =
+    lesson.step === 0
+      ? circleLessonCopy.perpendicular
+      : circleLessonCopy.midpoint;
   const boardTask = conditionOpen
     ? conditionPrompt
     : lessonMode
-      ? lesson.step === 0
-        ? circleLessonCopy.perpendicular.task
-        : lesson.step === 1
-          ? circleLessonCopy.midpoint.task
-          : c.lessonBoardTask
+      ? lesson.step === 2 || lesson.step === 3
+        ? c.lessonBoardTask
+        : lesson.found[lesson.step]
+          ? lessonStep.result
+          : conditionMet
+            ? lessonStep.ask
+            : lessonStep.task
       : free
         ? lab.question
         : missionPrompt(mission);
@@ -801,18 +805,22 @@ function Playground({
                   missionIndex={snapMission}
                   showMeasurements={display.lengths}
                   showAngles={display.angles}
+                  showAngleMarks={!lessonMode || display.angles}
                   highlightKey={highlightKey}
                   showInstructions={false}
                   ink={conditionOpen ? undefined : ink}
                 />
               </div>
               <div className={s.snapStatus} role="status" aria-live="polite">
-                {snapLabel && display.lengths && display.angles && (
-                  <span>
-                    <strong>{c.snapped}: </strong>
-                    <MathText>{snapLabel}</MathText>
-                  </span>
-                )}
+                {snapLabel &&
+                  !lessonMode &&
+                  display.lengths &&
+                  display.angles && (
+                    <span>
+                      <strong>{c.snapped}: </strong>
+                      <MathText>{snapLabel}</MathText>
+                    </span>
+                  )}
               </div>
               {conditionOpen && (
                 <div className={s.angleExperiment}>
@@ -1002,6 +1010,8 @@ function Playground({
                 state={lesson}
                 onState={setLesson}
                 onShape={lessonShape}
+                conditionMet={conditionMet}
+                onDeduce={revealDeduction}
               />
             ) : free ? (
               <div className={s.freeInstructions}>

@@ -1,5 +1,10 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab: condition first, then the deduction (04/11/2026)
+
+- [x] Owner request: in the demonstration the graph must show the condition first and what we can deduce afterwards, never both at once. Steps 1 and 2 now pause when the condition is true, ask "What can we deduce?", and show the result only when "Show what we can deduce" is pressed. Moving N away before pressing returns to the task.
+- [x] Fixed a leak: the angle's arc and right-angle square stayed on the diagram while the angle was hidden, so 16.2 gave its result away. The lesson now hides the mark as well; Tasks and Free play are unchanged.
+
 ## Circle Lab: lesson layout, second review (04/11/2026)
 
 - [x] The pen toolbar sits in the board's top row, beside Hide pen and Focus ("Focus on the circle" shortened to "Focus").

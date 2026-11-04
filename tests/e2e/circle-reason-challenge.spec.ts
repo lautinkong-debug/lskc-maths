@@ -116,7 +116,7 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   const lesson = page.getByRole("region", { name: "Guided lesson" });
   await expect(lesson).toBeVisible();
   await expect(
-    lesson.getByText("AN and NB appear when the angle is 90°."),
+    lesson.getByText("First make the condition true: the angle at N is 90°."),
   ).toBeVisible();
   const diagram = page.getByTestId("circle-diagram");
   await expect(diagram).not.toContainText("AN =");
@@ -143,7 +143,15 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
     await exact.press("Enter");
   }
 
+  // The condition comes first, on its own. The class then asks what follows.
+  const deduce = lesson.getByRole("button", {
+    name: "Show what we can deduce →",
+  });
   await placeNAtMidpoint();
+  await expect(diagram.locator("[data-angle-square]")).toHaveCount(1);
+  await expect(diagram).not.toContainText("AN =");
+  await expect(lesson.getByText("You found: AN = NB")).toHaveCount(0);
+  await deduce.click();
   await expect(lesson.getByText("You found: AN = NB")).toBeVisible();
   await expect(diagram).toContainText("AN =");
   await lesson.getByRole("button", { name: "Next step →" }).click();
@@ -153,7 +161,13 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await expect(diagram).not.toContainText("90°");
 
   await placeNAtMidpoint();
+  await expect(diagram).toContainText("AN =");
+  await expect(diagram).not.toContainText("90°");
+  await expect(diagram.locator("[data-angle-square]")).toHaveCount(0);
+  await deduce.click();
   await expect(lesson.getByText("You found: ∠ONB = 90°")).toBeVisible();
+  await expect(diagram).toContainText("90°");
+  await expect(diagram.locator("[data-angle-square]")).toHaveCount(1);
   await lesson.getByRole("button", { name: "Next step →" }).click();
   const questions = page.getByRole("region", { name: "Lesson questions" });
   await expect(questions.locator("[data-chord-sketch]")).toHaveCount(6);
@@ -280,7 +294,9 @@ test.describe("touch screens", () => {
       x: (a.x + b.x) / 2,
       y: (a.y + b.y) / 2,
     });
-    await expect(page.getByText("You found: AN = NB")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Show what we can deduce →" }),
+    ).toBeVisible();
     expect(await page.evaluate(() => scrollY)).toBe(top);
 
     await page.getByRole("button", { name: /Pen$/ }).first().tap();

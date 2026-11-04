@@ -107,10 +107,15 @@ export default function ChordLesson({
   state,
   onState,
   onShape,
+  conditionMet,
+  onDeduce,
 }: {
   state: ChordLessonState;
   onState: (update: (previous: ChordLessonState) => ChordLessonState) => void;
   onShape: (parameters: Parameters) => void;
+  /** The given fact is true on the circle right now. */
+  conditionMet: boolean;
+  onDeduce: () => void;
 }) {
   const { step, found } = state;
   function go(next: ChordLessonStep) {
@@ -169,6 +174,17 @@ export default function ChordLesson({
                 {c.next}
               </button>
             </>
+          ) : conditionMet ? (
+            // A pause for the class: the circle shows only the condition so far.
+            <div className={s.condition} role="status">
+              <p>
+                <Highlight kind="given">{c.given}</Highlight>{" "}
+                <MathText>{diagramStep.given}</MathText>
+              </p>
+              <button type="button" className={s.primary} onClick={onDeduce}>
+                {c.deduce}
+              </button>
+            </div>
           ) : (
             <p className={s.waiting}>
               <MathText>{diagramStep.waiting}</MathText>
