@@ -347,6 +347,13 @@
     font-size: 0.93em;
   }
 }
+/* Tablets: the panel is too narrow to sit the reason beside "Write", so it takes its own row. */
+@media (min-width: 701px) and (max-width: 1200px) {
+  .found dt:nth-of-type(3),
+  .found .writeReason {
+    grid-column: 1 / -1;
+  }
+}
 .score {
   display: flex;
   flex-wrap: wrap;

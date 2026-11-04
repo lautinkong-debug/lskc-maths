@@ -1,5 +1,11 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab: iPad check and handover to Codex (04/11/2026)
+
+- [x] 198 checks pass at six iPad sizes, portrait and landscape, with real touch input. Fixed along the way: on tablets the reason takes its own row, and form fields are 16px on touch screens so Safari does not zoom.
+- [ ] Still to do: try a real iPad. Real Safari has not been tested. The minimum is iPadOS 16.4.
+- [x] Handover notes are in `HANDOFF_CIRCLE_LAB.md`, copied to the main working folder with the Circle Lab code.
+
 ## Circle Lab: equal-length ticks and worksheet working (04/11/2026)
 
 - [x] AN and NB show a tick each when they are equal and the lengths are showing, so 16.1 gains them with the deduction and 16.2 has them as its condition.

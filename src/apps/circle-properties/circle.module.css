@@ -2065,6 +2065,14 @@
 .playground:not(.focused) .lessonArea .canvas svg {
   max-height: min(340px, 42vh);
 }
+/* Safari zooms the page when a form field under 16px is tapped. */
+@media (pointer: coarse) {
+  .app select,
+  .app textarea,
+  .app input:not([type="checkbox"], [type="radio"], [type="range"]) {
+    font-size: 16px;
+  }
+}
 /* Site Presentation mode: the circle, its task and the lesson fill the projector. */
 :global([data-presentation="true"]) .app {
   max-width: none;
