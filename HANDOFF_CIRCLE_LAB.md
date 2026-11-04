@@ -74,6 +74,7 @@ Last results in `out\circle-release-main`: 2,657 unit tests, 7 browser tests, ty
 - **Not yet run on real Safari.** The WebKit test browser is not installed, and no real iPad has been tried.
 - **Minimum is iPadOS 16.4.** The builds use regex lookbehind, class static blocks and `@property`. On older versions the page would fail to load. iPad Air 2 and iPad mini 4 stop at iPadOS 15.
 - Projection mode's fullscreen and Firebase sign-in were not tested on iPad.
+- A Wi-Fi link for a real iPad was not set up: opening a local server to the network needs the owner's permission.
 
 ## Waiting for the owner
 
@@ -89,4 +90,4 @@ Last results in `out\circle-release-main`: 2,657 unit tests, 7 browser tests, ty
 
 ## Local servers left running
 
-Started during testing, and safe to stop: ports 3000 (broken `next dev`), 3100 and 3101 (old `next start` builds), 3217 and 3218 (Circle Lab), and the Firebase emulators on 4000, 4400, 4500, 8080, 9099 and 9199. `npm run dev:all` will not start until they are stopped; restarting the computer clears them.
+Started during testing, and safe to stop: ports 3000 (broken `next dev`), 3100 and 3101 (old `next start` builds), 3217 (Circle Lab), and the Firebase emulators on 4000, 4400, 4500, 8080, 9099 and 9199. `npm run dev:all` will not start until they are stopped; restarting the computer clears them.
