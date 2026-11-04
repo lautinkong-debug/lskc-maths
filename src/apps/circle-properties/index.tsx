@@ -463,17 +463,28 @@ function Playground({
   onRelay: () => void;
 }) {
   const lab = labs.find((l) => l.id === labId)!;
-  const [saved, setSaved, saveFailed] = useLocalSession<PlaygroundState>(
-    `playground-${labId}`,
-    () => initialPlayground(labId),
-    (raw) => parsePlayground(labId, raw),
-  );
   // Only Topic 1 has the guided 16.1 / 16.2 lesson; other topics never read this record.
   const [lesson, setLesson] = useLocalSession<ChordLessonState>(
     "lesson-chords-16-1-16-2",
     initialChordLesson,
     parseChordLesson,
   );
+  const [saved, setSaved, saveFailed] = useLocalSession<PlaygroundState>(
+    `playground-${labId}`,
+    () => initialPlayground(labId),
+    (raw) => {
+      const parsed = parsePlayground(labId, raw);
+      // Opening the lesson replays its demonstration, ready for the next class.
+      return parsed &&
+        labId === "bisector" &&
+        lesson.open &&
+        (lesson.step === 0 || lesson.step === 1)
+        ? { ...parsed, parameters: { ...chordLessonStarts[lesson.step] } }
+        : parsed;
+    },
+  );
+  // Not saved: a finished step still replays from the condition on the next visit.
+  const [revealedStep, setRevealedStep] = useState<number | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   const ink = useInkBoard(`playground-${labId}`);
   const reasonRef = useRef<HTMLDivElement>(null);
@@ -518,6 +529,7 @@ function Playground({
   // Steps 3 and 4 put their questions across the full width below the circle.
   const lessonQuestions = lessonMode && lesson.step >= 2;
   const conditionMet = lessonMode && nAtMidpoint(parameters);
+  const revealed = revealedStep === lesson.step;
   const tasks = !free && !lessonMode;
   const angleCondition = ["centre", "segment", "semicircle"].includes(labId);
   const displayedParameters =
@@ -534,7 +546,8 @@ function Playground({
   const display =
     lessonMode && !conditionOpen
       ? chordLessonDisplay(
-          lesson,
+          lesson.step,
+          revealed,
           lessonReadings.step === lesson.step ? lessonReadings : {},
         )
       : { lengths: showMeasurements, angles: showAngles };
@@ -579,6 +592,7 @@ function Playground({
     if (step !== 0 && step !== 1) return;
     // The reveal always shows, even if a reading was hidden by hand.
     setLessonReadings({ step: -1 });
+    setRevealedStep(step);
     setLesson((previous) => {
       const found: [boolean, boolean] = [...previous.found];
       found[step] = true;
@@ -606,12 +620,15 @@ function Playground({
   }
   function openLesson() {
     setSnapResult(null);
-    if ((lesson.step === 0 || lesson.step === 1) && !lesson.found[lesson.step])
-      setParameters({ ...chordLessonStarts[lesson.step] });
+    if (lesson.step === 0 || lesson.step === 1)
+      lessonShape({ ...chordLessonStarts[lesson.step] });
     setLesson((previous) => ({ ...previous, open: true }));
   }
+  /** A new shape restarts the step: the result is hidden again, with no readings changed by hand. */
   function lessonShape(shape: Parameters) {
     setSnapResult(null);
+    setRevealedStep(null);
+    setLessonReadings({ step: -1 });
     setParameters(shape);
   }
   function togglePen() {
@@ -644,9 +661,9 @@ function Playground({
   const boardTask = conditionOpen
     ? conditionPrompt
     : lessonMode
-      ? lesson.step === 2 || lesson.step === 3
+      ? lesson.step >= 2
         ? c.lessonBoardTask
-        : lesson.found[lesson.step]
+        : revealed
           ? lessonStep.result
           : conditionMet
             ? lessonStep.ask
@@ -692,7 +709,7 @@ function Playground({
     setSaved((p) => ({ ...p, missionIndex: index, free: false }));
   }
   function newShape() {
-    setParameters(randomShape(labId));
+    (lessonMode ? lessonShape : setParameters)(randomShape(labId));
   }
   const slide = (key: DragKey, value: number) =>
     normalise(labId, { ...parameters, [key]: value });
@@ -925,7 +942,9 @@ function Playground({
                 <button
                   type="button"
                   onClick={() => {
-                    setParameters({ ...defaults[labId] });
+                    (lessonMode ? lessonShape : setParameters)({
+                      ...defaults[labId],
+                    });
                   }}
                 >
                   <span aria-hidden="true">↺</span>
@@ -1011,6 +1030,7 @@ function Playground({
                 onState={setLesson}
                 onShape={lessonShape}
                 conditionMet={conditionMet}
+                revealed={revealed}
                 onDeduce={revealDeduction}
               />
             ) : free ? (

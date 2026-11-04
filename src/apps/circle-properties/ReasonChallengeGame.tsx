@@ -837,7 +837,7 @@ export default function ReasonChallenge({
                 </div>
                 <div className={s.answerPanel}>
                   <div className={s.gates} aria-label={c.answerProgress}>
-                    {(["value", "condition", "target", "reason"] as const).map(
+                    {(["condition", "target", "reason", "value"] as const).map(
                       (key) => (
                         <span
                           key={key}
@@ -856,7 +856,34 @@ export default function ReasonChallenge({
                   </div>
                   <fieldset className={s.step}>
                     <legend>
-                      <b>1</b> {c.findValue} <MathText>x</MathText>
+                      <b>1</b> {c.checkCondition}
+                    </legend>
+                    <p>{c.conditionPrompt}</p>
+                    {choices("condition", [
+                      challenge.q.condition,
+                      ...challenge.q.wrongConditions,
+                    ])}
+                  </fieldset>
+                  <fieldset className={s.step}>
+                    <legend>
+                      <b>2</b> {c.identifyTarget}
+                    </legend>
+                    <p>{c.targetPrompt}</p>
+                    {choices("target", [
+                      challenge.target,
+                      ...challenge.wrongTargets,
+                    ])}
+                  </fieldset>
+                  <fieldset className={s.step}>
+                    <legend>
+                      <b>3</b> {c.chooseReason}
+                    </legend>
+                    <p>{c.reasonPrompt}</p>
+                    {choices("reason", challenge.reasonChoices)}
+                  </fieldset>
+                  <fieldset className={s.step}>
+                    <legend>
+                      <b>4</b> {c.findValue} <MathText>x</MathText>
                     </legend>
                     <div className={s.valueRow}>
                       <label htmlFor="reason-challenge-value">
@@ -889,33 +916,6 @@ export default function ReasonChallenge({
                         </MathText>
                       </p>
                     )}
-                  </fieldset>
-                  <fieldset className={s.step}>
-                    <legend>
-                      <b>2</b> {c.checkCondition}
-                    </legend>
-                    <p>{c.conditionPrompt}</p>
-                    {choices("condition", [
-                      challenge.q.condition,
-                      ...challenge.q.wrongConditions,
-                    ])}
-                  </fieldset>
-                  <fieldset className={s.step}>
-                    <legend>
-                      <b>3</b> {c.identifyTarget}
-                    </legend>
-                    <p>{c.targetPrompt}</p>
-                    {choices("target", [
-                      challenge.target,
-                      ...challenge.wrongTargets,
-                    ])}
-                  </fieldset>
-                  <fieldset className={s.step}>
-                    <legend>
-                      <b>4</b> {c.chooseReason}
-                    </legend>
-                    <p>{c.reasonPrompt}</p>
-                    {choices("reason", challenge.reasonChoices)}
                   </fieldset>
                   {!locked && (
                     <button

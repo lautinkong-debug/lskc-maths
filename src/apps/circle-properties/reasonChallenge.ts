@@ -205,13 +205,13 @@ export function gradeReasonChallenge(
   const base = gradeTransfer(challenge.q, response);
   const target = response.target === challenge.target;
   const messages: string[] = [];
-  if (!base.value) messages.push(c.valueMessage(challenge.q.explanation));
   if (!base.condition) messages.push(c.conditionMessage(challenge.q.condition));
   if (!target) messages.push(c.targetMessage(sentence(challenge.target)));
   if (!base.reason)
     messages.push(
       challenge.feedbackByReasonId[response.reason] ?? c.reasonFallback,
     );
+  if (!base.value) messages.push(c.valueMessage(challenge.q.explanation));
   const correct = base.value && base.condition && target && base.reason;
   // The worked lines under a correct answer already give the explanation.
   if (correct) messages.push(c.allCorrect);

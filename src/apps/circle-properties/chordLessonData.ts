@@ -15,7 +15,10 @@ export type ChordLessonState = {
   /** Topic 1 opens on the guided lesson until the student picks Tasks or Free play. */
   open: boolean;
   step: ChordLessonStep;
-  /** Step 1 (16.1) and step 2 (16.2) have each been completed on the diagram. */
+  /**
+   * Step 1 (16.1) and step 2 (16.2) have each been completed on the diagram.
+   * This only colours the step buttons: every visit replays the demonstration.
+   */
   found: [boolean, boolean];
   sort: Record<string, ChordReason>;
   /** Keyed by hidden-reason blank, not by question: a solution can hide several. */
@@ -53,14 +56,15 @@ export type ChordLessonReadings = { lengths: boolean; angles: boolean };
  * The Show/Hide buttons override either reading for the current step only.
  */
 export function chordLessonDisplay(
-  state: ChordLessonState,
+  step: ChordLessonStep,
+  revealed: boolean,
   override: Partial<ChordLessonReadings> = {},
 ): ChordLessonReadings {
   const lesson =
-    state.step === 0
-      ? { lengths: state.found[0], angles: true }
-      : state.step === 1
-        ? { lengths: true, angles: state.found[1] }
+    step === 0
+      ? { lengths: revealed, angles: true }
+      : step === 1
+        ? { lengths: true, angles: revealed }
         : { lengths: true, angles: true };
   return {
     lengths: override.lengths ?? lesson.lengths,

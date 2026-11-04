@@ -108,6 +108,7 @@ export default function ChordLesson({
   onState,
   onShape,
   conditionMet,
+  revealed,
   onDeduce,
 }: {
   state: ChordLessonState;
@@ -115,13 +116,14 @@ export default function ChordLesson({
   onShape: (parameters: Parameters) => void;
   /** The given fact is true on the circle right now. */
   conditionMet: boolean;
+  /** The class has pressed for the deduction during this visit to the step. */
+  revealed: boolean;
   onDeduce: () => void;
 }) {
   const { step, found } = state;
   function go(next: ChordLessonStep) {
-    // Each diagram step restarts from N off the mid-point until it is solved.
-    if ((next === 0 || next === 1) && !found[next])
-      onShape({ ...chordLessonStarts[next] });
+    // A diagram step always starts again from N off the mid-point, for the next class.
+    if (next === 0 || next === 1) onShape({ ...chordLessonStarts[next] });
     onState((previous) => ({ ...previous, step: next }));
   }
   const diagramStep = step === 0 ? c.perpendicular : c.midpoint;
@@ -157,7 +159,7 @@ export default function ChordLesson({
           <h4>
             <MathText>{diagramStep.heading}</MathText>
           </h4>
-          {found[step] ? (
+          {revealed ? (
             <>
               <Found
                 found={diagramStep.found}
@@ -172,6 +174,9 @@ export default function ChordLesson({
                 onClick={() => go((step + 1) as ChordLessonStep)}
               >
                 {c.next}
+              </button>
+              <button type="button" onClick={() => go(step)}>
+                {c.showAgain}
               </button>
             </>
           ) : conditionMet ? (

@@ -24,36 +24,27 @@ describe("Topic 1 guided lesson: 16.1 or 16.2", () => {
     expect(nAtMidpoint({ ...chordLessonStarts[1], secondary: 0 })).toBe(true);
   });
 
-  it("shows the given reading first and the result only once it is found", () => {
-    const lesson = initialChordLesson();
-    expect(chordLessonDisplay(lesson)).toEqual({
+  it("shows the given reading first and the result only once revealed", () => {
+    const both = { lengths: true, angles: true };
+    expect(chordLessonDisplay(0, false)).toEqual({
       lengths: false,
       angles: true,
     });
-    expect(chordLessonDisplay({ ...lesson, found: [true, false] })).toEqual({
-      lengths: true,
-      angles: true,
-    });
-    expect(chordLessonDisplay({ ...lesson, step: 1 })).toEqual({
+    expect(chordLessonDisplay(0, true)).toEqual(both);
+    expect(chordLessonDisplay(1, false)).toEqual({
       lengths: true,
       angles: false,
     });
-    expect(
-      chordLessonDisplay({ ...lesson, step: 1, found: [true, true] }),
-    ).toEqual({ lengths: true, angles: true });
-    expect(chordLessonDisplay({ ...lesson, step: 2 })).toEqual({
-      lengths: true,
-      angles: true,
-    });
+    expect(chordLessonDisplay(1, true)).toEqual(both);
+    expect(chordLessonDisplay(2, false)).toEqual(both);
   });
 
   it("lets the Show and Hide buttons override either reading", () => {
-    const lesson = initialChordLesson();
-    expect(chordLessonDisplay(lesson, { lengths: true })).toEqual({
+    expect(chordLessonDisplay(0, false, { lengths: true })).toEqual({
       lengths: true,
       angles: true,
     });
-    expect(chordLessonDisplay(lesson, { angles: false })).toEqual({
+    expect(chordLessonDisplay(0, false, { angles: false })).toEqual({
       lengths: false,
       angles: false,
     });

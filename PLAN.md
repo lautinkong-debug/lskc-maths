@@ -1,8 +1,13 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab: Reasons Relay step order (04/11/2026)
+
+- [x] Owner request: "Find the value" moves to the last step, so students reason first and calculate afterwards. The order is now condition, target, reason, value, in the steps, the progress locks, the intro line and the feedback.
+
 ## Circle Lab: condition first, then the deduction (04/11/2026)
 
 - [x] Owner request: in the demonstration the graph must show the condition first and what we can deduce afterwards, never both at once. Steps 1 and 2 now pause when the condition is true, ask "What can we deduce?", and show the result only when "Show what we can deduce" is pressed. Moving N away before pressing returns to the task.
+- [x] The demonstration replays. Saved progress only colours the step buttons green; opening the lesson, reloading, clicking a step or pressing "Show this again" always restarts from the condition, ready for the next class.
 - [x] Fixed a leak: the angle's arc and right-angle square stayed on the diagram while the angle was hidden, so 16.2 gave its result away. The lesson now hides the mark as well; Tasks and Free play are unchanged.
 
 ## Circle Lab: lesson layout, second review (04/11/2026)

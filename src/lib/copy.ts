@@ -4166,7 +4166,7 @@ export const circleReasonGameCopy = {
   kicker: "Four steps · one justified answer",
   title: "Reasons Relay",
   intro:
-    "Find the value. Check the givens. Name your target. Choose the reason.",
+    "Check the givens. Name your target. Choose the reason. Find the value.",
   levelPoints: "level points",
   saveFailed:
     "Your progress could not be saved in this browser. You can keep playing.",
@@ -4259,6 +4259,7 @@ export const circleLessonCopy = {
   get: "You get",
   write: "Write",
   deduce: "Show what we can deduce →",
+  showAgain: "↺ Show this again",
   perpendicular: {
     heading: "16.1 · Start with a right angle",
     task: "Drag N along AB until the angle at N is 90°.",

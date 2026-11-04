@@ -44,10 +44,10 @@ test("reason game keeps four-step drafts and checked answers when returning to q
   ).toBeVisible();
   const legends = await game.locator("fieldset legend").allTextContents();
   expect(legends).toHaveLength(4);
-  expect(legends[0]).toContain("Find the value");
-  expect(legends[1]).toContain("Check the condition");
-  expect(legends[2]).toContain("Identify the target");
-  expect(legends[3]).toContain("Choose the reason");
+  expect(legends[0]).toContain("Check the condition");
+  expect(legends[1]).toContain("Identify the target");
+  expect(legends[2]).toContain("Choose the reason");
+  expect(legends[3]).toContain("Find the value");
   await answer.fill(String(challenge.q.answer));
   await choose("Condition choices", challenge.q.condition);
   await choose("Target choices", challenge.target);
@@ -109,6 +109,16 @@ test("reason game keeps four-step drafts and checked answers when returning to q
   ).toBeVisible();
 });
 
+async function placeNAtMidpoint(page: Page) {
+  const tools = page.getByText("Tools: measurements, snapping and sliders");
+  const fine = page.getByText("Fine-tune / keyboard controls");
+  if (!(await fine.isVisible())) await tools.click();
+  const exact = page.getByLabel("Position of N along AB: exact value");
+  if (!(await exact.isVisible())) await fine.click();
+  await exact.fill("0");
+  await exact.press("Enter");
+}
+
 test("topic 1 guided lesson reveals the result only after the given fact is made true", async ({
   page,
 }) => {
@@ -128,39 +138,45 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await page.getByRole("button", { name: "Hide lengths" }).click();
   await expect(diagram).not.toContainText("AN =");
 
-  async function placeNAtMidpoint() {
-    const tools = page.getByText("Tools: measurements, snapping and sliders");
-    const fine = page.getByText("Fine-tune / keyboard controls");
-    if (!(await fine.isVisible())) await tools.click();
-    if (
-      !(await page
-        .getByLabel("Position of N along AB: exact value")
-        .isVisible())
-    )
-      await fine.click();
-    const exact = page.getByLabel("Position of N along AB: exact value");
-    await exact.fill("0");
-    await exact.press("Enter");
-  }
-
   // The condition comes first, on its own. The class then asks what follows.
   const deduce = lesson.getByRole("button", {
     name: "Show what we can deduce →",
   });
-  await placeNAtMidpoint();
+  await placeNAtMidpoint(page);
   await expect(diagram.locator("[data-angle-square]")).toHaveCount(1);
   await expect(diagram).not.toContainText("AN =");
   await expect(lesson.getByText("You found: AN = NB")).toHaveCount(0);
   await deduce.click();
   await expect(lesson.getByText("You found: AN = NB")).toBeVisible();
   await expect(diagram).toContainText("AN =");
+
+  // A finished step replays from the start, for the next class.
+  const again = async () => {
+    await expect(lesson.getByText("You found: AN = NB")).toHaveCount(0);
+    await expect(
+      lesson.getByText("First make the condition true: the angle at N is 90°."),
+    ).toBeVisible();
+    await expect(diagram).not.toContainText("AN =");
+    await expect(diagram.locator("[data-angle-square]")).toHaveCount(0);
+    await expect(
+      lesson.getByRole("button", { name: "16.1 Right angle" }),
+    ).toHaveAttribute("data-done", "true");
+  };
+  await page.reload();
+  await again();
+  await placeNAtMidpoint(page);
+  await deduce.click();
+  await lesson.getByRole("button", { name: "↺ Show this again" }).click();
+  await again();
+  await placeNAtMidpoint(page);
+  await deduce.click();
   await lesson.getByRole("button", { name: "Next step →" }).click();
   await expect(
     lesson.getByText("16.2 · Start with the mid-point"),
   ).toBeVisible();
   await expect(diagram).not.toContainText("90°");
 
-  await placeNAtMidpoint();
+  await placeNAtMidpoint(page);
   await expect(diagram).toContainText("AN =");
   await expect(diagram).not.toContainText("90°");
   await expect(diagram.locator("[data-angle-square]")).toHaveCount(0);
@@ -234,13 +250,16 @@ test.describe("laptop layout", () => {
     await page.evaluate(() =>
       localStorage.setItem(
         "lskc-circle-workspace-v3:lesson-chords-16-1-16-2",
-        JSON.stringify({ step: 1, found: [true, true] }),
+        JSON.stringify({ step: 1, found: [true, false] }),
       ),
     );
     await page.reload();
-    const marks = page
-      .getByRole("region", { name: "Guided lesson" })
-      .locator("dd mark");
+    await placeNAtMidpoint(page);
+    const lesson = page.getByRole("region", { name: "Guided lesson" });
+    await lesson
+      .getByRole("button", { name: "Show what we can deduce →" })
+      .click();
+    const marks = lesson.locator("dd mark");
     await expect(marks).toHaveCount(2);
     const given = (await marks.first().boundingBox())!;
     const result = (await marks.last().boundingBox())!;
