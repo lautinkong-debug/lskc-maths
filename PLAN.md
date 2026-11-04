@@ -1,5 +1,10 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab: equal-length ticks and worksheet working (04/11/2026)
+
+- [x] AN and NB show a tick each when they are equal and the lengths are showing, so 16.1 gains them with the deduction and 16.2 has them as its condition.
+- [x] "Write it" solutions now match Lesson Worksheet 16.1 version 3 line for line, so students see one way of writing on the sheet and on the screen.
+
 ## Circle Lab: Reasons Relay step order (04/11/2026)
 
 - [x] Owner request: "Find the value" moves to the last step, so students reason first and calculate afterwards. The order is now condition, target, reason, value, in the steps, the progress locks, the intro line and the feedback.

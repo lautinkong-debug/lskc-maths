@@ -24,6 +24,7 @@ import {
   rightAngleSize,
 } from "./diagramLayout";
 import InkLayer from "./InkLayer";
+import { evaluateMission, missions } from "./missions";
 import type { InkBoardController } from "./useInkBoard";
 
 const focusNotes: Record<LabId, string> = {
@@ -42,6 +43,26 @@ function arcPath(start: number, sweep: number, radius = RADIUS) {
   const a = circlePoint(start, radius),
     b = circlePoint(start + sweep, radius);
   return `M ${a.x} ${a.y} A ${radius} ${radius} 0 ${Math.abs(sweep) > 180 ? 1 : 0} ${sweep >= 0 ? 1 : 0} ${b.x} ${b.y}`;
+}
+/** The tick across the middle of a segment, marking it as one of two equal lengths. */
+function EqualTick({ from, to }: { from: Point; to: Point }) {
+  const length = Math.hypot(to.x - from.x, to.y - from.y);
+  if (length < 0.001) return null;
+  const middle = { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 };
+  const across = {
+    x: (-(to.y - from.y) / length) * 9,
+    y: ((to.x - from.x) / length) * 9,
+  };
+  return (
+    <line
+      className={styles.equalTick}
+      data-equal-tick
+      x1={middle.x - across.x}
+      y1={middle.y - across.y}
+      x2={middle.x + across.x}
+      y2={middle.y + across.y}
+    />
+  );
 }
 function AngleMark({
   angle,
@@ -139,6 +160,11 @@ export default function CircleDiagram({
   } | null>(null);
   const id = useId();
   const scene = getScene(lab, parameters);
+  // Like the length labels, the ticks are hidden while the lengths are.
+  const equalHalves =
+    lab === "bisector" &&
+    showMeasurements &&
+    evaluateMission(missions.bisector[0], parameters).complete;
   const focusLines =
     lab === "bisector"
       ? [
@@ -240,6 +266,12 @@ export default function CircleDiagram({
             strokeDasharray={line.dashed ? "6 5" : undefined}
           />
         ))}
+        {equalHalves && (
+          <>
+            <EqualTick from={scene.points.A} to={scene.points.N} />
+            <EqualTick from={scene.points.N} to={scene.points.B} />
+          </>
+        )}
         {scene.angles.map((angle, i) => (
           <AngleMark
             key={`angle-${i}`}

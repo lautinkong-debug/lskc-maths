@@ -145,10 +145,12 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await placeNAtMidpoint(page);
   await expect(diagram.locator("[data-angle-square]")).toHaveCount(1);
   await expect(diagram).not.toContainText("AN =");
+  await expect(diagram.locator("[data-equal-tick]")).toHaveCount(0);
   await expect(lesson.getByText("You found: AN = NB")).toHaveCount(0);
   await deduce.click();
   await expect(lesson.getByText("You found: AN = NB")).toBeVisible();
   await expect(diagram).toContainText("AN =");
+  await expect(diagram.locator("[data-equal-tick]")).toHaveCount(2);
 
   // A finished step replays from the start, for the next class.
   const again = async () => {
@@ -176,8 +178,10 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   ).toBeVisible();
   await expect(diagram).not.toContainText("90°");
 
+  await expect(diagram.locator("[data-equal-tick]")).toHaveCount(0);
   await placeNAtMidpoint(page);
   await expect(diagram).toContainText("AN =");
+  await expect(diagram.locator("[data-equal-tick]")).toHaveCount(2);
   await expect(diagram).not.toContainText("90°");
   await expect(diagram.locator("[data-angle-square]")).toHaveCount(0);
   await deduce.click();
@@ -219,7 +223,7 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
 
   await questions.getByRole("button", { name: "Next step →" }).click();
   await expect(questions.locator("[data-chord-sketch]")).toHaveCount(4);
-  await expect(questions.locator("[data-math-sqrt]")).toHaveCount(2);
+  await expect(questions.locator("[data-math-sqrt]")).toHaveCount(1);
   await expect(questions.locator("[data-math-fraction]").first()).toBeVisible();
   await expect(questions.getByText("½")).toHaveCount(0);
   const hidden = questions.getByRole("group", {

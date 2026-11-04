@@ -217,7 +217,7 @@ export type WriteItem = {
   lines: SolutionLine[];
 };
 const theorems: SolutionReason[] = ["r1", "r2"];
-/** Full solutions in the style of the worksheet and Example 16.1. */
+/** Full solutions, line for line as in Lesson Worksheet 16.1 Part A (version 3). */
 export const writeItems: WriteItem[] = [
   {
     id: "w1",
@@ -226,7 +226,7 @@ export const writeItems: WriteItem[] = [
     lines: [
       { text: "∵ ON ⊥ AB", reason: "given" },
       {
-        text: "∴ AN = ½ × AB",
+        text: "∴ AN = ½AB",
         blank: { id: "w1a", answer: "r1", choices: theorems },
       },
       { text: "= ½ × 10 cm", indent: true },
@@ -243,22 +243,20 @@ export const writeItems: WriteItem[] = [
         text: "∴ ∠ONA = 90°",
         blank: { id: "w2a", answer: "r2", choices: theorems },
       },
-      { text: "In △OAN," },
       {
-        text: "∠AON + ∠OAN + ∠ONA = 180°",
+        text: "∠AON = 180° − 90° − 35°",
         blank: {
           id: "w2b",
           answer: "angleSum",
           choices: ["extAngle", "angleSum", "pyth"],
         },
       },
-      { text: "∠AON + 35° + 90° = 180°" },
-      { text: "∠AON = 55°" },
+      { text: "= 55°", indent: true },
     ],
   },
   {
     id: "w3",
-    question: "Radius 10 cm, AB = 16 cm. N is on AB and ON ⊥ AB. Find ON.",
+    question: "Radius 10 cm, AB = 16 cm. Find the distance from O to AB.",
     sketch: {
       ends: ["A", "B"],
       foot: "N",
@@ -272,12 +270,12 @@ export const writeItems: WriteItem[] = [
     lines: [
       { text: "∵ ON ⊥ AB", reason: "given" },
       {
-        text: "∴ AN = ½ × AB",
+        text: "∴ AN = ½AB",
         blank: { id: "w3a", answer: "r1", choices: theorems },
       },
       { text: "= ½ × 16 cm", indent: true },
       { text: "= 8 cm", indent: true },
-      { text: "In △OAN, ∠ONA = 90°." },
+      { text: "In △OAN," },
       {
         text: "ON² + AN² = OA²",
         blank: {
@@ -286,9 +284,9 @@ export const writeItems: WriteItem[] = [
           choices: ["angleSum", "pyth", "extAngle"],
         },
       },
-      { text: "ON = √(OA² − AN²)" },
-      { text: "= √(10² − 8²) cm", indent: true },
+      { text: "ON = √(10² − 8²) cm" },
       { text: "= 6 cm", indent: true },
+      { text: "∴ the distance from O to AB is 6 cm." },
     ],
   },
   {

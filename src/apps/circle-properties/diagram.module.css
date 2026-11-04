@@ -64,6 +64,12 @@
 .red .angleSquare {
   stroke: #b12d54;
 }
+.equalTick {
+  stroke: #b12d54;
+  stroke-width: 3;
+  stroke-linecap: round;
+  pointer-events: none;
+}
 .angleLabel {
   fill: currentColor;
   font-size: 18px;
