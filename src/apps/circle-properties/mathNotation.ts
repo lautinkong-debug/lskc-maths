@@ -1,7 +1,8 @@
 export type NotationPart =
   | { kind: "text"; text: string }
   | { kind: "arc"; name: string }
-  | { kind: "fraction"; numerator: string; denominator: string };
+  | { kind: "fraction"; numerator: string; denominator: string }
+  | { kind: "sqrt"; radicand: string };
 
 const number = String.raw`[+−-]?(?:\d+(?:\.\d+)?|\.\d+)(?:°)?`;
 const phrase = String.raw`(?:centre angle|circumference angle|(?:first|second) arc length|(?:major|minor)-arc length|(?:the )?(?:longer|shorter) chord length)`;
@@ -10,10 +11,20 @@ const operand = String.raw`(?:\([^()\n]+\)|${namedArc}|[A-Z]{2,3}|∠[A-Z]{3}|[�
 // A colon between named mathematical quantities is a ratio. Numeric colons may
 // be times/scores, and a prose colon after a reason number is not division.
 const ratioOperand = String.raw`(?:${namedArc}|[A-Z]{2,3}|∠[A-Z]{3}|[θφℓxyr])`;
+// Worked solutions may write ½ as one character; it is stacked like any fraction.
+const vulgar: Record<string, [string, string]> = {
+  "½": ["1", "2"],
+  "⅓": ["1", "3"],
+  "⅔": ["2", "3"],
+  "¼": ["1", "4"],
+  "¾": ["3", "4"],
+};
 const fractionPattern = new RegExp(
-  String.raw`\\frac\{([^{}]+)\}\{([^{}]+)\}|(?<![A-Za-z0-9])(${operand})\s*[÷/]\s*(${operand})(?![A-Za-z0-9])|(?<![A-Za-z0-9])(${ratioOperand})\s*:\s*(${ratioOperand})(?![A-Za-z0-9])`,
+  String.raw`\\frac\{([^{}]+)\}\{([^{}]+)\}|(?<![A-Za-z0-9])(${operand})\s*[÷/]\s*(${operand})(?![A-Za-z0-9])|(?<![A-Za-z0-9])(${ratioOperand})\s*:\s*(${ratioOperand})(?![A-Za-z0-9])|([½⅓⅔¼¾])`,
   "g",
 );
+// √(…) takes the whole bracket as its radicand; √91 or √x takes the number or name.
+const sqrtPattern = /√\(([^()\n]+)\)|√(\d+(?:\.\d+)?|[A-Za-z]{1,3})/g;
 
 function arcs(text: string): NotationPart[] {
   const parts: NotationPart[] = [];
@@ -40,20 +51,39 @@ function arcs(text: string): NotationPart[] {
   return parts;
 }
 
-/** Only recognised mathematical operands become fractions; UI slashes stay prose. */
-export function parseNotation(text: string, fractions = true): NotationPart[] {
-  if (!fractions) return arcs(text);
+function fractionParts(text: string): NotationPart[] {
   const parts: NotationPart[] = [];
   let last = 0;
   for (const match of text.matchAll(fractionPattern)) {
     if (match.index > last) parts.push(...arcs(text.slice(last, match.index)));
+    const [numerator, denominator] = match[7]
+      ? vulgar[match[7]]
+      : [match[1] ?? match[3] ?? match[5], match[2] ?? match[4] ?? match[6]];
     parts.push({
       kind: "fraction",
-      numerator: (match[1] ?? match[3] ?? match[5]).trim(),
-      denominator: (match[2] ?? match[4] ?? match[6]).trim(),
+      numerator: numerator.trim(),
+      denominator: denominator.trim(),
     });
     last = match.index + match[0].length;
   }
   if (last < text.length) parts.push(...arcs(text.slice(last)));
+  return parts;
+}
+
+/**
+ * Only recognised mathematical operands become fractions; UI slashes stay prose.
+ * Fractions and square roots are two-dimensional, so SVG labels keep plain text.
+ */
+export function parseNotation(text: string, fractions = true): NotationPart[] {
+  if (!fractions) return arcs(text);
+  const parts: NotationPart[] = [];
+  let last = 0;
+  for (const match of text.matchAll(sqrtPattern)) {
+    if (match.index > last)
+      parts.push(...fractionParts(text.slice(last, match.index)));
+    parts.push({ kind: "sqrt", radicand: (match[1] ?? match[2]).trim() });
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) parts.push(...fractionParts(text.slice(last)));
   return parts;
 }

@@ -65,7 +65,7 @@ export function transferQuestion(
       const ab = number([14, 22, 18], 10, 23, 2);
       Object.assign(base, {
         given: `O is the centre. N is on chord AB, ON ⊥ AB and AB = ${ab} cm.`,
-        ask: "Find AN = x.",
+        ask: "AN = x cm. Find x.",
         answer: ab / 2,
         condition: "The perpendicular to AB passes through the centre O.",
         wrongConditions: [
@@ -81,7 +81,7 @@ export function transferQuestion(
       const half = number([6, 8, 7], 4, 19);
       Object.assign(base, {
         given: `O is the centre. N is on non-diameter chord AB and AN = NB = ${half} cm.`,
-        ask: "Find ∠ONB = x.",
+        ask: "∠ONB = x°. Find x.",
         answer: 90,
         unit: "°",
         condition:
@@ -122,7 +122,7 @@ export function transferQuestion(
       const d = number([3, 5, 4], 2, 17, 0.5);
       Object.assign(base, {
         given: `O is the centre. AB and CD are equal chords of this circle. OM ⊥ AB, ON ⊥ CD and OM = ${d} cm.`,
-        ask: "Find ON = x.",
+        ask: "ON = x cm. Find x.",
         answer: d,
         condition:
           "OM and ON are perpendicular distances from the same centre.",
@@ -139,7 +139,7 @@ export function transferQuestion(
       const length = number([12, 16, 14], 8, 19);
       Object.assign(base, {
         given: `O is the centre, and AB and CD are chords of this circle. OM ⊥ AB and ON ⊥ CD. OM = ON and AB = ${length} cm.`,
-        ask: "Find CD = x.",
+        ask: "CD = x cm. Find x.",
         answer: length,
         condition:
           "The chords have equal perpendicular distances from the centre of the same circle.",
@@ -156,7 +156,7 @@ export function transferQuestion(
       const a = number([86, 118, 142], 54, 57, 2);
       Object.assign(base, {
         given: `O is the centre and ∠AOB = ${a}°. P lies on the major arc AB.`,
-        ask: "Find ∠APB = x.",
+        ask: "∠APB = x°. Find x.",
         answer: a / 2,
         unit: "°",
         condition:
@@ -165,7 +165,7 @@ export function transferQuestion(
           "Any centre angle can be paired with any circumference angle.",
           "P is allowed to lie inside the circle.",
         ],
-        explanation: `The centre angle is twice the circumference angle on the same arc. x = ${a} ÷ 2 = ${a / 2}°.`,
+        explanation: `The centre angle is twice the circumference angle on the same arc. x = ${a} ÷ 2 = ${a / 2}.`,
       });
       base.diagram.angle = a;
       break;
@@ -174,7 +174,7 @@ export function transferQuestion(
       const a = number([47, 62, 38], 25, 51);
       Object.assign(base, {
         given: `A, B, P and Q lie on this circle. P and Q are on the same side of AB, and ∠APB = ${a}°.`,
-        ask: "Find ∠AQB = x.",
+        ask: "∠AQB = x°. Find x.",
         answer: a,
         unit: "°",
         condition:
@@ -183,7 +183,7 @@ export function transferQuestion(
           "P and Q can be on opposite sides of AB.",
           "P and Q can be any points inside the circle.",
         ],
-        explanation: `The two angles stand on AB in the same segment, so x = ${a}°.`,
+        explanation: `The two angles stand on AB in the same segment, so x = ${a}.`,
       });
       base.diagram.angle = 2 * a;
       base.diagram.value = a;
@@ -193,7 +193,7 @@ export function transferQuestion(
       Object.assign(base, {
         given:
           "AB is a diameter. P is a point on the circumference, distinct from A and B.",
-        ask: "Find ∠APB = x.",
+        ask: "∠APB = x°. Find x.",
         answer: 90,
         unit: "°",
         condition:
@@ -212,7 +212,7 @@ export function transferQuestion(
       const radius = number([7, 9, 6], 3, 19);
       Object.assign(base, {
         given: `A, B and P lie on the circle, ∠APB = 90°, and the radius is ${radius} cm.`,
-        ask: "Find AB = x.",
+        ask: "AB = x cm. Find x.",
         answer: radius * 2,
         condition:
           "The right-angle vertex P and endpoints A and B all lie on the circle.",
@@ -233,7 +233,7 @@ export function transferQuestion(
         arc = r.id === "r10";
       Object.assign(base, {
         given: `O is the centre. ∠AOB = ∠COD = ${a}°. The ${arc ? "minor arc" : "chord"} AB has length ${value} cm.`,
-        ask: `Find the length x of ${arc ? "minor arc" : "chord"} CD.`,
+        ask: `${arc ? "Minor arc CD" : "CD"} = x cm. Find x.`,
         answer: value,
         condition:
           "The corresponding angles and lengths belong to the same circle.",
@@ -241,7 +241,7 @@ export function transferQuestion(
           "Equal angles guarantee equal lengths in circles of any radii.",
           "Equal angles imply the chords must be parallel.",
         ],
-        explanation: `Equal centre angles in the same circle give equal ${arc ? "corresponding arcs" : "chords"}. Therefore x = ${value} cm.`,
+        explanation: `Equal centre angles in the same circle give equal ${arc ? "corresponding arcs" : "chords"}. Therefore x = ${value}.`,
       });
       base.diagram.angle = a;
       base.diagram.value = value;
@@ -253,7 +253,7 @@ export function transferQuestion(
         arc = r.id === "r11";
       Object.assign(base, {
         given: `The ${arc ? "minor arcs" : "chords"} AB and CD are equal in this circle. ∠AOB = ${a}° and O is the centre.`,
-        ask: "Find the minor centre angle ∠COD = x.",
+        ask: "Minor centre angle ∠COD = x°. Find x.",
         answer: a,
         unit: "°",
         condition: arc
@@ -263,7 +263,7 @@ export function transferQuestion(
           "A minor angle may be compared with a reflex angle without adjustment.",
           "The circles may have different radii.",
         ],
-        explanation: `Equal ${arc ? "arcs" : "chords"} in the same circle subtend equal corresponding centre angles. Thus x = ${a}°.`,
+        explanation: `Equal ${arc ? "arcs" : "chords"} in the same circle subtend equal corresponding centre angles. Thus x = ${a}.`,
       });
       base.diagram.angle = a;
       break;
@@ -274,7 +274,7 @@ export function transferQuestion(
         toArc = r.id === "r14";
       Object.assign(base, {
         given: `The ${toArc ? "chords" : "minor arcs"} AB and CD are equal in this circle. The ${toArc ? "minor arc" : "chord"} AB has length ${value} cm.`,
-        ask: `Find the length x of ${toArc ? "minor arc" : "chord"} CD.`,
+        ask: `${toArc ? "Minor arc CD" : "CD"} = x cm. Find x.`,
         answer: value,
         condition: toArc
           ? "The chords are in the same circle; compare minor arc with minor arc."
@@ -283,7 +283,7 @@ export function transferQuestion(
           "Compare a minor arc with a major arc of an equal chord.",
           "The lengths can be compared across circles with different radii.",
         ],
-        explanation: `Equal ${toArc ? "chords give equal corresponding minor arcs" : "arcs give equal chords"} in the same circle, so x = ${value} cm.`,
+        explanation: `Equal ${toArc ? "chords give equal corresponding minor arcs" : "arcs give equal chords"} in the same circle, so x = ${value}.`,
       });
       base.diagram.angle = number([64, 80, 106], 50, 61, 2);
       base.diagram.value = value;
@@ -301,7 +301,7 @@ export function transferQuestion(
         large = small * ratio;
       Object.assign(base, {
         given: `The highlighted arcs AB and CD subtend ${circ ? "circumference" : "centre"} angles ${large}° and ${small}° respectively in the same circle. Arc CD = ${length} cm.`,
-        ask: "Find the length x of arc AB.",
+        ask: "Arc AB = x cm. Find x.",
         answer: ratio * length,
         condition: circ
           ? "Each circumference angle stands on its own highlighted arc, which excludes its vertex."
@@ -310,7 +310,7 @@ export function transferQuestion(
           "The same proportion must also hold for chord lengths.",
           "The angles can refer to unrelated arcs.",
         ],
-        explanation: `Arc AB ÷ arc CD = ${large} ÷ ${small} = ${ratio}. Therefore x = ${length} × ${ratio} = ${ratio * length} cm. This proportion is for arcs, not chords.`,
+        explanation: `Arc AB ÷ arc CD = ${large} ÷ ${small} = ${ratio}. Therefore x = ${length} × ${ratio} = ${ratio * length}. This proportion is for arcs, not chords.`,
       });
       base.diagram.angle = large;
       base.diagram.value = small;

@@ -858,24 +858,25 @@ export default function ReasonChallenge({
                     <legend>
                       <b>1</b> {c.findValue} <MathText>x</MathText>
                     </legend>
-                    <label htmlFor="reason-challenge-value">
-                      {c.myValue} <MathText>x</MathText>{" "}
-                      {challenge.q.unit && `(${challenge.q.unit})`}
-                    </label>
-                    <input
-                      id="reason-challenge-value"
-                      type="text"
-                      // iPhone decimal keypads have no minus key.
-                      inputMode={
-                        allowsNegativeAnswer(challenge.q) ? "text" : "decimal"
-                      }
-                      autoComplete="off"
-                      value={draft.response.value}
-                      disabled={locked}
-                      onChange={(e) =>
-                        respond("value", e.target.value.slice(0, 40))
-                      }
-                    />
+                    <div className={s.valueRow}>
+                      <label htmlFor="reason-challenge-value">
+                        <MathText>x</MathText> =
+                      </label>
+                      <input
+                        id="reason-challenge-value"
+                        type="text"
+                        // iPhone decimal keypads have no minus key.
+                        inputMode={
+                          allowsNegativeAnswer(challenge.q) ? "text" : "decimal"
+                        }
+                        autoComplete="off"
+                        value={draft.response.value}
+                        disabled={locked}
+                        onChange={(e) =>
+                          respond("value", e.target.value.slice(0, 40))
+                        }
+                      />
+                    </div>
                     {grade && (
                       <p className={s.fieldFeedback}>
                         {grade.value ? c.valueCorrect : c.valueRetry}
@@ -883,7 +884,7 @@ export default function ReasonChallenge({
                     )}
                     {review && (
                       <p className={s.fieldFeedback}>
-                        {c.correctValue(challenge.q.answer, challenge.q.unit)}
+                        {c.correctValue(challenge.q.answer)}
                       </p>
                     )}
                   </fieldset>

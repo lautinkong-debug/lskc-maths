@@ -1,0 +1,20 @@
+.given,
+.get {
+  padding: 0.04em 0.24em;
+  border-radius: 0.25em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.given {
+  background: #cfe0ff;
+  color: #143b68;
+}
+.get {
+  /* Results are short: keep them whole so "bisects chord" reads as one idea. */
+  background: #bfe8cf;
+  color: #124a30;
+  white-space: nowrap;
+}
+.arrow {
+  font-weight: 800;
+}

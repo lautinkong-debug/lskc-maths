@@ -742,7 +742,7 @@ export default function TransferCheck({
             >
               <label className={s.field}>
                 <span>
-                  My value for <MathText>x</MathText> {q.unit && `(${q.unit})`}
+                  <MathText>x</MathText> =
                 </span>
                 <input
                   aria-label="Value of x"

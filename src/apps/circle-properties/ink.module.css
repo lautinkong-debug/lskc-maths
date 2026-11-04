@@ -1,21 +1,21 @@
 .toolbar {
   margin-left: auto;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
 }
 .panel {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
   width: fit-content;
   max-width: 100%;
   margin: 0;
-  padding: 6px;
+  padding: 3px 4px;
   border: 1px solid #bfd2ef;
-  border-radius: 16px;
+  border-radius: 12px;
   background: #eaf1ff;
-  box-shadow: 0 3px 10px #173b6820;
+  box-shadow: 0 2px 6px #173b6818;
   color: #143b68;
 }
 .group {
@@ -26,18 +26,19 @@
 }
 .group + .group {
   border-left: 1px solid #bfd2ef;
-  padding-left: 6px;
+  padding-left: 4px;
 }
 .toolbar .panel button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 44px;
-  width: 44px;
-  min-height: 44px;
-  padding: 5px;
+  /* Compact for a mouse; touch screens keep finger-sized targets below. */
+  flex: 0 0 34px;
+  width: 34px;
+  min-height: 34px;
+  padding: 4px;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: 8px;
   background: transparent;
   color: #143b68;
   cursor: pointer;
@@ -53,12 +54,17 @@
   opacity: 0.35;
   cursor: default;
 }
+.toolbar .panel svg {
+  width: 18px;
+  height: 18px;
+}
 .swatch {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 20px;
+  height: 20px;
+  font-size: 0.78rem;
   border-radius: 50%;
   border: 1px solid #143b6840;
   color: white;
@@ -89,6 +95,21 @@
 }
 .layer[data-ink-mode="erase"] .capture {
   cursor: cell;
+}
+@media (pointer: coarse) {
+  .toolbar .panel button {
+    flex-basis: 42px;
+    width: 42px;
+    min-height: 42px;
+  }
+  .toolbar .panel svg {
+    width: 20px;
+    height: 20px;
+  }
+  .swatch {
+    width: 24px;
+    height: 24px;
+  }
 }
 @media (max-width: 600px) {
   .panel {

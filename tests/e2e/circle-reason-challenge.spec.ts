@@ -121,6 +121,13 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   const diagram = page.getByTestId("circle-diagram");
   await expect(diagram).not.toContainText("AN =");
 
+  // A teacher can reveal or hide a reading; the step's reveal still works afterwards.
+  await page.getByText("Tools: measurements, snapping and sliders").click();
+  await page.getByRole("button", { name: "Show lengths" }).click();
+  await expect(diagram).toContainText("AN =");
+  await page.getByRole("button", { name: "Hide lengths" }).click();
+  await expect(diagram).not.toContainText("AN =");
+
   async function placeNAtMidpoint() {
     const tools = page.getByText("Tools: measurements, snapping and sliders");
     const fine = page.getByText("Fine-tune / keyboard controls");
@@ -148,15 +155,33 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await placeNAtMidpoint();
   await expect(lesson.getByText("You found: ∠ONB = 90°")).toBeVisible();
   await lesson.getByRole("button", { name: "Next step →" }).click();
+  await expect(lesson.locator("[data-chord-sketch]")).toHaveCount(6);
   const first = lesson.getByRole("group", { name: "Question 1", exact: true });
   await first.getByRole("button", { name: "16.2", exact: true }).click();
   await expect(
     lesson.getByText("Look again: ⊥ is given, so use 16.1."),
   ).toBeVisible();
+  await expect(lesson.getByText("✗ Not yet")).toBeVisible();
   await first.getByRole("button", { name: "16.1", exact: true }).click();
   await expect(
     lesson.getByText("✓ ⊥ is given, so the chord is cut in half."),
   ).toBeVisible();
+  await expect(lesson.getByText("✓ Correct")).toBeVisible();
+
+  await lesson.getByRole("button", { name: "Next step →" }).click();
+  await expect(lesson.locator("[data-chord-sketch]")).toHaveCount(4);
+  await expect(lesson.locator("[data-math-sqrt]")).toHaveCount(2);
+  await expect(lesson.locator("[data-math-fraction]").first()).toBeVisible();
+  await expect(lesson.getByText("½")).toHaveCount(0);
+  const hidden = lesson.getByRole("group", {
+    name: "Question 1, reason 1",
+    exact: true,
+  });
+  await hidden.getByRole("button", { name: /mid-pt/ }).click();
+  await expect(lesson.getByText("✗ Not yet")).toBeVisible();
+  await hidden.getByRole("button", { name: /bisects chord/ }).click();
+  await expect(hidden).toHaveCount(0);
+  await expect(lesson.getByText("✓ Correct")).toBeVisible();
 });
 
 for (const width of [360, 390]) {

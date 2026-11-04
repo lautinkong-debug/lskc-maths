@@ -17,6 +17,8 @@ const variableStyle: CSSProperties = {
 const proseFollows =
   /^\s+(?!(?:cm|mm|km|rad|sin|cos|tan)\b)(?:[A-Za-z][a-z]+|a)\b/;
 const punctuationFollows = /^[,:;]/;
+const unitFollows = /^\s+(?:cm|mm|km)\b/;
+const powerFollows = /^[²³]/;
 
 function variables(children: string, svg: boolean, notation: boolean) {
   const nodes = [];
@@ -55,7 +57,11 @@ function variables(children: string, svg: boolean, notation: boolean) {
               ? s.beforeProse
               : punctuationFollows.test(children.slice(index + token.length))
                 ? s.beforePunctuation
-                : undefined
+                : unitFollows.test(children.slice(index + token.length))
+                  ? s.beforeUnit
+                  : powerFollows.test(children.slice(index + token.length))
+                    ? s.beforePower
+                    : undefined
           }
         >
           {token}
@@ -140,6 +146,41 @@ export function MathFraction({
   );
 }
 
+/** A square root whose bar covers the whole radicand, as written by hand. */
+export function MathSqrt({ radicand }: { radicand: string }) {
+  return (
+    <span
+      className={s.sqrt}
+      role="math"
+      aria-label={`square root of ${radicand}`}
+      data-math-sqrt
+    >
+      <svg
+        className={s.radical}
+        viewBox="0 0 10 20"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          width: "0.62em",
+          height: "100%",
+          maxHeight: "none",
+          margin: 0,
+          display: "block",
+          overflow: "visible",
+        }}
+      >
+        <path d="M 0.6 12.4 L 2.8 11 L 5.6 19.4 L 10 0.3" />
+      </svg>
+      <span className={s.radicand} aria-hidden="true">
+        {inline(radicand, false, true, true)}
+      </span>
+    </span>
+  );
+}
+
 function inline(
   children: string,
   svg: boolean,
@@ -149,6 +190,8 @@ function inline(
 ) {
   const parts = parseNotation(children, fractions && !svg);
   return parts.map((part, index) => {
+    if (part.kind === "sqrt")
+      return <MathSqrt key={index} radicand={part.radicand} />;
     if (part.kind === "fraction")
       return (
         <MathFraction

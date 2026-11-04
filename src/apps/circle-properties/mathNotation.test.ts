@@ -223,3 +223,39 @@ it("separates italic names from punctuation without altering copied text or SVG 
   );
   expect(svg).not.toContain(styles.beforePunctuation);
 });
+
+describe("worked-solution notation", () => {
+  it("stacks ½ and written fractions vertically", () => {
+    expect(parseNotation("AN = ½ × 10 cm")).toEqual([
+      { kind: "text", text: "AN = " },
+      { kind: "fraction", numerator: "1", denominator: "2" },
+      { kind: "text", text: " × 10 cm" },
+    ]);
+    expect(parseNotation("AN = 1/2 × AB")).toEqual([
+      { kind: "text", text: "AN = " },
+      { kind: "fraction", numerator: "1", denominator: "2" },
+      { kind: "text", text: " × AB" },
+    ]);
+  });
+
+  it("draws a square root over the whole bracket, and keeps SVG labels as text", () => {
+    expect(parseNotation("ON = √(10² − 8²) cm")).toEqual([
+      { kind: "text", text: "ON = " },
+      { kind: "sqrt", radicand: "10² − 8²" },
+      { kind: "text", text: " cm" },
+    ]);
+    expect(parseNotation("√91 cm")).toEqual([
+      { kind: "sqrt", radicand: "91" },
+      { kind: "text", text: " cm" },
+    ]);
+    expect(parseNotation("ON = √(10² − 8²) cm", false)).toEqual([
+      { kind: "text", text: "ON = √(10² − 8²) cm" },
+    ]);
+    const html = renderToStaticMarkup(
+      createElement(MathText, null, "ON = √(OA² − AN²)"),
+    );
+    expect(html).toContain("data-math-sqrt");
+    expect(html).toContain('aria-label="square root of OA² − AN²"');
+    expect(html).toContain(">OA</var>²");
+  });
+});

@@ -1,0 +1,61 @@
+.sketch {
+  display: block;
+  flex: 0 0 11em;
+  width: 11em;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+.sketch text {
+  fill: #143b68;
+  font-size: 11px;
+  /* A white edge keeps labels readable where they cross a line. */
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 2.5px;
+  stroke-linejoin: round;
+}
+.circle {
+  fill: white;
+  stroke: #8a9db3;
+  stroke-width: 1.4;
+}
+.chord {
+  stroke: #3769f4;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.fromCentre {
+  stroke: #b3264a;
+  stroke-width: 1.8;
+}
+.radius {
+  stroke: #6b7c90;
+  stroke-width: 1.3;
+  stroke-dasharray: 4 3;
+}
+.dot {
+  fill: #143b68;
+}
+.given,
+.givenArc {
+  fill: none;
+  stroke: #1945a6;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+.sketch .givenText {
+  fill: #1945a6;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.askArc {
+  fill: none;
+  stroke: #b3264a;
+  stroke-width: 1.5;
+}
+.sketch .ask {
+  fill: #b3264a;
+  font-size: 13px;
+  font-weight: 800;
+}

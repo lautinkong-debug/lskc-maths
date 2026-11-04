@@ -1,5 +1,18 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab: owner's review comments (04/11/2026)
+
+- [x] Source: the owner's "Circle Website.docx" (seven screenshots with comments).
+- [x] Pen toolbar is more compact on mouse screens; touch screens keep finger-sized buttons.
+- [x] Show/Hide lengths and angles now also work in the guided lesson. They last for the current step only, and finding the result always reveals it.
+- [x] Reasons are highlighted in two colours, condition (blue) → result (green), in the lesson, and without the arrow in written solutions and "See how each reason works". Single-fact reasons such as "∠s in the same segment" stay plain.
+- [x] Lesson answers show a tick or cross on the button, a "Correct" / "Not yet" stamp, a tinted card and a coloured message; a wrong answer shakes unless reduced motion is on.
+- [x] Every lesson question has a small diagram that marks only what is given (right angle for 16.1, equal ticks for 16.2), so it never answers the question.
+- [x] MathText stacks ½ as a vertical fraction and draws a real square root over its whole bracket.
+- [x] "Write it" is now four full solutions (∵ / ∴ style) with the key reasons hidden, including ∠ sum of △ and Pyth. theorem. Old saved answers for this step are dropped.
+- [x] Reasons Relay and Reasons Play use the standard wording: "∠ONB = x°. Find x." and "AN = x cm. Find x.", with an "x =" answer box. The coordinate question (16.3) keeps its own wording.
+- [x] All 2657 unit tests, typecheck, lint and four Circle browser tests pass. Screenshots checked at 1366, 1920 (projector) and 375 px with no sideways scrolling. Not committed or published.
+
 ## Circle Lab: clear instructions and the 16.1 vs 16.2 guided lesson (03/11/2026)
 
 - [x] Owner request: students must be able to explore without a teacher, with short, clear instructions. Lesson observation on 09/11/2026 focuses on when to use 16.1 and 16.2. Owner chose guided steps in Topic 1 and the tidy layout for all seven topics.

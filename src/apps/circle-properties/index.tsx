@@ -30,6 +30,7 @@ import {
   initialChordLesson,
   nAtMidpoint,
   parseChordLesson,
+  type ChordLessonReadings,
   type ChordLessonState,
 } from "./chordLessonData";
 import DiscoveryCoach from "./DiscoveryCoach";
@@ -523,10 +524,29 @@ function Playground({
   const model = getModel(labId, displayedParameters),
     params = normalise(labId, parameters);
   // The lesson decides which readings are visible: the given first, the result once found.
+  // The Show/Hide buttons override that for the current step; the next step starts fresh.
+  const [lessonReadings, setLessonReadings] = useState<
+    Partial<ChordLessonReadings> & { step: number }
+  >({ step: -1 });
   const display =
     lessonMode && !conditionOpen
-      ? chordLessonDisplay(lesson)
+      ? chordLessonDisplay(
+          lesson,
+          lessonReadings.step === lesson.step ? lessonReadings : {},
+        )
       : { lengths: showMeasurements, angles: showAngles };
+  function toggleReading(kind: keyof ChordLessonReadings) {
+    if (!lessonMode)
+      return update(
+        kind === "lengths" ? "showMeasurements" : "showAngles",
+        !display[kind],
+      );
+    setLessonReadings((previous) => ({
+      ...(previous.step === lesson.step ? previous : {}),
+      step: lesson.step,
+      [kind]: !display[kind],
+    }));
+  }
   const visibleMeasurements = model.measurements.filter((m) =>
     m.unit === "°" || m.label === "Angle ratio"
       ? display.angles
@@ -555,12 +575,15 @@ function Playground({
       (step === 0 || step === 1) &&
       !lesson.found[step] &&
       nAtMidpoint(next)
-    )
+    ) {
+      // The reveal always shows, even if a reading was hidden by hand.
+      setLessonReadings({ step: -1 });
       setLesson((previous) => {
         const found: [boolean, boolean] = [...previous.found];
         found[step] = true;
         return { ...previous, found };
       });
+    }
   }
   function changeByHand(next: Parameters, key: DragKey) {
     const result = autoSnap
@@ -853,30 +876,26 @@ function Playground({
                   />
                   {c.autoSnap}
                 </label>
-                {!lessonMode && (
-                  <div
-                    className={s.measurementButtons}
-                    role="group"
-                    aria-label={c.measurementButtons}
+                <div
+                  className={s.measurementButtons}
+                  role="group"
+                  aria-label={c.measurementButtons}
+                >
+                  <button
+                    type="button"
+                    aria-pressed={display.lengths}
+                    onClick={() => toggleReading("lengths")}
                   >
-                    <button
-                      type="button"
-                      aria-pressed={showMeasurements}
-                      onClick={() =>
-                        update("showMeasurements", !showMeasurements)
-                      }
-                    >
-                      {showMeasurements ? c.hideLengths : c.showLengths}
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={showAngles}
-                      onClick={() => update("showAngles", !showAngles)}
-                    >
-                      {showAngles ? c.hideAngles : c.showAngles}
-                    </button>
-                  </div>
-                )}
+                    {display.lengths ? c.hideLengths : c.showLengths}
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={display.angles}
+                    onClick={() => toggleReading("angles")}
+                  >
+                    {display.angles ? c.hideAngles : c.showAngles}
+                  </button>
+                </div>
               </div>
               <div className={s.boardCaption}>
                 <span>

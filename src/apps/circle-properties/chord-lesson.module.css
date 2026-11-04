@@ -133,18 +133,53 @@
   list-style: none;
 }
 .cards > li {
+  position: relative;
   display: grid;
   gap: 8px;
-  padding: 12px;
+  /* The extra top space keeps the stamp clear of the question. */
+  padding: 18px 12px 12px;
   border-radius: 12px;
-  border: 1.5px solid #e3d6b4;
+  border: 2px solid #e3d6b4;
   background: white;
 }
 .cards > li[data-result="true"] {
-  border-color: #6db18c;
+  border-color: #1b714a;
+  background: #effaf3;
 }
 .cards > li[data-result="false"] {
-  border-color: var(--circle-red);
+  border-color: #b3264a;
+  background: #fdf1f3;
+}
+.stamp {
+  position: absolute;
+  top: -10px;
+  right: 10px;
+  z-index: 1;
+  padding: 1px 9px;
+  border: 2px solid currentColor;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.88em;
+  font-weight: 800;
+  transform: rotate(-3deg);
+}
+.stamp[data-right="true"] {
+  color: #1b714a;
+}
+.stamp[data-right="false"] {
+  color: #b3264a;
+}
+.cardBody {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+}
+.question {
+  display: grid;
+  flex: 1 1 9.5em;
+  gap: 8px;
+  min-width: 0;
 }
 .cards [role="group"] {
   display: flex;
@@ -163,30 +198,116 @@
 }
 .lesson .cards .reasonChoices button {
   flex: 1 1 100%;
+  justify-content: flex-start;
+  line-height: 1.7;
   font-weight: 600;
   text-align: left;
+}
+/* Right and wrong read at a glance from the back: fill, tick or cross, and a stamp. */
+.lesson .cards [role="group"] button[data-mark="right"],
+.lesson .cards [role="group"] button[data-mark="right"]:hover:not(:disabled) {
+  border-color: #145a3a;
+  background: #1b714a;
+  color: white;
+}
+.lesson .cards [role="group"] button[data-mark="wrong"],
+.lesson .cards [role="group"] button[data-mark="wrong"]:hover:not(:disabled) {
+  border-color: #8f1c3a;
+  background: #b3264a;
+  color: white;
+}
+.lesson .cards [role="group"] button[data-mark="right"]::before {
+  content: "✓";
+  margin-right: 0.35em;
+}
+.lesson .cards [role="group"] button[data-mark="wrong"]::before {
+  content: "✗";
+  margin-right: 0.35em;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cards > li[data-fresh="true"][data-result="false"],
+  .cards > li[data-fresh="true"] button[data-mark="wrong"] {
+    animation: wrongShake 0.4s ease-in-out;
+  }
+  .cards > li[data-fresh="true"] .stamp {
+    animation: stampDown 0.25s ease-out;
+  }
+}
+@keyframes wrongShake {
+  20%,
+  60% {
+    transform: translateX(-5px);
+  }
+  40%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+@keyframes stampDown {
+  from {
+    opacity: 0;
+    transform: rotate(-3deg) scale(1.8);
+  }
 }
 .feedback:empty {
   display: none;
 }
 .feedback {
-  font-size: 0.92em;
-  font-weight: 600;
+  padding: 6px 9px;
+  border-radius: 8px;
+  font-size: 0.95em;
+  font-weight: 700;
+}
+.feedback[data-right="true"] {
+  background: #d9f1e2;
+  color: #145a3a;
+}
+.feedback[data-right="false"] {
+  background: #fbdfe5;
+  color: #8f1c3a;
 }
 .working {
   display: grid;
-  gap: 2px;
+  gap: 4px;
   padding: 8px 10px;
   border-radius: 8px;
   background: #f6f8fd;
+  line-height: 1.7;
   font-variant-numeric: tabular-nums;
 }
-.working p + p {
-  padding-left: 1.2em;
+.indent {
+  padding-left: 2.2em;
+}
+.shownReason,
+.filled,
+.blank {
+  margin-left: 0.6em;
+}
+.shownReason {
+  color: #54657a;
+}
+.filled {
+  font-weight: 600;
 }
 .blank {
-  color: #6b5a33;
+  padding: 0 0.35em;
+  border: 1.5px dashed #a98a3c;
+  border-radius: 6px;
+  background: #fff7dc;
+  color: #5e4e2a;
   font-weight: 700;
+  white-space: nowrap;
+}
+.blankChoices {
+  display: grid;
+  gap: 6px;
+}
+.blankChoices > p:first-child {
+  font-size: 0.9em;
+  font-weight: 700;
+}
+.writeReason {
+  line-height: 1.8;
 }
 .score {
   display: flex;

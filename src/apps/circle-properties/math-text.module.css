@@ -33,6 +33,14 @@
   /* Give italic overhang breathing room before upright punctuation. */
   margin-inline-end: 0.16em;
 }
+.beforeUnit {
+  /* An italic x leans into the unit, so "x cm" needs a little more room. */
+  margin-inline-end: 0.14em;
+}
+.beforePower {
+  /* Italic overhang would otherwise touch the ² in ON². */
+  margin-inline-end: 0.1em;
+}
 .arc.beforePunctuation {
   margin-inline-end: 0.2em;
 }
@@ -63,4 +71,25 @@
 }
 .fraction > .denominator {
   padding-top: 0.13em;
+}
+.sqrt.sqrt {
+  /* The radical sign stretches from the bar down to the baseline of the radicand. */
+  position: relative;
+  display: inline-flex;
+  padding-left: 0.62em;
+  margin-inline: 0.06em 0.04em;
+  white-space: nowrap;
+}
+.radical path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.3px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.radicand {
+  padding: 0.1em 0.14em 0 0.06em;
+  border-top: 0.07em solid currentColor;
+  line-height: 1.15;
 }

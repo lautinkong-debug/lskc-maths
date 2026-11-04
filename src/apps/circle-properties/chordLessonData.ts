@@ -8,6 +8,8 @@ import { defaults, type Parameters } from "./geometry";
 import { evaluateMission, missions } from "./missions";
 
 export type ChordReason = "r1" | "r2";
+/** Full solutions also hide the other reasons a line depends on. */
+export type SolutionReason = ChordReason | "angleSum" | "pyth" | "extAngle";
 export type ChordLessonStep = 0 | 1 | 2 | 3;
 export type ChordLessonState = {
   /** Topic 1 opens on the guided lesson until the student picks Tasks or Free play. */
@@ -16,7 +18,8 @@ export type ChordLessonState = {
   /** Step 1 (16.1) and step 2 (16.2) have each been completed on the diagram. */
   found: [boolean, boolean];
   sort: Record<string, ChordReason>;
-  write: Record<string, ChordReason>;
+  /** Keyed by hidden-reason blank, not by question: a solution can hide several. */
+  write: Record<string, SolutionReason>;
 };
 
 export const initialChordLesson = (): ChordLessonState => ({
@@ -43,90 +46,275 @@ export function nAtMidpoint(parameters: Parameters): boolean {
   return evaluateMission(missions.bisector[0], parameters).complete;
 }
 
-/** Step 1 shows the angle (the given) and reveals the lengths; step 2 is the reverse. */
-export function chordLessonDisplay(state: ChordLessonState): {
-  lengths: boolean;
-  angles: boolean;
-} {
-  if (state.step === 0) return { lengths: state.found[0], angles: true };
-  if (state.step === 1) return { lengths: true, angles: state.found[1] };
-  return { lengths: true, angles: true };
+export type ChordLessonReadings = { lengths: boolean; angles: boolean };
+
+/**
+ * Step 1 shows the angle (the given) and reveals the lengths; step 2 is the reverse.
+ * The Show/Hide buttons override either reading for the current step only.
+ */
+export function chordLessonDisplay(
+  state: ChordLessonState,
+  override: Partial<ChordLessonReadings> = {},
+): ChordLessonReadings {
+  const lesson =
+    state.step === 0
+      ? { lengths: state.found[0], angles: true }
+      : state.step === 1
+        ? { lengths: true, angles: state.found[1] }
+        : { lengths: true, angles: true };
+  return {
+    lengths: override.lengths ?? lesson.lengths,
+    angles: override.angles ?? lesson.angles,
+  };
 }
+
+export type ChordSketchData = {
+  /** The chord's ends, and where the line from O meets the chord. */
+  ends: [string, string];
+  foot: string;
+  /** Only the GIVEN fact is marked, never the result the student must decide. */
+  given: "perpendicular" | "midpoint";
+  /** Chords lean different ways, so "horizontal" never looks like a condition. */
+  tilt: number;
+  /** The chord's distance from O as a fraction of the radius. */
+  depth?: number;
+  halfLabels?: [string, string?];
+  /** A radius drawn to one end of the chord, with an optional length. */
+  radius?: { to: 0 | 1; label?: string };
+  /** A given angle at the first end, between the chord and the radius. */
+  angle?: string;
+  caption?: string;
+  /** Where the "?" goes; "caption" means the caption already asks. */
+  ask: "half" | "distance" | "footAngle" | "centreAngle" | "caption";
+};
 
 export type SortCard = {
   id: string;
   given: string;
   ask: string;
   answer: ChordReason;
+  sketch: ChordSketchData;
+};
+const halfOfTen: ChordSketchData = {
+  ends: ["A", "B"],
+  foot: "N",
+  given: "perpendicular",
+  tilt: -8,
+  caption: "AB = 10 cm",
+  ask: "half",
+};
+const midpointAngle: ChordSketchData = {
+  ends: ["A", "B"],
+  foot: "N",
+  given: "midpoint",
+  tilt: 10,
+  depth: 0.574,
+  radius: { to: 0 },
+  angle: "35°",
+  ask: "centreAngle",
+};
+const equalHalves: ChordSketchData = {
+  ends: ["A", "B"],
+  foot: "M",
+  given: "midpoint",
+  tilt: -6,
+  depth: 0.36,
+  halfLabels: ["6 cm", "6 cm"],
+  ask: "footAngle",
 };
 /** Different letters on purpose: students must read the given fact, not the names. */
 export const sortCards: SortCard[] = [
-  { id: "s1", given: "ON ⊥ AB. AB = 10 cm.", ask: "Find AN.", answer: "r1" },
+  {
+    id: "s1",
+    given: "ON ⊥ AB. AB = 10 cm.",
+    ask: "Find AN.",
+    answer: "r1",
+    sketch: halfOfTen,
+  },
   {
     id: "s2",
     given: "N is the mid-point of AB. ∠OAN = 35°.",
     ask: "Find ∠AON.",
     answer: "r2",
+    sketch: midpointAngle,
   },
   {
     id: "s3",
     given: "OM ⊥ CD. Radius = 13 cm, CD = 24 cm.",
     ask: "Find OM.",
     answer: "r1",
+    sketch: {
+      ends: ["C", "D"],
+      foot: "M",
+      given: "perpendicular",
+      tilt: 6,
+      depth: 5 / 13,
+      radius: { to: 1, label: "13 cm" },
+      caption: "CD = 24 cm",
+      ask: "distance",
+    },
   },
   {
     id: "s4",
     given: "M is the mid-point of chord PQ.",
     ask: "Find ∠OMP.",
     answer: "r2",
+    sketch: {
+      ends: ["P", "Q"],
+      foot: "M",
+      given: "midpoint",
+      tilt: -14,
+      ask: "footAngle",
+    },
   },
-  { id: "s5", given: "OT ⊥ PQ. PT = 7 cm.", ask: "Find PQ.", answer: "r1" },
+  {
+    id: "s5",
+    given: "OT ⊥ PQ. PT = 7 cm.",
+    ask: "Find PQ.",
+    answer: "r1",
+    sketch: {
+      ends: ["P", "Q"],
+      foot: "T",
+      given: "perpendicular",
+      tilt: 12,
+      depth: 0.36,
+      halfLabels: ["7 cm"],
+      caption: "PQ = ?",
+      ask: "caption",
+    },
+  },
   {
     id: "s6",
     given: "AM = MB = 6 cm.",
     ask: "Explain why OM ⊥ AB.",
     answer: "r2",
+    sketch: equalHalves,
   },
 ];
 
+export type SolutionBlank = {
+  id: string;
+  answer: SolutionReason;
+  choices: SolutionReason[];
+};
+export type SolutionLine = {
+  text: string;
+  /** A reason that stays visible. */
+  reason?: string;
+  /** A reason hidden for the student to guess. */
+  blank?: SolutionBlank;
+  /** Continues the line above, so its = sign sits under the working. */
+  indent?: boolean;
+};
 export type WriteItem = {
   id: string;
   question: string;
-  /** The first line ends with the missing reason, shown as ( ? ). */
-  lines: string[];
-  answer: ChordReason;
+  sketch: ChordSketchData;
+  lines: SolutionLine[];
 };
-/** "Write it like this" lines from the worksheet and Example 16.1. */
+const theorems: SolutionReason[] = ["r1", "r2"];
+/** Full solutions in the style of the worksheet and Example 16.1. */
 export const writeItems: WriteItem[] = [
   {
     id: "w1",
     question: "ON ⊥ AB, AB = 10 cm. Find AN.",
-    lines: ["AN = ½ × 10 cm", "= 5 cm"],
-    answer: "r1",
+    sketch: halfOfTen,
+    lines: [
+      { text: "∵ ON ⊥ AB", reason: "given" },
+      {
+        text: "∴ AN = ½ × AB",
+        blank: { id: "w1a", answer: "r1", choices: theorems },
+      },
+      { text: "= ½ × 10 cm", indent: true },
+      { text: "= 5 cm", indent: true },
+    ],
   },
   {
     id: "w2",
     question: "N is the mid-point of AB. ∠OAN = 35°. Find ∠AON.",
-    lines: ["∠ONA = 90°", "∠AON = 180° − 90° − 35°   (∠ sum of △)", "= 55°"],
-    answer: "r2",
+    sketch: midpointAngle,
+    lines: [
+      { text: "∵ AN = NB", reason: "given" },
+      {
+        text: "∴ ∠ONA = 90°",
+        blank: { id: "w2a", answer: "r2", choices: theorems },
+      },
+      { text: "In △OAN," },
+      {
+        text: "∠AON + ∠OAN + ∠ONA = 180°",
+        blank: {
+          id: "w2b",
+          answer: "angleSum",
+          choices: ["extAngle", "angleSum", "pyth"],
+        },
+      },
+      { text: "∠AON + 35° + 90° = 180°" },
+      { text: "∠AON = 55°" },
+    ],
   },
   {
     id: "w3",
     question: "Radius 10 cm, AB = 16 cm. N is on AB and ON ⊥ AB. Find ON.",
-    lines: ["AN = 8 cm", "ON = √(10² − 8²) cm   (Pyth. theorem)", "= 6 cm"],
-    answer: "r1",
+    sketch: {
+      ends: ["A", "B"],
+      foot: "N",
+      given: "perpendicular",
+      tilt: -10,
+      depth: 0.6,
+      radius: { to: 0, label: "10 cm" },
+      caption: "AB = 16 cm",
+      ask: "distance",
+    },
+    lines: [
+      { text: "∵ ON ⊥ AB", reason: "given" },
+      {
+        text: "∴ AN = ½ × AB",
+        blank: { id: "w3a", answer: "r1", choices: theorems },
+      },
+      { text: "= ½ × 16 cm", indent: true },
+      { text: "= 8 cm", indent: true },
+      { text: "In △OAN, ∠ONA = 90°." },
+      {
+        text: "ON² + AN² = OA²",
+        blank: {
+          id: "w3b",
+          answer: "pyth",
+          choices: ["angleSum", "pyth", "extAngle"],
+        },
+      },
+      { text: "ON = √(OA² − AN²)" },
+      { text: "= √(10² − 8²) cm", indent: true },
+      { text: "= 6 cm", indent: true },
+    ],
+  },
+  {
+    id: "w4",
+    question: "AM = MB = 6 cm. Explain why OM ⊥ AB.",
+    sketch: equalHalves,
+    lines: [
+      { text: "∵ AM = MB", reason: "given" },
+      { text: "∴ M is the mid-point of AB." },
+      {
+        text: "∴ OM ⊥ AB",
+        blank: { id: "w4a", answer: "r2", choices: theorems },
+      },
+    ],
   },
 ];
 
-const reasonIds: ChordReason[] = ["r1", "r2"];
-const isReason = (value: unknown): value is ChordReason =>
-  reasonIds.includes(value as ChordReason);
-function answers(raw: unknown, ids: string[]): Record<string, ChordReason> {
-  const result: Record<string, ChordReason> = {};
+export const solutionBlanks = (item: WriteItem): SolutionBlank[] =>
+  item.lines.flatMap((line) => (line.blank ? [line.blank] : []));
+
+/** Keeps only known questions holding one of their own choices. */
+function answers<T extends string>(
+  raw: unknown,
+  allowed: Record<string, readonly T[]>,
+): Record<string, T> {
+  const result: Record<string, T> = {};
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return result;
-  for (const id of ids) {
+  for (const [id, choices] of Object.entries(allowed)) {
     const value = (raw as Record<string, unknown>)[id];
-    if (isReason(value)) result[id] = value;
+    if (choices.includes(value as T)) result[id] = value as T;
   }
   return result;
 }
@@ -141,13 +329,17 @@ export function parseChordLesson(raw: unknown): ChordLessonState | undefined {
       ? (value.step as ChordLessonStep)
       : 0,
     found: [found[0] === true, found[1] === true],
-    sort: answers(
+    sort: answers<ChordReason>(
       value.sort,
-      sortCards.map((card) => card.id),
+      Object.fromEntries(sortCards.map((card) => [card.id, ["r1", "r2"]])),
     ),
-    write: answers(
+    write: answers<SolutionReason>(
       value.write,
-      writeItems.map((item) => item.id),
+      Object.fromEntries(
+        writeItems
+          .flatMap(solutionBlanks)
+          .map((blank) => [blank.id, blank.choices]),
+      ),
     ),
   };
 }

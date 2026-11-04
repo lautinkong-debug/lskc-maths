@@ -2015,7 +2015,7 @@
   justify-content: flex-end;
 }
 .penBar {
-  padding: 8px 16px;
+  padding: 5px 12px;
   border-bottom: 1px solid #edf2fa;
 }
 .toolSwitches {
@@ -2042,6 +2042,11 @@
   min-height: 40px;
   padding: 6px 10px;
   font-size: 0.8rem;
+}
+.toolSwitches button[aria-pressed="true"] {
+  background: #eaf1ff;
+  border-color: #3769f4;
+  color: #1945a6;
 }
 .currentTask strong {
   font-size: 1.08rem;

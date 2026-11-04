@@ -23,6 +23,31 @@ export type Reason = {
   lab: LabId;
 };
 
+/** The words of a label that are the result; the words before them are the condition. */
+const reasonResults: Record<string, string> = {
+  r1: "bisects chord",
+  r2: "⊥ chord",
+  r3: "passes through centre",
+  r4: "equidistant from centre",
+  r5: "are equal",
+  r10: "equal arcs",
+  r11: "equal ∠s",
+  r12: "equal chords",
+  r13: "equal ∠s",
+  r14: "equal arcs",
+  r15: "equal chords",
+};
+
+/** Other labels name a single fact, so they have no condition to separate. */
+export function reasonParts(reason: Reason) {
+  const result = reasonResults[reason.id];
+  if (!result) return null;
+  const condition = reason.label
+    .slice(0, reason.label.lastIndexOf(result))
+    .trim();
+  return { condition, result };
+}
+
 export const reasons: Reason[] = [
   {
     id: "r1", number: "16.1",

@@ -5,6 +5,7 @@ import { circleReviewCopy as c } from "@/lib/copy";
 import { labs, reasons, type LabId } from "./content";
 import MathText from "./MathText";
 import MeasurementList from "./MeasurementList";
+import ReasonLabel from "./ReasonLabel";
 import ReasonFlowDiagram from "./ReasonFlowDiagram";
 import ReasonWorking from "./ReasonWorking";
 import { reasonWorking } from "./reasonWorkingData";
@@ -273,7 +274,7 @@ export default function ReasonExplorer({
             <p className={s.proofStatement}>
               <MathText>{reasonWorking[reason.id].conclusion}</MathText>{" "}
               <strong className={s.proofReason}>
-                (<MathText>{reason.label}</MathText>)
+                (<ReasonLabel reason={reason} arrow={false} />)
               </strong>
             </p>
           </div>
