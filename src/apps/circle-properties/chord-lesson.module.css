@@ -85,6 +85,9 @@
 .found dd {
   margin: 0;
 }
+.found .fullRow {
+  grid-column: 1 / -1;
+}
 .say {
   font-style: italic;
 }
@@ -125,16 +128,40 @@
   background: white;
   font-size: 0.92em;
 }
+.trap ul {
+  margin: 2px 0 0;
+  padding-left: 1.2em;
+}
+/* Fills the row below the circle and the panel, using the whole width of the board. */
+.questions {
+  grid-column: 1 / -1;
+  padding: 14px;
+  border: 1px solid #e4d7af;
+  border-radius: 12px;
+  background: #fff8e7;
+  scroll-margin-top: 10px;
+}
 .cards {
   display: grid;
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 27em), 1fr));
+  gap: 16px 12px;
   margin: 0;
-  padding: 0;
+  padding: 8px 0 0;
   list-style: none;
+}
+.solutionColumns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 27em), 1fr));
+  gap: 0 12px;
+  align-items: start;
+}
+.solutionColumns .cards {
+  grid-template-columns: minmax(0, 1fr);
 }
 .cards > li {
   position: relative;
   display: grid;
+  align-content: start;
   gap: 8px;
   /* The extra top space keeps the stamp clear of the question. */
   padding: 18px 12px 12px;
@@ -176,9 +203,7 @@
   gap: 10px;
 }
 .question {
-  display: grid;
   flex: 1 1 9.5em;
-  gap: 8px;
   min-width: 0;
 }
 .cards [role="group"] {

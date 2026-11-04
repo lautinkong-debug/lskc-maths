@@ -23,7 +23,7 @@ import {
 } from "./geometry";
 import { snapParameters, type SnapResult } from "./snapping";
 import { allMissions, evaluateMission, missions } from "./missions";
-import ChordLesson from "./ChordLesson";
+import ChordLesson, { ChordLessonQuestions } from "./ChordLesson";
 import {
   chordLessonDisplay,
   chordLessonStarts,
@@ -515,6 +515,8 @@ function Playground({
   const setShowReasons = (next: SetStateAction<boolean>) =>
     update("showReasons", next);
   const lessonMode = labId === "bisector" && lesson.open;
+  // Steps 3 and 4 put their questions across the full width below the circle.
+  const lessonQuestions = lessonMode && lesson.step >= 2;
   const tasks = !free && !lessonMode;
   const angleCondition = ["centre", "segment", "semicircle"].includes(labId);
   const displayedParameters =
@@ -609,6 +611,10 @@ function Playground({
     if ((lesson.step === 0 || lesson.step === 1) && !lesson.found[lesson.step])
       setParameters({ ...chordLessonStarts[lesson.step] });
     setLesson((previous) => ({ ...previous, open: true }));
+  }
+  function lessonShape(shape: Parameters) {
+    setSnapResult(null);
+    setParameters(shape);
   }
   function togglePen() {
     // A hidden pen must never keep capturing drags meant for the circle.
@@ -749,6 +755,7 @@ function Playground({
               </>
             ) : (
               <>
+                {penOpen && <InkToolbar board={ink} />}
                 <button
                   type="button"
                   aria-pressed={penOpen}
@@ -766,11 +773,6 @@ function Playground({
               </>
             )}
           </div>
-          {penOpen && !conditionOpen && (
-            <div className={s.penBar}>
-              <InkToolbar board={ink} />
-            </div>
-          )}
           {conditionOpen && !angleCondition ? (
             <ConditionsLab
               labId={labId}
@@ -999,12 +1001,7 @@ function Playground({
               <ChordLesson
                 state={lesson}
                 onState={setLesson}
-                onShape={(shape) => {
-                  setSnapResult(null);
-                  setParameters(shape);
-                }}
-                onPractice={onRelay}
-                onFreePlay={() => chooseStyle(true)}
+                onShape={lessonShape}
               />
             ) : free ? (
               <div className={s.freeInstructions}>
@@ -1060,6 +1057,15 @@ function Playground({
               </button>
             </div>
           </aside>
+        )}
+        {lessonQuestions && !conditionOpen && !focus && (
+          <ChordLessonQuestions
+            state={lesson}
+            onState={setLesson}
+            onShape={lessonShape}
+            onPractice={onRelay}
+            onFreePlay={() => chooseStyle(true)}
+          />
         )}
       </div>
       {showReasons && !conditionOpen && (

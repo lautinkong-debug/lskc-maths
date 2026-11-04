@@ -1,5 +1,13 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab: lesson layout, second review (04/11/2026)
+
+- [x] The pen toolbar sits in the board's top row, beside Hide pen and Focus ("Focus on the circle" shortened to "Focus").
+- [x] The lesson panel is wider and the circle smaller, so a whole reason fits on one row. In the result card, "Write" has its own row.
+- [x] The Trap is in point form.
+- [x] "Which one?" and "Write it" questions now fill the full width below the circle and panel, two cards across. The circle and the Given / You get table stay beside each other above them.
+- [x] "Which one?" answers are the full-sentence reasons instead of 16.1 / 16.2. The numbers remain only in the step names, headings and table, as textbook references.
+
 ## Circle Lab: owner's review comments (04/11/2026)
 
 - [x] Source: the owner's "Circle Website.docx" (seven screenshots with comments).

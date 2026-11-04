@@ -1,5 +1,6 @@
 .toolbar {
-  margin-left: auto;
+  /* Sits at the start of the board's top row, before Hide pen and Focus. */
+  margin-right: auto;
   font-size: 0.82rem;
 }
 .panel {
@@ -7,11 +8,11 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
   width: fit-content;
   max-width: 100%;
   margin: 0;
-  padding: 3px 4px;
+  padding: 2px 3px;
   border: 1px solid #bfd2ef;
   border-radius: 12px;
   background: #eaf1ff;
@@ -22,21 +23,21 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 2px;
+  gap: 1px;
 }
 .group + .group {
   border-left: 1px solid #bfd2ef;
-  padding-left: 4px;
+  padding-left: 3px;
 }
 .toolbar .panel button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   /* Compact for a mouse; touch screens keep finger-sized targets below. */
-  flex: 0 0 34px;
-  width: 34px;
-  min-height: 34px;
-  padding: 4px;
+  flex: 0 0 28px;
+  width: 28px;
+  min-height: 28px;
+  padding: 3px;
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
@@ -55,16 +56,16 @@
   cursor: default;
 }
 .toolbar .panel svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 .swatch {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  font-size: 0.78rem;
+  width: 17px;
+  height: 17px;
+  font-size: 0.68rem;
   border-radius: 50%;
   border: 1px solid #143b6840;
   color: white;

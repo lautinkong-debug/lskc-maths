@@ -3942,7 +3942,7 @@ export const circleCopy = {
   showAngles: "Show angles",
   hideAngles: "Hide angles",
   controls: "Fine-tune / keyboard controls",
-  focus: "Focus on the circle",
+  focus: "Focus",
   unfocus: "Show mission panel",
   showHint: "Need a hint?",
   capture: "Capture star",
@@ -4250,6 +4250,7 @@ export const circleReasonGameCopy = {
 export const circleLessonCopy = {
   mode: "Guided lesson",
   title: "16.1 or 16.2? Read what is given.",
+  questions: "Lesson questions",
   steps: ["16.1 Right angle", "16.2 Mid-point", "Which one?", "Write it"],
   stepsLabel: "Lesson steps",
   stepOf: (step: number, total: number) => `Step ${step} of ${total}`,
@@ -4277,17 +4278,23 @@ export const circleLessonCopy = {
   },
   which: {
     heading: "Which one? Read what is given.",
-    task: "Tap 16.1 or 16.2 for each question.",
+    task: "Tap the correct reason for each question.",
     table: "When to use 16.1 and 16.2",
-    trap: "Trap: both need a line from the centre O, and AB must not be a diameter.",
+    trap: {
+      title: "Trap",
+      points: [
+        "Both need a line from the centre O.",
+        "AB must not be a diameter.",
+      ],
+    },
     cardLabel: (number: number) => `Question ${number}`,
     right: {
       r1: "✓ ⊥ is given, so the chord is cut in half.",
       r2: "✓ The mid-point is given, so the angle is 90°.",
     },
     wrong: {
-      r1: "✗ Look again: ⊥ is given, so use 16.1.",
-      r2: "✗ Look again: the mid-point is given, so use 16.2.",
+      r1: "✗ Look again: ⊥ is given, so the line from the centre bisects the chord.",
+      r2: "✗ Look again: the mid-point is given, so the line from the centre is ⊥ to the chord.",
     },
     score: (right: number, total: number) => `${right} of ${total} correct`,
     again: "Try these again",
@@ -4315,7 +4322,7 @@ export const circleLessonCopy = {
     },
   },
   complete: "Lesson complete!",
-  remember: ["⊥ given → AN = NB (16.1)", "Mid-point given → 90° (16.2)"],
+  remember: ["⊥ given → AN = NB", "Mid-point given → 90°"],
   practise: "Practise in Reasons Relay",
   freePlay: "Explore on my own",
   restart: "Start the lesson again",

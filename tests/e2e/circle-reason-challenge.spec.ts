@@ -155,33 +155,83 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await placeNAtMidpoint();
   await expect(lesson.getByText("You found: ∠ONB = 90°")).toBeVisible();
   await lesson.getByRole("button", { name: "Next step →" }).click();
-  await expect(lesson.locator("[data-chord-sketch]")).toHaveCount(6);
-  const first = lesson.getByRole("group", { name: "Question 1", exact: true });
-  await first.getByRole("button", { name: "16.2", exact: true }).click();
-  await expect(
-    lesson.getByText("Look again: ⊥ is given, so use 16.1."),
-  ).toBeVisible();
-  await expect(lesson.getByText("✗ Not yet")).toBeVisible();
-  await first.getByRole("button", { name: "16.1", exact: true }).click();
-  await expect(
-    lesson.getByText("✓ ⊥ is given, so the chord is cut in half."),
-  ).toBeVisible();
-  await expect(lesson.getByText("✓ Correct")).toBeVisible();
+  const questions = page.getByRole("region", { name: "Lesson questions" });
+  await expect(questions.locator("[data-chord-sketch]")).toHaveCount(6);
 
-  await lesson.getByRole("button", { name: "Next step →" }).click();
-  await expect(lesson.locator("[data-chord-sketch]")).toHaveCount(4);
-  await expect(lesson.locator("[data-math-sqrt]")).toHaveCount(2);
-  await expect(lesson.locator("[data-math-fraction]").first()).toBeVisible();
-  await expect(lesson.getByText("½")).toHaveCount(0);
-  const hidden = lesson.getByRole("group", {
+  // The cards use the whole width below the circle, and each question stays one paragraph.
+  const wide = (await questions.boundingBox())!.width;
+  expect(wide).toBeGreaterThan(1.5 * (await lesson.boundingBox())!.width);
+  const paragraph = await questions
+    .locator("ol > li p")
+    .first()
+    .evaluate((element) => ({
+      height: element.getBoundingClientRect().height,
+      line: parseFloat(getComputedStyle(element).lineHeight) || 24,
+    }));
+  expect(paragraph.height).toBeLessThan(3 * paragraph.line);
+
+  const first = questions.getByRole("group", {
+    name: "Question 1",
+    exact: true,
+  });
+  await first.getByRole("button", { name: /mid-pt/ }).click();
+  await expect(
+    questions.getByText(
+      "Look again: ⊥ is given, so the line from the centre bisects the chord.",
+    ),
+  ).toBeVisible();
+  await expect(questions.getByText("✗ Not yet")).toBeVisible();
+  await first.getByRole("button", { name: /bisects chord/ }).click();
+  await expect(
+    questions.getByText("✓ ⊥ is given, so the chord is cut in half."),
+  ).toBeVisible();
+  await expect(questions.getByText("✓ Correct")).toBeVisible();
+
+  await questions.getByRole("button", { name: "Next step →" }).click();
+  await expect(questions.locator("[data-chord-sketch]")).toHaveCount(4);
+  await expect(questions.locator("[data-math-sqrt]")).toHaveCount(2);
+  await expect(questions.locator("[data-math-fraction]").first()).toBeVisible();
+  await expect(questions.getByText("½")).toHaveCount(0);
+  const hidden = questions.getByRole("group", {
     name: "Question 1, reason 1",
     exact: true,
   });
   await hidden.getByRole("button", { name: /mid-pt/ }).click();
-  await expect(lesson.getByText("✗ Not yet")).toBeVisible();
+  await expect(questions.getByText("✗ Not yet")).toBeVisible();
   await hidden.getByRole("button", { name: /bisects chord/ }).click();
   await expect(hidden).toHaveCount(0);
-  await expect(lesson.getByText("✓ Correct")).toBeVisible();
+  await expect(questions.getByText("✓ Correct")).toBeVisible();
+});
+
+test.describe("laptop layout", () => {
+  test.use({ viewport: { width: 1366, height: 768 } });
+
+  test("the pen tools share the top row, and a whole reason fits on one row", async ({
+    page,
+  }) => {
+    await open(page);
+    await page.getByRole("button", { name: /Pen$/ }).first().click();
+    const top = async (name: string | RegExp) =>
+      (await page.getByRole("button", { name }).first().boundingBox())!.y;
+    const undo = await top("Undo");
+    expect(Math.abs((await top("Hide pen")) - undo)).toBeLessThan(20);
+    expect(Math.abs((await top("Focus")) - undo)).toBeLessThan(20);
+
+    await page.evaluate(() =>
+      localStorage.setItem(
+        "lskc-circle-workspace-v3:lesson-chords-16-1-16-2",
+        JSON.stringify({ step: 1, found: [true, true] }),
+      ),
+    );
+    await page.reload();
+    const marks = page
+      .getByRole("region", { name: "Guided lesson" })
+      .locator("dd mark");
+    await expect(marks).toHaveCount(2);
+    const given = (await marks.first().boundingBox())!;
+    const result = (await marks.last().boundingBox())!;
+    expect(Math.abs(given.y - result.y)).toBeLessThan(4);
+  });
 });
 
 test.describe("touch screens", () => {
