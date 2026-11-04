@@ -92,8 +92,8 @@ function Found({
         <dd>
           <MathText>{get}</MathText>
         </dd>
-        <dt className={s.fullRow}>{c.write}</dt>
-        <dd className={`${s.fullRow} ${s.writeReason}`}>
+        <dt>{c.write}</dt>
+        <dd className={s.writeReason}>
           (<ReasonLabel reason={reason(reasonId)} />)
         </dd>
       </dl>
