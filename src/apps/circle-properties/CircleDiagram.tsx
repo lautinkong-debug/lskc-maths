@@ -15,6 +15,7 @@ import {
   type DragKey,
 } from "./geometry";
 import styles from "./diagram.module.css";
+import { useTouchDrag } from "./useTouchDrag";
 import MathText from "./MathText";
 import DiagramMeasurements from "./DiagramMeasurements";
 import {
@@ -126,6 +127,7 @@ export default function CircleDiagram({
   ink?: InkBoardController;
 }) {
   const svgRef = useRef<SVGSVGElement>(null);
+  useTouchDrag(svgRef, "[data-draggable], [data-ink-capture]");
   const drag = useRef<{
     key: DragKey;
     pointerId: number;

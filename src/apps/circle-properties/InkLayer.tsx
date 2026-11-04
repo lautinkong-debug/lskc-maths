@@ -225,6 +225,7 @@ export default function InkLayer({
           {...bounds}
           fill="transparent"
           className={s.capture}
+          data-ink-capture
           role="presentation"
           aria-label={
             board.mode === "pen"

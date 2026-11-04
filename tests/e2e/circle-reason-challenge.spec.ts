@@ -184,6 +184,91 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await expect(lesson.getByText("✓ Correct")).toBeVisible();
 });
 
+test.describe("touch screens", () => {
+  test.use({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+  });
+
+  type Spot = { x: number; y: number };
+  async function swipe(page: Page, from: Spot, to: Spot) {
+    const cdp = await page.context().newCDPSession(page);
+    const touch = (
+      type: "touchStart" | "touchMove" | "touchEnd",
+      points: Spot[],
+    ) => cdp.send("Input.dispatchTouchEvent", { type, touchPoints: points });
+    await touch("touchStart", [from]);
+    for (let step = 1; step <= 12; step++) {
+      await touch("touchMove", [
+        {
+          x: from.x + ((to.x - from.x) * step) / 12,
+          y: from.y + ((to.y - from.y) * step) / 12,
+        },
+      ]);
+      await page.waitForTimeout(16);
+    }
+    await touch("touchEnd", []);
+    await cdp.detach();
+  }
+  async function centre(page: Page, selector: string): Promise<Spot> {
+    const box = (await page.locator(selector).first().boundingBox())!;
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  }
+  const point = (label: string) => `[data-point="${label}"] circle`;
+
+  test("a finger drags points and draws, and still scrolls away from them", async ({
+    page,
+  }) => {
+    await open(page);
+    const diagram = page.getByTestId("circle-diagram");
+    await diagram.scrollIntoViewIfNeeded();
+    const top = await page.evaluate(() => scrollY);
+    const a = await centre(page, point("A"));
+    const b = await centre(page, point("B"));
+    await swipe(page, await centre(page, point("N")), {
+      x: (a.x + b.x) / 2,
+      y: (a.y + b.y) / 2,
+    });
+    await expect(page.getByText("You found: AN = NB")).toBeVisible();
+    expect(await page.evaluate(() => scrollY)).toBe(top);
+
+    await page.getByRole("button", { name: /Pen$/ }).first().tap();
+    await page.getByRole("button", { name: "Pen", exact: true }).tap();
+    const box = (await diagram.boundingBox())!;
+    const middle = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+    await swipe(page, middle, { x: middle.x + 60, y: middle.y + 60 });
+    await expect(
+      page.locator('[aria-label="Teacher annotations"] path'),
+    ).toHaveCount(1);
+    expect(await page.evaluate(() => scrollY)).toBe(top);
+    await page.getByRole("button", { name: "Move", exact: true }).tap();
+
+    const low = { x: box.x + box.width / 2, y: box.y + box.height * 0.9 };
+    await swipe(page, low, { x: low.x, y: low.y - 200 });
+    await expect
+      .poll(() => page.evaluate(() => scrollY))
+      .toBeGreaterThan(top + 50);
+  });
+
+  test("a finger drags the points in the reason explorer", async ({ page }) => {
+    await open(page);
+    await page.getByRole("button", { name: /Reveal the reasons/ }).tap();
+    const handle = page.locator("[data-flow-handle]").first();
+    await handle.scrollIntoViewIfNeeded();
+    const place = () =>
+      handle.locator("circle").first().getAttribute("cx") as Promise<string>;
+    const before = await place();
+    const start = (await handle.boundingBox())!;
+    const from = {
+      x: start.x + start.width / 2,
+      y: start.y + start.height / 2,
+    };
+    await swipe(page, from, { x: from.x + 40, y: from.y + 40 });
+    await expect.poll(place).not.toBe(before);
+  });
+});
+
 for (const width of [360, 390]) {
   test.describe(`phone typography at ${width}px`, () => {
     test.use({

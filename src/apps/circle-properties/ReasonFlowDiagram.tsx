@@ -4,6 +4,7 @@ import { MathSvgText } from "./MathText";
 import { buildReasonFlow, reasonFlow, visibleReasonMarks } from "./reasonFlow";
 import { dragReasonPoint, initialReasonParameters } from "./reasonExploration";
 import type { DragKey, Parameters, Point } from "./geometry";
+import { useTouchDrag } from "./useTouchDrag";
 import s from "./reason-flow.module.css";
 
 const colours = { base: "#65788e", given: "#2454c6", result: "#18764b" };
@@ -24,6 +25,7 @@ export default function ReasonFlowDiagram({
 }) {
   const id = useId();
   const svgRef = useRef<SVGSVGElement>(null);
+  useTouchDrag(svgRef, "[data-flow-handle]");
   const dragRef = useRef<{ key: DragKey; pointerId: number } | null>(null);
   const reason = reasons.find((item) => item.id === reasonId);
   const flow = reasonFlow[reasonId];

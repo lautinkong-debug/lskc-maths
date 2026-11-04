@@ -884,7 +884,9 @@ export default function ReasonChallenge({
                     )}
                     {review && (
                       <p className={s.fieldFeedback}>
-                        {c.correctValue(challenge.q.answer)}
+                        <MathText>
+                          {c.correctValue(challenge.q.answer)}
+                        </MathText>
                       </p>
                     )}
                   </fieldset>

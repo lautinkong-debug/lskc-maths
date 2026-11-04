@@ -11,7 +11,10 @@
 - [x] MathText stacks ½ as a vertical fraction and draws a real square root over its whole bracket.
 - [x] "Write it" is now four full solutions (∵ / ∴ style) with the key reasons hidden, including ∠ sum of △ and Pyth. theorem. Old saved answers for this step are dropped.
 - [x] Reasons Relay and Reasons Play use the standard wording: "∠ONB = x°. Find x." and "AN = x cm. Find x.", with an "x =" answer box. The coordinate question (16.3) keeps its own wording.
-- [x] All 2657 unit tests, typecheck, lint and four Circle browser tests pass. Screenshots checked at 1366, 1920 (projector) and 375 px with no sideways scrolling. Not committed or published.
+- [x] All 2657 unit tests, typecheck, lint and four Circle browser tests pass. Screenshots checked at 1366, 1920 (projector) and 375 px with no sideways scrolling.
+- [x] Full check on the owner's request found three faults, now fixed. Finger drags were cancelled on touch screens because browsers ignore `touch-action` on parts inside an SVG (points, reason explorer and pen; a fault from before this work), so `useTouchDrag` stops the scroll when a touch starts on a handle or the pen layer. Keyboard focus was lost when a solved blank's buttons disappeared. Screen readers heard nothing when a blank was filled.
+- [x] Passing on the production build with local emulators: site smoke, layout and challenge tests, plus Projection mode with real fullscreen. Security rules (24) and challenge server tests (11) pass. Run `test:rules` on its own emulators, not on ones the site is using: it leaves school-mode rules and dummy records behind.
+- [ ] Still to do by hand: a real iPhone and iPad (Safari could not be tested here; only their screen sizes were emulated in Edge).
 
 ## Circle Lab: clear instructions and the 16.1 vs 16.2 guided lesson (03/11/2026)
 

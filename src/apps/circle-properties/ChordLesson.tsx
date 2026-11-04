@@ -38,6 +38,13 @@ function SolutionReasonLabel({
   );
 }
 
+/** A solved blank's buttons disappear, so keyboard focus moves on within the card. */
+function keepFocusIn(card: HTMLElement | null) {
+  requestAnimationFrame(() =>
+    (card?.querySelector("button") ?? card)?.focus({ preventScroll: true }),
+  );
+}
+
 /** Says right or wrong in words and a tick or cross, not by colour alone. */
 function Stamp({ right }: { right: boolean }) {
   return (
@@ -330,6 +337,7 @@ export default function ChordLesson({
               return (
                 <li
                   key={item.id}
+                  tabIndex={-1}
                   data-result={solved ? true : wrong ? false : undefined}
                   data-fresh={fresh === item.id}
                 >
@@ -345,7 +353,8 @@ export default function ChordLesson({
                       label={c.sketch(item.question)}
                     />
                   </div>
-                  <div className={s.working}>
+                  {/* Live, so a screen reader hears each reason as it is filled in. */}
+                  <div className={s.working} aria-live="polite">
                     {item.lines.map((line) => (
                       <p
                         key={line.text}
@@ -395,12 +404,16 @@ export default function ChordLesson({
                               key={id}
                               aria-pressed={choice === id}
                               data-mark={choice === id ? "wrong" : undefined}
-                              onClick={() => {
+                              onClick={(event) => {
                                 setFresh(item.id);
                                 onState((previous) => ({
                                   ...previous,
                                   write: { ...previous.write, [blank.id]: id },
                                 }));
+                                if (id === blank.answer)
+                                  keepFocusIn(
+                                    event.currentTarget.closest("li"),
+                                  );
                               }}
                             >
                               <span>
