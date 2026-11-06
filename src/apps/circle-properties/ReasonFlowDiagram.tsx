@@ -86,9 +86,8 @@ export default function ReasonFlowDiagram({
       onPointerMove={move}
       onPointerUp={stop}
       onPointerCancel={stop}
-      onLostPointerCapture={() => {
-        dragRef.current = null;
-        svgRef.current?.removeAttribute("data-dragging");
+      onLostPointerCapture={(event) => {
+        if (event.target === event.currentTarget) stop(event);
       }}
     >
       <title
@@ -252,7 +251,8 @@ export default function ReasonFlowDiagram({
             className={s.handle}
             data-flow-handle={handle.name}
             onPointerDown={(event) => {
-              if (event.button !== 0 || !event.isPrimary) return;
+              if (dragRef.current || !event.isPrimary || event.button !== 0)
+                return;
               event.preventDefault();
               event.currentTarget.focus({ preventScroll: true });
               dragRef.current = { key: handle.key, pointerId: event.pointerId };

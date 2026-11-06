@@ -21,11 +21,13 @@ export function PresentationFrame({
   title,
   topic,
   canPresent,
+  classroomHref,
   children,
 }: {
   title: string;
   topic: string;
   canPresent: boolean;
+  classroomHref?: string;
   children: ReactNode;
 }) {
   const frame = useRef<HTMLElement>(null);
@@ -88,15 +90,25 @@ export function PresentationFrame({
               </h1>
               <p className="text-pencil mt-1">{topic}</p>
             </div>
-            <button
-              type="button"
-              aria-pressed={presenting}
-              disabled={!canPresent}
-              onClick={() => void togglePresentation()}
-              className="border-grid-strong text-navy hover:bg-navy-wash min-h-12 rounded-md border px-4 py-2 font-semibold transition-colors disabled:opacity-50"
-            >
-              {presenting ? copy.apps.exitPresentation : copy.apps.presentation}
-            </button>
+            <div className="flex max-w-full flex-wrap items-center gap-3">
+              {classroomHref && !presenting && (
+                <a
+                  href={classroomHref}
+                  className="border-grid-strong text-navy hover:bg-navy-wash inline-flex min-h-12 items-center rounded-md border px-4 py-2 font-semibold"
+                >
+                  {copy.apps.studentClassLink}
+                </a>
+              )}
+              <button
+                type="button"
+                aria-pressed={presenting}
+                disabled={!canPresent}
+                onClick={() => void togglePresentation()}
+                className="border-grid-strong text-navy hover:bg-navy-wash min-h-12 rounded-md border px-4 py-2 font-semibold transition-colors disabled:opacity-50"
+              >
+                {presenting ? copy.apps.exitPresentation : copy.apps.presentation}
+              </button>
+            </div>
           </div>
           <div className="mt-8">{children}</div>
         </div>

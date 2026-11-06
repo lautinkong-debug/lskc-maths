@@ -24,10 +24,12 @@ function variables(children: string, svg: boolean, notation: boolean) {
   const nodes = [];
   let last = 0;
   const pattern =
-    /(?<![A-Za-z])(?:[ABCDMNOPQT]{2,3}|[ABCDMNOPQT]|[xyr])(?![A-Za-z])|[θφℓ]/g;
+    /(?:[ABCDMNOPQT]{1,3}|[xyr])(?![A-Za-z])|[θφℓ]/g;
   for (const match of children.matchAll(pattern)) {
     const index = match.index,
       token = match[0];
+    if (/^[A-Za-z]/.test(token) && /[A-Za-z]/.test(children.charAt(index - 1)))
+      continue;
     // Only style A in prose when its surrounding words identify the point.
     // In particular, “A perpendicular …” and “A different case …” stay upright.
     if (

@@ -1,5 +1,11 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab student access and iPad checks (06/11/2026)
+
+- Added `/apps/circle-properties/classroom` for class sets of iPads. It delivers the same lesson and games in one HTML response and uses the same browser-local progress. New requests check the teacher's app visibility. School-only deployments use the regular gated site.
+- Fixed older WebKit failing to initialise the lesson's notation, a second touch interrupting a drag, and overlapping length and right-angle labels in Fold. The single-file lesson was checked in Windows WebKit 15.4 and 16.0, plus modern WebKit and Edge at iPad sizes. Physical iPads and the school network require a separate classroom check.
+- The first 32 cold sessions on the full website returned the page but failed to load required assets on the shared filtered test connection. The dedicated student link is the target for a production retest with independent Relay answers. Evidence lives under `out/classroom-32-qa` in the release checkout.
+
 ## Circle Lab: paper circle demonstrations for Lesson 1 (05/11/2026)
 
 Source: Lesson Worksheet 16.1 v4, Part A Steps 1 – 3 (concrete, picture, proof). Paper circle 1: radius 5 cm, AB = 8 cm, ON = 3 cm.

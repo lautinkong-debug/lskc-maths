@@ -212,8 +212,8 @@ export default function CircleDiagram({
         onPointerMove={move}
         onPointerUp={stop}
         onPointerCancel={stop}
-        onLostPointerCapture={() => {
-          drag.current = null;
+        onLostPointerCapture={(event) => {
+          if (event.target === event.currentTarget) stop(event);
         }}
         data-testid="circle-diagram"
       >
@@ -372,6 +372,8 @@ export default function CircleDiagram({
               onPointerDown={
                 point.drag
                   ? (event) => {
+                      if (drag.current || !event.isPrimary || event.button !== 0)
+                        return;
                       event.preventDefault();
                       drag.current = {
                         key: point.drag!,

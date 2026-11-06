@@ -76,7 +76,7 @@ export default function ReasonPractice({
   const options = ids.slice(offset).concat(ids.slice(0, offset));
   const feedback =
     question && answer !== null ? feedbackFor(question, answer) : "";
-  const shortFeedback = feedback.split(/(?<=\.)\s/)[0];
+  const shortFeedback = feedback.match(/^[\s\S]*?\.(?=\s)/)?.[0] ?? feedback;
   function choose(id: string) {
     if (!question || review || answer !== null) return;
     setState(answerCard(state, id, clock()));

@@ -38,6 +38,11 @@
   font-size: 20px;
   font-weight: 800;
 }
+.measureLeader {
+  stroke: #b3264a;
+  stroke-width: 1.25;
+  stroke-dasharray: 3 3;
+}
 .landed {
   fill: #1b714a;
   font-size: 20px;

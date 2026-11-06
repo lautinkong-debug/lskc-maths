@@ -263,6 +263,15 @@ test("the paper circle demonstrations move on one stage per press", async ({
 
   // Fold: A lands on B, then the crease is measured.
   const paper = page.getByTestId("paper-circle");
+  async function checkHeightLabel(cm: string) {
+    const angle = (await paper.locator("text").filter({ hasText: /^90°$/ }).boundingBox())!;
+    const height = (await paper.getByText(cm, { exact: true }).boundingBox())!;
+    const gap = Math.max(
+      height.x - (angle.x + angle.width), angle.x - (height.x + height.width),
+      height.y - (angle.y + angle.height), angle.y - (height.y + height.height),
+    );
+    expect(gap, `The ${cm} ON label must clear the 90° reading`).toBeGreaterThan(2);
+  }
   await press("Fold it →");
   await expect(paper.locator('[data-flipped="true"]')).toHaveCount(1);
   await expect(paper).toContainText("A lands on B");
@@ -277,12 +286,23 @@ test("the paper circle demonstrations move on one stage per press", async ({
   await expect(paper.locator("[data-paper-square]")).toHaveCount(1);
   await press("(d) Measure ON →");
   await expect(lesson).toContainText("9 + 16 = 25");
+  await checkHeightLabel("3 cm");
   await press("What do we see? →");
   await expect(lesson).toContainText("Is measuring enough?");
 
-  // Another chord restarts the fold, with its own numbers.
-  await press("Try another chord");
-  await expect(paper).toHaveAttribute("data-stage", "0");
+  // Both sloping chords must leave room for the ON measurement beside the right angle.
+  for (const height of ["4 cm", "1.4 cm"]) {
+    await press("Try another chord");
+    await expect(paper).toHaveAttribute("data-stage", "0");
+    await press("Fold it →");
+    await press("Open it →");
+    await press("(a) Check the crease →");
+    await press("(b) Measure AN and BN →");
+    await press("(c) Measure ∠ONA →");
+    await press("(d) Measure ON →");
+    await checkHeightLabel(height);
+    await press("What do we see? →");
+  }
   await lesson.getByRole("button", { name: "Mirror proof" }).click();
 
   // Mirror: the triangle flips, then each blank waits for a press.
@@ -415,6 +435,51 @@ test.describe("touch screens", () => {
       .poll(() => page.evaluate(() => scrollY))
       .toBeGreaterThan(drawing + 50);
   });
+
+  for (const diagram of ["construction", "reason explorer"] as const) {
+    test(`the first finger keeps its handle in the ${diagram} after another finger lifts`, async ({ page }) => {
+      await open(page);
+      const construction = diagram === "construction";
+      if (construction) {
+        await page.getByRole("button", { name: "16.1 Right angle" }).tap();
+      } else {
+        await page.getByRole("button", { name: /Reveal the reasons/ }).tap();
+      }
+      const handle = (name: string) =>
+        construction ? point(name) : `[data-flow-handle="${name}"] circle`;
+      await page.locator(handle("A")).first().scrollIntoViewIfNeeded();
+      const first = await centre(page, handle("A"));
+      const aY = () =>
+        page.locator(handle("A")).first().getAttribute("cy").then(Number);
+      const client = await page.context().newCDPSession(page);
+      const touch = (
+        type: "touchStart" | "touchMove" | "touchEnd",
+        touchPoints: (Spot & { id: number })[],
+      ) => client.send("Input.dispatchTouchEvent", { type, touchPoints });
+      try {
+        const startY = await aY();
+        await touch("touchStart", [{ ...first, id: 1 }]);
+        const held = { ...first, y: first.y + 12, id: 1 };
+        await touch("touchMove", [held]);
+        await expect.poll(aY).toBeGreaterThan(startY + 2);
+        const heldY = await aY();
+        const second = { ...(await centre(page, handle("B"))), id: 2 };
+        const secondY = await page.locator(handle("B")).first().getAttribute("cy");
+        const movedSecond = { ...second, y: second.y + 18 };
+        await touch("touchStart", [held, second]);
+        await touch("touchMove", [held, movedSecond]);
+        // A nonempty CDP touchEnd list identifies the contacts to lift.
+        await touch("touchEnd", [movedSecond]);
+        expect(await page.locator(handle("B")).first().getAttribute("cy")).toBe(secondY);
+        expect(await aY()).toBeCloseTo(heldY, 1);
+        await touch("touchMove", [{ ...held, y: held.y + 18 }]);
+        await expect.poll(aY).toBeGreaterThan(heldY + 2);
+      } finally {
+        await touch("touchEnd", []);
+        await client.detach();
+      }
+    });
+  }
 
   test("a finger drags the points in the reason explorer", async ({ page }) => {
     await open(page);

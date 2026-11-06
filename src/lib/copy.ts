@@ -3667,6 +3667,7 @@ export const copy = {
     allStrands: "All strands",
     openApp: "Open app",
     backToApps: "All web apps",
+    studentClassLink: "Student class link",
     loading: "Loading app…",
     checkingAvailability: "Checking app availability…",
     settingsFailed: "Could not load app settings. Please try again.",

@@ -49,7 +49,7 @@ svg { max-width: 100%; }
 `;
 await writeFile(resolve(output, "theme.css"), theme);
 
-const head = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>Circle Lab | LSKC Mathematics</title>';
+const head = '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><link rel="icon" href="data:,"><title>Circle Lab | LSKC Mathematics</title>';
 await writeFile(
   resolve(output, "index.html"),
   `${head}<link rel="stylesheet" href="/theme.css"><link rel="stylesheet" href="/app.css"></head><body><div id="root"></div><script src="/app.js" defer></script></body></html>`,

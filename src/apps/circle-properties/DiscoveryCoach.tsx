@@ -74,7 +74,7 @@ export default function DiscoveryCoach({
   const open = session.open[mission.id] ?? false;
   const feedback = check.revealed ? card.explanation : evaluation?.feedback;
   const [firstFeedback = "", ...moreFeedback] =
-    feedback?.split(/(?<=[.!?])\s+/) ?? [];
+    feedback?.match(/\S[\s\S]*?(?:[.!?](?=\s)|$)/g) ?? [];
   function updateCheck(patch: Partial<DiscoveryCheckState>) {
     setSession((previous) => ({
       ...previous,

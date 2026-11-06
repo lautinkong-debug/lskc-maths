@@ -82,6 +82,11 @@ export function AppHost({ slug }: { slug: string }) {
         title={listing.title}
         topic={listing.topic}
         canPresent={readySlug === slug}
+        classroomHref={
+          slug === "circle-properties" && process.env.NEXT_PUBLIC_ACCESS_MODE === "public"
+            ? "/apps/circle-properties/classroom"
+            : undefined
+        }
       >
         <Suspense fallback={<p role="status">{copy.apps.loading}</p>}>
           <Component />

@@ -20,7 +20,7 @@ const vulgar: Record<string, [string, string]> = {
   "¾": ["3", "4"],
 };
 const fractionPattern = new RegExp(
-  String.raw`\\frac\{([^{}]+)\}\{([^{}]+)\}|(?<![A-Za-z0-9])(${operand})\s*[÷/]\s*(${operand})(?![A-Za-z0-9])|(?<![A-Za-z0-9])(${ratioOperand})\s*:\s*(${ratioOperand})(?![A-Za-z0-9])|([½⅓⅔¼¾])`,
+  String.raw`\\frac\{([^{}]+)\}\{([^{}]+)\}|(${operand})\s*[÷/]\s*(${operand})(?![A-Za-z0-9])|(${ratioOperand})\s*:\s*(${ratioOperand})(?![A-Za-z0-9])|([½⅓⅔¼¾])`,
   "g",
 );
 // √(…) takes the whole bracket as its radicand; √91 or √x takes the number or name.
@@ -54,7 +54,18 @@ function arcs(text: string): NotationPart[] {
 function fractionParts(text: string): NotationPart[] {
   const parts: NotationPart[] = [];
   let last = 0;
-  for (const match of text.matchAll(fractionPattern)) {
+  const matcher = new RegExp(fractionPattern);
+  let match: RegExpExecArray | null;
+  while ((match = matcher.exec(text))) {
+    // Older iPads cannot parse regex lookbehind. Check the left boundary here;
+    // retry inside a rejected match so its denominator can start a valid ratio.
+    if (
+      !match[1] && !match[7] &&
+      /[A-Za-z0-9]/.test(text.charAt(match.index - 1))
+    ) {
+      matcher.lastIndex = match.index + 1;
+      continue;
+    }
     if (match.index > last) parts.push(...arcs(text.slice(last, match.index)));
     const [numerator, denominator] = match[7]
       ? vulgar[match[7]]

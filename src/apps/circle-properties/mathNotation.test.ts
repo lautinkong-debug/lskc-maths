@@ -6,6 +6,16 @@ import { parseNotation } from "./mathNotation";
 import styles from "./math-text.module.css";
 
 describe("circle mathematical notation", () => {
+  it("keeps a word ending upright and still recognises the next fraction", () => {
+    expect(parseNotation("wordAB / CD / ON")).toEqual([
+      { kind: "text", text: "wordAB / " },
+      { kind: "fraction", numerator: "CD", denominator: "ON" },
+    ]);
+    const html = renderToStaticMarkup(createElement(MathText, null, "Index NB"));
+    expect(html.match(/<var /g)).toHaveLength(1);
+    expect(html).toContain(">NB</var>");
+  });
+
   it("parses the arc ratio in a mission without swallowing the instruction", () => {
     expect(
       parseNotation("Arc AB ÷ arc CD = 2. Inspect the chord ratio."),

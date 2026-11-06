@@ -25,6 +25,9 @@ function hostingFirebaseEnv(): NonNullable<NextConfig["env"]> | undefined {
 
 const nextConfig: NextConfig = {
   env: hostingFirebaseEnv(),
+  outputFileTracingIncludes: {
+    "/apps/circle-properties/classroom": ["./out/circle-properties/Circle-Lab.html"],
+  },
   // Keep the local classroom preview free of the floating developer menu.
   // Next.js still reports compile and runtime errors.
   devIndicators: false,

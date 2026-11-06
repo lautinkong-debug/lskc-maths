@@ -220,6 +220,9 @@ function FoldScene({ stage, chord }: { stage: number; chord: PaperChord }) {
   const opened = stage >= foldStage.opened;
   const halves = stage >= foldStage.halves;
   const below = 26;
+  const heightMid = world(midpoint(O, N));
+  // Keep the ON reading above and to the right of its segment, clear of the mark at N.
+  const heightLabel = { x: heightMid.x + 94, y: heightMid.y - 35 };
   return (
     <>
       <g transform={`rotate(${chord.tilt} ${cx} ${cy})`}>
@@ -318,10 +321,12 @@ function FoldScene({ stage, chord }: { stage: number; chord: PaperChord }) {
       )}
       {stage >= foldStage.pythagoras && (
         <>
-          <Label
-            at={world({ x: cx + 36, y: (O.y + N.y) / 2 })}
-            className={s.measure}
-          >
+          <Segment
+            from={heightMid}
+            to={{ x: heightLabel.x - 31, y: heightLabel.y + 3 }}
+            className={s.measureLeader}
+          />
+          <Label at={heightLabel} className={s.measure}>
             {`${chord.distance} cm`}
           </Label>
           <Label

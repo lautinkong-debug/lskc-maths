@@ -7,8 +7,8 @@
   },
   "description": "Mathematics Department website for S.T.F.A. Lee Shau Kee College",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/build-circle-lab.mjs && next dev",
+    "build": "node scripts/build-circle-lab.mjs && next build",
     "build:statistics": "node scripts/build-statistical-lab.mjs",
     "preview:statistics": "node scripts/serve-statistical-lab.mjs",
     "test:statistics:e2e": "npm run build:statistics && playwright test --config playwright.statistics.config.ts",
