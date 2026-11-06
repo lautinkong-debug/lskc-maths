@@ -11,7 +11,7 @@
 }
 .steps {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
 }
 .lesson .steps button {
@@ -58,6 +58,44 @@
   background: #fffdf5;
   border: 1px dashed #d9c58f;
   color: #6b5a33;
+}
+.paperList,
+.proof {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.answer {
+  color: #b3264a;
+}
+.seen {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #a8ceba;
+  background: #e4f6eb;
+  color: #174f36;
+  font-weight: 600;
+}
+.seen p + p {
+  margin-top: 6px;
+}
+.proof li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 14px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: white;
+}
+.proof li[data-current="true"] {
+  outline: 2px solid #d97706;
+}
+.proofReason {
+  color: #54657a;
+  font-style: italic;
 }
 .condition {
   display: grid;

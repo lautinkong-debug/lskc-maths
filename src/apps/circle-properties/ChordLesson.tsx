@@ -15,6 +15,8 @@ import {
   type SolutionReason,
 } from "./chordLessonData";
 import ChordSketch from "./ChordSketch";
+import PaperCirclePanel from "./PaperCirclePanel";
+import { isPaperStep, type PaperChord } from "./paperCircle";
 import type { Parameters } from "./geometry";
 import MathText from "./MathText";
 import ReasonLabel, { Highlight } from "./ReasonLabel";
@@ -110,6 +112,9 @@ export default function ChordLesson({
   conditionMet,
   revealed,
   onDeduce,
+  paperStage,
+  paperChord,
+  onPaperRestart,
 }: {
   state: ChordLessonState;
   onState: (update: (previous: ChordLessonState) => ChordLessonState) => void;
@@ -119,14 +124,18 @@ export default function ChordLesson({
   /** The class has pressed for the deduction during this visit to the step. */
   revealed: boolean;
   onDeduce: () => void;
+  paperStage: number;
+  paperChord: PaperChord;
+  onPaperRestart: () => void;
 }) {
   const { step, found } = state;
   function go(next: ChordLessonStep) {
     // A diagram step always starts again from N off the mid-point, for the next class.
-    if (next === 0 || next === 1) onShape({ ...chordLessonStarts[next] });
+    if (next === 3 || next === 4) onShape({ ...chordLessonStarts[next] });
+    onPaperRestart();
     onState((previous) => ({ ...previous, step: next }));
   }
-  const diagramStep = step === 0 ? c.perpendicular : c.midpoint;
+  const diagramStep = step === 3 ? c.perpendicular : c.midpoint;
 
   return (
     <section className={s.lesson} aria-label={c.mode}>
@@ -138,11 +147,13 @@ export default function ChordLesson({
             key={label}
             aria-current={step === index ? "step" : undefined}
             data-done={
-              index < 2
-                ? found[index]
-                : index === 2
-                  ? sortRight(state) === sortCards.length
-                  : writeComplete(state)
+              index < 3
+                ? state.seen[index]
+                : index < 5
+                  ? found[index - 3]
+                  : index === 5
+                    ? sortRight(state) === sortCards.length
+                    : writeComplete(state)
             }
             onClick={() => go(index as ChordLessonStep)}
           >
@@ -153,7 +164,11 @@ export default function ChordLesson({
       </nav>
       <p className={s.stepOf}>{c.stepOf(step + 1, c.steps.length)}</p>
 
-      {(step === 0 || step === 1) && (
+      {isPaperStep(step) && (
+        <PaperCirclePanel step={step} stage={paperStage} chord={paperChord} />
+      )}
+
+      {(step === 3 || step === 4) && (
         <>
           {/* The task itself sits above the circle, where every topic shows it. */}
           <h4>
@@ -165,7 +180,7 @@ export default function ChordLesson({
                 found={diagramStep.found}
                 given={diagramStep.given}
                 get={diagramStep.get}
-                reasonId={step === 0 ? "r1" : "r2"}
+                reasonId={step === 3 ? "r1" : "r2"}
                 say={diagramStep.say}
               />
               <button
@@ -199,9 +214,9 @@ export default function ChordLesson({
       )}
 
       {/* The questions fill the full width below; this stays beside the circle to refer to. */}
-      {step >= 2 && (
+      {step >= 5 && (
         <>
-          <h4>{step === 2 ? c.which.heading : c.writeStep.heading}</h4>
+          <h4>{step === 5 ? c.which.heading : c.writeStep.heading}</h4>
           <table className={s.compare}>
             <caption className={s.visuallyHidden}>{c.which.table}</caption>
             <thead>
@@ -287,7 +302,7 @@ export function ChordLessonQuestions({
       className={`${s.lesson} ${s.questions}`}
       aria-label={c.questions}
     >
-      {step === 2 && (
+      {step === 5 && (
         <>
           <p className={s.task}>{c.which.task}</p>
           <ol className={s.cards}>
@@ -377,7 +392,7 @@ export function ChordLessonQuestions({
             type="button"
             className={s.primary}
             onClick={() => {
-              onState((previous) => ({ ...previous, step: 3 }));
+              onState((previous) => ({ ...previous, step: 6 }));
               // The button is at the end of a long list; the next step starts at the top.
               requestAnimationFrame(() =>
                 top.current?.scrollIntoView({ block: "start" }),
@@ -389,7 +404,7 @@ export function ChordLessonQuestions({
         </>
       )}
 
-      {step === 3 && (
+      {step === 6 && (
         <>
           <p className={s.task}>{c.writeStep.task}</p>
           {/* Fixed columns: a card never jumps across when a solved blank's buttons close. */}
@@ -542,7 +557,7 @@ export function ChordLessonQuestions({
                 <button
                   type="button"
                   onClick={() => {
-                    onShape({ ...chordLessonStarts[0] });
+                    onShape({ ...chordLessonStarts[3] });
                     onState(() => initialChordLesson());
                   }}
                 >

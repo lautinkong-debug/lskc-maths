@@ -21,30 +21,30 @@ describe("Topic 1 guided lesson: 16.1 or 16.2", () => {
     for (const start of Object.values(chordLessonStarts))
       expect(nAtMidpoint(start)).toBe(false);
     expect(nAtMidpoint({ ...defaults.bisector, secondary: 0 })).toBe(true);
-    expect(nAtMidpoint({ ...chordLessonStarts[1], secondary: 0 })).toBe(true);
+    expect(nAtMidpoint({ ...chordLessonStarts[4], secondary: 0 })).toBe(true);
   });
 
   it("shows the given reading first and the result only once revealed", () => {
     const both = { lengths: true, angles: true };
-    expect(chordLessonDisplay(0, false)).toEqual({
+    expect(chordLessonDisplay(3, false)).toEqual({
       lengths: false,
       angles: true,
     });
-    expect(chordLessonDisplay(0, true)).toEqual(both);
-    expect(chordLessonDisplay(1, false)).toEqual({
+    expect(chordLessonDisplay(3, true)).toEqual(both);
+    expect(chordLessonDisplay(4, false)).toEqual({
       lengths: true,
       angles: false,
     });
-    expect(chordLessonDisplay(1, true)).toEqual(both);
-    expect(chordLessonDisplay(2, false)).toEqual(both);
+    expect(chordLessonDisplay(4, true)).toEqual(both);
+    expect(chordLessonDisplay(5, false)).toEqual(both);
   });
 
   it("lets the Show and Hide buttons override either reading", () => {
-    expect(chordLessonDisplay(0, false, { lengths: true })).toEqual({
+    expect(chordLessonDisplay(3, false, { lengths: true })).toEqual({
       lengths: true,
       angles: true,
     });
-    expect(chordLessonDisplay(0, false, { angles: false })).toEqual({
+    expect(chordLessonDisplay(3, false, { angles: false })).toEqual({
       lengths: false,
       angles: false,
     });
@@ -78,14 +78,16 @@ describe("Topic 1 guided lesson: 16.1 or 16.2", () => {
   it("restores saved progress and drops anything unknown", () => {
     const saved = {
       open: false,
-      step: 3,
+      step: 6,
+      seen: [true, false, true],
       found: [true, true],
       sort: { s1: "r1", s2: "r9", fake: "r1" },
       write: { w1a: "r2", w2b: "pyth", w3b: "r1", w1: "r1" },
     };
     expect(parseChordLesson(JSON.parse(JSON.stringify(saved)))).toEqual({
       open: false,
-      step: 3,
+      step: 6,
+      seen: [true, false, true],
       found: [true, true],
       sort: { s1: "r1" },
       write: { w1a: "r2", w2b: "pyth" },

@@ -1,5 +1,21 @@
 # Circle Lab handover: Claude Code to Codex (4 November 2026)
 
+## Paper circle update (6 November 2026)
+
+The paper circle demonstrations for Lesson 1 (Words, Fold, Mirror proof) are committed on `fix/circle-relay-feedback-and-timer`, on top of `d7b4831`. They are **not pushed and not on the live website**, which still has `d7b4831`. Publish only if the owner asks.
+
+The main working folder has the same files. `src/lib/copy.ts` and `PLAN.md` there received only this change. The previous versions are in `out\backup-before-claude-paper-circle-2026-11-06`.
+
+For Monday's lesson the owner uses the single file `out\circle-release-main\out\circle-properties\Circle-Lab.html` from a USB stick, unless the website is updated first. The lesson plan (`Lesson_Plan_16.1_Chords_Lesson_Observation_v2.docx`, in the owner's Google Drive worksheet folder) follows the seven steps and uses their exact button names, so tell the owner before renaming a button or changing a step.
+
+## Publication update (5 November 2026)
+
+The owner explicitly approved pushing the 12 commits to `lautinkong-debug/lskc-maths` main. Commit `d7b483159fc971c50d267a132b9ad0e456ede684` is now published at `https://lskc-maths.vercel.app/apps/circle-properties`. Vercel deployment `dpl_6XHFSCbDMDmEqvRV8Dmo4p1QdesQ` is Ready and assigned to the production domain.
+
+Codex rechecked 730 Circle Lab tests, full-site lint, the production build with TypeScript, and seven browser scenarios both locally and on production. Live checks also covered all seven topics, projection mode, old saved-tab migration and Reasons Play. Touch checks used desktop Edge touch emulation; real iPad/Safari remains unverified. Release evidence is in `out/circle-release-main/out/circle-publication-tests/`.
+
+The original handover below records the state before publication.
+
 Read `CLAUDE.md`, then this file, then the November sections at the top of `PLAN.md`.
 
 The owner is a maths teacher, not a programmer: explain things in plain English. **The owner teaches this lesson to the principal on Monday 9 November 2026**, so avoid risky changes to Topic 1 before then.
@@ -28,6 +44,7 @@ All in `src/apps/circle-properties/`, with wording in `src/lib/copy.ts`.
   - Steps 3 and 4 (`ChordLessonQuestions`): question cards across the full width, with the circle and the Given / You get table above them.
   - Answers are full-sentence reasons, not 16.1 / 16.2.
   - "Write it" solutions match Lesson Worksheet 16.1 version 3 line for line, with key reasons hidden.
+- **Paper circle demonstrations (`PaperCircleDemo.tsx`, `PaperCirclePanel.tsx`, `paperCircle.ts`):** Words, Fold and Mirror proof, from worksheet v4 Part A Steps 1 – 3. One press moves one stage. These are lesson steps 0 – 2; 16.1 and 16.2 are now steps 3 and 4, Which one? 5, Write it 6.
 - **`ChordSketch.tsx`:** a small diagram per question that marks only the given fact.
 - **`ReasonLabel.tsx`, `reasonParts()` in `content.ts`:** reasons split into condition (blue) and result (green).
 - **`MathText.tsx`, `mathNotation.ts`:** ½ as a vertical fraction, √(...) as a real root sign.
@@ -37,7 +54,8 @@ All in `src/apps/circle-properties/`, with wording in `src/lib/copy.ts`.
 ## Owner decisions: please keep these
 
 - Condition first, then the deduction. The graph must never show both before the button is pressed.
-- A finished step always replays. `found` only colours the step buttons. `revealedStep` in `index.tsx` is deliberately not saved.
+- A finished step always replays. `seen` and `found` only colour the step buttons. `revealedStep` and `paper` in `index.tsx` are deliberately not saved.
+- Demonstrations ask before showing: each tag, blank and measurement waits for a press.
 - Full-sentence reasons in question cards. The numbers stay only in step names, headings and the table.
 - In Reasons Relay the value comes last.
 - x with its unit: x° and x cm, with `x =` as a plain number.
@@ -66,7 +84,7 @@ node scripts/build-circle-lab.mjs
 npx playwright test --config=playwright.circle-reason.config.ts
 ```
 
-Last results in `out\circle-release-main`: 2,657 unit tests, 7 browser tests, typecheck and lint all pass. The site smoke, layout and challenge tests, 24 rules tests and 11 challenge tests passed before the last few layout changes.
+Last results in `out\circle-release-main` (6 November 2026): 2,662 unit tests, 8 browser tests, typecheck, lint and the production build all pass. The site smoke, layout and challenge tests, 24 rules tests and 11 challenge tests passed before the last few layout changes.
 
 ## iPad status
 

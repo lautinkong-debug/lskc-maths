@@ -1,5 +1,16 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab: paper circle demonstrations for Lesson 1 (05/11/2026)
+
+Source: Lesson Worksheet 16.1 v4, Part A Steps 1 – 3 (concrete, picture, proof). Paper circle 1: radius 5 cm, AB = 8 cm, ON = 3 cm.
+
+- [x] The guided lesson now has seven steps: Words, Fold, Mirror proof, 16.1, 16.2, Which one?, Write it.
+- [x] Words: each part draws itself with its tag; the word follows on the next press; then two radii line up along the diameter.
+- [x] Fold: the left half folds over so A lands on B, opens to leave a crease, then (a) – (d) are measured one press at a time, ending on "Is measuring enough?"
+- [x] Mirror proof: △OAN flips over the crease onto △OBN, then each proof line lights up its part of the diagram. The blanks (radii, RHS, BN) wait for a press.
+- [x] Try another chord repeats a demonstration on a leaning chord. The controls sit under the diagram, so they work in Focus mode. The pen works on all three.
+- [x] Lesson progress moved to a new saved record (`lesson-chords-16-1-16-2-v2`), because the step numbers changed.
+
 ## Circle Lab: iPad check and handover to Codex (04/11/2026)
 
 - [x] 198 checks pass at six iPad sizes, portrait and landscape, with real touch input. Fixed along the way: on tablets the reason takes its own row, and form fields are 16px on touch screens so Safari does not zoom.

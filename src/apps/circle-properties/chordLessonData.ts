@@ -10,14 +10,17 @@ import { evaluateMission, missions } from "./missions";
 export type ChordReason = "r1" | "r2";
 /** Full solutions also hide the other reasons a line depends on. */
 export type SolutionReason = ChordReason | "angleSum" | "pyth" | "extAngle";
-export type ChordLessonStep = 0 | 1 | 2 | 3;
+/** Words, Fold, Mirror proof, 16.1, 16.2, Which one?, Write it (worksheet v4 order). */
+export type ChordLessonStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export type ChordLessonState = {
   /** Topic 1 opens on the guided lesson until the student picks Tasks or Free play. */
   open: boolean;
   step: ChordLessonStep;
+  /** Words, Fold and Mirror proof have each been seen to the end. */
+  seen: [boolean, boolean, boolean];
   /**
-   * Step 1 (16.1) and step 2 (16.2) have each been completed on the diagram.
-   * This only colours the step buttons: every visit replays the demonstration.
+   * The 16.1 and 16.2 steps have each been completed on the diagram.
+   * These only colour the step buttons: every visit replays the demonstration.
    */
   found: [boolean, boolean];
   sort: Record<string, ChordReason>;
@@ -28,15 +31,16 @@ export type ChordLessonState = {
 export const initialChordLesson = (): ChordLessonState => ({
   open: true,
   step: 0,
+  seen: [false, false, false],
   found: [false, false],
   sort: {},
   write: {},
 });
 
-/** Step 2 starts on a different, slanting chord so N is clearly off the mid-point again. */
-export const chordLessonStarts: Record<0 | 1, Required<Parameters>> = {
-  0: { ...defaults.bisector },
-  1: {
+/** 16.2 starts on a different, slanting chord so N is clearly off the mid-point again. */
+export const chordLessonStarts: Record<3 | 4, Required<Parameters>> = {
+  3: { ...defaults.bisector },
+  4: {
     ...defaults.bisector,
     primary: -3.5,
     secondary: -55,
@@ -52,7 +56,7 @@ export function nAtMidpoint(parameters: Parameters): boolean {
 export type ChordLessonReadings = { lengths: boolean; angles: boolean };
 
 /**
- * Step 1 shows the angle (the given) and reveals the lengths; step 2 is the reverse.
+ * 16.1 shows the angle (the given) and reveals the lengths; 16.2 is the reverse.
  * The Show/Hide buttons override either reading for the current step only.
  */
 export function chordLessonDisplay(
@@ -61,9 +65,9 @@ export function chordLessonDisplay(
   override: Partial<ChordLessonReadings> = {},
 ): ChordLessonReadings {
   const lesson =
-    step === 0
+    step === 3
       ? { lengths: revealed, angles: true }
-      : step === 1
+      : step === 4
         ? { lengths: true, angles: revealed }
         : { lengths: true, angles: true };
   return {
@@ -325,11 +329,13 @@ export function parseChordLesson(raw: unknown): ChordLessonState | undefined {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return;
   const value = raw as Partial<ChordLessonState>;
   const found = Array.isArray(value.found) ? value.found : [];
+  const seen = Array.isArray(value.seen) ? value.seen : [];
   return {
     open: value.open !== false,
-    step: [0, 1, 2, 3].includes(value.step as number)
+    step: [0, 1, 2, 3, 4, 5, 6].includes(value.step as number)
       ? (value.step as ChordLessonStep)
       : 0,
+    seen: [seen[0] === true, seen[1] === true, seen[2] === true],
     found: [found[0] === true, found[1] === true],
     sort: answers<ChordReason>(
       value.sort,

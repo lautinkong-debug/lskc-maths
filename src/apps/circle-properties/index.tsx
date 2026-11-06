@@ -24,6 +24,13 @@ import {
 import { snapParameters, type SnapResult } from "./snapping";
 import { allMissions, evaluateMission, missions } from "./missions";
 import ChordLesson, { ChordLessonQuestions } from "./ChordLesson";
+import PaperCircleDemo from "./PaperCircleDemo";
+import {
+  isPaperStep,
+  paperChords,
+  paperLastStage,
+  paperTask,
+} from "./paperCircle";
 import {
   chordLessonDisplay,
   chordLessonStarts,
@@ -32,6 +39,7 @@ import {
   parseChordLesson,
   type ChordLessonReadings,
   type ChordLessonState,
+  type ChordLessonStep,
 } from "./chordLessonData";
 import DiscoveryCoach from "./DiscoveryCoach";
 import { missionPrompt } from "./discovery";
@@ -465,7 +473,7 @@ function Playground({
   const lab = labs.find((l) => l.id === labId)!;
   // Only Topic 1 has the guided 16.1 / 16.2 lesson; other topics never read this record.
   const [lesson, setLesson] = useLocalSession<ChordLessonState>(
-    "lesson-chords-16-1-16-2",
+    "lesson-chords-16-1-16-2-v2",
     initialChordLesson,
     parseChordLesson,
   );
@@ -478,13 +486,15 @@ function Playground({
       return parsed &&
         labId === "bisector" &&
         lesson.open &&
-        (lesson.step === 0 || lesson.step === 1)
+        (lesson.step === 3 || lesson.step === 4)
         ? { ...parsed, parameters: { ...chordLessonStarts[lesson.step] } }
         : parsed;
     },
   );
   // Not saved: a finished step still replays from the condition on the next visit.
   const [revealedStep, setRevealedStep] = useState<number | null>(null);
+  // Also not saved: a paper circle demonstration always opens at its first stage.
+  const [paper, setPaper] = useState({ step: -1, stage: 0, chord: 0 });
   const boardRef = useRef<HTMLDivElement>(null);
   const ink = useInkBoard(`playground-${labId}`);
   const reasonRef = useRef<HTMLDivElement>(null);
@@ -527,7 +537,10 @@ function Playground({
     update("showReasons", next);
   const lessonMode = labId === "bisector" && lesson.open;
   // Steps 3 and 4 put their questions across the full width below the circle.
-  const lessonQuestions = lessonMode && lesson.step >= 2;
+  const lessonQuestions = lessonMode && lesson.step >= 5;
+  const paperStep = lessonMode && isPaperStep(lesson.step) ? lesson.step : null;
+  const paperStage = paper.step === lesson.step ? paper.stage : 0;
+  const paperChord = paperChords[paper.chord];
   const conditionMet = lessonMode && nAtMidpoint(parameters);
   const revealed = revealedStep === lesson.step;
   const tasks = !free && !lessonMode;
@@ -589,13 +602,13 @@ function Playground({
   /** The result stays hidden until the class has seen the condition on its own. */
   function revealDeduction() {
     const step = lesson.step;
-    if (step !== 0 && step !== 1) return;
+    if (step !== 3 && step !== 4) return;
     // The reveal always shows, even if a reading was hidden by hand.
     setLessonReadings({ step: -1 });
     setRevealedStep(step);
     setLesson((previous) => {
       const found: [boolean, boolean] = [...previous.found];
-      found[step] = true;
+      found[step - 3] = true;
       return { ...previous, found };
     });
   }
@@ -620,9 +633,41 @@ function Playground({
   }
   function openLesson() {
     setSnapResult(null);
-    if (lesson.step === 0 || lesson.step === 1)
+    if (lesson.step === 3 || lesson.step === 4)
       lessonShape({ ...chordLessonStarts[lesson.step] });
+    restartPaper();
     setLesson((previous) => ({ ...previous, open: true }));
+  }
+  function restartPaper() {
+    setPaper((previous) => ({ ...previous, step: -1, stage: 0 }));
+  }
+  function anotherChord() {
+    setPaper((previous) => ({
+      step: -1,
+      stage: 0,
+      chord: (previous.chord + 1) % paperChords.length,
+    }));
+  }
+  /** One press moves the demonstration on one stage, and the last press moves to the next step. */
+  function advancePaper() {
+    if (paperStep === null) return;
+    if (paperStage >= paperLastStage[paperStep]) {
+      if (paperStep === 2) lessonShape({ ...chordLessonStarts[3] });
+      restartPaper();
+      setLesson((previous) => ({
+        ...previous,
+        step: (paperStep + 1) as ChordLessonStep,
+      }));
+      return;
+    }
+    const stage = paperStage + 1;
+    setPaper((previous) => ({ ...previous, step: paperStep, stage }));
+    if (stage === paperLastStage[paperStep])
+      setLesson((previous) => {
+        const seen: ChordLessonState["seen"] = [...previous.seen];
+        seen[paperStep] = true;
+        return { ...previous, seen };
+      });
   }
   /** A new shape restarts the step: the result is hidden again, with no readings changed by hand. */
   function lessonShape(shape: Parameters) {
@@ -655,19 +700,21 @@ function Playground({
         ? "Compare ∠APB and ∠AQB on opposite sides of AB. Then move Q back. Which position is needed for equal angles?"
         : "Compare the angle at P when AB is a diameter and when it misses O. Drag P too: what changes?";
   const lessonStep =
-    lesson.step === 0
+    lesson.step === 3
       ? circleLessonCopy.perpendicular
       : circleLessonCopy.midpoint;
   const boardTask = conditionOpen
     ? conditionPrompt
     : lessonMode
-      ? lesson.step >= 2
-        ? c.lessonBoardTask
-        : revealed
-          ? lessonStep.result
-          : conditionMet
-            ? lessonStep.ask
-            : lessonStep.task
+      ? paperStep !== null
+        ? paperTask(paperStep, paperStage)
+        : lesson.step >= 5
+          ? c.lessonBoardTask
+          : revealed
+            ? lessonStep.result
+            : conditionMet
+              ? lessonStep.ask
+              : lessonStep.task
       : free
         ? lab.question
         : missionPrompt(mission);
@@ -814,19 +861,33 @@ function Playground({
                   )}
                 </div>
               )}
-              <div className={s.canvas}>
-                <CircleDiagram
-                  lab={labId}
-                  parameters={displayedParameters}
-                  onChange={changeByHand}
-                  missionIndex={snapMission}
-                  showMeasurements={display.lengths}
-                  showAngles={display.angles}
-                  showAngleMarks={!lessonMode || display.angles}
-                  highlightKey={highlightKey}
-                  showInstructions={false}
-                  ink={conditionOpen ? undefined : ink}
-                />
+              <div
+                className={`${s.canvas} ${paperStep !== null ? s.paperCanvas : ""}`}
+              >
+                {paperStep !== null ? (
+                  <PaperCircleDemo
+                    step={paperStep}
+                    stage={paperStage}
+                    chord={paperChord}
+                    ink={ink}
+                    onAdvance={advancePaper}
+                    onRestart={restartPaper}
+                    onAnotherChord={anotherChord}
+                  />
+                ) : (
+                  <CircleDiagram
+                    lab={labId}
+                    parameters={displayedParameters}
+                    onChange={changeByHand}
+                    missionIndex={snapMission}
+                    showMeasurements={display.lengths}
+                    showAngles={display.angles}
+                    showAngleMarks={!lessonMode || display.angles}
+                    highlightKey={highlightKey}
+                    showInstructions={false}
+                    ink={conditionOpen ? undefined : ink}
+                  />
+                )}
               </div>
               <div className={s.snapStatus} role="status" aria-live="polite">
                 {snapLabel &&
@@ -888,7 +949,7 @@ function Playground({
               )}
             </>
           )}
-          {!conditionOpen && (
+          {!conditionOpen && paperStep === null && (
             <details className={s.boardOptions}>
               <summary>{c.tools}</summary>
               <div className={s.toolSwitches}>
@@ -1032,6 +1093,9 @@ function Playground({
                 conditionMet={conditionMet}
                 revealed={revealed}
                 onDeduce={revealDeduction}
+                paperStage={paperStage}
+                paperChord={paperChord}
+                onPaperRestart={restartPaper}
               />
             ) : free ? (
               <div className={s.freeInstructions}>

@@ -5,7 +5,7 @@ test.use({ actionTimeout: 10_000 });
 
 async function open(page: Page) {
   await page.goto("/");
-  await expect(page.getByTestId("circle-diagram")).toBeVisible();
+  await expect(page.getByTestId("paper-circle")).toBeVisible();
 }
 
 test("reason game keeps four-step drafts and checked answers when returning to question one", async ({
@@ -125,6 +125,7 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await open(page);
   const lesson = page.getByRole("region", { name: "Guided lesson" });
   await expect(lesson).toBeVisible();
+  await lesson.getByRole("button", { name: "16.1 Right angle" }).click();
   await expect(
     lesson.getByText("First make the condition true: the angle at N is 90°."),
   ).toBeVisible();
@@ -237,6 +238,76 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await expect(questions.getByText("✓ Correct")).toBeVisible();
 });
 
+test("the paper circle demonstrations move on one stage per press", async ({
+  page,
+}) => {
+  await open(page);
+  const lesson = page.getByRole("region", { name: "Guided lesson" });
+  const controls = page.getByRole("group", { name: "Demonstration controls" });
+  const press = (name: string) =>
+    controls.getByRole("button", { name, exact: true }).click();
+
+  // Words: each tag shows before its word.
+  await press("Show the next tag →");
+  await expect(lesson).toContainText("the fixed point O");
+  await expect(lesson).not.toContainText("centre");
+  await press("Show the word");
+  await expect(lesson).toContainText("centre");
+  for (let tag = 0; tag < 3; tag++) {
+    await press("Show the next tag →");
+    await press("Show the word");
+  }
+  await press("How are they linked? →");
+  await expect(lesson).toContainText("Diameter = 2 × radius");
+  await press("Next step →");
+
+  // Fold: A lands on B, then the crease is measured.
+  const paper = page.getByTestId("paper-circle");
+  await press("Fold it →");
+  await expect(paper.locator('[data-flipped="true"]')).toHaveCount(1);
+  await expect(paper).toContainText("A lands on B");
+  await press("Open it →");
+  await expect(paper.locator('[data-flipped="true"]')).toHaveCount(0);
+  await press("(a) Check the crease →");
+  await expect(lesson).toContainText("O, the centre");
+  await press("(b) Measure AN and BN →");
+  await expect(paper).toContainText("4 cm");
+  await expect(paper.locator("[data-paper-square]")).toHaveCount(0);
+  await press("(c) Measure ∠ONA →");
+  await expect(paper.locator("[data-paper-square]")).toHaveCount(1);
+  await press("(d) Measure ON →");
+  await expect(lesson).toContainText("9 + 16 = 25");
+  await press("What do we see? →");
+  await expect(lesson).toContainText("Is measuring enough?");
+
+  // Another chord restarts the fold, with its own numbers.
+  await press("Try another chord");
+  await expect(paper).toHaveAttribute("data-stage", "0");
+  await lesson.getByRole("button", { name: "Mirror proof" }).click();
+
+  // Mirror: the triangle flips, then each blank waits for a press.
+  await press("Flip it →");
+  await expect(paper.locator('[data-flipped="true"]')).toHaveCount(1);
+  await press("Start the proof →");
+  await expect(lesson).toContainText("∠ONA = ∠ONB = 90°");
+  await press("Next line →");
+  await expect(lesson).toContainText("(______)");
+  await expect(lesson).not.toContainText("radii");
+  await press("Show the reason →");
+  await expect(lesson).toContainText("( radii )");
+  await press("Next line →");
+  await press("Next line →");
+  await press("Show the reason →");
+  await expect(lesson).toContainText("( RHS )");
+  await press("Next line →");
+  await expect(lesson).toContainText("∴ AN = ____");
+  await press("Show the answer →");
+  await expect(lesson).toContainText("Theorem 16.1: if ON ⊥ AB, then AN = BN.");
+  await press("Next step →");
+  await expect(page.getByTestId("circle-diagram")).toBeVisible();
+  await expect(lesson).toContainText("16.1 · Start with a right angle");
+});
+
 test.describe("laptop layout", () => {
   test.use({ viewport: { width: 1366, height: 768 } });
 
@@ -253,8 +324,8 @@ test.describe("laptop layout", () => {
 
     await page.evaluate(() =>
       localStorage.setItem(
-        "lskc-circle-workspace-v3:lesson-chords-16-1-16-2",
-        JSON.stringify({ step: 1, found: [true, false] }),
+        "lskc-circle-workspace-v3:lesson-chords-16-1-16-2-v2",
+        JSON.stringify({ step: 4, found: [true, false] }),
       ),
     );
     await page.reload();
@@ -308,9 +379,11 @@ test.describe("touch screens", () => {
     page,
   }) => {
     await open(page);
+    await page.getByRole("button", { name: "16.1 Right angle" }).tap();
     const diagram = page.getByTestId("circle-diagram");
     await diagram.scrollIntoViewIfNeeded();
-    const top = await page.evaluate(() => scrollY);
+    const place = async () => (await diagram.boundingBox())!.y;
+    const before = await place();
     const a = await centre(page, point("A"));
     const b = await centre(page, point("B"));
     await swipe(page, await centre(page, point("N")), {
@@ -320,24 +393,27 @@ test.describe("touch screens", () => {
     await expect(
       page.getByRole("button", { name: "Show what we can deduce →" }),
     ).toBeVisible();
-    expect(await page.evaluate(() => scrollY)).toBe(top);
+    // The circle stays under the finger, even if a shorter task line shifts the page.
+    expect(Math.abs((await place()) - before)).toBeLessThan(2);
 
     await page.getByRole("button", { name: /Pen$/ }).first().tap();
     await page.getByRole("button", { name: "Pen", exact: true }).tap();
+    // Tapping the buttons above may scroll them into view; drawing must not.
+    const drawing = await page.evaluate(() => scrollY);
     const box = (await diagram.boundingBox())!;
     const middle = { x: box.x + box.width / 2, y: box.y + box.height / 2 };
     await swipe(page, middle, { x: middle.x + 60, y: middle.y + 60 });
     await expect(
       page.locator('[aria-label="Teacher annotations"] path'),
     ).toHaveCount(1);
-    expect(await page.evaluate(() => scrollY)).toBe(top);
+    expect(await page.evaluate(() => scrollY)).toBe(drawing);
     await page.getByRole("button", { name: "Move", exact: true }).tap();
 
     const low = { x: box.x + box.width / 2, y: box.y + box.height * 0.9 };
     await swipe(page, low, { x: low.x, y: low.y - 200 });
     await expect
       .poll(() => page.evaluate(() => scrollY))
-      .toBeGreaterThan(top + 50);
+      .toBeGreaterThan(drawing + 50);
   });
 
   test("a finger drags the points in the reason explorer", async ({ page }) => {

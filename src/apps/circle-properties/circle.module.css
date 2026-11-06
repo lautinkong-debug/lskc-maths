@@ -2065,6 +2065,16 @@
 .playground:not(.focused) .lessonArea .canvas svg {
   max-height: min(340px, 42vh);
 }
+/* The task can change mid-drag; a steady height keeps the circle still under the finger. */
+@media (max-width: 1200px) {
+  .lessonArea .currentTask {
+    min-height: 72px;
+  }
+}
+/* Focus enlarges a demonstration, but its buttons sit below it and must stay on screen. */
+.focused .paperCanvas svg {
+  max-height: max(300px, calc(100vh - 390px));
+}
 /* Safari zooms the page when a form field under 16px is tapped. */
 @media (pointer: coarse) {
   .app select,
