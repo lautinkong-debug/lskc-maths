@@ -11,6 +11,24 @@
 .reasonNav {
   margin: 0 0 0.85rem;
 }
+.switchTheorem {
+  margin: 0 0 0.85rem;
+}
+.switchTheorem summary {
+  padding: 0.55rem;
+  cursor: pointer;
+}
+.resetPrompt {
+  padding: 0.8rem;
+  background: #fff0dc;
+  border-radius: 0.5rem;
+}
+.resetPrompt .actions {
+  margin-top: 0.6rem;
+}
+.scratch small {
+  font-weight: 400;
+}
 .reasonNav button,
 .termList button {
   padding: 0.45rem 0.8rem;

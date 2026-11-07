@@ -66,6 +66,21 @@ beforeEach(() => {
 });
 
 describe("ink controller command sequencing", () => {
+  it("restarts with a clean drawing board and cannot restore the previous pupil's strokes", () => {
+    const board = render();
+    board.setMode("pen");
+    board.addStroke(stroke("previous-pupil"));
+    board.reset();
+    board.undo();
+    board.redo();
+    expect(render()).toMatchObject({
+      mode: "move",
+      strokes: [],
+      canUndo: false,
+      canRedo: false,
+    });
+    expect(harness.document.strokes).toEqual([]);
+  });
   it("keeps successive strokes issued before the next React render", () => {
     const board = render();
     board.addStroke(stroke("a"));

@@ -1,7 +1,12 @@
 import { useId, useRef, type KeyboardEvent, type PointerEvent } from "react";
 import { reasons } from "./content";
 import { MathSvgText } from "./MathText";
-import { buildReasonFlow, reasonFlow, visibleReasonMarks } from "./reasonFlow";
+import {
+  buildReasonFlow,
+  reasonFlow,
+  reasonResultFact,
+  visibleReasonMarks,
+} from "./reasonFlow";
 import { dragReasonPoint, initialReasonParameters } from "./reasonExploration";
 import type { DragKey, Parameters, Point } from "./geometry";
 import { useTouchDrag } from "./useTouchDrag";
@@ -104,7 +109,7 @@ export default function ReasonFlowDiagram({
         id={`${id}-title`}
       >{`${reason.number}: ${reveal ? "given facts and conclusion" : "given facts only"}`}</title>
       <desc id={`${id}-description`}>
-        {`Blue given facts: ${flow.startingFact}${reveal ? ` Green conclusion: ${flow.resultFact}` : " The conclusion markings are hidden."}`}
+        {`Blue given facts: ${flow.startingFact}${reveal ? ` Green conclusion: ${reasonResultFact(reasonId, current)}` : " The conclusion markings are hidden."}`}
         {onChange &&
           " Drag a ringed point to change the shape while keeping the givens. Focus a point and use the arrow keys, or hold Shift for larger movements."}
         {reasonId === "r3" &&

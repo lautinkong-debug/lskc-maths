@@ -76,6 +76,7 @@ export function initialReasonParameters(id: string): ReasonParameters {
 export function normaliseReasonParameters(
   id: string,
   input: ReasonParameters,
+  movingVertex: "P" | "Q" = "Q",
 ): ReasonParameters {
   const lab = reasonLab(id);
   let p: ReasonParameters = normalise(lab, input);
@@ -96,6 +97,24 @@ export function normaliseReasonParameters(
     p = { ...p, primary: sweep, secondary: sweep, alternate: false };
   } else if (lab === "ratios") p = { ...p, alternate: id === "r17" };
   p = normalise(lab, p);
+  if (id === "r7") {
+    // Keep all four handle centres independently reachable on the short allowed arc.
+    const sweep = 360 - p.primary;
+    // On a short arc, reserve space for both end handles even with the fixed vertex halfway along.
+    const gap = Math.min(25, 1600 / sweep); // Usually 16°, about 35 diagram units.
+    const edge = Math.max(5, gap);
+    const fixedKey = movingVertex === "P" ? "secondary" : "tertiary";
+    const movingKey = movingVertex === "P" ? "tertiary" : "secondary";
+    const fixed = clamp(p[fixedKey]!, edge, 100 - edge);
+    let moving = clamp(p[movingKey]!, edge, 100 - edge);
+    if (Math.abs(moving - fixed) < gap) {
+      const left = fixed - gap;
+      const right = fixed + gap;
+      moving =
+        left < edge || (moving >= fixed && right <= 100 - edge) ? right : left;
+    }
+    p = { ...p, [fixedKey]: fixed, [movingKey]: moving };
+  }
   if (id === "r17") {
     const marginP = Math.max(8, 800 / (360 - p.primary));
     const marginQ = Math.max(8, 800 / (360 - p.secondary));
@@ -166,14 +185,18 @@ export function dragReasonPoint(
     });
   if (lab === "segment" && (key === "P" || key === "Q")) {
     const end = 90 + p.primary / 2 + p.rotation!;
-    return normaliseReasonParameters(id, {
-      ...p,
-      [key === "P" ? "tertiary" : "secondary"]: fractionOnArc(
-        bearing,
-        end,
-        360 - p.primary,
-      ),
-    });
+    return normaliseReasonParameters(
+      id,
+      {
+        ...p,
+        [key === "P" ? "tertiary" : "secondary"]: fractionOnArc(
+          bearing,
+          end,
+          360 - p.primary,
+        ),
+      },
+      key,
+    );
   }
   if (id === "r17" && (key === "P" || key === "Q")) {
     const arc = getReasonScene(id, p).arcs[key === "P" ? 0 : 1];
@@ -252,6 +275,11 @@ export function reasonControls(id: string): Control[] {
   return controls;
 }
 
+export function matchingCentreAngleLabel(sweep: number) {
+  if (Math.abs(sweep - 180) < 1e-8) return "Straight ∠AOB";
+  return sweep > 180 ? "Reflex ∠AOB" : "∠AOB";
+}
+
 export function reasonMeasurements(
   id: string,
   input: ReasonParameters,
@@ -289,7 +317,7 @@ export function reasonMeasurements(
     return [
       angle("∠APB", "A", "P", "B"),
       {
-        label: "Matching ∠AOB",
+        label: matchingCentreAngleLabel(scene.arcs[0].sweep),
         value: scene.arcs[0].sweep,
         unit: "°",
       },

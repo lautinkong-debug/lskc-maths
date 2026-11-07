@@ -29,6 +29,7 @@ export type InkBoardController = {
   undo: () => void;
   redo: () => void;
   clear: () => void;
+  reset: () => void;
   canUndo: boolean;
   canRedo: boolean;
   saveFailed: boolean;
@@ -95,6 +96,14 @@ export function useInkBoard(storageKey: string): InkBoardController {
     undo: () => dispatch({ type: "undo" }),
     redo: () => dispatch({ type: "redo" }),
     clear: () => dispatch({ type: "clear" }),
+    reset: () => {
+      const blank: InkHistory = { past: [], present: [], future: [] };
+      currentHistory.current = blank;
+      setHistory(blank);
+      setDocument({ strokes: [] });
+      setRejected(false);
+      setMode("move");
+    },
     canUndo: history.past.length > 0,
     canRedo: history.future.length > 0,
     saveFailed,

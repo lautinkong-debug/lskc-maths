@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { reasons } from "./content";
 import { angleAt, circlePoint, distance, type Parameters } from "./geometry";
-import { buildReasonFlow, visibleReasonMarks } from "./reasonFlow";
+import {
+  buildReasonFlow,
+  reasonResultFact,
+  visibleReasonMarks,
+} from "./reasonFlow";
 import {
   dragReasonPoint,
   getReasonScene,
@@ -61,6 +65,49 @@ function checkInvariant(id: string, parameters: Parameters) {
 }
 
 describe("constrained reason exploration", () => {
+  it.each(["P", "Q"] as const)("on a 60° arc, keeps %s and all three other handles separated across reload", (moving) => {
+    const compact = { ...initialReasonParameters("r7"), primary: 300, tertiary: 50, secondary: 50 };
+    const shape = normaliseReasonParameters("r7", compact, moving);
+    expect(normaliseReasonParameters("r7", shape)).toEqual(shape);
+    const { points } = buildReasonFlow("r7", shape);
+    const names = ["A", "B", "P", "Q"];
+    for (const [i, name] of names.entries())
+      for (const other of names.slice(i + 1))
+        expect(distance(points[name], points[other])).toBeGreaterThan(30);
+  });
+  it.each(["P", "Q"] as const)(
+    "keeps both same-segment vertices available when %s is dragged onto the other",
+    (key) => {
+      const input = initialReasonParameters("r7");
+      const other = key === "P" ? "Q" : "P";
+      const fixed = buildReasonFlow("r7", input).points[other];
+      const moved = dragReasonPoint("r7", input, key, fixed);
+      const { points } = buildReasonFlow("r7", moved);
+      expect(distance(points.P, points.Q)).toBeGreaterThan(30);
+      expect(distance(points[other], fixed)).toBeLessThan(1e-6);
+      checkInvariant("r7", moved);
+      const restored = normaliseReasonParameters("r7", {
+        ...input,
+        secondary: input.tertiary!,
+      });
+      const saved = buildReasonFlow("r7", restored);
+      expect(distance(saved.points.P, saved.points.Q)).toBeGreaterThan(30);
+    },
+  );
+  it.each([
+    [100, false, "∠AOB"],
+    [100, true, "Reflex ∠AOB"],
+    [240, false, "Reflex ∠AOB"],
+    [240, true, "∠AOB"],
+    [180, true, "Straight ∠AOB"],
+  ] as const)(
+    "labels the actual matched turn for sweep %s and opposite side %s",
+    (primary, alternate, expected) => {
+      const p = { ...initialReasonParameters("r6"), primary, alternate };
+      expect(reasonMeasurements("r6", p)[1].label).toBe(expected);
+      expect(reasonResultFact("r6", p)).toBe(expected + " = 2θ.");
+    },
+  );
   it("keeps signed chord offsets within the exposed control range while distances stay positive", () => {
     const p = normaliseReasonParameters("r4", {
       ...initialReasonParameters("r4"),
@@ -204,9 +251,10 @@ describe("constrained reason exploration", () => {
     );
     expect(p.alternate).toBe(true);
     const readings = reasonMeasurements("r6", p);
-    expect(
-      readings.find((m) => m.label === "Matching ∠AOB")?.value,
-    ).toBeCloseTo(240, 8);
+    expect(readings.find((m) => m.label === "Reflex ∠AOB")?.value).toBeCloseTo(
+      240,
+      8,
+    );
     expect(readings.find((m) => m.label === "∠APB")?.value).toBeCloseTo(120, 8);
     expect(
       buildReasonFlow("r6", p).marks.find((m) => m.id === "angle-O"),

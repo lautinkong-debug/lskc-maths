@@ -822,7 +822,9 @@ function Playground({
           </button>
         </div>
       </div>
-      {labId === "bisector" && (lessonMode || theoremMode) && (
+    </>
+  );
+  const chordSelector = labId === "bisector" && (lessonMode || theoremMode) && (
         <nav className={guideStyles.reasonNav} aria-label={circleTheoremLessonCopy.chordLessons}>
           <button type="button" aria-pressed={lessonMode} onClick={openChordLesson}>
             {circleTheoremLessonCopy.originalChords}
@@ -831,14 +833,12 @@ function Playground({
             {circleTheoremLessonCopy.locateCentre}
           </button>
         </nav>
-      )}
-    </>
   );
   if (theoremMode) {
     return (
       <section className={s.playground} aria-label={places[labId].subtitle} data-tone={places[labId].tone}>
         {lessonHeader}
-        <TheoremLesson lab={lab} onRelay={onRelay} />
+        <TheoremLesson lab={lab} onRelay={onRelay} chordSelector={chordSelector || undefined} />
       </section>
     );
   }
@@ -849,6 +849,7 @@ function Playground({
       data-tone={places[labId].tone}
     >
       {lessonHeader}
+      {chordSelector}
       <div
         className={`${s.playArea} ${conditionOpen ? s.testingCondition : ""} ${lessonMode ? s.lessonArea : ""}`}
       >

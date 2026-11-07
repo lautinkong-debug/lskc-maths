@@ -9,7 +9,7 @@ import ReasonLabel from "./ReasonLabel";
 import ReasonFlowDiagram from "./ReasonFlowDiagram";
 import ReasonWorking from "./ReasonWorking";
 import { reasonWorking } from "./reasonWorkingData";
-import { reasonFlow } from "./reasonFlow";
+import { reasonFlow, reasonResultFact } from "./reasonFlow";
 import {
   initialReasonParameters,
   normaliseReasonParameters,
@@ -272,7 +272,11 @@ export default function ReasonExplorer({
               ∴
             </span>
             <p className={s.proofStatement}>
-              <MathText>{reasonWorking[reason.id].conclusion}</MathText>{" "}
+              <MathText>
+                {reason.id === "r6"
+                  ? reasonResultFact(reason.id, experiment.parameters)
+                  : reasonWorking[reason.id].conclusion}
+              </MathText>{" "}
               <strong className={s.proofReason}>
                 (<ReasonLabel reason={reason} arrow={false} />)
               </strong>
@@ -336,9 +340,11 @@ export default function ReasonExplorer({
               <thead>
                 <tr>
                   <th scope="col">Case</th>
-                  {measurements.map((m) => (
+                  {measurements.map((m, column) => (
                     <th key={m.label} scope="col">
-                      <MathText>{m.label}</MathText>
+                      <MathText>
+                        {reason.id === "r6" && column === 1 ? "Matching centre angle" : m.label}
+                      </MathText>
                     </th>
                   ))}
                 </tr>
@@ -350,8 +356,11 @@ export default function ReasonExplorer({
                       <th scope="row">
                         {i === experiment.samples.length ? "Now" : i + 1}
                       </th>
-                      {reasonMeasurements(reason.id, sample).map((m) => (
+                      {reasonMeasurements(reason.id, sample).map((m, column) => (
                         <td key={m.label}>
+                          {reason.id === "r6" && column === 1 && (
+                            <MathText>{m.label + " = "}</MathText>
+                          )}
                           {format(m.value, m.unit)} {m.unit}
                         </td>
                       ))}

@@ -5,6 +5,7 @@ import {
   FLOW_RADIUS,
   getReasonScene,
   initialReasonParameters,
+  matchingCentreAngleLabel,
   normaliseReasonParameters,
   toFlowPoint,
   type ReasonParameters,
@@ -117,6 +118,13 @@ export const reasonFlow: Record<string, ReasonFlow> = {
 };
 
 export type FlowPoint = { x: number; y: number };
+/** Match the notation to the actual intercepted arc as the pupil moves P. */
+export function reasonResultFact(id: string, parameters: ReasonParameters) {
+  if (id !== "r6") return reasonFlow[id].resultFact;
+  const sweep = getReasonScene(id, parameters).arcs[0].sweep;
+  return `${matchingCentreAngleLabel(sweep)} = 2θ.`;
+}
+
 export type FlowStage = "base" | "given" | "result";
 type MarkBase = { id: string; stage: FlowStage };
 export type FlowMark = MarkBase &

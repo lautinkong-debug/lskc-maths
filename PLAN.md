@@ -9,6 +9,14 @@ Based on the observation lesson at commit `6f5899d`. Use the `codex/circle-guide
 - Keep observed measurements separate from given facts. For arc questions, identify the corresponding arc and the position of the angle's vertex. For chord distances, mark the perpendicular foot.
 - Checked 15 lesson paths against the supplied reasons summary and Book 5A Key Notes. The local QA run passed 759 Circle Lab unit tests and 47 browser tests. Separate offline checks covered touch dragging at phone and iPad sizes, written work after reloading and returning to the original observation lesson.
 
+### Student, teacher and engineering review
+
+- A correct conclusion now needs the correct reason before the model proof opens. The optional written draft stays available for pupils to compare against the model.
+- Mixed practice includes cases with insufficient givens. After a mistake pupils can try a fresh case in the same reasoning direction, revisit their first attempt and move forward again after a reload. The heading identifies the round as mixed practice.
+- The 16.6 diagram names the matching reflex centre angle when appropriate. In 16.7 the two circumference points remain separately draggable. Theorem restart asks for confirmation and clears the theorem's pen strokes and undo history along with the answers.
+- The separate handover file is `out/Circle-Lab-Guided-Preview.html` in the main project folder. Open 16.3 from **Explore → Perpendiculars and chord mid-points → 16.3 · Locate the centre**.
+- The reviewed build passed 811 Circle Lab unit tests and all 57 browser cases across runs (four were rerun once the local server was listening). The named offline file also passed touch, proof, refresh and observation-lesson walkthroughs at phone, iPad and desktop sizes. These tablet checks used Edge touch emulation.
+
 - 07/11/2026 · Circle Lab now treats a chord through the centre as a diameter. Its mid-point is O and its halves are the radii AO and OB. Moving either endpoint away restores the construction with N for reasons 16.1 and 16.2.
 
 ## Circle Lab: iPad layout, faster loading and the 32-student check (06/11/2026)
