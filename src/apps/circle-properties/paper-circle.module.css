@@ -1,5 +1,6 @@
 .demo {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   padding-bottom: 12px;
   background: white;
@@ -13,6 +14,7 @@
   overflow: visible;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 :global([data-presentation="true"]) .scene {
   max-height: 56vh;

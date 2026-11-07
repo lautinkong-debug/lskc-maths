@@ -10,6 +10,8 @@
   max-height: 510px;
   overflow: visible;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 .grid {
   display: none;

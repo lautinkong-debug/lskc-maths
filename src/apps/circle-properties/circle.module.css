@@ -21,6 +21,15 @@
   font-family: var(--font-plex-sans, Arial), sans-serif;
   font-size: 16px;
   line-height: 1.5;
+  /* A demonstration is pressed again and again: two quick taps must not zoom Safari. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+/* When the lesson panel grows mid-drag, Chromium scrolls the page to follow whatever
+   it has anchored to, which moves the circle out from under the finger. Safari has
+   no such feature, so this also makes every browser behave the same. */
+:global(html):has(.app) {
+  overflow-anchor: none;
 }
 .app *,
 .app *::before,
@@ -56,9 +65,12 @@
     background 0.15s,
     transform 0.15s;
 }
-.app button:hover:not(:disabled) {
-  border-color: var(--blue);
-  transform: translateY(-1px);
+/* On a touch screen hover sticks to the last button tapped, which reads as "chosen". */
+@media (hover: hover) {
+  .app button:hover:not(:disabled) {
+    border-color: var(--blue);
+    transform: translateY(-1px);
+  }
 }
 .app button:active:not(:disabled) {
   transform: translateY(2px);
@@ -1508,6 +1520,7 @@
   width: min(310px, calc(100vw - 40px));
   padding: 16px;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   border: 1px solid #b8cde5;
   border-radius: 12px;
@@ -1722,20 +1735,11 @@
   background: white;
   border-color: var(--line);
 }
-@media (max-width: 1000px) {
-  .header {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .brand {
-    flex: 1;
-  }
-  .settings {
-    order: 2;
-  }
-  .tabs {
-    order: 3;
-    width: 100%;
+/* iPads and small laptops have no room for three columns, so the property list
+   becomes the drop-down above the circle and the circle and lesson share the width. */
+@media (max-width: 1399px) {
+  .app {
+    padding: 12px;
   }
   .explorer {
     display: block;
@@ -1770,8 +1774,9 @@
     top: calc(100% + 4px);
     width: 100%;
     z-index: 8;
-    padding: 7px;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 7px;
     gap: 4px;
     background: white;
     border: 1px solid #b8cde5;
@@ -1797,8 +1802,23 @@
     padding: 0;
   }
   .playSwitch button {
-    min-height: 36px;
     padding: 6px 12px;
+  }
+}
+@media (max-width: 1000px) {
+  .header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .brand {
+    flex: 1;
+  }
+  .settings {
+    order: 2;
+  }
+  .tabs {
+    order: 3;
+    width: 100%;
   }
   .playArea {
     grid-template-columns: minmax(0, 1fr) 265px;
@@ -2001,12 +2021,22 @@
   border-left: 4px solid #cc8a0b;
   border-radius: 4px 14px 14px 4px;
 }
+/* The numbers are part of each item, so they cannot run into the item before. */
 .howTo ol {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 22px;
   margin: 0;
-  padding-left: 1.2em;
+  padding: 0;
+  list-style: none;
+  counter-reset: how-to;
+}
+.howTo li {
+  counter-increment: how-to;
+}
+.howTo li::before {
+  content: counter(how-to) ". ";
+  font-weight: 700;
 }
 .howTo button {
   margin-left: auto;
@@ -2056,7 +2086,7 @@
 /* The lesson panel is wide enough for a whole reason on one row; the circle gives way. */
 @media (min-width: 701px) {
   .playArea.lessonArea {
-    grid-template-columns: minmax(0, 1fr) minmax(360px, 47%);
+    grid-template-columns: minmax(0, 1fr) minmax(340px, 47%);
   }
   .focused .playArea.lessonArea {
     grid-template-columns: minmax(0, 1fr);
@@ -2077,6 +2107,10 @@
 }
 /* Safari zooms the page when a form field under 16px is tapped. */
 @media (pointer: coarse) {
+  .app .boardTools button,
+  .app .playSwitch button {
+    min-height: 44px;
+  }
   .app select,
   .app textarea,
   .app input:not([type="checkbox"], [type="radio"], [type="range"]) {

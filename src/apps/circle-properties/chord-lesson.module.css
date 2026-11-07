@@ -1,5 +1,7 @@
 .lesson {
   display: grid;
+  /* A fixed column: without it, a wide child stretches the panel past its own edge. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   font-size: 1rem;
 }
@@ -9,19 +11,24 @@
 .title {
   font-size: 1.25em;
 }
+/* Each button is as wide as its words and the rows fill up, at any panel width. */
 .steps {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
 .lesson .steps button {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: 7px;
-  min-height: 40px;
-  padding: 6px 9px;
-  font-size: 0.82em;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 6px 12px 6px 8px;
+  font-size: 0.875em;
   font-weight: 700;
+  line-height: 1.25;
 }
 .lesson .steps button > span {
   display: grid;
@@ -62,6 +69,7 @@
 .paperList,
 .proof {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   margin: 0;
   padding: 0;
@@ -99,6 +107,7 @@
 }
 .condition {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   padding: 14px;
   border-radius: 14px;
@@ -109,6 +118,7 @@
 .found,
 .complete {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
   padding: 14px;
   border-radius: 14px;
@@ -151,6 +161,8 @@
 }
 .compare {
   width: 100%;
+  /* Fixed, so a long reason wraps inside its cell in every browser. */
+  table-layout: fixed;
   border-collapse: collapse;
   background: white;
   border-radius: 10px;
@@ -166,6 +178,9 @@
 }
 .compare thead th {
   background: #fff4d8;
+}
+.compare thead th:first-child {
+  width: 3.6em;
 }
 .trap {
   padding: 8px 10px;
@@ -206,6 +221,7 @@
 .cards > li {
   position: relative;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: 8px;
   /* The extra top space keeps the stamp clear of the question. */
@@ -338,6 +354,7 @@
 }
 .working {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 4px;
   padding: 8px 10px;
   border-radius: 8px;
@@ -370,6 +387,7 @@
 }
 .blankChoices {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
 }
 .blankChoices > p:first-child {
@@ -404,6 +422,7 @@
 }
 .actions {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 .visuallyHidden {

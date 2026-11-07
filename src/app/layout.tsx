@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import "katex/dist/katex.min.css";
 import "./globals.css";
 import "./studio.css";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -26,6 +25,8 @@ const spectral = localFont({
   adjustFontFallback: "Times New Roman",
   variable: "--font-spectral",
   display: "swap",
+  // Headings only, and they swap in: not worth delaying a lesson on busy Wi-Fi.
+  preload: false,
 });
 
 const plexSans = localFont({

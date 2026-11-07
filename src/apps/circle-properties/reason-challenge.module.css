@@ -436,6 +436,7 @@
 }
 .choices {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 9px;
 }
 .game .choices button {
@@ -547,6 +548,7 @@
 }
 .ready {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   justify-items: start;
   gap: 12px;
   margin-top: 16px;
@@ -735,6 +737,7 @@
 }
 .skillBody {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   gap: 12px;
 }

@@ -1,5 +1,31 @@
 # Circle Lab handover: Claude Code to Codex (4 November 2026)
 
+## iPad and loading update (6 November 2026, afternoon)
+
+These changes are committed on `fix/circle-relay-feedback-and-timer`, one commit after `3889a09`. Publishing was left to the owner. The sections below predate them.
+
+**After publishing, check these on the live site.** Vercel's caching was tested only on `next start` with a simulator. `/apps/circle-properties` and `/apps/circle-properties/classroom` must both return 200, and a second request to each should show `X-Vercel-Cache: HIT` or `STALE`. The class link is now built ahead, so `out/circle-properties/Circle-Lab.html` must exist when `next build` runs: `npm run build` makes it first, but a bare `next build` does not.
+
+**Corrections:** `3889a09` is already on `origin/main` and live, so the live site is no longer `d7b4831`. The owner's iPad screenshot came from the single-file build, which has no Tailwind reset and uses Arial, so check that build as well as the website.
+
+**Owner decisions to keep:** the rules below are new, and the owner should confirm the first two.
+
+- Below 1400 px wide, including 1366 px laptops, the property list is a drop-down. The teacher script may need a word changed if it says "the list on the left".
+- A teacher's Hide or new title takes about a minute to reach students, and a hidden lesson stays open if Firestore cannot be read. Teachers still see their own changes live.
+- A student on an app page must not load Firebase. Do not import `@/lib/firebase`, `@/lib/authClient` or `@/lib/db/*` at the top of anything `AppHost` or the header uses.
+
+**New traps:**
+
+- `src/app/apps/[slug]/page.tsx` must never import `registry.ts`. Add each new app to `src/apps/appRoutes.ts` as well.
+- `copy.ts` must contain nothing that runs as it loads, such as a tagged template or a function call. One `String.raw` kept the whole file in every bundle.
+- Single-column grids in Circle Lab need `grid-template-columns: minmax(0, 1fr)`, not an implicit column.
+- This PC's NordVPN Threat Protection unpacks gzip before Edge's own throttling sees it, so DevTools throttling overstates load times here. Pace the compressed bytes before they reach the browser.
+- Running 32 browsers on this PC measures the PC, not iPads. Compare old and new with a few students on a share of the link.
+- A teacher already signed in before this update shows as signed out on an app page until they open any other page once (the `lskc-signed-in` hint).
+- WebKit copies from earlier work are in `out/ipad-qa-browsers`, `out/ipad15-probe/browsers` and `out/ipad-legacy-probe/browsers`. The owner declined that browser, so they were not used.
+
+**New tests:** `tests/e2e/circle-ipad.spec.ts` runs in `playwright.circle-reason.config.ts`. `tests/e2e/circle-site-load.spec.ts` has its own `playwright.circle-site.config.ts` and needs `npx next build` first.
+
 ## Paper circle update (6 November 2026)
 
 The paper circle demonstrations for Lesson 1 (Words, Fold, Mirror proof) are committed on `fix/circle-relay-feedback-and-timer`, on top of `d7b4831`. They are **not pushed and not on the live website**, which still has `d7b4831`. Publish only if the owner asks.

@@ -1,5 +1,6 @@
 .coach {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
   line-height: 1.5;
 }
@@ -86,6 +87,7 @@
 }
 .extraContent {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 .moreOptions {
@@ -104,6 +106,7 @@
 }
 .conditionEntry {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 5px;
   border-left: 3px solid #407b60;
   padding: 8px 0 8px 11px;
@@ -155,6 +158,7 @@
 }
 .check {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   padding-top: 3px;
   border-top: 1px solid #d9e0e8;
@@ -185,6 +189,7 @@
 }
 .choices {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 .coach .choices button {
@@ -196,6 +201,7 @@
 }
 .answer {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
 }
 .answer label {
@@ -280,6 +286,7 @@
 }
 .done {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   padding: 12px;
   border: 1px solid #a8ceba;

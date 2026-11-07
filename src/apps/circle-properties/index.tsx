@@ -155,7 +155,6 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
     (raw) => parseProgress(JSON.stringify(raw)),
   );
   const [resetPrompt, setResetPrompt] = useState(false);
-  const [resetError, setResetError] = useState(false);
   const [propertyMenu, setPropertyMenu] = useState(false);
   const [relayRequest, setRelayRequest] = useState<{
     lab: LabId;
@@ -219,10 +218,10 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
     try {
       clearLocalSessions();
       localStorage.setItem(storageKey, JSON.stringify(emptyProgress()));
-      onReset();
     } catch {
-      setResetError(true);
+      // Blocked or full storage still gets a fresh start for the next class.
     }
+    onReset();
   }
   return (
     <div className={s.app} data-appearance={workspace.appearance} ref={appRef}>
@@ -450,7 +449,6 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
                   {c.cancel}
                 </button>
               </div>
-              {resetError && <p role="alert">{c.storageFailed}</p>}
             </div>
           )}
         </details>
@@ -723,6 +721,14 @@ function Playground({
       boardRef.current?.scrollIntoView({ block: "nearest", behavior: "auto" }),
     );
   }
+  /** The enlarged board starts at the top of the screen, so its buttons stay in reach. */
+  function toggleFocus() {
+    setFocus((x) => !x);
+    if (!focus)
+      requestAnimationFrame(() =>
+        boardRef.current?.scrollIntoView({ block: "start", behavior: "auto" }),
+      );
+  }
   function openCondition() {
     setConditionParameters({ ...parameters });
     setConditionOpen(true);
@@ -833,7 +839,7 @@ function Playground({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setFocus((x) => !x)}
+                  onClick={toggleFocus}
                   aria-pressed={focus}
                 >
                   {focus ? c.unfocus : c.focus}

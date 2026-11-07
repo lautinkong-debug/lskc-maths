@@ -748,6 +748,9 @@ export default function TransferCheck({
                   aria-label="Value of x"
                   inputMode="decimal"
                   autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   required
                   value={state.response.value}
                   disabled={state.submitted}

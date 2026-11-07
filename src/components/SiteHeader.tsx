@@ -44,6 +44,7 @@ export function SiteHeader() {
       )}
       {isTeacher && (
         <Link
+          prefetch={false}
           href="/challenges"
           onClick={() => setOpen(false)}
           className="text-navy-soft text-sm hover:text-white"
@@ -53,6 +54,7 @@ export function SiteHeader() {
       )}
       {isTeacher && (
         <Link
+          prefetch={false}
           href="/manage/topics"
           onClick={() => setOpen(false)}
           className="text-navy-soft text-sm hover:text-white"
@@ -62,6 +64,7 @@ export function SiteHeader() {
       )}
       {role === "admin" && (
         <Link
+          prefetch={false}
           href="/admin/teachers"
           onClick={() => setOpen(false)}
           className="text-navy-soft text-sm hover:text-white"
@@ -72,6 +75,7 @@ export function SiteHeader() {
       {user ? (
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <Link
+            prefetch={false}
             href="/login"
             onClick={() => setOpen(false)}
             className="text-navy-soft break-all hover:text-white"
@@ -91,6 +95,7 @@ export function SiteHeader() {
         </div>
       ) : !loading ? (
         <Link
+          prefetch={false}
           href="/login"
           onClick={() => setOpen(false)}
           className="rounded border border-white/35 px-3 py-1.5 text-sm hover:border-white/70"
@@ -119,6 +124,7 @@ export function SiteHeader() {
       </a>
       <div className="studio-header-inner">
         <Link
+          prefetch={false}
           href="/"
           className="studio-brand flex items-center gap-3"
           onClick={() => setOpen(false)}
@@ -147,6 +153,7 @@ export function SiteHeader() {
         >
           {NAV.map((item) => (
             <Link
+              prefetch={false}
               key={item.href}
               href={item.href}
               aria-current={isActive(pathname, item.href) ? "page" : undefined}
@@ -181,6 +188,7 @@ export function SiteHeader() {
         >
           {NAV.map((item) => (
             <Link
+              prefetch={false}
               key={item.href}
               href={item.href}
               onClick={() => setOpen(false)}

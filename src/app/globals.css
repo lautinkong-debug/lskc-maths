@@ -80,6 +80,21 @@ body {
   }
 }
 
+/* Appears only if an app is still not ready after a long wait. It needs no script,
+   because the scripts themselves may be what never arrived. */
+.app-slow-load {
+  visibility: hidden;
+  animation: app-slow-load 0.01s linear 12s forwards;
+}
+.app-slow-load a {
+  text-decoration: underline;
+}
+@keyframes app-slow-load {
+  to {
+    visibility: visible;
+  }
+}
+
 /* KaTeX sizes itself relative to the surrounding text; keep it honest. */
 .katex {
   font-size: 1.05em;

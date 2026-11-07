@@ -2,6 +2,13 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  // These open the single-file lesson or the production build, so each runs
+  // under its own config: playwright.circle-reason and playwright.circle-site.
+  testIgnore: [
+    "circle-reason-challenge.spec.ts",
+    "circle-ipad.spec.ts",
+    "circle-site-load.spec.ts",
+  ],
   globalSetup: "./tests/e2e/global-setup.ts",
   fullyParallel: false,
   workers: 1,

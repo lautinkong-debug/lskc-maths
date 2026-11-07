@@ -150,6 +150,7 @@ The UI hiding a button is a convenience, never the protection. Every permission 
 
 - Every app lives in `src/apps/<slug>/` and default-exports a React component.
 - Register it with one entry in `src/apps/registry.ts`: `slug, title, topic, levels, strand, summary, thumbnail, load: () => import('./<slug>')`.
+- Add its slug and title to `src/apps/appRoutes.ts` too. The server route reads that file and must never import `registry.ts`: on the server, the `load` imports would put every app on every app page. A unit test keeps the two lists equal.
 - `/apps/[slug]` wraps the app in `<PresentationFrame>`, which provides the Presentation mode button (Fullscreen API + larger type/controls) and exposes `usePresentation()` so apps can enlarge labels.
 - Apps are pure client components, need no Firebase access, and must work with mouse, touch and keyboard.
 - A teaching app without challenges normally needs only its own folder, `registry.ts` and its central copy block.

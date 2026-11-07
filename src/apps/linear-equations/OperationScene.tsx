@@ -1,6 +1,7 @@
 "use client";
 import { useLayoutEffect, useRef } from "react";
 import katex from "katex";
+import "katex/dist/katex.min.css";
 import { Math as Maths } from "@/components/Math";
 import { copy } from "@/lib/copy";
 import { equationTex } from "./engine";

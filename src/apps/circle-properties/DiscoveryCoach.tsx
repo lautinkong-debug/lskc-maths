@@ -253,6 +253,9 @@ export default function DiscoveryCoach({
                       type="text"
                       inputMode="decimal"
                       autoComplete="off"
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      spellCheck={false}
                       value={check.draft}
                       maxLength={48}
                       onChange={(event) =>

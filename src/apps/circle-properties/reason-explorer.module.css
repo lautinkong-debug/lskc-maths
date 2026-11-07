@@ -405,6 +405,7 @@
 .writtenProof {
   width: min(100%, 960px);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   margin: 18px auto;
 }

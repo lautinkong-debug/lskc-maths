@@ -1,5 +1,23 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab: iPad layout, faster loading and the 32-student check (06/11/2026)
+
+Committed on `fix/circle-relay-feedback-and-timer`; publishing was left to the owner. Tested in Edge with touch emulation; real Safari and a real iPad remain untested.
+
+- [x] Owner's bug: step buttons and heading ran out of the lesson panel. The lesson's grid had no fixed column, so a wide child could stretch it past the panel. All lesson and panel grids now use a fixed column, and the step buttons wrap on flexible rows at their natural width, 44 px tall. The owner's screenshot was the single-file build, so check both builds.
+- [x] Below 1400 px the property list becomes the drop-down above the circle, so the circle and lesson share the width. The heading above the app is compact at those widths. The how-to numbers are now part of each item.
+- [x] Also fixed: Focus left the press button off screen; two quick taps could zoom Safari; hover stuck to the last tapped button; labels could start a text selection on a long press; Reset failed with blocked storage; the keyboard could correct typed answers; Chromium scrolled the circle from under the finger when the panel grew.
+- [x] `/apps/[slug]` imported `registry.ts` on the server, which put all 13 apps on every app page. It now reads `appRoutes.ts` and is built ahead, refreshed at most once a minute, and served from the CDN. A new app needs a line in both files; a unit test keeps them equal.
+- [x] Students no longer load Firebase on an app page. The server reads the listing when the cached page refreshes, and the SDK loads only for a browser that has signed in, or in school mode. Measured locally: Hide reached students in 67 s, un-hide in 56 s.
+- [x] In school mode the server cannot read the listing, so everyone waits for the live one and a failed read stays closed. `src/lib/appAvailability.ts` holds this decision for both modes, with unit tests.
+- [x] `/apps/circle-properties/classroom` is cached the same way and opens if Firestore cannot be read. This reverses its earlier "fail closed" behaviour, on the owner's request that Firebase must not block a student.
+- [x] A download that fails now offers Reload instead of hanging. One `String.raw` in `copy.ts` was keeping the whole file in every bundle; the single file fell from 727 KB to 569 KB. The favicon fell from 323 KB to 6 KB.
+- [x] Measured on one student's share of busy Wi-Fi: 47 to 18 requests, 1,419 KB to 386 KB, usable in about 7 s down to about 3.5 s. Old and new compared directly, 8 students on a quarter of a 40 Mbit link: slowest student 10.1 - 13.5 s down to 4.3 - 5.0 s. 32 plain clients received every file in 3.0 s with no failures.
+- [x] Checked on the final code: typecheck, lint, 2,697 unit tests, production build, 40 Circle and iPad browser tests, 10 website tests (five runs in a row), USB check 7 of 7, 24 rules tests, 11 challenge API tests, and all 13 apps plus Home opening on the production build. The smoke, upload, layout, Tug classroom and 32-pupil Tug specs pass on the development server. `challenge.spec.ts` passes with `--timeout=180000`; at the default 30 s it ran out of time on the development server.
+- [ ] Not run: the other specs in `npm run test:e2e` (348 tests in all). The default run now skips the three Circle specs that need their own config.
+- [ ] Two failures predate this work and are not fixed. `polynomial-tug.spec.ts` "teacher and four separate pupils" is intermittent: it failed 2 of 3 runs on the published `3889a09`, at the same line as here. `studio.spec.ts` still expects 5 apps; the site has 13.
+- [ ] Still to do: publish (owner's decision), copy the rebuilt `Circle-Lab.html` to the USB stick, and try a real iPad on the school Wi-Fi.
+
 ## Circle Lab student access and iPad checks (06/11/2026)
 
 - Added `/apps/circle-properties/classroom` for class sets of iPads. It delivers the same lesson and games in one HTML response and uses the same browser-local progress. New requests check the teacher's app visibility. School-only deployments use the regular gated site.

@@ -543,6 +543,36 @@
     gap: 20px;
   }
 }
+/* On an iPad every line above the app pushes the circle off the screen. */
+@media (max-width: 1399px) {
+  .studio-header-inner {
+    padding: 10px 18px;
+  }
+  .studio-app-frame {
+    padding-block: 10px;
+  }
+  .studio-lesson-heading {
+    gap: 8px 12px;
+    padding: 8px 14px;
+  }
+  .studio-lesson-heading > div:first-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 14px;
+  }
+  .studio-lesson-heading h1 {
+    margin-top: 0;
+    font-size: 1.5rem;
+  }
+  .studio-lesson-heading p {
+    margin-top: 0;
+    font-size: 0.875rem;
+  }
+  .studio-lesson-heading + div {
+    margin-top: 10px;
+  }
+}
 @media (max-width: 1050px) {
   .studio-hero-layout {
     gap: 28px;
@@ -622,9 +652,6 @@
   }
   .studio-app-grid {
     gap: 16px;
-  }
-  .studio-lesson-heading {
-    padding: 20px;
   }
 }
 @media (max-width: 540px) {

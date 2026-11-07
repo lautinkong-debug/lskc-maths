@@ -897,6 +897,9 @@ export default function ReasonChallenge({
                           allowsNegativeAnswer(challenge.q) ? "text" : "decimal"
                         }
                         autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck={false}
                         value={draft.response.value}
                         disabled={locked}
                         onChange={(e) =>

@@ -44,7 +44,7 @@ button { cursor: pointer; }
 button:disabled { cursor: default; }
 svg { max-width: 100%; }
 :focus-visible { outline: 3px solid var(--color-navy); outline-offset: 3px; box-shadow: 0 0 0 5px var(--color-highlight); }
-@media (max-width: 600px) { body { padding: 12px; } }
+@media (max-width: 1399px) { body { padding: 10px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
 `;
 await writeFile(resolve(output, "theme.css"), theme);

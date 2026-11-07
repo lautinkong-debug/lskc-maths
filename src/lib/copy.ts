@@ -161,7 +161,8 @@ export const copy = {
     verified: "L.H.S. = R.H.S. The solution checks.",
     bracketTitle: "The minus sign multiplies every term.",
     bracketNote: "A negative times a negative is positive. The second term becomes +5.",
-    bracketProducts: [String.raw`(-1)\times 2q=-2q`, String.raw`(-1)\times(-5)=+5`],
+    // Plain strings: a tagged template here keeps this whole file in every bundle.
+    bracketProducts: ["(-1)\\times 2q=-2q", "(-1)\\times(-5)=+5"],
     firstHint: "Use the same operation on both sides.",
     hints: {
       basic: "Collect like terms first. Undo addition or subtraction, then divide by the coefficient of the unknown.",
@@ -3669,7 +3670,9 @@ export const copy = {
     backToApps: "All web apps",
     studentClassLink: "Student class link",
     loading: "Loading app…",
-    checkingAvailability: "Checking app availability…",
+    slowLoad: "Still waiting? The Wi-Fi may be busy.",
+    loadFailed: "This app did not finish downloading. The Wi-Fi may be busy.",
+    reload: "Reload the page",
     settingsFailed: "Could not load app settings. Please try again.",
     editListing: "Edit listing",
     featured: "Featured",

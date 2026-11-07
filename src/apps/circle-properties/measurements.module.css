@@ -1,6 +1,8 @@
 .measurements {
   pointer-events: none;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 .navy {
   color: #2454c8;

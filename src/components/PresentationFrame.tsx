@@ -79,6 +79,7 @@ export function PresentationFrame({
             <div>
               {!presenting && (
                 <Link
+                  prefetch={false}
                   href="/apps"
                   className="text-navy text-sm font-semibold underline underline-offset-4"
                 >

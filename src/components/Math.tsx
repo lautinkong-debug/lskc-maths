@@ -1,4 +1,5 @@
 import katex from "katex";
+import "katex/dist/katex.min.css";
 
 type MathProps = {
   /** TeX source, e.g. `y = ax^2 + bx + c`. */
