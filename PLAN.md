@@ -1,5 +1,14 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Circle Lab guided lessons for 16.3–16.17 (local preview, 07/11/2026)
+
+Based on the observation lesson at commit `6f5899d`. Use the `codex/circle-guided-preview` branch and its own offline build for review.
+
+- In 16.3 pupils draw perpendicular bisectors for different chords, predict the centre's position and justify it. The existing 16.1 and 16.2 demonstration is a separate choice.
+- The other six topics follow the same teaching sequence. Pupils identify the features, vary a diagram that preserves the givens, predict the conclusion, distinguish closely related reasons and complete written working for a fresh example.
+- Keep observed measurements separate from given facts. For arc questions, identify the corresponding arc and the position of the angle's vertex. For chord distances, mark the perpendicular foot.
+- Checked 15 lesson paths against the supplied reasons summary and Book 5A Key Notes. The local QA run passed 759 Circle Lab unit tests and 47 browser tests. Separate offline checks covered touch dragging at phone and iPad sizes, written work after reloading and returning to the original observation lesson.
+
 - 07/11/2026 · Circle Lab now treats a chord through the centre as a diameter. Its mid-point is O and its halves are the radii AO and OB. Moving either endpoint away restores the construction with N for reasons 16.1 and 16.2.
 
 ## Circle Lab: iPad layout, faster loading and the 32-student check (06/11/2026)

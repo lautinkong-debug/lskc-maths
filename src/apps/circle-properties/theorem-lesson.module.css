@@ -1,0 +1,297 @@
+.reasonNav,
+.stageNav > div,
+.actions,
+.shapeActions,
+.termList {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.reasonNav {
+  margin: 0 0 0.85rem;
+}
+.reasonNav button,
+.termList button {
+  padding: 0.45rem 0.8rem;
+  font-size: 0.87rem;
+}
+.reasonNav button[aria-pressed="true"],
+.termList button[aria-pressed="true"] {
+  background: #e5eeff;
+  border-color: #3563ca;
+  color: #123e95;
+}
+.lesson {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  grid-template-areas: "board nav" "board panel";
+  grid-template-rows: auto 1fr;
+  gap: 0 14px;
+  align-items: start;
+}
+.lesson h3,
+.lesson h4,
+.lesson p {
+  margin: 0;
+}
+.board,
+.stageNav,
+.panel {
+  min-width: 0;
+  border: 1px solid var(--line, #d8e4f4);
+}
+.board {
+  grid-area: board;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 15px;
+}
+.board > svg {
+  max-height: clamp(260px, 42vh, 420px);
+}
+.boardTitle {
+  background: #fff4d8;
+  padding: 0.78rem 1rem;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+.stageNav,
+.panel {
+  background: #fff8e8;
+  border-color: #ead7aa;
+}
+.stageNav {
+  grid-area: nav;
+  border-radius: 15px 15px 0 0;
+  padding: 1rem 1rem 0.85rem;
+}
+.stageNav h3 {
+  font-size: 1.1rem;
+  margin: 0 0 0.65rem;
+}
+.stageNav button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.82rem;
+  min-height: 44px;
+}
+.stageNav button span {
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e8effb;
+  min-width: 1.5rem;
+  height: 1.5rem;
+}
+.stageNav button[aria-current="step"] {
+  border-color: #2d58cc;
+  box-shadow: inset 0 0 0 1px #2d58cc;
+}
+.stageNav button[aria-current="step"] span {
+  background: #244cc6;
+  color: white;
+}
+.panel {
+  grid-area: panel;
+  border-radius: 0 0 15px 15px;
+  border-top: 0;
+  padding: 1rem;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: minmax(0, 1fr);
+}
+.panel h4,
+.caseSheet h4 {
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+.tag,
+.boardFoot {
+  margin: 0;
+  border-top: 1px solid #dce7f6;
+  padding: 0.75rem 1rem;
+}
+.tag {
+  background: #f2f7ff;
+  display: grid;
+  gap: 0.2rem;
+}
+.tag > span:first-child,
+.boardFoot > span {
+  color: #4d6380;
+  font-size: 0.8rem;
+}
+.tag strong {
+  font-size: 1.16rem;
+}
+.boardFoot .shapeActions {
+  margin-top: 0.4rem;
+}
+.boardTools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.65rem;
+  border-bottom: 1px solid var(--line);
+}
+.boardTools > button {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.65rem;
+}
+.lesson[data-focused="true"] {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "board";
+}
+.lesson[data-focused="true"] .stageNav,
+.lesson[data-focused="true"] .panel {
+  display: none;
+}
+.lesson[data-focused="true"] .board > svg {
+  max-height: min(70vh, 700px);
+}
+.shapeActions button {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.82rem;
+}
+.panel .primary {
+  background: #2454bf;
+  color: white;
+  border-color: #2454bf;
+  font-weight: 700;
+  justify-self: start;
+}
+.panel .primary:hover:not(:disabled) {
+  background: #173f9a;
+}
+.caseSheet {
+  display: grid;
+  gap: 1rem;
+  padding: 1.2rem;
+}
+.given,
+.target,
+.proof {
+  padding: 0.75rem 0.9rem;
+  border-inline-start: 4px solid #315ecb;
+  background: #eef4ff;
+  border-radius: 0 8px 8px 0;
+  line-height: 1.55;
+}
+.target,
+.proof {
+  border-color: #217555;
+  background: #edf8f1;
+}
+.given b,
+.target b,
+.proof b {
+  font-size: 0.85rem;
+}
+.given p,
+.target p,
+.proof p {
+  margin-top: 0.35rem;
+}
+.proof p:last-child {
+  font-weight: 550;
+}
+.scratch {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 700;
+}
+.scratch textarea {
+  width: 100%;
+  border: 1px solid #9eb5d3;
+  border-radius: 9px;
+  padding: 0.65rem;
+  font: inherit;
+  font-weight: 400;
+  color: #173a62;
+  resize: vertical;
+}
+.readings summary {
+  font-weight: 650;
+  cursor: pointer;
+}
+.question,
+.options {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+.options button {
+  display: flex;
+  align-items: flex-start;
+  text-align: start;
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  line-height: 1.45;
+}
+.lesson .options button:disabled {
+  opacity: 1;
+  color: #28435f;
+}
+.lesson .options button:disabled[data-answer="correct"] {
+  border-color: #348368;
+  background: #e7f5ea;
+  color: #154f36;
+}
+.options button[data-answer="retry"] {
+  border-color: #b95b12;
+  background: #fff0df;
+}
+.letter {
+  font-weight: 700;
+  font-size: 0.8rem;
+  background: #edf3fc;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.3rem;
+}
+.feedback {
+  padding: 0.7rem 0.8rem;
+  border-radius: 8px;
+  line-height: 1.5;
+  background: #fff0dc;
+  color: #763b0c;
+}
+.feedback[data-correct="true"] {
+  background: #e5f4e9;
+  color: #18583a;
+}
+@media (max-width: 760px) {
+  .lesson {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "nav" "board" "panel";
+    grid-template-rows: auto;
+    gap: 0.6rem;
+  }
+  .stageNav,
+  .panel {
+    padding: 0.7rem;
+    border: 1px solid #ead7aa;
+    border-radius: 12px;
+  }
+  .stageNav > div {
+    gap: 0.3rem;
+  }
+  .stageNav button {
+    font-size: 0.77rem;
+    padding: 0.2rem 0.45rem;
+  }
+  .board > svg {
+    max-height: min(38vh, 295px);
+  }
+  .caseSheet {
+    padding: 0.8rem;
+    gap: 0.65rem;
+  }
+  .scratch textarea {
+    font-size: 16px;
+  }
+}

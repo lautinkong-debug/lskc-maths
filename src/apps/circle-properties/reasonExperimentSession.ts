@@ -36,7 +36,7 @@ export function initialReasonExperiment(labId: LabId): ReasonExperimentSession {
 }
 
 /** Read only supported finite controls, then restore the theorem's givens. */
-function parseParameters(
+export function parseReasonParameters(
   reasonId: string,
   raw: unknown,
 ): ReasonParameters | undefined {
@@ -69,7 +69,7 @@ export function parseReasonExperiment(
       const saved = record(savedShapes?.[id]);
       const samples = Array.isArray(saved?.samples)
         ? saved.samples
-            .map((sample) => parseParameters(id, sample))
+            .map((sample) => parseReasonParameters(id, sample))
             .filter(
               (sample): sample is ReasonParameters => sample !== undefined,
             )
@@ -79,7 +79,7 @@ export function parseReasonExperiment(
         id,
         {
           parameters:
-            parseParameters(id, saved?.parameters) ??
+          parseReasonParameters(id, saved?.parameters) ??
             fallback.shapes[id].parameters,
           samples,
         },

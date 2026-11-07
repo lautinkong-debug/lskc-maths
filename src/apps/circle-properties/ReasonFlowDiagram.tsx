@@ -5,6 +5,9 @@ import { buildReasonFlow, reasonFlow, visibleReasonMarks } from "./reasonFlow";
 import { dragReasonPoint, initialReasonParameters } from "./reasonExploration";
 import type { DragKey, Parameters, Point } from "./geometry";
 import { useTouchDrag } from "./useTouchDrag";
+import InkLayer from "./InkLayer";
+import ReasonProofLines from "./ReasonProofLines";
+import type { InkBoardController } from "./useInkBoard";
 import s from "./reason-flow.module.css";
 
 const colours = { base: "#65788e", given: "#2454c6", result: "#18764b" };
@@ -16,12 +19,19 @@ export default function ReasonFlowDiagram({
   parameters,
   onChange,
   trails = [],
+  focusMarks,
+  ink,
+  proofLines = false,
 }: {
   reasonId: string;
   reveal: boolean;
   parameters?: Parameters;
   onChange?: (next: Parameters) => void;
   trails?: Parameters[];
+  /** Vocabulary tags point out individual parts without exposing conclusion marks. */
+  focusMarks?: readonly string[];
+  ink?: InkBoardController;
+  proofLines?: boolean;
 }) {
   const id = useId();
   const svgRef = useRef<SVGSVGElement>(null);
@@ -96,7 +106,7 @@ export default function ReasonFlowDiagram({
       <desc id={`${id}-description`}>
         {`Blue given facts: ${flow.startingFact}${reveal ? ` Green conclusion: ${flow.resultFact}` : " The conclusion markings are hidden."}`}
         {onChange &&
-          " Drag a ringed point. Both diagrams move together while the givens stay true. Focus a point and use the arrow keys; hold Shift for larger movements."}
+          " Drag a ringed point to change the shape while keeping the givens. Focus a point and use the arrow keys, or hold Shift for larger movements."}
         {reasonId === "r3" &&
           trails.length > 0 &&
           " Dashed lines show saved perpendicular bisectors."}
@@ -122,12 +132,23 @@ export default function ReasonFlowDiagram({
           })}
         </g>
       )}
+      {reveal && proofLines && (
+        <ReasonProofLines reasonId={reasonId} model={model} />
+      )}
       {visibleReasonMarks(model, reveal).map((mark) => {
         const colour = colours[mark.stage];
         const common = {
           key: mark.id,
           "data-mark": mark.id,
           "data-stage": mark.stage,
+          opacity:
+            focusMarks?.length &&
+            !focusMarks.some(
+              (prefix) =>
+                mark.id === prefix || mark.id.startsWith(prefix + "-"),
+            )
+              ? 0.55
+              : 1,
         };
         switch (mark.kind) {
           case "circle":
@@ -275,6 +296,7 @@ export default function ReasonFlowDiagram({
             />
           </g>
         ))}
+      {ink && <InkLayer board={ink} svgRef={svgRef} />}
     </svg>
   );
 }

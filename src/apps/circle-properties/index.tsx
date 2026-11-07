@@ -7,7 +7,7 @@ import {
   useSyncExternalStore,
   type SetStateAction,
 } from "react";
-import { circleCopy as c, circleLessonCopy } from "@/lib/copy";
+import { circleCopy as c, circleLessonCopy, circleTheoremLessonCopy } from "@/lib/copy";
 import { labs, reasons, type LabId } from "./content";
 import CircleDiagram from "./CircleDiagram";
 import ReasonExplorer from "./ReasonExplorer";
@@ -25,6 +25,8 @@ import {
 import { snapParameters, type SnapResult } from "./snapping";
 import { allMissions, evaluateMission, missions } from "./missions";
 import ChordLesson, { ChordLessonQuestions } from "./ChordLesson";
+import TheoremLesson from "./TheoremLesson";
+import guideStyles from "./theorem-lesson.module.css";
 import PaperCircleDemo from "./PaperCircleDemo";
 import {
   isPaperStep,
@@ -476,6 +478,11 @@ function Playground({
     initialChordLesson,
     parseChordLesson,
   );
+  const [theoremMode, setTheoremMode] = useLocalSession<boolean>(
+    `theorem-guide-open-${labId}`,
+    () => labId !== "bisector",
+    (raw) => (typeof raw === "boolean" ? raw : undefined),
+  );
   const [saved, setSaved, saveFailed] = useLocalSession<PlaygroundState>(
     `playground-${labId}`,
     () => initialPlayground(labId),
@@ -534,7 +541,7 @@ function Playground({
   const setFocus = (next: SetStateAction<boolean>) => update("focus", next);
   const setShowReasons = (next: SetStateAction<boolean>) =>
     update("showReasons", next);
-  const lessonMode = labId === "bisector" && lesson.open;
+  const lessonMode = labId === "bisector" && lesson.open && !theoremMode;
   // Steps 3 and 4 put their questions across the full width below the circle.
   const lessonQuestions = lessonMode && lesson.step >= 5;
   const paperStep = lessonMode && isPaperStep(lesson.step) ? lesson.step : null;
@@ -542,7 +549,7 @@ function Playground({
   const paperChord = paperChords[paper.chord];
   const conditionMet = lessonMode && nAtMidpoint(parameters);
   const revealed = revealedStep === lesson.step && conditionMet;
-  const tasks = !free && !lessonMode;
+  const tasks = !free && !lessonMode && !theoremMode;
   const angleCondition = ["centre", "segment", "semicircle"].includes(labId);
   const displayedParameters =
     conditionOpen && angleCondition && conditionParameters
@@ -631,12 +638,14 @@ function Playground({
     setHighlightKey((n) => n + 1);
   }
   function chooseStyle(freePlay: boolean) {
+    setTheoremMode(false);
     setSnapResult(null);
     if (labId === "bisector")
       setLesson((previous) => ({ ...previous, open: false }));
     setFree(freePlay);
   }
-  function openLesson() {
+  function openChordLesson() {
+    setTheoremMode(false);
     setSnapResult(null);
     if (lesson.step === 3 || lesson.step === 4)
       lessonShape({ ...chordLessonStarts[lesson.step] });
@@ -773,12 +782,8 @@ function Playground({
   }
   const slide = (key: DragKey, value: number) =>
     normalise(labId, { ...parameters, [key]: value });
-  return (
-    <section
-      className={`${s.playground} ${focus ? s.focused : ""}`}
-      aria-label={places[labId].subtitle}
-      data-tone={places[labId].tone}
-    >
+  const lessonHeader = (
+    <>
       <div className={s.stageHeading}>
         <div>
           <p className={s.chapter}>
@@ -791,15 +796,16 @@ function Playground({
           <p className={s.propertyName}>{places[labId].name}</p>
         </div>
         <div className={s.playSwitch} role="group" aria-label={c.playStyle}>
-          {labId === "bisector" && (
             <button
               type="button"
-              aria-pressed={lessonMode}
-              onClick={openLesson}
+              aria-pressed={lessonMode || theoremMode}
+              onClick={() => {
+                if (labId === "bisector" && !theoremMode) openChordLesson();
+                else setTheoremMode(true);
+              }}
             >
               {circleLessonCopy.mode}
             </button>
-          )}
           <button
             type="button"
             aria-pressed={tasks}
@@ -809,13 +815,40 @@ function Playground({
           </button>
           <button
             type="button"
-            aria-pressed={free && !lessonMode}
+            aria-pressed={free && !lessonMode && !theoremMode}
             onClick={() => chooseStyle(true)}
           >
             {c.free}
           </button>
         </div>
       </div>
+      {labId === "bisector" && (lessonMode || theoremMode) && (
+        <nav className={guideStyles.reasonNav} aria-label={circleTheoremLessonCopy.chordLessons}>
+          <button type="button" aria-pressed={lessonMode} onClick={openChordLesson}>
+            {circleTheoremLessonCopy.originalChords}
+          </button>
+          <button type="button" aria-pressed={theoremMode} onClick={() => setTheoremMode(true)}>
+            {circleTheoremLessonCopy.locateCentre}
+          </button>
+        </nav>
+      )}
+    </>
+  );
+  if (theoremMode) {
+    return (
+      <section className={s.playground} aria-label={places[labId].subtitle} data-tone={places[labId].tone}>
+        {lessonHeader}
+        <TheoremLesson lab={lab} onRelay={onRelay} />
+      </section>
+    );
+  }
+  return (
+    <section
+      className={`${s.playground} ${focus ? s.focused : ""}`}
+      aria-label={places[labId].subtitle}
+      data-tone={places[labId].tone}
+    >
+      {lessonHeader}
       <div
         className={`${s.playArea} ${conditionOpen ? s.testingCondition : ""} ${lessonMode ? s.lessonArea : ""}`}
       >

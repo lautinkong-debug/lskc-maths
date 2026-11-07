@@ -7,6 +7,7 @@ export default defineConfig({
   testIgnore: [
     "circle-reason-challenge.spec.ts",
     "circle-ipad.spec.ts",
+    "circle-guided-lessons.spec.ts",
     "circle-site-load.spec.ts",
   ],
   globalSetup: "./tests/e2e/global-setup.ts",

@@ -2,7 +2,11 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  testMatch: ["circle-reason-challenge.spec.ts", "circle-ipad.spec.ts"],
+  testMatch: [
+    "circle-reason-challenge.spec.ts",
+    "circle-ipad.spec.ts",
+    "circle-guided-lessons.spec.ts",
+  ],
   outputDir: "./out/circle-reason-tests",
   workers: 1,
   reporter: "list",
