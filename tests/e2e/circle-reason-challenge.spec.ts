@@ -261,7 +261,7 @@ test("the paper circle demonstrations move on one stage per press", async ({
   await expect(lesson).toContainText("Diameter = 2 × radius");
   await press("Next step →");
 
-  // Fold: A lands on B, then the crease is measured.
+  // Fold: A lands on B, then the diameter and chord are examined.
   const paper = page.getByTestId("paper-circle");
   async function checkHeightLabel(cm: string) {
     const angle = (await paper.locator("text").filter({ hasText: /^90°$/ }).boundingBox())!;
@@ -277,7 +277,7 @@ test("the paper circle demonstrations move on one stage per press", async ({
   await expect(paper).toContainText("A lands on B");
   await press("Open it →");
   await expect(paper.locator('[data-flipped="true"]')).toHaveCount(0);
-  await press("(a) Check the crease →");
+  await press("(a) Check the diameter →");
   await expect(lesson).toContainText("O, the centre");
   await press("(b) Measure AN and BN →");
   await expect(paper).toContainText("4 cm");
@@ -296,7 +296,7 @@ test("the paper circle demonstrations move on one stage per press", async ({
     await expect(paper).toHaveAttribute("data-stage", "0");
     await press("Fold it →");
     await press("Open it →");
-    await press("(a) Check the crease →");
+    await press("(a) Check the diameter →");
     await press("(b) Measure AN and BN →");
     await press("(c) Measure ∠ONA →");
     await press("(d) Measure ON →");

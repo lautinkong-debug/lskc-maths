@@ -26,6 +26,8 @@ Committed on `fix/circle-relay-feedback-and-timer`; publishing was left to the o
 
 ## Circle Lab: paper circle demonstrations for Lesson 1 (05/11/2026)
 
+- [x] 07/11: Fold and Mirror proof refer to the full fold line as a diameter. The button for part (a) reads “Check the diameter”.
+
 Source: Lesson Worksheet 16.1 v4, Part A Steps 1 – 3 (concrete, picture, proof). Paper circle 1: radius 5 cm, AB = 8 cm, ON = 3 cm.
 
 - [x] The guided lesson now has seven steps: Words, Fold, Mirror proof, 16.1, 16.2, Which one?, Write it.
