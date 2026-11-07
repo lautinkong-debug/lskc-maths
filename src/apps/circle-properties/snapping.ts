@@ -1,8 +1,11 @@
 import type { LabId } from "./content";
 import {
+  CENTRE,
   angleAt,
   distance,
+  dragParameter,
   getScene,
+  isBisectorDiameter,
   normalise,
   wrapAngle,
   type DragKey,
@@ -38,7 +41,21 @@ export function snapParameters(
       : undefined;
 
   if (lab === "bisector") {
-    if (key !== "N" && key !== "secondary") return unchanged;
+    if (
+      (key === "A" || key === "B") &&
+      Math.abs(p.primary) <= offsetTolerance
+    ) {
+      const fixed = getScene(lab, p).points[key === "A" ? "B" : "A"];
+      return {
+        parameters: dragParameter(lab, p, key, {
+          x: 2 * CENTRE.x - fixed.x,
+          y: 2 * CENTRE.y - fixed.y,
+        }),
+        label: "AB is a diameter",
+      };
+    }
+    if (isBisectorDiameter(p) || (key !== "N" && key !== "secondary"))
+      return unchanged;
     const points = getScene(lab, p).points;
     const midpoint = {
       x: (points.A.x + points.B.x) / 2,

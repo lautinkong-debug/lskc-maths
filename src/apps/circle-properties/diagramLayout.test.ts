@@ -37,6 +37,31 @@ function angleCollisions(lab: LabId, parameters: Parameters, missionIndex = 2) {
 }
 
 describe("construction label layout", () => {
+  it("labels both radii on a diameter and keeps nearby genuine mid-points distinguishable", () => {
+    for (const rotation of [0, 90, 326]) {
+      const diameter = {
+        ...defaults.bisector,
+        primary: 0,
+        secondary: 0,
+        rotation,
+      };
+      const labels = getMeasurementLayout("bisector", diameter);
+      expect(labels.map(({ label }) => label)).toEqual([
+        "AO = 10 cm",
+        "OB = 10 cm",
+      ]);
+      expect(overlaps(labels[0].box, labels[1].box)).toBe(false);
+      for (const primary of [-0.2, 0.2]) {
+        const scene = getScene("bisector", { ...diameter, primary });
+        const o = getPointLabelOffset(scene, scene.points.O);
+        const n = getPointLabelOffset(scene, scene.points.N);
+        expect(o.leader).toEqual({ x: scene.points.O.x, y: scene.points.O.y });
+        expect(n.leader).toEqual({ x: scene.points.N.x, y: scene.points.N.y });
+        expect(o.x * n.x + o.y * n.y).toBeLessThan(0);
+      }
+    }
+  });
+
   it("connects displaced angle values to their own angle arc instead of an old text position", () => {
     const scene = getScene("ratios", {
       ...defaults.ratios,

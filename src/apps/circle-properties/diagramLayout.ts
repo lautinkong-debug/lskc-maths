@@ -187,8 +187,23 @@ function sceneAnnotations(scene: Scene): AnnotationLayout {
   const names: LayoutBox[] = [];
   const points: Record<string, PointLabelOffset> = {};
   const vertices = Object.values(scene.points);
+  const n = scene.points.N;
+  const centreGap =
+    n && scene.angles.some((angle) => angle.at === "N")
+      ? distance(CENTRE, n)
+      : Infinity;
   for (const point of vertices) {
-    const offset = rawPointLabelOffset(scene, point);
+    const separateCentreLabels =
+      centreGap > 0 &&
+      centreGap < 16 &&
+      (point.label === "N" || point.label === "O");
+    const other = point.label === "N" ? CENTRE : n;
+    const offset = separateCentreLabels
+      ? {
+          x: (32 * (point.x - other.x)) / centreGap,
+          y: (32 * (point.y - other.y)) / centreGap,
+        }
+      : rawPointLabelOffset(scene, point);
     const preferred = {
       x: point.x + offset.x,
       y: point.y + offset.y,
@@ -210,7 +225,7 @@ function sceneAnnotations(scene: Scene): AnnotationLayout {
     points[point.label] = {
       x: label.x - point.x,
       y: label.y - point.y,
-      ...(distance(preferred, label) > 4
+      ...(separateCentreLabels || distance(preferred, label) > 4
         ? { leader: { x: point.x, y: point.y } }
         : {}),
     };
@@ -415,8 +430,9 @@ export function getMeasurementLayout(
   const add = (from: string, to: string, tone: Tone, guide = false) =>
     measurements.push(segmentMeasurement(scene, from, to, tone, guide));
   if (lab === "bisector") {
-    add("A", "N", "navy");
-    add("N", "B", "red");
+    const divisionPoint = scene.points.N ? "N" : "O";
+    add("A", divisionPoint, "navy");
+    add(divisionPoint, "B", "red");
     if (missionIndex === 1) add("A", "B", "muted");
   } else if (lab === "chords") {
     add("A", "B", "navy");

@@ -249,6 +249,7 @@ export function evaluateMission(
   let complete = false;
   switch (mission.lab) {
     case "bisector": {
+      if (!p.N) return { complete: false, feedback: scene.caption };
       const midpoint =
         near(cm(p.A, p.N), cm(p.N, p.B), lengthTolerance) &&
         near(angleAt(p.O, p.N, p.B), 90);

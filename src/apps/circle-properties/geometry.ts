@@ -1,3 +1,4 @@
+import { circleCopy } from "@/lib/copy";
 import type { LabId } from "./content";
 export type { LabId } from "./content";
 
@@ -61,6 +62,10 @@ export type Scene = {
 export const CENTRE = { x: 280, y: 220 };
 export const RADIUS = 160;
 export const UNIT = 16;
+// A drag to antipodal endpoints can leave a trigonometric round-off residue.
+export function isBisectorDiameter(parameters: Parameters) {
+  return Math.abs(parameters.primary) < 1e-10;
+}
 const radians = (degrees: number) => (degrees * Math.PI) / 180;
 export const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));
@@ -230,8 +235,7 @@ export function normalise(
       c.min,
       c.max,
     );
-  if (lab === "bisector" && Math.abs(result.primary) < 0.2)
-    result.primary = result.primary < 0 ? -0.2 : 0.2;
+  if (lab === "bisector" && isBisectorDiameter(result)) result.primary = 0;
   if (lab === "centre" || lab === "segment" || lab === "semicircle") {
     result.secondary = arcFraction(
       result.secondary,
@@ -296,6 +300,10 @@ export function getScene(lab: LabId, parameters: Parameters): Scene {
     point("B", ab.b, "B");
     line("A", "B", "navy", false, 4);
     if (lab === "bisector") {
+      if (isBisectorDiameter(p)) {
+        scene.caption = circleCopy.diameterHelp;
+        return scene;
+      }
       const n = interpolate(ab.a, ab.b, (p.secondary + 100) / 200);
       point(
         "N",
@@ -309,7 +317,7 @@ export function getScene(lab: LabId, parameters: Parameters): Scene {
       line("O", "B", "muted", true);
       angle("N", "O", "B", "red", false, 27);
       scene.caption =
-        "Drag A and B independently around the circle. Slide N along AB. Radius = 10 cm; diameter positions are excluded here.";
+        "Drag A or B around the circle. Slide N along AB. The radius is 10 cm.";
     } else {
       const cd = chordEndpoints(p.secondary, p.rotation2, true);
       point("M", midpoint(ab.a, ab.b), "M", 16, -17);
@@ -461,6 +469,11 @@ export function getModel(lab: LabId, parameters: Parameters): Model {
   let toggleLabel: string | undefined;
   switch (lab) {
     case "bisector":
+      if (isBisectorDiameter(p)) {
+        length("AO", "A", "O");
+        length("OB", "O", "B");
+        break;
+      }
       length("AN", "A", "N");
       length("NB", "N", "B");
       angle("∠ONB", "O", "N", "B");
@@ -531,7 +544,10 @@ export function getModel(lab: LabId, parameters: Parameters): Model {
   return {
     measurements,
     signature: `${lab}:${Object.values(p).join(":")}`,
-    controls: getControls(lab),
+    controls: getControls(lab).filter(
+      (c) =>
+        !(lab === "bisector" && isBisectorDiameter(p) && c.key === "secondary"),
+    ),
     toggleLabel,
     description: scene.caption,
   };
@@ -611,6 +627,7 @@ export function dragParameter(
     return normalise(lab, next);
   }
   if (lab === "bisector" && (key === "N" || key === "secondary")) {
+    if (isBisectorDiameter(p)) return p;
     const ends = chordEndpoints(p.primary, p.rotation),
       dx = ends.b.x - ends.a.x,
       dy = ends.b.y - ends.a.y;

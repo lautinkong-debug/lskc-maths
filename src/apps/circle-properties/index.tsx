@@ -17,6 +17,7 @@ import { useInkBoard } from "./useInkBoard";
 import {
   defaults,
   getModel,
+  isBisectorDiameter,
   normalise,
   type Parameters,
   type DragKey,
@@ -540,7 +541,7 @@ function Playground({
   const paperStage = paper.step === lesson.step ? paper.stage : 0;
   const paperChord = paperChords[paper.chord];
   const conditionMet = lessonMode && nAtMidpoint(parameters);
-  const revealed = revealedStep === lesson.step;
+  const revealed = revealedStep === lesson.step && conditionMet;
   const tasks = !free && !lessonMode;
   const angleCondition = ["centre", "segment", "semicircle"].includes(labId);
   const displayedParameters =
@@ -549,6 +550,12 @@ function Playground({
       : parameters;
   const model = getModel(labId, displayedParameters),
     params = normalise(labId, parameters);
+  const chordBoard =
+    labId === "bisector" && paperStep === null && !conditionOpen;
+  const diameter = chordBoard && isBisectorDiameter(params);
+  // Older boards could stop 0.2 cm from O when a student tried to make a diameter.
+  const nearDiameter =
+    chordBoard && !diameter && Math.abs(params.primary) <= 0.2;
   // The lesson decides which readings are visible: the given first, the result once found.
   // The Show/Hide buttons override that for the current step; the next step starts fresh.
   const [lessonReadings, setLessonReadings] = useState<
@@ -600,7 +607,7 @@ function Playground({
   /** The result stays hidden until the class has seen the condition on its own. */
   function revealDeduction() {
     const step = lesson.step;
-    if (step !== 3 && step !== 4) return;
+    if (!conditionMet || (step !== 3 && step !== 4)) return;
     // The reveal always shows, even if a reading was hidden by hand.
     setLessonReadings({ step: -1 });
     setRevealedStep(step);
@@ -855,12 +862,26 @@ function Playground({
             />
           ) : (
             <>
-              {!focus && (
+              {(!focus || diameter || nearDiameter) && (
                 <div className={s.currentTask}>
                   <strong>
-                    <MathText>{boardTask}</MathText>
+                    <MathText>
+                      {diameter
+                        ? c.diameterHelp
+                        : nearDiameter
+                          ? c.nearDiameter
+                          : boardTask}
+                    </MathText>
                   </strong>
-                  {tasks && !conditionOpen && (
+                  {nearDiameter && (
+                    <button
+                      type="button"
+                      onClick={() => applyShape({ ...params, primary: 0 })}
+                    >
+                      <MathText>{c.makeDiameter}</MathText>
+                    </button>
+                  )}
+                  {tasks && !conditionOpen && !diameter && !nearDiameter && (
                     <span>
                       {c.taskOf(missionIndex + 1, missions[labId].length)}
                     </span>
@@ -920,7 +941,7 @@ function Playground({
                             changeCondition((p) => ({ ...p, primary: 180 }))
                           }
                         >
-                          <MathText>Make AB a diameter</MathText>
+                          <MathText>{c.makeDiameter}</MathText>
                         </button>
                         <button
                           type="button"
@@ -1097,6 +1118,7 @@ function Playground({
                 onState={setLesson}
                 onShape={lessonShape}
                 conditionMet={conditionMet}
+                diameter={diameter}
                 revealed={revealed}
                 onDeduce={revealDeduction}
                 paperStage={paperStage}

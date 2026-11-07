@@ -13,6 +13,38 @@ import {
 import type { LabId } from "./content";
 
 describe("circle constructions", () => {
+  it.each([0, 90, 326])(
+    "uses O alone at the mid-point of a diameter rotated by %s°",
+    (rotation) => {
+      const diameter = {
+        ...defaults.bisector,
+        primary: 0,
+        secondary: 35,
+        rotation,
+      };
+      const scene = getScene("bisector", diameter);
+      expect(Object.keys(scene.points).sort()).toEqual(["A", "B", "O"]);
+      expect(distance(scene.points.A, scene.points.B)).toBeCloseTo(
+        2 * RADIUS,
+        9,
+      );
+      expect(scene.angles).toHaveLength(0);
+      expect(scene.rightAngles).toHaveLength(0);
+      const model = getModel("bisector", diameter);
+      expect(model.measurements.map((reading) => reading.label)).toEqual([
+        "AO",
+        "OB",
+      ]);
+      for (const reading of model.measurements) {
+        expect(reading.value).toBeCloseTo(10, 9);
+        expect(reading.unit).toBe("cm");
+      }
+      expect(
+        model.controls.some((control) => control.key === "secondary"),
+      ).toBe(false);
+    },
+  );
+
   it("measures midpoint and perpendicular conditions independently", () => {
     for (const primary of [1, 3, 5, 8]) {
       const midpoint = getScene("bisector", {

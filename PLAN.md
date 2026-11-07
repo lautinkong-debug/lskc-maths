@@ -1,5 +1,7 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+- 07/11/2026 · Circle Lab now treats a chord through the centre as a diameter. Its mid-point is O and its halves are the radii AO and OB. Moving either endpoint away restores the construction with N for reasons 16.1 and 16.2.
+
 ## Circle Lab: iPad layout, faster loading and the 32-student check (06/11/2026)
 
 Committed on `fix/circle-relay-feedback-and-timer`; publishing was left to the owner. Tested in Edge with touch emulation; real Safari and a real iPad remain untested.

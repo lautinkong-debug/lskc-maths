@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useRef, useState } from "react";
-import { circleLessonCopy as c } from "@/lib/copy";
+import { circleCopy, circleLessonCopy as c } from "@/lib/copy";
 import { reasons } from "./content";
 import {
   chordLessonStarts,
@@ -110,6 +110,7 @@ export default function ChordLesson({
   onState,
   onShape,
   conditionMet,
+  diameter,
   revealed,
   onDeduce,
   paperStage,
@@ -121,6 +122,7 @@ export default function ChordLesson({
   onShape: (parameters: Parameters) => void;
   /** The given fact is true on the circle right now. */
   conditionMet: boolean;
+  diameter: boolean;
   /** The class has pressed for the deduction during this visit to the step. */
   revealed: boolean;
   onDeduce: () => void;
@@ -207,7 +209,9 @@ export default function ChordLesson({
             </div>
           ) : (
             <p className={s.waiting}>
-              <MathText>{diagramStep.waiting}</MathText>
+              <MathText>
+                {diameter ? circleCopy.diameterLesson : diagramStep.waiting}
+              </MathText>
             </p>
           )}
         </>

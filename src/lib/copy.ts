@@ -4019,6 +4019,12 @@ export const circleCopy = {
   liveMeasurements: "Live measurements",
   taskOf: (task: number, total: number) => `Task ${task} of ${total}`,
   lessonBoardTask: "Use the circle to check your answers.",
+  diameterHelp:
+    "AB is a diameter. O is its mid-point. Drag A or B to explore another chord.",
+  nearDiameter: "AB passes close to O.",
+  makeDiameter: "Make AB a diameter",
+  diameterLesson:
+    "For 16.1 and 16.2, choose a chord that passes beside the centre.",
   changeCondition: "Change one condition",
   backToCircle: "Back to my circle",
   whyItWorks: "Why does it work?",

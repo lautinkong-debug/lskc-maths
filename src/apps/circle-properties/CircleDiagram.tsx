@@ -6,6 +6,7 @@ import {
   CENTRE,
   RADIUS,
   circlePoint,
+  distance,
   dragParameter,
   getScene,
   type Parameters,
@@ -160,19 +161,26 @@ export default function CircleDiagram({
   } | null>(null);
   const id = useId();
   const scene = getScene(lab, parameters);
+  const diameter = lab === "bisector" && !scene.points.N;
+  // Near a diameter, keep the centre and the movable point visible at their actual positions.
+  const centreDotScale =
+    lab === "bisector" && scene.points.N
+      ? Math.min(1, distance(scene.points.O, scene.points.N) / 16)
+      : 1;
   // Like the length labels, the ticks are hidden while the lengths are.
   const equalHalves =
     lab === "bisector" &&
+    !diameter &&
     showMeasurements &&
     evaluateMission(missions.bisector[0], parameters).complete;
   const focusLines =
-    lab === "bisector"
+    lab === "bisector" && !diameter
       ? [
           { from: "A", to: "N", tone: "navy" as const },
           { from: "N", to: "B", tone: "red" as const },
           { from: "O", to: "N", tone: "red" as const },
         ]
-      : lab === "chords"
+      : lab === "chords" || diameter
         ? scene.lines.filter((line) => !line.dashed)
         : lab === "semicircle" || lab === "equal-arcs"
           ? scene.lines.filter((line) =>
@@ -357,6 +365,8 @@ export default function CircleDiagram({
         )}
         {Object.values(scene.points).map((point) => {
           const { x: dx, y: dy, leader } = getPointLabelOffset(scene, point);
+          const dotScale =
+            point.label === "O" || point.label === "N" ? centreDotScale : 1;
           const tone: Tone =
             (point.label === "P" && lab !== "ratios") ||
             (point.label === "Q" && lab === "ratios") ||
@@ -421,7 +431,10 @@ export default function CircleDiagram({
               <circle
                 cx={point.x}
                 cy={point.y}
-                r={point.label === "O" ? 4 : 7}
+                r={(point.label === "O" ? 4 : 7) * dotScale}
+                style={
+                  dotScale < 1 ? { strokeWidth: 1.5 * dotScale } : undefined
+                }
                 className={styles.pointDot}
               />
               <text
@@ -442,7 +455,7 @@ export default function CircleDiagram({
       </svg>
       {highlightKey > 0 && (
         <p className={styles.focusNote} role="status">
-          <MathText>{focusNotes[lab]}</MathText>
+          <MathText>{diameter ? scene.caption : focusNotes[lab]}</MathText>
         </p>
       )}
       {showInstructions && (

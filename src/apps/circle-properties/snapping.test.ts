@@ -35,6 +35,44 @@ const samePoint = (
   ).toBeLessThan(1e-9);
 
 describe("magnetic precision assistance", () => {
+  it.each(["A", "B"] as const)(
+    "keeps the opposite end fixed when %s snaps to a diameter",
+    (key) => {
+      const nearDiameter = shape("bisector", {
+        primary: -0.2,
+        rotation: 326,
+        secondary: 30,
+      });
+      const result = snapParameters("bisector", nearDiameter, key);
+      expect(result.parameters.primary).toBe(0);
+      samePoint(
+        "bisector",
+        nearDiameter,
+        result.parameters,
+        key === "A" ? "B" : "A",
+      );
+      for (const mission of missions.bisector) {
+        expect(evaluateMission(mission, result.parameters).complete).toBe(
+          false,
+        );
+      }
+      expect(
+        snapParameters("bisector", result.parameters, "N").label,
+      ).toBeNull();
+      // An exact entry or slider step either side of zero remains a genuine chord.
+      for (const offset of [-0.1, 0.1]) {
+        const moved = shape("bisector", {
+          ...result.parameters,
+          primary: offset,
+        });
+        expect(
+          snapParameters("bisector", moved, "primary").parameters.primary,
+        ).toBe(offset);
+        expect(getScene("bisector", moved).points.N).toBeDefined();
+      }
+    },
+  );
+
   it.each([0.2, 4, 9.7, -0.2, -4, -9.7])(
     "constructs an exact perpendicular and equal halves for signed chord offset %s",
     (primary) => {
