@@ -10,13 +10,11 @@ import { useAuth } from "@/lib/auth";
 import { useEditMode } from "@/lib/editMode";
 
 const destinations = [
-  { href: "/", label: c.forms },
   { href: "/apps", label: c.apps },
   { href: "/mistakes-book", label: c.books },
   { href: "/manage", label: c.teacher },
 ];
 function active(pathname: string, href: string) {
-  if (href === "/") return pathname === "/" || pathname.startsWith("/forms/");
   if (
     href === "/manage" &&
     (pathname.startsWith("/challenges") || pathname.startsWith("/admin"))
