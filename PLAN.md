@@ -1,5 +1,15 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+## Form-first website review (09/11/2026, local)
+
+The homepage starts with F1–F6. Each form has a shareable page with its available lessons and correction notes. The full Web apps and Mistakes Book libraries remain searchable by form and textbook topic. Resource detail links return to the originating form or the filtered library.
+
+Students with a class code can open Join with code directly. The teacher workspace groups lesson preparation, hosting and correction-book management. Teacher and admin operations use the existing role checks. The isolated preview runs against the demo Firebase emulators and is intended for review before release.
+
+Review locally at `http://127.0.0.1:3391/`. On this computer, `out/review/Start-Maths-Preview.cmd` in this checkout reopens the preview. Try F5 → Circle Lab → Back to Form 5, then open the F5 correction booklet. To try the teacher workspace, sign in with the local Teacher test account. The preview uses sample records.
+
+The full unit suite passed 2,798 tests. Twenty browser checks covered form navigation, catalogue filters and return links, mobile keyboard navigation, Circle Lab loading without Firebase, interrupted downloads and simulated iPad lesson layouts. At 390, 820 and 1440 pixels, the homepage and F5 page both fitted the viewport.
+
 - 09/11/2026 · Added Classroom Games to Web Apps. Five StudyBot players accept the school's maths practice bank or a teacher's imported questions. INK-Shoot opens the original game with its built-in questions, with a separate StudyBot link for teachers.
 
 ## Circle Lab guided lessons for 16.3–16.17 (local preview, 07/11/2026)

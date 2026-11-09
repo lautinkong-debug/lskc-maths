@@ -48,9 +48,18 @@ const converter: FirestoreDataConverter<HomeContent> = {
   },
   fromFirestore(snapshot: QueryDocumentSnapshot) {
     const data = snapshot.data();
+    // Earlier seeds stored the two stock sentences in Firestore. Respect edited school wording.
+    const previousDefault =
+      data.heroTitle === "Make sense of the mathematics." &&
+      data.intro ===
+        "Move a point. Test an idea. Discover the why behind the answer — with interactive lessons and thoughtful practice.";
     return {
-      heroTitle: data.heroTitle as string,
-      intro: data.intro as string,
+      heroTitle: previousDefault
+        ? defaultHomeContent.heroTitle
+        : (data.heroTitle as string),
+      intro: previousDefault
+        ? defaultHomeContent.intro
+        : (data.intro as string),
       announcement: data.announcement as Announcement,
       updatedBy: data.updatedBy as string,
       updatedAt: data.updatedAt?.toDate() ?? null,

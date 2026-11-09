@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { Math as Tex } from "@/components/Math";
-import { CanvasGrid } from "./CanvasGrid";
 import { copy } from "@/lib/copy";
 
 const A = 0.5;
@@ -67,10 +66,9 @@ export function ParabolaHero() {
   function moveTo(clientX: number, clientY: number) {
     const svg = svgRef.current;
     if (!svg) return;
-    const rect = svg.getBoundingClientRect();
-    if (rect.width === 0 || rect.height === 0) return;
-    const userX = ((clientX - rect.left) / rect.width) * WIDTH;
-    const userY = ((clientY - rect.top) / rect.height) * HEIGHT;
+    const transform = svg.getScreenCTM();
+    if (!transform) return;
+    const { x: userX, y: userY } = new DOMPoint(clientX, clientY).matrixTransform(transform.inverse());
     setH(clamp(snap(userX / UNIT + X_MIN), H_RANGE.min, H_RANGE.max));
     setK(clamp(snap(Y_MAX - userY / UNIT), K_RANGE.min, K_RANGE.max));
   }
@@ -92,7 +90,6 @@ export function ParabolaHero() {
   return (
     <div className="mx-auto flex w-full max-w-[560px] flex-col gap-4 lg:max-w-none">
       <div className="studio-plot">
-        <CanvasGrid />
         <svg
           ref={svgRef}
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}

@@ -5,9 +5,7 @@ test("the department library opens congruence under F2 and 2A05", async ({
   page,
 }) => {
   await page.goto("/apps");
-  await page
-    .getByRole("combobox", { name: "Level", exact: true })
-    .selectOption("F2");
+  await page.getByRole("button", { name: "F2", exact: true }).click();
   await page
     .getByRole("searchbox", { name: "Search apps", exact: true })
     .fill("2A05");

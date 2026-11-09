@@ -1,0 +1,235 @@
+.area {
+  color: #172f49;
+  padding-bottom: 2rem;
+}
+.navigation,
+.page,
+.area > main {
+  width: min(100% - 2rem, 74rem);
+  margin-inline: auto;
+}
+.navigation {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-block-start: 1.25rem;
+  padding-block: 0.6rem;
+  border-block: 1px solid #d4e2ec;
+}
+.navigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.55rem;
+  color: #37556d;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+.navigation a:hover {
+  background: #eff5fa;
+  color: #123f62;
+}
+.navigation a[aria-current] {
+  background: #e2eff8;
+  color: #103e60;
+  box-shadow: inset 0 -2px #2c6d9d;
+}
+@media (max-width: 650px) {
+  .navigation a:not(:first-child):not([aria-current]) {
+    display: none;
+  }
+}
+.page,
+.area > main {
+  padding: clamp(1.6rem, 4vw, 3.25rem) 0;
+}
+.heading {
+  max-width: 48rem;
+  margin-bottom: 1.9rem;
+}
+.heading h1,
+.area > main h1,
+.login h1 {
+  font-size: clamp(2rem, 4.2vw, 3.45rem);
+  font-weight: 700;
+  color: #103e60;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+.heading p,
+.area > main > h1 + p,
+.login > p {
+  margin-top: 0.7rem;
+  line-height: 1.6;
+  color: #446175;
+  max-width: 60ch;
+}
+.groups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.group {
+  min-width: 0;
+  border: 1px solid #d4e2ec;
+  background: white;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+.group h2 {
+  padding: 0.95rem 1.2rem;
+  font-size: 1.15rem;
+  color: #163d5b;
+  font-weight: 750;
+  background: #edf5fa;
+}
+.links {
+  padding: 0 1.15rem;
+}
+.action {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 0.28rem 0.65rem;
+  padding: 1rem 0;
+  text-decoration: none;
+}
+.action + .action {
+  border-top: 1px solid #dbe7ef;
+}
+.action strong {
+  color: #144c75;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.action:hover strong {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.arrow {
+  color: #397197;
+}
+.detail {
+  grid-column: 1 / -1;
+  line-height: 1.48;
+  font-size: 0.92rem;
+  color: #476174;
+}
+.area
+  > main
+  :where(form, section, ul, div)[class*="border-grid"]:not(
+    [class*="border-t"]
+  ):not([class*="border-b"]) {
+  border-radius: 0.8rem;
+}
+.area
+  > main
+  :where(input, select, button):not([type="checkbox"]):not([type="radio"]) {
+  min-height: 42px;
+}
+.area > main h2 {
+  color: #163d5b;
+}
+.area
+  > main
+  :where(input, select, textarea):not([type="checkbox"]):not([type="radio"]) {
+  max-width: 100%;
+}
+.bookFilters {
+  display: grid;
+  grid-template-columns:
+    minmax(10rem, 2fr) minmax(7rem, 1fr) minmax(9rem, 1fr)
+    auto;
+  gap: 0.85rem;
+  align-items: end;
+  padding: 1rem;
+  margin-top: 1.3rem;
+  background: #eff6fa;
+  border-radius: 0.8rem;
+}
+.bookFilters label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+  color: #173d58;
+}
+.bookFilters :is(input, select) {
+  width: 100%;
+  border: 1px solid #a8c2d3;
+  background: white;
+  border-radius: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  font-weight: 400;
+}
+.bookFilters button,
+.minorLink {
+  justify-self: start;
+  color: #195477;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.signInAction {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 0.6rem 1.4rem;
+  border-radius: 0.55rem;
+  color: white;
+  background: #10486d;
+  font-weight: 700;
+}
+.signInAction:hover {
+  background: #123857;
+}
+.minorLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.login {
+  max-width: 42rem;
+  padding: clamp(1.8rem, 6vw, 4rem) 1rem;
+  margin-inline: auto;
+}
+.login section {
+  border-radius: 0.8rem;
+}
+.login a:focus-visible,
+.navigation a:focus-visible,
+.action:focus-visible {
+  outline: 3px solid #17639a;
+  outline-offset: 2px;
+}
+@media (max-width: 810px) {
+  .groups {
+    grid-template-columns: 1fr;
+  }
+  .bookFilters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bookFilters > label:first-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 540px) {
+  .navigation {
+    gap: 0.1rem;
+  }
+  .navigation a {
+    font-size: 0.82rem;
+    padding: 0.4rem 0.55rem;
+  }
+  .bookFilters {
+    padding: 0.8rem;
+  }
+  .area
+    > main
+    :where(input, select, textarea):not([type="checkbox"]):not([type="radio"]) {
+    font-size: 1rem;
+  }
+}

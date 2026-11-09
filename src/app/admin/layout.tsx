@@ -1,9 +1,9 @@
-import { RequireRole } from "@/components/AuthGate";
+import { TeacherArea } from "@/components/teachers/TeacherArea";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <RequireRole role="admin">{children}</RequireRole>;
+  return <TeacherArea role="admin">{children}</TeacherArea>;
 }

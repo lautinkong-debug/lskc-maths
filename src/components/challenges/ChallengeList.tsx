@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { copy } from "@/lib/copy";
+import { teacherNavigationCopy as teacher } from "@/lib/teacherNavigationCopy";
 import { listTeacherChallenges } from "@/lib/db/challenges";
 import { type ChallengeRoom } from "@/lib/challenges/types";
 import styles from "./Challenges.module.css";
@@ -45,7 +46,13 @@ export function ChallengeList() {
           href="/challenges/new?app=directed-numbers"
           className="bg-navy mt-4 inline-flex min-h-12 items-center rounded px-5 font-semibold text-white"
         >
-          {c.newTitle}
+          {teacher.newRoom}
+        </Link>
+        <Link
+          href="/boards"
+          className="text-navy mt-2 ml-3 inline-flex min-h-12 items-center font-semibold underline underline-offset-4"
+        >
+          {teacher.boards}
         </Link>
       </header>
       {loading ? (

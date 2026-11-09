@@ -132,10 +132,11 @@ export function watchVisibleBooks(
   isTeacher: boolean,
   onChange: (rows: MistakeBook[]) => void,
   onError: (error: Error) => void,
+  level?: Level,
 ): Unsubscribe {
-  const visibleQuery = isTeacher
-    ? query(books)
-    : query(books, where("edition", "==", "student"));
+  const filters = isTeacher ? [] : [where("edition", "==", "student")];
+  if (level) filters.push(where("level", "==", level));
+  const visibleQuery = query(books, ...filters);
   return onSnapshot(
     visibleQuery,
     (snapshot) =>

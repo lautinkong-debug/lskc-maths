@@ -155,8 +155,9 @@ export function AppHost({
         title={setting?.title.trim() || title}
         topic={app.topic}
         canPresent={readySlug === slug}
+        canShare={availability !== "teacherOnly"}
         classroomHref={
-          slug === "circle-properties" && ACCESS_MODE === "public"
+          availability !== "teacherOnly" && slug === "circle-properties" && ACCESS_MODE === "public"
             ? "/apps/circle-properties/classroom"
             : undefined
         }

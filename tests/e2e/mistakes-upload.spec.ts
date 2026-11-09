@@ -80,10 +80,10 @@ test("a teacher uploads from the chapter and a separate student can find and rea
   const student = await browser.newContext({ baseURL });
   try {
     const reader = await student.newPage();
-    await reader.goto("/mistakes-book");
+    await reader.goto("/mistakes-book?level=F1");
     await reader
-      .getByRole("button", { name: /1A04 Linear Equation in One Unknown/ })
-      .click();
+      .getByRole("searchbox", { name: "Search correction books" })
+      .fill(title);
     await reader.getByRole("link", { name: new RegExp(title) }).click();
     await expect(
       reader.getByRole("heading", { name: title, exact: true }),
@@ -99,6 +99,13 @@ test("a teacher uploads from the chapter and a separate student can find and rea
     await reader.screenshot({
       path: "out/linear-equations/student-mistakes-preview.png",
     });
+    await reader.getByRole("link", { name: /Back to Mistakes Book/ }).click();
+    await expect(
+      reader.getByRole("searchbox", { name: "Search correction books" }),
+    ).toHaveValue(title);
+    await expect(
+      reader.getByRole("button", { name: "F1", exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
   } finally {
     await student.close();
   }

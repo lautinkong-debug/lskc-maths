@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { FormChooser } from "./FormChooser";
+import { portalCopy as navigation } from "@/lib/portalCopy";
 import { useEffect, useState, type FormEvent } from "react";
 import { EditableText, editedLabel } from "@/components/EditableText";
 import { ParabolaHero } from "@/components/home/ParabolaHero";
@@ -72,8 +74,8 @@ export function HomeContent() {
     : "";
 
   return (
-    <section className="studio-hero">
-      <div className="mx-auto w-full max-w-[1400px] px-4 pt-6 sm:px-6">
+    <section className="form-home-hero">
+      <div className="portal-notice">
         {error && (
           <p role="alert" className="text-crimson">
             {error}
@@ -204,12 +206,8 @@ export function HomeContent() {
           </div>
         )}
       </div>
-      <div className="studio-hero-layout">
-        <div className="studio-hero-copy">
-          <p className="studio-eyebrow">
-            <span className="studio-status-dot" />
-            {copy.studio.eyebrow}
-          </p>
+      <div className="portal-home-layout">
+        <div className="form-welcome">
           <EditableText
             as="h1"
             label={copy.home.heroTitleLabel}
@@ -217,47 +215,28 @@ export function HomeContent() {
             maxLength={100}
             updatedBy={content.updatedBy}
             updatedAt={content.updatedAt}
-            className="studio-hero-title"
+            className="portal-hero-title"
             onSave={(value) => saveHomeContent({ heroTitle: value }, email())}
           />
-          <div className="mt-4">
-            <EditableText
-              label={copy.home.heroIntroLabel}
-              value={content.intro}
-              maxLength={500}
-              multiline
-              updatedBy={content.updatedBy}
-              updatedAt={content.updatedAt}
-              className="text-graphite/85 max-w-prose text-base lg:text-lg"
-              onSave={(value) => saveHomeContent({ intro: value }, email())}
-            />
-          </div>
-          <div className="studio-hero-actions">
-            <Link className="studio-button studio-button-primary" href="/apps">
-              {copy.studio.explore}
-              <span aria-hidden="true">↗</span>
-            </Link>
-            <Link className="studio-text-link" href="/join">
-              {copy.studio.challenge}
-              <span aria-hidden="true">→</span>
-            </Link>
-          </div>
-          <Link
-            href="/apps/quadratic-explorer"
-            className="text-navy text-meta hover:text-navy-deep mt-5 inline-block underline underline-offset-4"
-          >
-            {copy.home.openFullApp} &rarr;
-          </Link>
+          <EditableText
+            label={copy.home.heroIntroLabel}
+            value={content.intro}
+            maxLength={500}
+            multiline
+            updatedBy={content.updatedBy}
+            updatedAt={content.updatedAt}
+            className="portal-home-intro"
+            onSave={(value) => saveHomeContent({ intro: value }, email())}
+          />
+          <FormChooser />
         </div>
-        <div className="studio-graph-card">
-          <div className="studio-graph-heading">
-            <span className="studio-eyebrow">{copy.studio.graphTag}</span>
-            <span aria-hidden="true">↗</span>
+        <aside className="portal-sketch" aria-label={navigation.graph}>
+          <div className="sketch-heading">
+            <h2>{navigation.graph}</h2>
+            <p>{navigation.graphHint}</p>
           </div>
-          <h2>{copy.studio.graphTitle}</h2>
-          <p>{copy.studio.graphHint}</p>
           <ParabolaHero />
-        </div>
+        </aside>
       </div>
     </section>
   );

@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { copy } from "@/lib/copy";
+import { classroomNavigationCopy as classroom } from "@/lib/classroomNavigationCopy";
 import { seasonFor } from "@/lib/challenges/logic";
 import { type ClassBoard } from "@/lib/challenges/types";
 import { watchClassBoard } from "@/lib/db/challenges";
 import styles from "./Challenges.module.css";
+import entry from "./ClassroomEntry.module.css";
 
 const c = copy.challenges;
 const seasons = (() => {
@@ -67,17 +69,17 @@ export function ClassBoards() {
     high = Math.max(1, ...ranked.map((item) => item.average)),
     span = high - low;
   return (
-    <main className={`${styles.page} mx-auto max-w-5xl space-y-7 px-4 sm:px-6`}>
-      <Link className={styles.back} href="/apps/directed-numbers#play">
-        ← {c.returnToPlay}
+    <main
+      className={`${styles.page} ${entry.page} mx-auto w-full max-w-5xl space-y-5 px-4 sm:px-6`}
+    >
+      <Link className={entry.back} href="/join" prefetch={false}>
+        ← {classroom.backToClassroom}
       </Link>
-      <header>
-        <h1 className="font-display text-navy font-semibold">
-          {c.boardsTitle}
-        </h1>
-        <p className="mt-3 max-w-xl">{c.boardsIntro}</p>
+      <header className={entry.intro}>
+        <h1>{classroom.results}</h1>
+        <p>{classroom.resultsIntro}</p>
       </header>
-      <div className={styles.filters}>
+      <div className={`${styles.filters} ${entry.filters}`}>
         <label>
           {c.boardLevel}
           <select
@@ -113,51 +115,55 @@ export function ClassBoards() {
       {error && <p role="alert">{error}</p>}
       {loading ? (
         <p role="status">{c.loading}</p>
-      ) : !ranked.length ? (
-        <p className={styles.empty}>{c.boardEmpty}</p>
+      ) : error ? null : !ranked.length ? (
+        <p className={entry.empty}>{c.boardEmpty}</p>
       ) : (
-        <ol className={styles.boardList}>
-          {ranked.map((item, index) => (
-            <li key={item.tag} className={styles.boardRow}>
-              <span className={styles.place}>{index + 1}</span>
-              <div>
-                <div className={styles.barHeading}>
-                  <strong>
-                    {item.tag}
-                    {item.tag === myClass && (
-                      <span className="bg-highlight ml-2 rounded px-2 py-1">
-                        {c.yourClass}
-                      </span>
-                    )}
-                  </strong>
-                  <span>{c.boardPlayers(item.players)}</span>
+        <section className={entry.ranking}>
+          <h2>{classroom.ranking}</h2>
+          <ol className={styles.boardList}>
+            {ranked.map((item, index) => (
+              <li key={item.tag} className={styles.boardRow}>
+                <span className={styles.place}>{index + 1}</span>
+                <div>
+                  <div className={styles.barHeading}>
+                    <strong>
+                      {item.tag}
+                      {item.tag === myClass && (
+                        <span className="bg-highlight ml-2 rounded px-2 py-1">
+                          {c.yourClass}
+                        </span>
+                      )}
+                    </strong>
+                    <span>{c.boardPlayers(item.players)}</span>
+                  </div>
+                  <div className={styles.bar}>
+                    <span
+                      className={styles.barFill}
+                      style={{
+                        left: `${((0 - low) / span) * 100}%`,
+                        width: `${(Math.abs(item.average) / span) * 100}%`,
+                        transform:
+                          item.average < 0 ? "translateX(-100%)" : undefined,
+                        backgroundColor:
+                          item.tag === myClass
+                            ? "var(--color-highlight)"
+                            : undefined,
+                      }}
+                    />
+                    <span
+                      className="bg-grid-strong absolute inset-y-0 w-px"
+                      style={{ left: `${((0 - low) / span) * 100}%` }}
+                    />
+                    <strong className={styles.score}>
+                      {c.average(Number(item.average.toFixed(1)))}
+                    </strong>
+                  </div>
                 </div>
-                <div className={styles.bar}>
-                  <span
-                    className={styles.barFill}
-                    style={{
-                      left: `${((0 - low) / span) * 100}%`,
-                      width: `${(Math.abs(item.average) / span) * 100}%`,
-                      transform:
-                        item.average < 0 ? "translateX(-100%)" : undefined,
-                      backgroundColor:
-                        item.tag === myClass
-                          ? "var(--color-highlight)"
-                          : undefined,
-                    }}
-                  />
-                  <span
-                    className="bg-grid-strong absolute inset-y-0 w-px"
-                    style={{ left: `${((0 - low) / span) * 100}%` }}
-                  />
-                  <strong className={styles.score}>
-                    {c.average(Number(item.average.toFixed(1)))}
-                  </strong>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ol>
+              </li>
+            ))}
+          </ol>
+          <p className={entry.support}>{classroom.resultsNote}</p>
+        </section>
       )}
     </main>
   );

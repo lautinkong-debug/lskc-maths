@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, Suspense, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth";
 import { auth } from "@/lib/firebase";
 import { ACCESS_MODE } from "@/lib/constants";
 import { copy } from "@/lib/copy";
+import { classroomNavigationCopy as classroom } from "@/lib/classroomNavigationCopy";
 import { Avatar, Stamp } from "@/components/game";
 import {
   ANIMALS,
@@ -15,7 +17,11 @@ import {
   randomNickname,
   type NicknameIndex,
 } from "@/lib/challenges/nicknames";
-import { displayCode, normaliseCode } from "@/lib/challenges/codes";
+import {
+  displayCode,
+  normaliseCode,
+  validJoinCode,
+} from "@/lib/challenges/codes";
 import {
   findChallengeByCode,
   getChallengeEntry,
@@ -35,6 +41,7 @@ import { challengeRunners } from "@/apps/challenge-runners";
 import { useProgress, frameIndex } from "@/apps/directed-numbers/play/progress";
 import { type Question } from "@/apps/directed-numbers/lib/generate";
 import styles from "./Challenges.module.css";
+import entry from "./ClassroomEntry.module.css";
 
 const c = copy.challenges,
   p = copy.apps.directedNumbers.playLesson;
@@ -92,6 +99,10 @@ function showMeUrl(question: Question) {
 }
 
 export function JoinChallenge({ initialCode = "" }: { initialCode?: string }) {
+  const router = useRouter();
+  const [game, setGame] = useState<"directed" | "tug">("directed");
+  const [lookupAttempt, setLookupAttempt] = useState(0);
+  const [finishedLookup, setFinishedLookup] = useState(-1);
   const mainRef = useRef<HTMLElement>(null);
   const { loading: authLoading, joinAnonymously } = useAuth();
   const [progress, updateProgress] = useProgress();
@@ -115,7 +126,13 @@ export function JoinChallenge({ initialCode = "" }: { initialCode?: string }) {
     return () => window.clearInterval(timer);
   }, []);
   useEffect(() => {
-    if (!initialCode || authLoading) return;
+    if (
+      !initialCode ||
+      authLoading ||
+      game !== "directed" ||
+      code !== normaliseCode(initialCode)
+    )
+      return;
     let active = true;
     findChallengeByCode(initialCode)
       .then(async (found) => {
@@ -170,11 +187,14 @@ export function JoinChallenge({ initialCode = "" }: { initialCode?: string }) {
       })
       .catch(() => {
         if (active) setError(c.codeError);
+      })
+      .finally(() => {
+        if (active) setFinishedLookup(lookupAttempt);
       });
     return () => {
       active = false;
     };
-  }, [initialCode, authLoading]);
+  }, [initialCode, authLoading, game, code, lookupAttempt]);
   const roomId = room?.id;
   useEffect(() => {
     if (!roomId) return;
@@ -211,26 +231,26 @@ export function JoinChallenge({ initialCode = "" }: { initialCode?: string }) {
     heading?.focus({ preventScroll: true });
     heading?.scrollIntoView({ block: "start" });
   }, [phase]);
-  async function find(event: FormEvent) {
+  const checking =
+    Boolean(initialCode) &&
+    game === "directed" &&
+    code === normaliseCode(initialCode) &&
+    finishedLookup !== lookupAttempt;
+  function find(event: FormEvent) {
     event.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      const found = await findChallengeByCode(code);
-      if (
-        !found ||
-        found.status === "closed" ||
-        Date.now() >= found.closesAt.getTime()
-      )
-        throw new Error(c.codeError);
-      setRoom(found);
-      setCode(found.code);
-      setPhase("identity");
-      window.history.replaceState(null, "", `/join/${found.code}`);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : c.codeError);
-    } finally {
-      setBusy(false);
+    if (!validJoinCode(code)) {
+      setError(classroom.checkCharacters);
+      return;
+    }
+    if (game === "tug") {
+      router.push(`/polynomial-tug?room=${encodeURIComponent(code)}`);
+      return;
+    }
+    if (normaliseCode(initialCode) === code) {
+      setError("");
+      setLookupAttempt((attempt) => attempt + 1);
+    } else {
+      router.push(`/join/${encodeURIComponent(code)}`);
     }
   }
   async function join() {
@@ -338,27 +358,47 @@ export function JoinChallenge({ initialCode = "" }: { initialCode?: string }) {
   return (
     <main
       ref={mainRef}
-      className={`${styles.page} mx-auto max-w-5xl space-y-5 px-4 sm:px-6`}
+      className={`${styles.page} ${entry.page} mx-auto w-full max-w-5xl space-y-5 px-4 sm:px-6`}
     >
       {phase === "code" && (
         <>
-          <Link className={styles.back} href="/apps/directed-numbers#play">
-            ← {c.returnToPlay}
-          </Link>
-          <div className={styles.entry}>
-            <header className={styles.entryIntro}>
-              <h1 className="font-display text-navy font-semibold">
-                {c.joinTitle}
-              </h1>
-              <p>{c.joinIntro}</p>
-              <ol className={styles.steps}>
-                {c.joinSteps.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-            </header>
-            <form onSubmit={find} className={styles.entryForm}>
-              <label>
+          <header className={entry.intro}>
+            <h1>{classroom.joinTitle}</h1>
+            <p>{classroom.joinIntro}</p>
+          </header>
+          <div className={entry.layout}>
+            <form onSubmit={find} className={entry.form}>
+              <fieldset className={entry.gameField} disabled={busy}>
+                <legend>{classroom.chooseActivity}</legend>
+                <div>
+                  {(["directed", "tug"] as const).map((id) => (
+                    <label
+                      key={id}
+                      className={entry.gameOption}
+                      data-selected={game === id}
+                    >
+                      <input
+                        type="radio"
+                        name="class-activity"
+                        checked={game === id}
+                        onChange={() => {
+                          setGame(id);
+                          setError("");
+                        }}
+                      />
+                      <span>
+                        <strong>{classroom[id]}</strong>
+                        <small>
+                          {id === "directed"
+                            ? classroom.directedDescription
+                            : classroom.tugDescription}
+                        </small>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <label className={entry.code}>
                 {c.enterCode}
                 <input
                   autoComplete="off"
@@ -368,30 +408,70 @@ export function JoinChallenge({ initialCode = "" }: { initialCode?: string }) {
                   className={`${input} font-mono uppercase`}
                   maxLength={8}
                   value={displayCode(code)}
-                  onChange={(event) =>
-                    setCode(normaliseCode(event.target.value).slice(0, 6))
-                  }
+                  onChange={(event) => {
+                    setCode(normaliseCode(event.target.value).slice(0, 6));
+                    setError("");
+                  }}
+                  disabled={busy}
                 />
               </label>
               <button
                 className={primary}
-                disabled={busy || code.length !== 6}
+                disabled={busy || checking || code.length !== 6}
                 type="submit"
               >
-                {busy ? c.loading : c.findRoom}
+                {busy || checking
+                  ? c.loading
+                  : game === "tug"
+                    ? classroom.joinTug
+                    : c.findRoom}
                 <span aria-hidden="true"> →</span>
               </button>
-              <p>
+              {error && (
+                <div className={entry.formError} role="alert">
+                  <p>{error}</p>
+                  {game === "directed" && validJoinCode(code) && (
+                    <Link
+                      prefetch={false}
+                      href={`/polynomial-tug?room=${encodeURIComponent(code)}`}
+                    >
+                      {classroom.tryTug}
+                    </Link>
+                  )}
+                </div>
+              )}
+              <p className={entry.support}>
                 {ACCESS_MODE === "public"
                   ? c.joinNoAccount
                   : c.joinSchoolAccount}
               </p>
             </form>
+            <nav className={entry.related} aria-label={classroom.outsideClass}>
+              <Link href="/boards" prefetch={false}>
+                <span>
+                  <strong>{classroom.results}</strong>
+                  <small>{classroom.resultsIntro}</small>
+                </span>
+                <span aria-hidden="true">→</span>
+              </Link>
+              <Link href="/apps/directed-numbers#play" prefetch={false}>
+                <span>
+                  <strong>{classroom.practice}</strong>
+                  <small>{classroom.practiceDescription}</small>
+                </span>
+                <span aria-hidden="true">→</span>
+              </Link>
+            </nav>
           </div>
         </>
       )}
       {room && phase !== "code" && (
         <header>
+          {(phase === "identity" || phase === "result") && (
+            <Link href="/join" prefetch={false} className={entry.back}>
+              ← {classroom.chooseAnother}
+            </Link>
+          )}
           <p className="text-navy font-mono text-xl font-bold tracking-widest">
             {displayCode(room.code)}
           </p>
@@ -407,7 +487,7 @@ export function JoinChallenge({ initialCode = "" }: { initialCode?: string }) {
           </p>
         </header>
       )}
-      {error && (
+      {error && phase !== "code" && (
         <p
           role="alert"
           className="border-crimson-deep text-crimson-deep rounded border p-3"
@@ -648,6 +728,9 @@ export function JoinChallenge({ initialCode = "" }: { initialCode?: string }) {
             )}
             <Link className={action} href="/apps/directed-numbers#play">
               {c.returnToPlay}
+            </Link>
+            <Link className={action} href="/boards" prefetch={false}>
+              {classroom.resultsLink}
             </Link>
           </div>
         </section>

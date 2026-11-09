@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ACTIVE_LEVELS, type Level } from "@/lib/constants";
 import { copy } from "@/lib/copy";
+import { teacherNavigationCopy as c } from "@/lib/teacherNavigationCopy";
+import s from "@/components/teachers/teacher.module.css";
 import {
   BookInputError,
   deleteBook,
@@ -29,6 +31,20 @@ export default function ManageBooksPage() {
   const [loading, setLoading] = useState(true);
   const [booksLoadError, setBooksLoadError] = useState(false);
   const [topicsLoadError, setTopicsLoadError] = useState(false);
+  const [query, setQuery] = useState("");
+  const [listLevel, setListLevel] = useState("");
+  const [listEdition, setListEdition] = useState("");
+  const editHeading = useRef<HTMLHeadingElement>(null);
+  const search = query.trim().toLowerCase();
+  const matches = books.filter(
+    (book) =>
+      (!listLevel || book.level === listLevel) &&
+      (!listEdition || book.edition === listEdition) &&
+      (!search ||
+        `${book.title} ${book.topicName} ${book.fileName}`
+          .toLowerCase()
+          .includes(search)),
+  );
 
   useEffect(
     () =>
@@ -68,6 +84,7 @@ export default function ManageBooksPage() {
     setTopicId(book.topicId);
     setReplacement(null);
     setMessage("");
+    requestAnimationFrame(() => editHeading.current?.focus());
   }
 
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -128,6 +145,60 @@ export default function ManageBooksPage() {
         {copy.books.manageTitle}
       </h1>
       <p className="mt-2">{copy.books.manageIntro}</p>
+      <Link className={s.minorLink} href="/manage/upload">
+        {c.upload} →
+      </Link>
+      {books.length > 0 && (
+        <div
+          role="search"
+          aria-label={c.manageBookFilter}
+          className={s.bookFilters}
+        >
+          <label>
+            {c.bookSearch}
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+            />
+          </label>
+          <label>
+            {c.form}
+            <select
+              value={listLevel}
+              onChange={(event) => setListLevel(event.target.value)}
+            >
+              <option value="">{c.allForms}</option>
+              {ACTIVE_LEVELS.map((form) => (
+                <option key={form}>{form}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            {c.edition}
+            <select
+              value={listEdition}
+              onChange={(event) => setListEdition(event.target.value)}
+            >
+              <option value="">{c.allEditions}</option>
+              <option value="student">{copy.books.studentEdition}</option>
+              <option value="teacher">{copy.books.teacherEdition}</option>
+            </select>
+          </label>
+          {(query || listLevel || listEdition) && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                setListLevel("");
+                setListEdition("");
+              }}
+            >
+              {c.resetFilters}
+            </button>
+          )}
+        </div>
+      )}
       {message && (
         <p
           role={isError ? "alert" : "status"}
@@ -151,9 +222,13 @@ export default function ManageBooksPage() {
         </p>
       ) : books.length === 0 ? (
         <p className="mt-8">{copy.books.noManagedBooks}</p>
+      ) : matches.length === 0 ? (
+        <p className="mt-8" role="status">
+          {c.noMatches}
+        </p>
       ) : (
         <ul className="border-grid mt-8 divide-y border-t border-b">
-          {books.map((book) => (
+          {matches.map((book) => (
             <li
               key={book.id}
               className="flex flex-wrap items-center gap-4 py-4"
@@ -198,7 +273,11 @@ export default function ManageBooksPage() {
 
       {editing && (
         <section className="border-grid mt-10 border bg-white p-5 sm:p-7">
-          <h2 className="font-display text-section text-crimson-deep font-semibold">
+          <h2
+            ref={editHeading}
+            tabIndex={-1}
+            className="font-display text-section text-crimson-deep font-semibold"
+          >
             {copy.books.editAction}: {editing.title}
           </h2>
           <form

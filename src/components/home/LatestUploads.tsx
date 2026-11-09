@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { portalCopy as c } from "@/lib/portalCopy";
 import { copy } from "@/lib/copy";
 import { watchLatestStudentBooks, type MistakeBook } from "@/lib/db/books";
 
@@ -27,10 +28,17 @@ export function LatestUploads() {
   );
 
   return (
-    <section className="studio-latest">
-      <h2 className="font-display border-grid text-section border-b pb-2 font-semibold">
-        {copy.home.latestTitle}
-      </h2>
+    <section className="home-shelf home-books">
+      <div className="home-shelf-heading">
+        <h2 className="portal-section-title">{c.latestBooks}</h2>
+        <Link
+          href="/mistakes-book"
+          prefetch={false}
+          className="portal-text-link"
+        >
+          {c.seeAllBooks} →
+        </Link>
+      </div>
       {loading ? (
         <p className="py-5">{copy.books.loading}</p>
       ) : error ? (
@@ -44,6 +52,7 @@ export function LatestUploads() {
           {books.map((book) => (
             <li key={book.id} className="border-rule border-b last:border-0">
               <Link
+                prefetch={false}
                 href={`/mistakes-book/${book.id}`}
                 className="hover:bg-crimson-wash flex flex-wrap items-baseline gap-x-3 gap-y-1 py-3"
               >

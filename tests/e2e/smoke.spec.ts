@@ -11,25 +11,29 @@ test("teacher pages require sign-in, then admit a seeded admin", async ({
   await page.getByRole("main").getByRole("link", { name: "Sign in" }).click();
   await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
   await page.getByRole("button", { name: /^Admin:/ }).click();
-  await expect(page.getByText("Teacher access is active.")).toBeVisible();
-  await page.goto("/manage/topics");
+  await expect(page).toHaveURL(/\/manage\/topics$/);
   await expect(
     page.getByRole("heading", { name: "Manage topics" }),
   ).toBeVisible();
 });
 
-test("a visitor can browse seeded Mistakes Book topics", async ({ page }) => {
-  await page.goto("/mistakes-book");
+test("a visitor can open a form-filtered correction library and clear the search", async ({
+  page,
+}) => {
+  await page.goto("/mistakes-book?level=F5&q=unmatchedbooktitle");
   await expect(page).toHaveTitle(/Mistakes book/);
   await expect(
     page.getByRole("heading", { name: "Mistakes book" }),
   ).toBeVisible();
-  await page
-    .getByRole("button", { name: /1A02 Directed Numbers and the Number Line/ })
-    .click();
   await expect(
-    page.getByRole("heading", { name: "Directed Numbers and the Number Line" }),
-  ).toBeVisible();
+    page.getByRole("button", { name: "F5", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.getByRole("searchbox", { name: "Search correction books" }),
+  ).toHaveValue("unmatchedbooktitle");
+  await expect(page.getByText("0 books found", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Clear filters" }).click();
+  await expect(page).toHaveURL(/\/mistakes-book$/);
 });
 
 test("a visitor can open and use a Web App", async ({ page }) => {
@@ -54,6 +58,9 @@ test("the Home graph and mobile menu work with a keyboard", async ({
   await menu.focus();
   await page.keyboard.press("Enter");
   await expect(menu).toHaveAttribute("aria-expanded", "true");
+  await page.keyboard.press("Escape");
+  await expect(menu).toHaveAttribute("aria-expanded", "false");
+  await expect(menu).toBeFocused();
   const vertex = page.getByRole("slider", { name: /Vertex/ });
   await expect(vertex).toHaveAttribute("aria-valuenow", "1");
   await vertex.focus();

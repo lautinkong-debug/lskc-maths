@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ClassBoards } from "@/components/challenges/ClassBoards";
-import { copy } from "@/lib/copy";
+import { classroomNavigationCopy as classroom } from "@/lib/classroomNavigationCopy";
 
-export const metadata:Metadata={title:copy.challenges.boardsTitle};
-export default function Page(){return <ClassBoards/>;}
+export const metadata: Metadata = { title: classroom.results };
+export default function Page() {
+  return <ClassBoards />;
+}

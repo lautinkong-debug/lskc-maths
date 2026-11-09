@@ -2403,9 +2403,9 @@ export const copy = {
     skip: "Skip to content",
   },
   home: {
-    heroTitle: "Make sense of the mathematics.",
+    heroTitle: "Choose your form.",
     heroIntro:
-      "Move a point. Test an idea. Discover the why behind the answer — with interactive lessons and thoughtful practice.",
+      "Find interactive lessons, revision games and correction notes for your form.",
     heroHint: "Drag the vertex",
     heroGraphLabel:
       "A parabola on graph paper. Drag its vertex, or use the arrow keys, to change the equation.",

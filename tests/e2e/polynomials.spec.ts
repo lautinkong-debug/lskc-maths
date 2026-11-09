@@ -220,9 +220,7 @@ test("the F1 library finds the integrated polynomial app by chapter code", async
   page,
 }) => {
   await page.goto("/apps");
-  await page
-    .getByRole("combobox", { name: "Level", exact: true })
-    .selectOption("F1");
+  await page.getByRole("button", { name: "F1", exact: true }).click();
   await page
     .getByRole("searchbox", { name: "Search apps", exact: true })
     .fill("1A10");

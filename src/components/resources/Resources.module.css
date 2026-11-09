@@ -1,0 +1,380 @@
+.page {
+  --ink: #163345;
+  --navy: #173f61;
+  --quiet: #4e6676;
+  --line: #d2dfe7;
+  --tint: #eff5fa;
+  color: var(--ink);
+}
+.heading,
+.resultsBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem 1.25rem;
+  flex-wrap: wrap;
+}
+.heading h1,
+.detailTitle {
+  margin: 0;
+  color: var(--navy);
+  font-size: clamp(2.15rem, 5vw, 3.8rem);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+.heading p {
+  color: var(--quiet);
+  margin: 0.6rem 0 0;
+  line-height: 1.5;
+}
+.back,
+.resultsBar a,
+.management a,
+.reset {
+  color: var(--navy);
+  font-weight: 650;
+  text-underline-offset: 0.2em;
+}
+.back:hover,
+.resultsBar a:hover,
+.management a:hover,
+.reset:hover {
+  text-decoration: underline;
+}
+.filters {
+  margin-top: clamp(1.25rem, 3vw, 2rem);
+  padding: clamp(0.85rem, 2.5vw, 1.4rem);
+  border: 1px solid var(--line);
+  background: var(--tint);
+  border-radius: 1rem;
+}
+.formRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.formLabel,
+.filterFields label > span {
+  font-weight: 650;
+  font-size: 0.88rem;
+  color: var(--navy);
+}
+.formLabel {
+  margin-right: 0.4rem;
+}
+.formRow button,
+.filterFields input,
+.filterFields select {
+  background: white;
+  border: 1px solid #acbecb;
+  border-radius: 0.55rem;
+  min-height: 2.75rem;
+  color: var(--ink);
+}
+.formRow button {
+  font-weight: 600;
+  min-width: 2.75rem;
+  padding: 0.35rem 0.85rem;
+}
+.formRow button:hover {
+  border-color: var(--navy);
+}
+.formRow button[aria-pressed="true"] {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: white;
+}
+.filterFields {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 0.85rem;
+}
+.filterFields label,
+.searchControl {
+  min-width: 0;
+}
+.filterFields label > span {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+.filterFields input,
+.filterFields select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  font-size: 1rem;
+}
+.filterFields input {
+  padding-left: 2.5rem;
+}
+.searchControl {
+  position: relative;
+}
+.filterFields .searchControl {
+  margin: 0;
+}
+.search svg {
+  position: absolute;
+  pointer-events: none;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.15rem;
+  color: var(--quiet);
+}
+.reset {
+  margin-top: 0.35rem;
+  min-height: 2.75rem;
+  text-decoration: underline;
+}
+.results {
+  margin-top: clamp(1.25rem, 3vw, 2rem);
+}
+.resultsBar {
+  padding-bottom: 0.8rem;
+}
+.resultsBar h2 {
+  color: var(--navy);
+  font-size: 1.18rem;
+  font-weight: 700;
+}
+.resultsBar a,
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  font-size: 0.92rem;
+}
+.appList,
+.bookList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+.appList {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+}
+.appCard {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+.appCard,
+.bookLink,
+.empty {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+}
+.appCard:has(.appLink:hover),
+.appCard:focus-within,
+.bookLink:hover,
+.bookLink:focus-visible {
+  border-color: #6187a2;
+  box-shadow: 0 3px 12px #173f610c;
+}
+.appLink {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+.thumb {
+  background: var(--tint);
+  border-bottom: 1px solid var(--line);
+  height: 7.5rem;
+  overflow: hidden;
+}
+.thumbImage {
+  width: 100%;
+  height: 100%;
+}
+.appBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 1rem 1.15rem 0.8rem;
+  min-width: 0;
+}
+.meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.65rem;
+  color: var(--quiet);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+.featured,
+.edition {
+  color: var(--navy);
+  border-radius: 0.35rem;
+  background: var(--tint);
+  padding: 0.1rem 0.45rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+.appLink h3,
+.bookLink h3 {
+  margin: 0.4rem 0 0;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  font-weight: 720;
+  color: var(--navy);
+  overflow-wrap: anywhere;
+}
+.chapterName {
+  margin: 0.32rem 0 0;
+  color: var(--quiet);
+  font-size: 0.88rem;
+}
+.description {
+  margin: 0.6rem 0;
+  color: var(--ink);
+  line-height: 1.5;
+  font-size: 0.935rem;
+  overflow-wrap: anywhere;
+}
+.cardFoot {
+  margin-top: auto;
+  padding-top: 0.6rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--quiet);
+  font-size: 0.79rem;
+  font-weight: 600;
+}
+.cardFoot > :last-child,
+.rowArrow {
+  font-size: 1.15rem;
+  color: var(--navy);
+}
+.bookList {
+  gap: 0.65rem;
+}
+.bookLink {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: clamp(0.85rem, 2vw, 1.35rem);
+  text-decoration: none;
+}
+.bookInfo {
+  flex: 1;
+  min-width: 0;
+}
+.bookLink h3 {
+  margin-top: 0.16rem;
+  font-size: 1.12rem;
+}
+.bookLink .description {
+  margin: 0.28rem 0 0;
+}
+.edition {
+  display: inline-block;
+  margin-top: 0.4rem;
+}
+.documentIcon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 3.4rem;
+  height: 3.8rem;
+  border: 1px solid #c8dce8;
+  border-radius: 0.6rem;
+  color: var(--navy);
+  background: var(--tint);
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+.empty {
+  padding: 1.5rem;
+  color: var(--quiet);
+}
+.management {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.2rem;
+  margin-block: 1rem;
+}
+.detailTitle {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 1.15rem 0 0.8rem;
+  overflow-wrap: anywhere;
+}
+.detail {
+  max-width: 65rem;
+}
+.detail [role="alert"] {
+  margin-top: 1rem;
+}
+@media (max-width: 650px) {
+  .filterFields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+  .formLabel {
+    grid-column: 1 / 4;
+  }
+  .formRow {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.3rem;
+  }
+  .formRow button {
+    min-width: 0;
+    padding-inline: 0.25rem;
+  }
+  .formRow button:first-of-type {
+    grid-column: 4 / -1;
+    justify-self: end;
+    padding-inline: 0.85rem;
+  }
+  .appList {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.7rem;
+  }
+  .appLink {
+    display: grid;
+    grid-template-columns: minmax(4.25rem, 22%) minmax(0, 1fr);
+  }
+  .thumb {
+    height: 100%;
+    min-height: 6.2rem;
+    border-bottom: 0;
+    border-right: 1px solid var(--line);
+    display: grid;
+    align-content: center;
+  }
+  .thumbImage {
+    max-height: 6rem;
+  }
+  .appBody {
+    padding: 0.7rem 0.8rem 0.65rem;
+  }
+  .appLink h3 {
+    font-size: 1.12rem;
+    margin-top: 0.22rem;
+  }
+  .description,
+  .chapterName {
+    font-size: 0.85rem;
+  }
+  .cardFoot {
+    padding-top: 0.15rem;
+  }
+  .bookLink {
+    gap: 0.65rem;
+  }
+  .documentIcon {
+    flex-basis: 2.6rem;
+    height: 3.15rem;
+    font-size: 0.67rem;
+  }
+}

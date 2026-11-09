@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { JoinChallenge } from "@/components/challenges/JoinChallenge";
-import { copy } from "@/lib/copy";
+import { classroomNavigationCopy as classroom } from "@/lib/classroomNavigationCopy";
 
-export const metadata:Metadata={title:copy.challenges.joinTitle};
-export default function Page(){return <JoinChallenge/>;}
+export const metadata: Metadata = { title: classroom.joinTitle };
+export default function Page() {
+  return <JoinChallenge />;
+}

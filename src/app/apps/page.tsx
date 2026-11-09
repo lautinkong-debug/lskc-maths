@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { appRegistry } from "@/apps/registry";
 import { AppListingEditor } from "@/components/apps/AppListingEditor";
 import { useAuth } from "@/lib/auth";
@@ -16,17 +16,38 @@ import {
 } from "@/lib/db/appSettings";
 import { useEditMode } from "@/lib/editMode";
 import { sortTopicsForLevel, watchTopics, type Topic } from "@/lib/db/topics";
+import {
+  ResourceFilters,
+  useResourceFilters,
+} from "@/components/resources/ResourceFilters";
+import { matchesResourceSearch, resourceHref } from "@/lib/resourceNavigation";
+import { resourceNavigationCopy as c } from "@/lib/resourceNavigationCopy";
+import s from "@/components/resources/Resources.module.css";
 
 export default function AppsPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="portal-page">
+          <h1 className="portal-heading">{copy.apps.title}</h1>
+          <p role="status">{copy.apps.loading}</p>
+        </main>
+      }
+    >
+      <AppCatalogue />
+    </Suspense>
+  );
+}
+
+function AppCatalogue() {
   const { user, role } = useAuth();
   const { editing } = useEditMode();
   const isTeacher = role === "teacher" || role === "admin";
-  const [level, setLevel] = useState("all");
-  const [topicId, setTopicId] = useState("all");
+  const { filters, update } = useResourceFilters();
+  const { level, topic: topicId, q: search } = filters;
   const [topics, setTopics] = useState<Topic[]>([]);
   const [topicsLoaded, setTopicsLoaded] = useState(false);
   const [topicsError, setTopicsError] = useState("");
-  const [search, setSearch] = useState("");
   const [settings, setSettings] = useState<AppSettings[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState("");
@@ -76,27 +97,38 @@ export default function AppsPage() {
         a.order - b.order ||
         a.title.localeCompare(b.title),
     );
-  const query = search.trim().toLowerCase();
-  const topicGroups = ACTIVE_LEVELS.filter(
-    (item) => level === "all" || item === level,
-  ).map((item) => ({ level: item, topics: sortTopicsForLevel(topics, item) }));
-  const selectedTopic = topicsError
-    ? undefined
-    : topicGroups
-        .flatMap((group) => group.topics)
-        .find((topic) => topic.id === topicId);
-  const filtered = ordered.filter(
+  const available = ordered.filter(
     (app) =>
-      (isTeacher || app.visible) &&
-      (level === "all" || app.levels.some((item) => item === level)) &&
-      (!selectedTopic || app.topicCodes.includes(selectedTopic.code)) &&
-      (!query ||
-        `${app.title} ${app.topic} ${app.topicCodes.join(" ")} ${app.summary} ${app.levels.join(" ")}`
-          .toLowerCase()
-          .includes(query)),
+      (isTeacher || app.visible) && (!level || app.levels.includes(level)),
+  );
+  const chapterOptions = ACTIVE_LEVELS.filter(
+    (form) => !level || form === level,
+  ).flatMap((form) =>
+    sortTopicsForLevel(topics, form).map((topic) => ({
+      ...topic,
+      group: form,
+    })),
+  );
+  const selectedTopic = chapterOptions.find((topic) => topic.id === topicId);
+  const filtered = available.filter(
+    (app) =>
+      (!topicId ||
+        (selectedTopic &&
+          app.topicCodes.includes(selectedTopic.code) &&
+          selectedTopic.levels.some((topicLevel) =>
+            app.levels.includes(topicLevel),
+          ))) &&
+      matchesResourceSearch(search, [
+        app.title,
+        app.topic,
+        ...app.topicCodes,
+        app.summary,
+        ...app.levels,
+        STRANDS[app.strand],
+      ]),
   );
   const canReorder =
-    editing && level === "all" && !selectedTopic && query === "";
+    editing && isTeacher && !level && !topicId && !search.trim();
 
   async function reorder(sourceSlug: string, targetSlug: string) {
     if (!canReorder || !user?.email || savingOrder || sourceSlug === targetSlug)
@@ -147,244 +179,189 @@ export default function AppsPage() {
   }
 
   return (
-    <main className="studio-library mx-auto w-full max-w-[1400px] px-4 py-10 sm:px-6 lg:py-14">
-      <div className="studio-library-heading">
-        <p className="studio-eyebrow">{copy.studio.libraryEyebrow}</p>
-        <h1 className="font-display text-hero text-navy font-semibold">
-          {copy.apps.title}
-        </h1>
-        <p className="mt-2 max-w-prose">{copy.studio.libraryIntro}</p>
-      </div>
-      <div className="studio-library-layout">
-        <aside className="studio-filters">
-          <h2>{copy.studio.filterTitle}</h2>
-          <p className="studio-filter-hint">{copy.studio.filterHint}</p>
-          <label className="min-w-0 text-sm font-semibold">
-            {copy.apps.filterLevel}
-            <select
-              aria-label={copy.apps.filterLevel}
-              value={level}
-              onChange={(event) => {
-                setLevel(event.target.value);
-                setTopicId("all");
-              }}
-              className="border-grid-strong mt-1 block w-full rounded border px-3 py-2 font-normal"
-            >
-              <option value="all">{copy.apps.allLevels}</option>
-              {ACTIVE_LEVELS.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="min-w-0 text-sm font-semibold">
-            {copy.apps.filterTopic}
-            <select
-              aria-label={copy.apps.filterTopic}
-              value={selectedTopic?.id ?? "all"}
-              onChange={(event) => setTopicId(event.target.value)}
-              disabled={!topicsLoaded || !!topicsError}
-              className="border-grid-strong mt-1 block w-full rounded border px-3 py-2 font-normal"
-            >
-              <option value="all">
-                {topicsLoaded ? copy.apps.allTopics : copy.topics.loading}
-              </option>
-              {topicGroups
-                .filter((group) => group.topics.length > 0)
-                .map((group) => (
-                  <optgroup key={group.level} label={group.level}>
-                    {group.topics.map((topic) => (
-                      <option key={topic.id} value={topic.id}>
-                        {topic.code} · {topic.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-            </select>
-          </label>
-          <label className="min-w-0 text-sm font-semibold">
-            {copy.apps.search}
-            <input
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              className="border-grid-strong mt-1 block w-full rounded border px-3 py-2 font-normal"
-            />
-          </label>
-          {(level !== "all" || topicId !== "all" || search !== "") && (
-            <button
-              className="studio-clear-filters"
-              type="button"
-              onClick={() => {
-                setLevel("all");
-                setTopicId("all");
-                setSearch("");
-              }}
-            >
-              {copy.studio.resetFilters} ↺
-            </button>
-          )}
-        </aside>
-        <div className="studio-library-results">
-          {topicsError && (
-            <p role="alert" className="text-crimson mt-3">
-              {topicsError}
-            </p>
-          )}
-          {selectedTopic && (
-            <p className="text-navy mt-4 font-semibold">
-              {selectedTopic.code} · {selectedTopic.name}
-            </p>
-          )}
-          {editing && (
-            <p className="text-pencil mt-4 text-sm">
-              {canReorder
-                ? copy.apps.dragToReorder
-                : copy.apps.clearFiltersToReorder}
-            </p>
-          )}
-          {status && (
-            <p role="status" className="text-navy mt-4">
-              {status}
-            </p>
-          )}
-          {!loaded ? (
-            <p role="status" className="mt-5">
-              {copy.apps.loading}
-            </p>
-          ) : loadError ? (
-            <p role="alert" className="text-crimson mt-5">
-              {loadError}
-            </p>
-          ) : (
-            <>
-              <p role="status" className="text-pencil mt-5 text-sm">
-                {copy.apps.resultCount(filtered.length)}
+    <main className={`portal-page ${s.page}`}>
+      <header className={s.heading}>
+        <div>
+          <h1 className="portal-heading">{copy.apps.title}</h1>
+          <p>{c.appIntro}</p>
+        </div>
+        {level && (
+          <Link href={`/forms/${level.toLowerCase()}`} className={s.back}>
+            ← {c.formLink(level)}
+          </Link>
+        )}
+      </header>
+      <ResourceFilters
+        filters={filters}
+        update={update}
+        chapters={loaded && !loadError ? chapterOptions : []}
+        searchLabel={copy.apps.search}
+        placeholder={c.findApps}
+        topicDisabled={
+          !topicsLoaded || !loaded || Boolean(topicsError || loadError)
+        }
+      />
+      <section className={s.results} aria-label={c.results}>
+        {topicsError && (
+          <p role="alert" className="text-crimson mt-3">
+            {topicsError}
+          </p>
+        )}
+        {editing && isTeacher && (
+          <p className="text-pencil mt-4 text-sm">
+            {canReorder
+              ? copy.apps.dragToReorder
+              : copy.apps.clearFiltersToReorder}
+          </p>
+        )}
+        {status && (
+          <p role="status" className="text-navy mt-4">
+            {status}
+          </p>
+        )}
+        {!loaded ? (
+          <p role="status" className="mt-5">
+            {copy.apps.loading}
+          </p>
+        ) : loadError ? (
+          <p role="alert" className="text-crimson mt-5">
+            {loadError}
+          </p>
+        ) : (
+          <>
+            <div className={s.resultsBar}>
+              <h2>
+                <span role="status">
+                  {copy.apps.resultCount(filtered.length)}
+                </span>
+              </h2>
+              <Link
+                href={resourceHref("/mistakes-book", { ...filters, q: "" })}
+              >
+                {c.appToBooks} →
+              </Link>
+            </div>
+            {filtered.length === 0 ? (
+              <p className={s.empty}>
+                {selectedTopic && (
+                  <strong>
+                    {selectedTopic.code} · {selectedTopic.name}
+                    <br />
+                  </strong>
+                )}
+                {selectedTopic && !search.trim()
+                  ? copy.apps.emptyTopic
+                  : c.noApps}
               </p>
-              {filtered.length === 0 ? (
-                <p className="border-grid mt-4 border bg-white p-6">
-                  {selectedTopic && !query
-                    ? copy.apps.emptyTopic
-                    : copy.apps.empty}
-                </p>
-              ) : (
-                <ul className="studio-app-grid">
-                  {filtered.map((app) => {
-                    const Thumbnail = app.thumbnail;
-                    const group = ordered.filter(
-                      (item) => item.featured === app.featured,
-                    );
-                    const groupIndex = group.findIndex(
-                      (item) => item.slug === app.slug,
-                    );
-                    const registryApp = appRegistry.find(
-                      (item) => item.slug === app.slug,
-                    )!;
-                    return (
-                      <li
-                        key={app.slug}
-                        draggable={
-                          canReorder && !savingOrder && editingSlug !== app.slug
-                        }
-                        onDragStart={(event) => {
-                          if (!canReorder) return;
-                          setDraggingSlug(app.slug);
-                          event.dataTransfer.effectAllowed = "move";
-                        }}
-                        onDragOver={(event) => {
-                          if (canReorder) event.preventDefault();
-                        }}
-                        onDrop={(event) => {
-                          event.preventDefault();
-                          if (draggingSlug)
-                            void reorder(draggingSlug, app.slug);
-                          setDraggingSlug(null);
-                        }}
-                        onDragEnd={() => setDraggingSlug(null)}
-                        className="studio-app-card flex h-full flex-col"
+            ) : (
+              <ul className={s.appList}>
+                {filtered.map((app) => {
+                  const Thumbnail = app.thumbnail;
+                  const group = ordered.filter(
+                    (item) => item.featured === app.featured,
+                  );
+                  const groupIndex = group.findIndex(
+                    (item) => item.slug === app.slug,
+                  );
+                  const registryApp = appRegistry.find(
+                    (item) => item.slug === app.slug,
+                  )!;
+                  return (
+                    <li
+                      key={app.slug}
+                      draggable={
+                        canReorder && !savingOrder && editingSlug !== app.slug
+                      }
+                      onDragStart={(event) => {
+                        if (!canReorder) return;
+                        setDraggingSlug(app.slug);
+                        event.dataTransfer.effectAllowed = "move";
+                      }}
+                      onDragOver={(event) => {
+                        if (canReorder) event.preventDefault();
+                      }}
+                      onDrop={(event) => {
+                        event.preventDefault();
+                        if (draggingSlug) void reorder(draggingSlug, app.slug);
+                        setDraggingSlug(null);
+                      }}
+                      onDragEnd={() => setDraggingSlug(null)}
+                      className={s.appCard}
+                    >
+                      <Link
+                        prefetch={false}
+                        href={resourceHref(`/apps/${app.slug}`, filters)}
+                        className={s.appLink}
                       >
-                        <Link
-                          href={`/apps/${app.slug}`}
-                          className="group flex flex-1 flex-col"
-                        >
-                          <Thumbnail className="studio-app-thumbnail h-44 w-full" />
-                          <div className="flex flex-1 flex-col p-5">
-                            <div className="flex flex-wrap gap-2 text-xs font-semibold">
-                              {app.featured && (
-                                <span className="bg-highlight px-2 py-1">
-                                  {copy.apps.featured}
-                                </span>
-                              )}
-                              {!app.visible && isTeacher && (
-                                <span className="border-navy text-navy border px-2 py-1">
-                                  {copy.apps.hiddenTeacher}
-                                </span>
-                              )}
-                            </div>
-                            <h2 className="font-display text-card text-navy mt-2 font-semibold">
-                              {app.title}
-                            </h2>
-                            <p className="text-pencil mt-1 text-sm">
-                              {app.topic}
-                            </p>
-                            <p className="mt-3 flex-1">{app.summary}</p>
-                            <p className="text-pencil mt-4 text-sm">
-                              {app.levels.join(" · ")} · {STRANDS[app.strand]}
-                            </p>
-                            <span className="text-navy mt-4 font-semibold group-hover:underline">
-                              {copy.apps.openApp} →
-                            </span>
+                        <div className={s.thumb}>
+                          <Thumbnail className={s.thumbImage} />
+                        </div>
+                        <div className={s.appBody}>
+                          <div className={s.meta}>
+                            <span>{app.levels.join(" · ")}</span>
+                            {app.featured && (
+                              <span className={s.featured}>
+                                {copy.apps.featured}
+                              </span>
+                            )}
+                            {!app.visible && isTeacher && (
+                              <span>{copy.apps.hiddenTeacher}</span>
+                            )}
                           </div>
-                        </Link>
-                        {editing && (
-                          <div className="border-grid flex flex-wrap gap-2 border-t px-5 py-3">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setEditingSlug(
-                                  editingSlug === app.slug ? null : app.slug,
-                                )
-                              }
-                              className="border-navy text-navy rounded border px-3 py-1.5 text-sm"
-                            >
-                              {copy.apps.editListing}
-                            </button>
-                            <button
-                              type="button"
-                              disabled={
-                                !canReorder || savingOrder || groupIndex === 0
-                              }
-                              onClick={() =>
-                                void reorder(
-                                  app.slug,
-                                  group[groupIndex - 1].slug,
-                                )
-                              }
-                              className="border-grid-strong rounded border px-3 py-1.5 text-sm disabled:opacity-40"
-                            >
-                              {copy.apps.moveUp}
-                            </button>
-                            <button
-                              type="button"
-                              disabled={
-                                !canReorder ||
-                                savingOrder ||
-                                groupIndex === group.length - 1
-                              }
-                              onClick={() =>
-                                void reorder(
-                                  app.slug,
-                                  group[groupIndex + 1].slug,
-                                )
-                              }
-                              className="border-grid-strong rounded border px-3 py-1.5 text-sm disabled:opacity-40"
-                            >
-                              {copy.apps.moveDown}
-                            </button>
+                          <h3>{app.title}</h3>
+                          <p className={s.chapterName}>{app.topic}</p>
+                          <p className={s.description}>{app.summary}</p>
+                          <div className={s.cardFoot}>
+                            <span>{app.topicCodes.join(" · ")}</span>
+                            <span aria-hidden="true">↗</span>
                           </div>
-                        )}
-                        {editing && editingSlug === app.slug && user?.email && (
+                        </div>
+                      </Link>
+                      {editing && isTeacher && (
+                        <div className="border-grid flex flex-wrap gap-2 border-t px-5 py-3">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEditingSlug(
+                                editingSlug === app.slug ? null : app.slug,
+                              )
+                            }
+                            className="border-navy text-navy rounded border px-3 py-1.5 text-sm"
+                          >
+                            {copy.apps.editListing}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={
+                              !canReorder || savingOrder || groupIndex === 0
+                            }
+                            onClick={() =>
+                              void reorder(app.slug, group[groupIndex - 1].slug)
+                            }
+                            className="border-grid-strong rounded border px-3 py-1.5 text-sm disabled:opacity-40"
+                          >
+                            {copy.apps.moveUp}
+                          </button>
+                          <button
+                            type="button"
+                            disabled={
+                              !canReorder ||
+                              savingOrder ||
+                              groupIndex === group.length - 1
+                            }
+                            onClick={() =>
+                              void reorder(app.slug, group[groupIndex + 1].slug)
+                            }
+                            className="border-grid-strong rounded border px-3 py-1.5 text-sm disabled:opacity-40"
+                          >
+                            {copy.apps.moveDown}
+                          </button>
+                        </div>
+                      )}
+                      {editing &&
+                        isTeacher &&
+                        editingSlug === app.slug &&
+                        user?.email && (
                           <AppListingEditor
                             app={registryApp}
                             setting={bySlug.get(app.slug) ?? null}
@@ -397,15 +374,14 @@ export default function AppsPage() {
                             }}
                           />
                         )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </>
-          )}
-        </div>
-      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </>
+        )}
+      </section>
     </main>
   );
 }

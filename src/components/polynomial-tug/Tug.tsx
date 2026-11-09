@@ -9,6 +9,8 @@ import {
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { copy } from "@/lib/copy";
+import { classroomNavigationCopy as classroom } from "@/lib/classroomNavigationCopy";
+import { validJoinCode } from "@/lib/challenges/codes";
 import { Math as MathNotation } from "@/components/Math";
 import { JoinQR } from "@/components/challenges/JoinQR";
 import { Working } from "@/apps/polynomials/quest/Working";
@@ -231,9 +233,14 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
         )}
       </header>
       {error && (
-        <p role="alert" className={styles.error}>
-          {error}
-        </p>
+        <div role="alert" className={styles.error}>
+          <p>{error}</p>
+          {!state && validJoinCode(code) && (
+            <Link prefetch={false} className="underline underline-offset-4" href={`/join/${encodeURIComponent(code)}`}>
+              {classroom.tryDirected}
+            </Link>
+          )}
+        </div>
       )}
       {offline && state && <p role="status">{c.reconnect}</p>}
       {!code && (
@@ -303,7 +310,7 @@ export default function Tug({ initialCode = "" }: { initialCode?: string }) {
               ) : (
                 <>
                   <p>{c.teacherSignIn}</p>
-                  <Link href="/login">{c.signIn}</Link>
+                      <Link href="/login?next=%2Fpolynomial-tug">{c.signIn}</Link>
                 </>
               )}
             </section>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import {
   ACTIVE_LEVELS,
@@ -34,6 +34,7 @@ export default function TopicsPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
+  const editor = useRef<HTMLHeadingElement>(null);
 
   useEffect(
     () =>
@@ -77,6 +78,7 @@ export default function TopicsPage() {
     setDraftLevel(topic.levels[0]);
     setStrand(topic.strand);
     setMessage("");
+    requestAnimationFrame(() => editor.current?.focus());
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -174,7 +176,11 @@ export default function TopicsPage() {
 
       <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
         <section className="border-grid h-fit border p-5">
-          <h2 className="font-display text-section text-navy font-semibold">
+          <h2
+            ref={editor}
+            tabIndex={-1}
+            className="font-display text-section text-navy font-semibold"
+          >
             {editing ? copy.topics.editTitle : copy.topics.addTitle}
           </h2>
           <form

@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ResourceBackLink } from "@/components/resources/ResourceBackLink";
+import s from "@/components/resources/Resources.module.css";
 import { useAuth } from "@/lib/auth";
 import { copy } from "@/lib/copy";
 import { getVisibleBook, type MistakeBook } from "@/lib/db/books";
@@ -45,13 +46,10 @@ export function BookDetail({ id }: { id: string }) {
 
   const allowed = book && (book.edition === "student" || isTeacher);
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:py-14">
-      <Link
-        href="/mistakes-book"
-        className="text-crimson-deep text-sm font-semibold underline"
-      >
+    <main className={`portal-page ${s.page} ${s.detail}`}>
+      <ResourceBackLink collection="/mistakes-book" className={s.back}>
         ← {copy.books.backToBooks}
-      </Link>
+      </ResourceBackLink>
       {loading || authLoading || (book !== null && book.id !== id) ? (
         <p role="status" className="mt-8">
           {copy.books.loading}
@@ -66,9 +64,7 @@ export function BookDetail({ id }: { id: string }) {
         </h1>
       ) : (
         <>
-          <h1 className="font-display text-hero text-crimson-deep mt-6 font-semibold">
-            {book.title}
-          </h1>
+          <h1 className={s.detailTitle}>{book.title}</h1>
           <p className="text-pencil mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
             <span>
               {book.level} · {book.topicName}

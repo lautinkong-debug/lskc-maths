@@ -1,0 +1,210 @@
+.page {
+  color: var(--color-graphite);
+}
+
+.page .intro {
+  border: 0;
+  padding-bottom: 0.35rem;
+}
+
+.intro h1 {
+  color: var(--color-navy-deep);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.intro p {
+  margin-top: 0.65rem;
+  color: var(--color-pencil);
+  max-width: 60ch;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(15rem, 0.9fr);
+  align-items: start;
+  gap: clamp(1rem, 2.8vw, 2rem);
+}
+
+.form,
+.filters,
+.empty,
+.ranking {
+  background: white;
+  border: 1px solid var(--color-grid);
+  border-radius: 1rem;
+  padding: clamp(1.15rem, 3.3vw, 2rem);
+}
+
+.form {
+  display: grid;
+  gap: 1rem;
+}
+
+.gameField {
+  min-width: 0;
+  border: 0;
+}
+
+.gameField legend,
+.code {
+  font-weight: 650;
+  color: var(--color-navy-deep);
+}
+
+.gameField > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.gameOption {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid var(--color-grid-strong);
+  background: white;
+  border-radius: 0.65rem;
+  padding: 0.75rem;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.gameOption[data-selected="true"] {
+  border-color: var(--color-navy);
+  background: var(--color-navy-wash);
+  box-shadow: inset 0 0 0 1px var(--color-navy);
+}
+
+.gameOption input {
+  flex: 0 0 auto;
+  accent-color: var(--color-navy);
+}
+
+.gameOption strong,
+.gameOption small,
+.related strong,
+.related small {
+  display: block;
+}
+
+.gameOption strong {
+  color: var(--color-navy);
+  font-size: 0.94rem;
+}
+.gameOption small {
+  color: var(--color-pencil);
+  font-size: 0.81rem;
+  margin-top: 0.2rem;
+}
+
+.code input {
+  display: block;
+  margin-top: 0.45rem;
+  min-height: 3.5rem;
+  font-size: 1.38rem;
+  letter-spacing: 0.13em;
+  font-variant-numeric: tabular-nums;
+  background: white;
+}
+
+.form > button {
+  min-height: 48px;
+}
+.support {
+  color: var(--color-pencil);
+  font-size: 0.875rem;
+}
+
+.related {
+  background: var(--color-navy-wash);
+  border: 1px solid var(--color-grid);
+  border-radius: 1rem;
+  padding-inline: 1.2rem;
+}
+
+.related a {
+  min-height: 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-block: 1rem;
+  line-height: 1.4;
+  color: var(--color-navy);
+}
+
+.related a + a {
+  border-top: 1px solid var(--color-grid-strong);
+}
+.related a:hover strong {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+.related small {
+  color: var(--color-graphite);
+  font-size: 0.875rem;
+  margin-top: 0.22rem;
+}
+.related a > span:last-child {
+  font-size: 1.35rem;
+}
+.formError {
+  color: var(--color-crimson-deep);
+}
+.formError a,
+.back {
+  color: var(--color-navy);
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+}
+.empty {
+  color: var(--color-pencil);
+}
+.filters {
+  background: var(--color-navy-wash);
+}
+.filters label {
+  flex: 1 1 10rem;
+}
+.ranking h2 {
+  color: var(--color-navy-deep);
+  font-size: 1.35rem;
+  font-weight: 650;
+  margin-bottom: 1.25rem;
+}
+.ranking .support {
+  padding-top: 1.25rem;
+}
+
+@media (max-width: 740px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 430px) {
+  .gameField > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .gameOption {
+    min-height: 48px;
+  }
+  .gameOption > span {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.6rem;
+  }
+  .gameOption small {
+    margin: 0;
+  }
+}
