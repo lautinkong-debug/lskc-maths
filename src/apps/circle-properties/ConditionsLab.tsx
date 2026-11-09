@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, type PointerEvent } from "react";
-import type { LabId } from "./content";
+import { reasons, type LabId } from "./content";
 import { useLocalSession } from "./useLocalSession";
 import {
   initialConditions,
@@ -14,10 +14,12 @@ import {
 } from "./conditions";
 import s from "./conditions.module.css";
 import MathText from "./MathText";
+import ReasonLabel from "./ReasonLabel";
 
 const format = (n: number) => Number(n.toFixed(2));
 const sx = (x: number) => 230 + 14 * x;
 const sy = (y: number) => 185 + 14 * y;
+const chordBisection = reasons.find((item) => item.id === "r1")!;
 
 export default function ConditionsLab({
   labId,
@@ -44,6 +46,7 @@ export default function ConditionsLab({
   const svg = useRef<SVGSVGElement>(null);
   const circles = radiusComparison(state.radius, state.angle);
   const perpendicular = perpendicularComparison(state.offset);
+  const squareSide = state.offset > 0 ? -13 : 13;
   function locate(event: PointerEvent<SVGSVGElement>) {
     const matrix = svg.current?.getScreenCTM();
     if (!matrix) return;
@@ -292,125 +295,208 @@ export default function ConditionsLab({
               }
             </MathText>
           </p>
-          <svg
-            className={s.diagram}
-            viewBox="0 0 460 370"
-            role="img"
-            aria-label="A perpendicular line meets a chord at a movable foot N; the line need not pass through centre O"
-          >
-            <circle
-              cx="230"
-              cy="185"
-              r="140"
-              fill="none"
-              stroke="#3769f4"
-              strokeWidth="2"
-            />
-            <line
-              x1={sx(-perpendicular.half)}
-              y1={sy(-5)}
-              x2={sx(perpendicular.half)}
-              y2={sy(-5)}
-              stroke="#3769f4"
-              strokeWidth="3"
-            />
-            <line
-              x1={sx(state.offset)}
-              y1="30"
-              x2={sx(state.offset)}
-              y2="335"
-              stroke="#bc2e59"
-              strokeWidth="3"
-            />
-            <line
-              x1="230"
-              y1="185"
-              x2={sx(state.offset)}
-              y2={sy(-5)}
-              stroke="#667e95"
-              strokeDasharray="6 5"
-            />
-            <path
-              d={`M ${sx(state.offset) + 13} ${sy(-5)} v 13 h -13`}
-              fill="none"
-              stroke="#bc2e59"
-              strokeWidth="2"
-            />
-            <circle cx="230" cy="185" r="4" fill="#143b68" />
-            <text x="211" y="205">
-              <MathText svg notation>
-                O
-              </MathText>
-            </text>
-            <text x={sx(-perpendicular.half) - 17} y={sy(-5) - 9}>
-              <MathText svg notation>
-                A
-              </MathText>
-            </text>
-            <text x={sx(perpendicular.half) + 6} y={sy(-5) - 9}>
-              <MathText svg notation>
-                B
-              </MathText>
-            </text>
-            <text x={sx(state.offset) + 7} y={sy(-5) - 10}>
-              <MathText svg notation>
-                N
-              </MathText>
-            </text>
-            <text x="230" y="20" textAnchor="middle" className={s.pink}>
-              perpendicular line
-            </text>
-          </svg>
-          <div className={s.controls}>
-            <label>
-              <span>
-                <MathText>Move N along AB</MathText>
-              </span>
-              <input
-                aria-label="Foot of perpendicular line"
-                type="range"
-                min="-8"
-                max="8"
-                step="0.25"
-                value={state.offset}
-                onChange={(e) =>
-                  setState((v) => ({ ...v, offset: Number(e.target.value) }))
+          <div className={s.perpendicularLayout}>
+            <div className={s.perpendicularBoard}>
+              <svg
+                className={s.diagram}
+                data-testid="perpendicular-chord-diagram"
+                viewBox="0 0 460 370"
+                role="img"
+                aria-label={
+                  perpendicular.throughCentre
+                    ? "The pink perpendicular passes through centre O. Matching ticks on AN and NB show that N bisects chord AB."
+                    : "The pink line meets chord AB at a right angle at N and misses centre O. AN and NB are unequal."
                 }
-              />
-            </label>
-          </div>
-          <div className={s.readouts}>
-            <div>
-              <strong>
-                <MathText notation>AN</MathText> = {format(perpendicular.an)} cm
-              </strong>
-              <strong>
-                <MathText notation>NB</MathText> = {format(perpendicular.nb)} cm
-              </strong>
+              >
+                <circle
+                  cx="230"
+                  cy="185"
+                  r="140"
+                  fill="none"
+                  stroke="#3769f4"
+                  strokeWidth="2"
+                />
+                <line
+                  x1={sx(-perpendicular.half)}
+                  y1={sy(-5)}
+                  x2={sx(perpendicular.half)}
+                  y2={sy(-5)}
+                  stroke="#3769f4"
+                  strokeWidth="3"
+                />
+                <line
+                  x1={sx(state.offset)}
+                  y1="30"
+                  x2={sx(state.offset)}
+                  y2="335"
+                  stroke="#bc2e59"
+                  strokeWidth="3"
+                />
+                {!perpendicular.throughCentre && (
+                  <line
+                    x1="230"
+                    y1="185"
+                    x2={sx(state.offset)}
+                    y2={sy(-5)}
+                    stroke="#667e95"
+                    strokeDasharray="6 5"
+                  />
+                )}
+                {perpendicular.throughCentre && (
+                  <g className={s.halfTicks}>
+                    {(["AN", "NB"] as const).map((half) => {
+                      const x = sx(
+                        ((half === "AN" ? -1 : 1) * perpendicular.half) / 2,
+                      );
+                      return (
+                        <path
+                          key={half}
+                          data-equal-half={half}
+                          d={`M ${x - 2} ${sy(-5) + 7} l 4 -14`}
+                        />
+                      );
+                    })}
+                  </g>
+                )}
+                <path
+                  d={`M ${sx(state.offset) + squareSide} ${sy(-5)} v 13 h ${-squareSide}`}
+                  fill="none"
+                  stroke="#bc2e59"
+                  strokeWidth="2.8"
+                />
+                <circle cx="230" cy="185" r="4" fill="#143b68" />
+                <text x="211" y="205">
+                  <MathText svg notation>
+                    O
+                  </MathText>
+                </text>
+                <text x={sx(-perpendicular.half) - 17} y={sy(-5) - 9}>
+                  <MathText svg notation>
+                    A
+                  </MathText>
+                </text>
+                <text x={sx(perpendicular.half) + 6} y={sy(-5) - 9}>
+                  <MathText svg notation>
+                    B
+                  </MathText>
+                </text>
+                <text
+                  x={sx(state.offset) + (state.offset > 0 ? -7 : 7)}
+                  y={sy(-5) - 10}
+                  textAnchor={state.offset > 0 ? "end" : "start"}
+                >
+                  <MathText svg notation>
+                    N
+                  </MathText>
+                </text>
+                <text
+                  x={sx(state.offset)}
+                  y="20"
+                  textAnchor="middle"
+                  className={s.pink}
+                >
+                  {perpendicular.throughCentre
+                    ? "perpendicular bisector"
+                    : "perpendicular line"}
+                </text>
+              </svg>
+              <div className={s.controls}>
+                <label>
+                  <span>
+                    <MathText>Move N along AB</MathText>
+                  </span>
+                  <input
+                    aria-label="Foot of perpendicular line"
+                    type="range"
+                    min="-8"
+                    max="8"
+                    step="0.25"
+                    value={state.offset}
+                    onChange={(e) =>
+                      setState((v) => ({
+                        ...v,
+                        offset: Number(e.target.value),
+                      }))
+                    }
+                  />
+                </label>
+              </div>
+              <button
+                type="button"
+                onClick={() => setState((v) => ({ ...v, offset: 0 }))}
+              >
+                <MathText>Put the perpendicular through O</MathText>
+              </button>
             </div>
-            <div>
-              <span>
-                <MathText>Pink line ⊥ AB: always</MathText>
-              </span>
-              <span>
-                <MathText notation>∠ONB</MathText> ={" "}
-                {format(perpendicular.centreAngle)}°
-              </span>
-            </div>
+            <aside
+              className={s.chordReason}
+              aria-label="Reason for the chord halves"
+              data-through-centre={perpendicular.throughCentre}
+            >
+              <h3>Reason {chordBisection.number}</h3>
+              <div className={s.working} aria-live="polite" aria-atomic="true">
+                {perpendicular.throughCentre ? (
+                  <>
+                    <p>
+                      <span aria-label="Because">∵</span>
+                      <MathText>O is the centre and ON ⊥ AB at N.</MathText>
+                    </p>
+                    <p>
+                      <span aria-label="Therefore">∴</span>
+                      <strong>
+                        <MathText>AN = NB</MathText>
+                      </strong>
+                    </p>
+                    <p>
+                      <MathText>N is the mid-point of chord AB.</MathText>
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      <MathText>
+                        The pink line meets AB at 90° but misses O.
+                      </MathText>
+                    </p>
+                    <p>
+                      <strong>
+                        <MathText>AN ≠ NB</MathText>
+                      </strong>
+                    </p>
+                    <p>
+                      <MathText>
+                        Move the line through O to apply this reason.
+                      </MathText>
+                    </p>
+                  </>
+                )}
+              </div>
+              <p className={s.reasonName}>
+                <ReasonLabel reason={chordBisection} arrow={false} />
+              </p>
+              <div className={s.readouts}>
+                <div>
+                  <strong>
+                    <MathText notation>AN</MathText> ={" "}
+                    {format(perpendicular.an)} cm
+                  </strong>
+                  <strong>
+                    <MathText notation>NB</MathText> ={" "}
+                    {format(perpendicular.nb)} cm
+                  </strong>
+                </div>
+                <div>
+                  <span>
+                    <MathText>Pink line ⊥ AB</MathText>
+                  </span>
+                  <span>
+                    <MathText notation>∠ONB</MathText> ={" "}
+                    {format(perpendicular.centreAngle)}°
+                  </span>
+                </div>
+              </div>
+            </aside>
           </div>
-          <p className={s.feedback}>
-            <MathText>
-              {perpendicular.throughCentre
-                ? "Now the perpendicular passes through O, and the halves are equal. Move it away and compare again."
-                : "The pink line is perpendicular, but it misses O and the halves are unequal. A perpendicular from the centre is the required condition."}
-            </MathText>
-          </p>
-          <button
-            type="button"
-            onClick={() => setState((v) => ({ ...v, offset: 0 }))}
-          >
-            <MathText>Put the perpendicular through O</MathText>
-          </button>
         </>
       )}
       {state.experiment === "centre" && (

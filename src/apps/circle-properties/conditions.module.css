@@ -1,4 +1,5 @@
 .lab {
+  container-type: inline-size;
   color: #143b68;
   font-size: 1rem;
 }
@@ -62,6 +63,68 @@
 }
 .diagram .pink {
   fill: #bc2e59;
+}
+.perpendicularLayout {
+  display: grid;
+  align-items: start;
+  gap: 1rem;
+}
+.perpendicularBoard {
+  min-width: 0;
+}
+.perpendicularBoard .diagram {
+  touch-action: auto;
+}
+.perpendicularBoard .controls input {
+  min-height: 44px;
+}
+.halfTicks {
+  fill: none;
+  stroke: #147044;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+.chordReason {
+  min-width: 0;
+  padding: 1rem;
+  background: #f4f7fc;
+  border: 1px solid #cad9eb;
+  border-radius: 12px;
+}
+.chordReason[data-through-centre="true"] {
+  background: #f1f9f4;
+  border-color: #9bc7ac;
+}
+.chordReason h3 {
+  font-size: 1.14rem;
+}
+.working p,
+.reasonName {
+  line-height: 1.5;
+}
+.working p > span[aria-label] {
+  display: inline-block;
+  margin-inline-end: 0.5em;
+}
+.working strong {
+  font-size: 1.3rem;
+}
+.chordReason[data-through-centre="true"] .working strong {
+  color: #14643f;
+}
+.chordReason .reasonName {
+  margin: 0.85rem 0;
+  font-weight: 650;
+}
+.chordReason .readouts {
+  grid-template-columns: 1fr;
+  background: white;
+  font-variant-numeric: tabular-nums;
+}
+@container (min-width: 43rem) {
+  .perpendicularLayout {
+    grid-template-columns: minmax(0, 1.45fr) minmax(16rem, 1fr);
+  }
 }
 .controls {
   display: grid;
