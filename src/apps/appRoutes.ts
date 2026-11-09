@@ -1,4 +1,4 @@
-import { circleCopy, copy } from "@/lib/copy";
+import { circleCopy, classroomGamesCopy, copy } from "@/lib/copy";
 
 /**
  * The slug and page title of every app, for the server side of /apps/[slug].
@@ -9,6 +9,7 @@ import { circleCopy, copy } from "@/lib/copy";
  * keeps this list the same as the registry.
  */
 export const appTitles: Readonly<Record<string, string>> = {
+  "classroom-games": classroomGamesCopy.title,
   "circle-properties": circleCopy.title,
   "linear-equations": copy.linearEquations.title,
   "equation-village": copy.equationVillage.title,

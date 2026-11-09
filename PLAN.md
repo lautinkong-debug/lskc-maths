@@ -1,5 +1,7 @@
 # PLAN.md — LSKC Mathematics Department Website
 
+- 09/11/2026 · Added Classroom Games to Web Apps. Five StudyBot players accept the school's maths practice bank or a teacher's imported questions. INK-Shoot opens the original game with its built-in questions, with a separate StudyBot link for teachers.
+
 ## Circle Lab guided lessons for 16.3–16.17 (local preview, 07/11/2026)
 
 Based on the observation lesson at commit `6f5899d`. Use the `codex/circle-guided-preview` branch and its own offline build for review.

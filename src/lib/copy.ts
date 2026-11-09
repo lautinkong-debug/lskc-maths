@@ -2,6 +2,33 @@
  * Every string the site shows. Keep wording here so it stays consistent and
  * can be changed in one place. UI language is English - see CLAUDE.md.
  */
+export const classroomGamePlayerCopy = {
+  games: {
+    ink: { name: "INK-Shoot: Knowledge Assault", description: "Upgrade your equipment, collect the stamp and escort it across the harbour in a 4v4 battle." },
+    tug: { name: "Tug of War", description: "Two teams share a screen. Correct answers pull the rope towards your side." },
+    race: { name: "Knowledge Kart", description: "Choose a driver and track. Answer maths questions during the race to earn speed boosts." },
+    archery: { name: "Archery Quiz", description: "Draw the bow and hit the target with the correct answer. A missed shot lets you try again." },
+    spacecraft: { name: "Spacecraft Quiz", description: "Fly into the lane with the correct answer and shoot asteroids for bonus points." },
+    tank: { name: "Tank Battle Quiz", description: "Drive the tank and fire at the UFO whose colour matches the correct answer." },
+  },
+  attribution: "Games by StudyBot",
+  setup: "Set up game", menu: "All six games", play: "Start game",
+  openInk: "Play INK-Shoot", teacherInk: "Use custom questions in StudyBot",
+  inkNote: "The original opens in a new tab with built-in maths questions in Traditional Chinese.",
+  bank: "Question bank", sample: "Maths practice", custom: "My questions",
+  questions: "Questions", file: "Import TXT or JSON", importFailed: "This file could not be read.",
+  format: "One question per line. Separate the question, correct answer and three distractors with |.",
+  formatThree: "Use two or three distractors. The three lanes always include the correct answer.",
+  example: "Solve 3x + 6 = 21. What is x? | 5 | 3 | 7 | 9",
+  localNote: "Your draft is saved in this browser. Starting the game sends the selected questions to StudyBot’s game player.",
+  teamOne: "Left team", teamTwo: "Right team", leftDefault: "Red team", rightDefault: "Blue team",
+  lead: "Winning lead", timer: "Seconds per question (optional)", minTug: "Enter at least two questions for Tug of War.",
+  loading: "Loading the game from StudyBot…", slow: "The game is taking longer to load. You can retry or open StudyBot directly.",
+  retry: "Reload game", again: "Play again", full: "Full screen", exitFull: "Exit full screen",
+  leave: "Leave this game and return to the collection?", fallback: "Open original game",
+  fullFailed: "This browser could not enter full screen.", invalid: "Check the question bank and try again.",
+} as const;
+
 export const copy = {
   equationVillage: {
     title: "Equation Village",
@@ -4491,6 +4518,13 @@ export const circleLessonCopy = {
   practise: "Practise in Reasons Relay",
   freePlay: "Explore on my own",
   restart: "Start the lesson again",
+} as const;
+
+export const classroomGamesCopy = {
+  title: "Classroom Games",
+  topic: "Mixed maths revision",
+  summary:
+    "Revise maths with INK-Shoot, Tug of War, Knowledge Kart, Archery Quiz, Spacecraft Quiz and Tank Battle Quiz.",
 } as const;
 
 /** One diagram cue per circle reason: the Relay hint, and the new-diagram check after submitting. */

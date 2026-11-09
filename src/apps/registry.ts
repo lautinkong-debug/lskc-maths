@@ -1,8 +1,9 @@
 import CirclePropertiesThumbnail from "./circle-properties/Thumbnail";
+import ClassroomGamesThumbnail from "./classroom-games/Thumbnail";
 import LinearEquationsThumbnail from "./linear-equations/Thumbnail";
 import type { ComponentType } from "react";
 import type { Level, Strand } from "@/lib/constants";
-import { copy, circleCopy } from "@/lib/copy";
+import { copy, circleCopy, classroomGamesCopy } from "@/lib/copy";
 import QuadraticThumbnail from "./quadratic-explorer/Thumbnail";
 import UnitCircleThumbnail from "./unit-circle/Thumbnail";
 import InequalityThumbnail from "./inequality-number-line/Thumbnail";
@@ -33,6 +34,17 @@ export interface AppEntry {
 
 /** The index and detail route both use this list. New apps register here. */
 export const appRegistry: readonly AppEntry[] = [
+  {
+    slug: "classroom-games",
+    title: classroomGamesCopy.title,
+    topic: classroomGamesCopy.topic,
+    topicCodes: ["1A03", "1A04", "1A07", "1A09", "2A04"],
+    levels: ["F1", "F2", "F3", "F4", "F5", "F6"],
+    strand: "number-algebra",
+    summary: classroomGamesCopy.summary,
+    thumbnail: ClassroomGamesThumbnail,
+    load: () => import("./classroom-games"),
+  },
   {
     slug: "circle-properties",
     topicCodes: ["Ch16"],
