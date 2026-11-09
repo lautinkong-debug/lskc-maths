@@ -5,7 +5,7 @@
  * step hides the result until the student has made the given fact true.
  */
 import { defaults, type Parameters } from "./geometry";
-import { evaluateMission, missions } from "./missions";
+export { nAtMidpoint } from "./geometry";
 
 export type ChordReason = "r1" | "r2";
 /** Full solutions also hide the other reasons a line depends on. */
@@ -47,11 +47,6 @@ export const chordLessonStarts: Record<3 | 4, Required<Parameters>> = {
     rotation: 32,
   },
 };
-
-/** ON ⊥ AB and AN = NB happen together; each step shows a different one first. */
-export function nAtMidpoint(parameters: Parameters): boolean {
-  return evaluateMission(missions.bisector[0], parameters).complete;
-}
 
 export type ChordLessonReadings = { lengths: boolean; angles: boolean };
 

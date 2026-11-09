@@ -147,15 +147,18 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await expect(diagram.locator("[data-angle-square]")).toHaveCount(1);
   await expect(diagram).not.toContainText("AN =");
   await expect(diagram.locator("[data-equal-tick]")).toHaveCount(0);
-  await expect(lesson.getByText("You found: AN = NB")).toHaveCount(0);
+  const proof = (id: string, part: string) =>
+    lesson.locator(`[data-evidence-for="${id}"] [data-proof-stage="${part}"]`);
+  await expect(proof("r1", "conclusion")).toHaveCount(0);
   await deduce.click();
-  await expect(lesson.getByText("You found: AN = NB")).toBeVisible();
+  await expect(proof("r1", "conclusion")).toContainText("AN = NB");
+  await expect(proof("r1", "reason")).toContainText("Reason 16.1");
   await expect(diagram).toContainText("AN =");
   await expect(diagram.locator("[data-equal-tick]")).toHaveCount(2);
 
   // A finished step replays from the start, for the next class.
   const again = async () => {
-    await expect(lesson.getByText("You found: AN = NB")).toHaveCount(0);
+    await expect(proof("r1", "conclusion")).toHaveCount(0);
     await expect(
       lesson.getByText("First make the condition true: the angle at N is 90°."),
     ).toBeVisible();
@@ -185,8 +188,13 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await expect(diagram.locator("[data-equal-tick]")).toHaveCount(2);
   await expect(diagram).not.toContainText("90°");
   await expect(diagram.locator("[data-angle-square]")).toHaveCount(0);
+  await expect(proof("r2", "given")).toContainText("O is the centre");
+  await expect(proof("r2", "reason")).toHaveCount(0);
   await deduce.click();
-  await expect(lesson.getByText("You found: ∠ONB = 90°")).toBeVisible();
+  await expect(proof("r2", "conclusion")).toContainText("ON ⊥ AB");
+  await expect(proof("r2", "reason")).toContainText("Reason 16.2");
+  await expect(diagram.locator("[data-equal-tick]").first()).toHaveCSS("stroke", "rgb(36, 84, 198)");
+  await expect(diagram.locator("[data-angle-square]")).toHaveCSS("stroke", "rgb(20, 113, 67)");
   await expect(diagram).toContainText("90°");
   await expect(diagram.locator("[data-angle-square]")).toHaveCount(1);
   await lesson.getByRole("button", { name: "Next step →" }).click();

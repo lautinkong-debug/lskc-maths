@@ -48,6 +48,7 @@ import DiscoveryCoach from "./DiscoveryCoach";
 import { missionPrompt } from "./discovery";
 import ReasonPractice from "./ReasonPractice";
 import ConditionsLab from "./ConditionsLab";
+import AngleConditionReason from "./AngleConditionReason";
 import type { Experiment } from "./conditions";
 import { useLocalSession, clearLocalSessions } from "./useLocalSession";
 import {
@@ -851,7 +852,7 @@ function Playground({
       {lessonHeader}
       {chordSelector}
       <div
-        className={`${s.playArea} ${conditionOpen ? s.testingCondition : ""} ${lessonMode ? s.lessonArea : ""}`}
+        className={`${s.playArea} ${conditionOpen && !angleCondition ? s.testingCondition : ""} ${lessonMode ? s.lessonArea : ""}`}
       >
         <div
           className={s.board}
@@ -864,6 +865,12 @@ function Playground({
             {conditionOpen ? (
               <>
                 {!angleCondition && <span>{c.changeCondition}</span>}
+                <button type="button" onClick={() => {
+                  setConditionOpen(false);
+                  setFocus(false);
+                  setShowReasons(true);
+                  requestAnimationFrame(() => reasonRef.current?.scrollIntoView({ block: "start" }));
+                }}>Compare this topic’s reasons</button>
                 <button type="button" onClick={closeCondition}>
                   {c.backToCircle}
                 </button>
@@ -944,6 +951,11 @@ function Playground({
                     showMeasurements={display.lengths}
                     showAngles={display.angles}
                     showAngleMarks={!lessonMode || display.angles}
+                    chordReason={
+                      lessonMode && (lesson.step === 3 || lesson.step === 4)
+                        ? lesson.step === 3 ? "r1" : "r2"
+                        : undefined
+                    }
                     highlightKey={highlightKey}
                     showInstructions={false}
                     ink={conditionOpen ? undefined : ink}
@@ -1144,6 +1156,7 @@ function Playground({
             </details>
           )}
         </div>
+        {conditionOpen && angleCondition && <AngleConditionReason lab={labId} parameters={displayedParameters} />}
         {!conditionOpen && (
           <aside className={s.missionPanel}>
             {lessonMode ? (

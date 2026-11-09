@@ -11,6 +11,7 @@ export default defineConfig({
     "circle-site-load.spec.ts",
     "circle-two-chords.spec.ts",
     "circle-chord-condition.spec.ts",
+    "circle-reason-gallery.spec.ts",
   ],
   globalSetup: "./tests/e2e/global-setup.ts",
   fullyParallel: false,

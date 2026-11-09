@@ -1,6 +1,6 @@
 import type { LabId } from "./content";
 
-export type Experiment = "radii" | "perpendicular" | "centre";
+export type Experiment = "radii" | "perpendicular" | "midpoint" | "centre";
 export type ConditionState = {
   experiment: Experiment;
   radius: number;
@@ -35,7 +35,11 @@ const bounded = (
 export function parseConditions(value: unknown): ConditionState | undefined {
   if (!value || typeof value !== "object") return undefined;
   const v = value as Partial<ConditionState>;
-  if (!["radii", "perpendicular", "centre"].includes(v.experiment ?? ""))
+  if (
+    !["radii", "perpendicular", "midpoint", "centre"].includes(
+      v.experiment ?? "",
+    )
+  )
     return undefined;
   const g = v.guess;
   return {

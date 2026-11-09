@@ -5,18 +5,16 @@ import { circleReviewCopy as c } from "@/lib/copy";
 import { labs, reasons, type LabId } from "./content";
 import MathText from "./MathText";
 import MeasurementList from "./MeasurementList";
-import ReasonLabel from "./ReasonLabel";
+import ReasonEvidencePanel from "./ReasonEvidencePanel";
 import ReasonFlowDiagram from "./ReasonFlowDiagram";
 import ReasonWorking from "./ReasonWorking";
-import { reasonWorking } from "./reasonWorkingData";
-import { reasonFlow, reasonResultFact } from "./reasonFlow";
+import { reasonFlow } from "./reasonFlow";
 import {
   initialReasonParameters,
   normaliseReasonParameters,
   reasonControls,
   reasonMeasurements,
   reasonDragHint,
-  reasonConstraint,
   type ReasonParameters,
 } from "./reasonExploration";
 import {
@@ -67,7 +65,6 @@ export default function ReasonExplorer({
       },
     }));
   }
-  const flow = reasonFlow[reason.id];
   const id = useId();
   const choose = (reasonId: string) => {
     setSaved((previous) => ({ ...previous, selectedId: reasonId }));
@@ -80,11 +77,6 @@ export default function ReasonExplorer({
         <div>
           <h3 id={`${id}-heading`}>See how each reason works</h3>
           <p>Keep the givens. Change the shape. Discover what stays true.</p>
-        </div>
-        <div className={s.legend} aria-label="Diagram colour key">
-          <span className={s.givenKey}>Given</span>
-          <span className={s.resultKey}>Concluded</span>
-          <span className={s.scale}>Model radius: 10 cm</span>
         </div>
       </div>
 
@@ -111,14 +103,7 @@ export default function ReasonExplorer({
 
       <div className={s.exploreInstructions}>
         <p>
-          <strong>Keep the givens: </strong>
-          <MathText>
-            {reasonConstraint(reason.id).replace(/^Held: /, "")}
-          </MathText>
-        </p>
-        <p>
-          <MathText>{reasonDragHint(reason.id)}</MathText> Both diagrams move
-          together.
+          <MathText>{reasonDragHint(reason.id)}</MathText>
         </p>
         <div className={s.experimentActions}>
           <button
@@ -201,13 +186,15 @@ export default function ReasonExplorer({
       </div>
 
       <div className={s.stages} id={`${id}-stages`} key={reason.id}>
-        <div className={`${s.stage} ${s.givenStage}`}>
-          <h4>
-            <span aria-hidden="true">1</span> Given
-          </h4>
+        <div className={s.stage}>
+          <div className={s.legend} aria-label="Diagram colour key">
+            <span className={s.givenKey}>Given</span>
+            {revealed && <span className={s.resultKey}>Conclusion</span>}
+            <span className={s.scale}>Model radius: 10 cm</span>
+          </div>
           <ReasonFlowDiagram
             reasonId={reason.id}
-            reveal={false}
+            reveal={revealed}
             parameters={experiment.parameters}
             onChange={change}
             trails={experiment.samples}
@@ -221,72 +208,19 @@ export default function ReasonExplorer({
             />
           </details>
         </div>
-        {revealed ? (
-          <div className={`${s.stage} ${s.resultStage}`}>
-            <h4>
-              <span aria-hidden="true">2</span> Therefore
-            </h4>
-            <ReasonFlowDiagram
-              reasonId={reason.id}
-              reveal
-              parameters={experiment.parameters}
-              onChange={change}
-              trails={experiment.samples}
-            />
-          </div>
-        ) : (
-          <div className={`${s.stage} ${s.questionStage}`}>
-            <div className={s.question}>
-              <span className={s.questionMark} aria-hidden="true">
-                ?
-              </span>
-              <h4>What can you conclude?</h4>
-              <p>
-                Drag the ringed points and compare the measurements. Which new
-                fact keeps appearing?
-              </p>
-              <button
-                className={s.primary}
-                type="button"
-                onClick={() => setRevealedId(reason.id)}
-              >
-                Reveal the conclusion
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div className={s.writtenProof} role="region" aria-label={c.writtenProof}>
-        <div className={`${s.proofCaption} ${s.givenProof}`}>
-          <span className={s.proofSymbol} aria-hidden="true">
-            ∵
-          </span>
-          <p className={s.proofStatement}>
-            <MathText>{flow.startingFact}</MathText>
-          </p>
-        </div>
-        {revealed && (
-          <div className={`${s.proofCaption} ${s.conclusionProof}`}>
-            <span className={s.proofSymbol} aria-hidden="true">
-              ∴
-            </span>
-            <p className={s.proofStatement}>
-              <MathText>
-                {reason.id === "r6"
-                  ? reasonResultFact(reason.id, experiment.parameters)
-                  : reasonWorking[reason.id].conclusion}
-              </MathText>{" "}
-              <strong className={s.proofReason}>
-                (<ReasonLabel reason={reason} arrow={false} />)
-              </strong>
-            </p>
-          </div>
-        )}
+        <ReasonEvidencePanel
+          reasonId={reason.id}
+          parameters={experiment.parameters}
+          revealed={revealed}
+          onToggle={() => setRevealedId(revealed ? null : reason.id)}
+          onCompare={reason.id === "r2" || reason.id === "r3"
+            ? () => choose(reason.id === "r2" ? "r3" : "r2")
+            : undefined}
+        />
       </div>
 
       <details className={s.fineTune}>
-        <summary>Keyboard controls for these diagrams</summary>
+        <summary>Keyboard controls for the diagram</summary>
         <p>
           Focus a ringed point and use the arrow keys. Hold Shift to move
           further, or use these controls.
@@ -381,14 +315,8 @@ export default function ReasonExplorer({
               <MathText>{reason.condition}</MathText>
             </p>
           </div>
-          <p className={s.contrast}>
-            <MathText>{flow.contrast}</MathText>
-          </p>
           <ReasonWorking key={reason.id} reasonId={reason.id} />
           <div className={s.actions}>
-            <button type="button" onClick={() => setRevealedId(null)}>
-              Replay from the givens
-            </button>
             <button type="button" onClick={onPractice}>
               Practise these reasons
             </button>

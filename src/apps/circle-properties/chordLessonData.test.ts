@@ -22,6 +22,9 @@ describe("Topic 1 guided lesson: 16.1 or 16.2", () => {
       expect(nAtMidpoint(start)).toBe(false);
     expect(nAtMidpoint({ ...defaults.bisector, secondary: 0 })).toBe(true);
     expect(nAtMidpoint({ ...chordLessonStarts[4], secondary: 0 })).toBe(true);
+    // A rounded reading or a near miss can earn a task star, but cannot justify the theorem.
+    expect(nAtMidpoint({ ...defaults.bisector, primary: 9.8, secondary: 1 })).toBe(false);
+    expect(nAtMidpoint({ ...defaults.bisector, primary: 0, secondary: 0 })).toBe(false);
   });
 
   it("shows the given reading first and the result only once revealed", () => {

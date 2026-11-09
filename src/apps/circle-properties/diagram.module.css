@@ -72,6 +72,34 @@
   stroke-linecap: round;
   pointer-events: none;
 }
+.diagram svg[data-chord-reason] {
+  --half-mark: #147143;
+  --angle-mark: #2454c6;
+}
+.diagram svg[data-chord-reason="r2"] {
+  --half-mark: #2454c6;
+  --angle-mark: #147143;
+}
+.diagram [data-chord-reason] .equalTick {
+  stroke: var(--half-mark);
+  stroke-width: 4;
+}
+.diagram [data-chord-reason] [data-measurement] {
+  fill: var(--half-mark);
+}
+.diagram [data-chord-reason] .angleSquare {
+  stroke: var(--angle-mark);
+  stroke-width: 4;
+}
+.diagram [data-chord-reason] .angleLabel {
+  fill: var(--angle-mark);
+}
+.diagram [data-chord-reason] .circumference {
+  stroke: #60738a;
+}
+.diagram [data-chord-reason] [data-segment="ON"] {
+  stroke: #2454c6;
+}
 .angleLabel {
   fill: currentColor;
   font-size: 18px;

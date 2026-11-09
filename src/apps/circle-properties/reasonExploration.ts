@@ -43,7 +43,7 @@ export function initialReasonParameters(id: string): ReasonParameters {
   if (["r1", "r2", "r3"].includes(id))
     Object.assign(p, { primary: 5, secondary: 0 });
   else if (id === "r4" || id === "r5")
-    Object.assign(p, { primary: 5, secondary: 5 });
+    Object.assign(p, { primary: 5, secondary: 5, rotation2: 28 });
   else if (id === "r6")
     Object.assign(p, { primary: 120, secondary: 50, rotation: 180 });
   else if (id === "r7")
@@ -68,7 +68,9 @@ export function initialReasonParameters(id: string): ReasonParameters {
       tertiary: 80,
       qPosition: 220 / 2.6,
     });
-  else Object.assign(p, { primary: 70, secondary: 70 });
+  // Equal central angles in this example must not look equal merely because
+  // they are vertically opposite. The second chord can still be rotated freely.
+  else Object.assign(p, { primary: 70, secondary: 70, rotation2: 28 });
   return normaliseReasonParameters(id, p);
 }
 

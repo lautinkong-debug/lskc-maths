@@ -105,17 +105,6 @@
   color: #54657a;
   font-style: italic;
 }
-.condition {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
-  padding: 14px;
-  border-radius: 14px;
-  border: 1px solid #b4c9ee;
-  background: #eef4ff;
-  font-size: 1.08em;
-}
-.found,
 .complete {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -126,25 +115,8 @@
   background: #e4f6eb;
   color: #174f36;
 }
-.found > strong,
 .complete > strong {
   font-size: 1.15em;
-}
-.found dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: baseline;
-  gap: 4px 10px;
-  margin: 0;
-}
-.found dt {
-  font-weight: 700;
-}
-.found dd {
-  margin: 0;
-}
-.say {
-  font-style: italic;
 }
 .lesson .primary {
   justify-content: center;
@@ -396,19 +368,6 @@
 }
 .writeReason {
   line-height: 1.8;
-}
-/* Small laptops: just enough to keep the longer reason on one row beside "Write". */
-@media (min-width: 701px) and (max-width: 1340px) {
-  .found .writeReason {
-    font-size: 0.93em;
-  }
-}
-/* Tablets: the panel is too narrow to sit the reason beside "Write", so it takes its own row. */
-@media (min-width: 701px) and (max-width: 1200px) {
-  .found dt:nth-of-type(3),
-  .found .writeReason {
-    grid-column: 1 / -1;
-  }
 }
 .score {
   display: flex;

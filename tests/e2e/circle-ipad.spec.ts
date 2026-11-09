@@ -234,7 +234,8 @@ test.describe("on an iPad", () => {
     await page.setViewportSize({ width: 820, height: 1180 });
     await expect(deduce).toBeVisible();
     await deduce.tap();
-    await expect(page.getByText("You found: AN = NB")).toBeVisible();
+    const proof = page.locator('[data-evidence-for="r1"] [data-proof-stage="conclusion"]');
+    await expect(proof).toContainText("AN = NB");
     await cdp.detach();
   });
 

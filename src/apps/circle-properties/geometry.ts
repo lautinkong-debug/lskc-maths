@@ -66,6 +66,10 @@ export const UNIT = 16;
 export function isBisectorDiameter(parameters: Parameters) {
   return Math.abs(parameters.primary) < 1e-10;
 }
+/** The chord slider places N halfway between its endpoints at exactly zero. */
+export function nAtMidpoint(parameters: Parameters) {
+  return !isBisectorDiameter(parameters) && Math.abs(parameters.secondary) < 1e-10;
+}
 const radians = (degrees: number) => (degrees * Math.PI) / 180;
 export const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));

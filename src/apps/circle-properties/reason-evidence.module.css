@@ -1,0 +1,85 @@
+.panel {
+  display: grid;
+  align-content: start;
+  gap: 0.65rem;
+  min-width: 0;
+  color: #143b68;
+}
+.panel section {
+  padding: 0.8rem 1rem;
+  border-inline-start: 4px solid;
+  border-radius: 0 0.6rem 0.6rem 0;
+}
+.panel h4 {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45em;
+  margin: 0;
+  color: inherit;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+.panel h4 span {
+  font:
+    bold 1.1em "Cambria Math",
+    Georgia,
+    serif;
+}
+.panel p {
+  margin: 0.35rem 0 0;
+  line-height: 1.42;
+  overflow-wrap: break-word;
+}
+.panel .given {
+  background: #edf3ff;
+  border-color: #2454c6;
+  color: #183f88;
+}
+.panel .conclusion {
+  background: #e6f6ec;
+  border-color: #18764b;
+  color: #125638;
+}
+.given p,
+.conclusion p {
+  font-size: clamp(1.1rem, 1.05rem + 0.35vw, 1.38rem);
+  font-weight: 680;
+}
+.panel .reason,
+.panel .predict {
+  background: #fff8e8;
+  border-color: #c28a23;
+}
+.reason .label {
+  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.25rem);
+  font-weight: 750;
+}
+.reason .hint {
+  margin-top: 0.55rem;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.panel button {
+  min-height: 44px;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid #b6cae4;
+  border-radius: 0.55rem;
+  background: #fff;
+  color: #143b68;
+  font: inherit;
+  cursor: pointer;
+}
+.panel .predict button {
+  margin-top: 0.7rem;
+  border-color: #2454c6;
+  background: #2454c6;
+  color: #fff;
+  font-weight: 700;
+}
+.panel button:focus-visible {
+  outline: 3px solid #3769f4;
+  outline-offset: 3px;
+}

@@ -84,6 +84,13 @@
   stroke-width: 5;
   stroke-linecap: round;
 }
+.halfTicks[data-role="given"] {
+  stroke: #2454c6;
+}
+.lab button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
 .chordReason {
   min-width: 0;
   padding: 1rem;

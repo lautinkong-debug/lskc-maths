@@ -95,6 +95,7 @@ for (const topic of topics) {
         }
         const guide = page.getByTestId("theorem-lesson");
         const spec = theoremLessons[id];
+        const evidence = guide.locator(`[data-evidence-for="${id}"]`);
         await expect(guide).toHaveAttribute("data-reason", id);
         const nav = guide.getByRole("navigation", {
           name: "Guided lesson steps",
@@ -120,29 +121,31 @@ for (const topic of topics) {
           guide.locator('[data-choice="' + index + '"]').click();
         await choose((spec.prediction.answer + 1) % 3);
         await expect(guide.locator('[data-correct="false"]')).toBeVisible();
+        await expect(evidence.locator('[data-proof-stage="given"]')).toBeVisible();
+        await expect(evidence.locator('[data-proof-stage="reason"]')).toHaveCount(0);
         await expect(svg.locator('[data-stage="result"]')).toHaveCount(0);
         await choose(spec.prediction.answer);
+        await expect(evidence.locator('[data-proof-stage="reason"]')).toContainText("Reason 16." + id.slice(1));
         await expect(
           svg.locator('[data-stage="result"]').first(),
         ).toBeVisible();
-        if (id !== "r17") {
-          await guide
-            .getByRole("button", { name: "Hide conclusion marks" })
-            .click();
-          await expect(svg.locator('[data-stage="result"]')).toHaveCount(0);
-          await guide
-            .getByRole("button", { name: "Show conclusion marks" })
-            .click();
-          await expect(
-            svg.locator('[data-stage="result"]').first(),
-          ).toBeVisible();
-          await guide
-            .getByRole("button", { name: "See the conclusion on the diagram" })
-            .click();
-          await expect(
-            guide.getByRole("region", { name: "Guided lesson board" }),
-          ).toBeFocused();
-        }
+        await guide
+          .getByRole("button", { name: "Hide conclusion marks" })
+          .click();
+        await expect(svg.locator('[data-stage="result"]')).toHaveCount(0);
+        await expect(evidence.locator('[data-proof-stage="conclusion"]')).toHaveCount(0);
+        await guide
+          .getByRole("button", { name: "Show conclusion marks" })
+          .click();
+        await expect(
+          svg.locator('[data-stage="result"]').first(),
+        ).toBeVisible();
+        await guide
+          .getByRole("button", { name: "See the conclusion on the diagram" })
+          .click();
+        await expect(
+          guide.getByRole("region", { name: "Guided lesson board" }),
+        ).toBeFocused();
         if (["r3", "r4", "r5", "r6", "r7", "r8", "r9", "r17"].includes(id)) {
           await expect(svg.locator("[data-proof-guide]")).toHaveCount(0);
           await guide.getByRole("button", { name: "Show proof lines" }).click();

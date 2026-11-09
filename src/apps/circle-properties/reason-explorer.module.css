@@ -1,4 +1,5 @@
 .explorer {
+  container-type: inline-size;
   min-width: 0;
   padding: 22px;
   border: 1px solid #cbdced;
@@ -96,8 +97,14 @@
 }
 .stages {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
   gap: 16px;
+}
+@container (min-width: 43rem) {
+  .stages {
+    grid-template-columns: minmax(0, 1.3fr) minmax(16rem, 1fr);
+  }
 }
 .stage {
   min-width: 0;
@@ -106,85 +113,12 @@
   padding: 16px;
   background: #fbfdff;
 }
-.stage h4 {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 1.1rem;
-}
-.stage h4 > span {
-  display: inline-grid;
-  place-items: center;
-  width: 27px;
-  height: 27px;
-  border-radius: 50%;
-  color: #fff;
-  background: #2454c8;
-  font-size: 0.9rem;
-}
 .stage > svg {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 330px;
+  max-height: 410px;
   margin: 8px auto 0;
-}
-.givenStage,
-.givenProof {
-  --proof-ink: #183f88;
-  --proof-edge: #527fde;
-  --proof-tint: #eaf1ff;
-}
-.givenStage h4 {
-  color: #2454c8;
-}
-.resultStage {
-  background: #f7fcf8;
-  border-color: #b5d9c5;
-}
-.conclusionProof {
-  --proof-ink: #125638;
-  --proof-edge: #369166;
-  --proof-tint: #e6f6ec;
-}
-.resultStage h4 {
-  color: #167047;
-}
-.resultStage h4 > span {
-  background: #167047;
-}
-.questionStage {
-  display: grid;
-  place-items: center;
-  background: #fffdf5;
-  border-style: dashed;
-}
-.question {
-  width: min(100%, 300px);
-  padding: 20px 0;
-  text-align: center;
-}
-.question h4 {
-  justify-content: center;
-}
-.question p {
-  margin: 12px 0 18px;
-  line-height: 1.5;
-}
-.questionMark {
-  display: block;
-  margin-bottom: 12px;
-  color: #a96b08;
-  font-size: 2.6rem;
-  font-weight: 700;
-}
-.explorer .primary {
-  padding: 11px 17px;
-  background: #3769f4;
-  border-color: #3769f4;
-  color: #fff;
-  font-weight: 700;
 }
 .explanation {
   margin-top: 16px;
@@ -197,13 +131,6 @@
 .reasonText p {
   margin: 0;
   line-height: 1.55;
-}
-.contrast {
-  margin: 16px 0;
-  padding: 10px 13px;
-  border-left: 3px solid #d4aa41;
-  background: #fff9e9;
-  line-height: 1.5;
 }
 .actions {
   display: flex;
@@ -272,17 +199,8 @@
   .explorer {
     padding: 14px;
   }
-  .stages {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .stage {
     padding: 13px;
-  }
-  .question {
-    padding: 4px 0;
-  }
-  .questionMark {
-    display: none;
   }
   .comparison th,
   .comparison td {
@@ -401,44 +319,6 @@
 }
 .savedCases tbody tr:last-child {
   background: #edf4ff;
-}
-.writtenProof {
-  width: min(100%, 960px);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 12px;
-  margin: 18px auto;
-}
-.proofCaption {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
-  gap: 0.65rem;
-  padding: clamp(0.7rem, 1.2vw, 1.1rem);
-  border-inline-start: 4px solid var(--proof-edge);
-  border-radius: 10px;
-  background: var(--proof-tint);
-  color: var(--proof-ink);
-}
-.proofSymbol {
-  font-family: "Cambria Math", Georgia, serif;
-  font-size: clamp(1.7rem, 2.25vw, 2.05rem);
-  font-weight: bold;
-  line-height: 1.12;
-}
-.proofCaption .proofStatement {
-  margin: 0;
-  font-size: clamp(1.25rem, 1.1rem + 0.5vw, 1.6rem);
-  font-weight: 750;
-  line-height: 1.42;
-  overflow-wrap: anywhere;
-}
-.proofReason {
-  margin-inline-start: 0.35em;
-  font-size: clamp(1.12rem, 1rem + 0.4vw, 1.35rem);
-  font-weight: 750;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
 }
 .observations {
   margin-top: 0.35rem;

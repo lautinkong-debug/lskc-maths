@@ -20,6 +20,7 @@ import { isPaperStep, type PaperChord } from "./paperCircle";
 import type { Parameters } from "./geometry";
 import MathText from "./MathText";
 import ReasonLabel, { Highlight } from "./ReasonLabel";
+import ReasonEvidencePanel from "./ReasonEvidencePanel";
 import s from "./chord-lesson.module.css";
 
 const reason = (id: ChordReason) => reasons.find((item) => item.id === id)!;
@@ -59,48 +60,6 @@ function Stamp({ right }: { right: boolean }) {
     <span className={s.stamp} data-right={right}>
       {right ? c.stamp.right : c.stamp.wrong}
     </span>
-  );
-}
-
-/** One result card: the given fact, what it gives you, and the reason to write. */
-function Found({
-  found,
-  given,
-  get,
-  reasonId,
-  say,
-}: {
-  found: string;
-  given: string;
-  get: string;
-  reasonId: ChordReason;
-  say: string;
-}) {
-  return (
-    <div className={s.found} role="status">
-      <strong>
-        <MathText>{found}</MathText>
-      </strong>
-      <dl>
-        <dt>
-          <Highlight kind="given">{c.given}</Highlight>
-        </dt>
-        <dd>
-          <MathText>{given}</MathText>
-        </dd>
-        <dt>
-          <Highlight kind="get">{c.get}</Highlight>
-        </dt>
-        <dd>
-          <MathText>{get}</MathText>
-        </dd>
-        <dt>{c.write}</dt>
-        <dd className={s.writeReason}>
-          (<ReasonLabel reason={reason(reasonId)} />)
-        </dd>
-      </dl>
-      <p className={s.say}>♪ {say}</p>
-    </div>
   );
 }
 
@@ -176,15 +135,14 @@ export default function ChordLesson({
           <h4>
             <MathText>{diagramStep.heading}</MathText>
           </h4>
+          {conditionMet && (
+            <ReasonEvidencePanel
+              reasonId={step === 3 ? "r1" : "r2"}
+              revealed={revealed}
+            />
+          )}
           {revealed ? (
             <>
-              <Found
-                found={diagramStep.found}
-                given={diagramStep.given}
-                get={diagramStep.get}
-                reasonId={step === 3 ? "r1" : "r2"}
-                say={diagramStep.say}
-              />
               <button
                 type="button"
                 className={s.primary}
@@ -198,15 +156,9 @@ export default function ChordLesson({
             </>
           ) : conditionMet ? (
             // A pause for the class: the circle shows only the condition so far.
-            <div className={s.condition} role="status">
-              <p>
-                <Highlight kind="given">{c.given}</Highlight>{" "}
-                <MathText>{diagramStep.given}</MathText>
-              </p>
-              <button type="button" className={s.primary} onClick={onDeduce}>
-                {c.deduce}
-              </button>
-            </div>
+            <button type="button" className={s.primary} onClick={onDeduce}>
+              {c.deduce}
+            </button>
           ) : (
             <p className={s.waiting}>
               <MathText>

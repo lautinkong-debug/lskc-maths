@@ -42,6 +42,13 @@
   fill: #a8c9ff;
   pointer-events: none;
 }
+.inferenceSector {
+  fill-opacity: 0.18;
+  pointer-events: none;
+}
+.locatedCentre {
+  filter: drop-shadow(0 0 2px #18764b);
+}
 .savedLines {
   stroke: #65788e;
   stroke-width: 1.7px;
@@ -68,9 +75,9 @@
   touch-action: none;
 }
 .ring {
-  fill: #3769f4;
-  fill-opacity: 0.08;
-  stroke: #2454c6;
+  fill: #59758b;
+  fill-opacity: 0.05;
+  stroke: #5b7088;
   stroke-width: 1.8px;
   pointer-events: none;
 }

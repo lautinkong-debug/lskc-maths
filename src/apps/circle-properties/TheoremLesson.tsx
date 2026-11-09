@@ -12,6 +12,7 @@ import MeasurementList from "./MeasurementList";
 import InkToolbar from "./InkToolbar";
 import { useInkBoard } from "./useInkBoard";
 import ReasonFlowDiagram from "./ReasonFlowDiagram";
+import ReasonEvidencePanel from "./ReasonEvidencePanel";
 import TwoBisectorsDiagram from "./TwoBisectorsDiagram";
 import { proofLineHints } from "./ReasonProofLines";
 import ReasonLabel from "./ReasonLabel";
@@ -20,7 +21,7 @@ import {
   reasonMeasurements,
   type ReasonParameters,
 } from "./reasonExploration";
-import { reasonFlow, reasonResultFact } from "./reasonFlow";
+import { reasonResultFact } from "./reasonFlow";
 import {
   bisectorIntersection,
   theoremLessons,
@@ -464,7 +465,7 @@ function LessonActivity({
                     {!comparingChords && (
                       <span>{reveal ? c.revealedKey : c.givenKey}</span>
                     )}
-                    {stage === 2 && predicted && id !== "r17" && (
+                    {stage === 2 && predicted && (
                       <div className={s.shapeActions}>
                         <button
                           type="button"
@@ -579,6 +580,16 @@ function LessonActivity({
           className={s.panel}
           aria-label={guideSteps[stage]}
         >
+          {(stage === 1 || stage === 2) && (
+            <ReasonEvidencePanel
+              reasonId={id}
+              parameters={activeShape}
+              revealed={exploringIntersection || reveal}
+              given={comparingChords ? c.intersectionGivens : undefined}
+              conclusion={comparingChords ? c.centreLocated : reasonResultFact(id, activeShape)}
+              hint={comparingChords ? c.intersectionReason : undefined}
+            />
+          )}
           {stage === 0 && (
             <>
               <h4>{c.words}</h4>
@@ -605,24 +616,7 @@ function LessonActivity({
           )}
           {stage === 1 && (
             <>
-              <div className={s.given}>
-                <b>{circleLessonCopy.given}</b>
-                <p>
-                  <MathText>
-                    {exploringIntersection
-                      ? c.intersectionGivens
-                      : reasonFlow[id].startingFact}
-                  </MathText>
-                </p>
-              </div>
-              {exploringIntersection ? (
-                <div className={s.proof}>
-                  <b>{c.therefore}</b>
-                  <p>
-                    <MathText>{c.intersectionReason}</MathText>
-                  </p>
-                </div>
-              ) : (
+              {!exploringIntersection && (
                 <details className={s.readings}>
                   <summary>{c.readings}</summary>
                   <p>{c.readingHint}</p>
@@ -658,30 +652,25 @@ function LessonActivity({
               />
               {predicted && (
                 <>
-                  {!comparingChords && (
-                    <div className={s.proof}>
-                      <b>{c.therefore}</b>
-                      <p>
-                        <MathText>{reasonResultFact(id, activeShape)}</MathText>
-                      </p>
+                  {reveal && !comparingChords && (
+                    <details className={s.readings}>
+                      <summary>{c.whyItWorks}</summary>
                       <p>
                         <MathText>{lesson.explanation}</MathText>
                       </p>
-                    </div>
+                    </details>
                   )}
-                  {id !== "r17" && (
-                    <button
-                      type="button"
-                      className={s.diagramJump}
-                      onClick={() => {
-                        setHideConclusion(false);
-                        board.current?.focus({ preventScroll: true });
-                        board.current?.scrollIntoView({ block: "start" });
-                      }}
-                    >
-                      {comparingChords ? c.findIntersection : c.seeConclusion}
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    className={s.diagramJump}
+                    onClick={() => {
+                      setHideConclusion(false);
+                      board.current?.focus({ preventScroll: true });
+                      board.current?.scrollIntoView({ block: "start" });
+                    }}
+                  >
+                    {comparingChords ? c.findIntersection : c.seeConclusion}
+                  </button>
                   <button
                     type="button"
                     className={s.primary}

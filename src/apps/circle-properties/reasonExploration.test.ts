@@ -117,11 +117,11 @@ describe("constrained reason exploration", () => {
     expect(control.label).toBe("Shared chord offset from O");
     expect(p.primary).toBeGreaterThanOrEqual(control.min);
     expect(p.primary).toBeLessThanOrEqual(control.max);
-    expect(
-      reasonMeasurements("r4", p)
-        .filter((m) => m.label === "OM" || m.label === "ON")
-        .map((m) => m.value),
-    ).toEqual([6, 6]);
+    const readings = reasonMeasurements("r4", p).filter(
+      (m) => m.label === "OM" || m.label === "ON",
+    );
+    expect(readings).toHaveLength(2);
+    for (const reading of readings) expect(reading.value).toBeCloseTo(6, 10);
   });
   it.each(reasons.map((r) => r.id))(
     "%s permits movement from every handle with at least one arrow-key direction",

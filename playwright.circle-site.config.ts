@@ -7,6 +7,7 @@ export default defineConfig({
     "circle-site-load.spec.ts",
     "circle-two-chords.spec.ts",
     "circle-chord-condition.spec.ts",
+    "circle-reason-gallery.spec.ts",
   ],
   outputDir: "./out/circle-site-tests",
   workers: 1,

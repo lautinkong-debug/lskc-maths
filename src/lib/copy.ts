@@ -4300,6 +4300,7 @@ export const circleTheoremLessonCopy = {
   findParts: "Find each part of the circle.",
   changeShape: "Keep the givens. Change the shape.",
   readMarks: "Read the new marks on the circle.",
+  whyItWorks: "Why does this follow?",
   predict: "Predict what stays true.",
   revealedKey: "Blue givens · Green conclusion",
   givenKey: "Blue marks show the givens.",

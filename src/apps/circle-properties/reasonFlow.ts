@@ -21,19 +21,20 @@ export type ReasonFlow = {
 /** Keep the direction of each textbook reason explicit. */
 export const reasonFlow: Record<string, ReasonFlow> = {
   r1: {
-    startingFact: "O is the centre and ON ⊥ AB.",
+    startingFact: "O is the centre. ON is perpendicular to the non-diameter chord AB at N.",
     resultFact: "AN = NB: N is the mid-point.",
     contrast:
       "Start with the right-angle mark. The equal-length marks are what you obtain.",
   },
   r2: {
-    startingFact: "O is the centre and AN = NB.",
+    startingFact:
+      "O is the centre. N is the mid-point of the non-diameter chord AB, so AN = NB. Join ON.",
     resultFact: "ON ⊥ AB.",
     contrast:
       "Start with the equal-length marks. The right-angle mark is what you obtain.",
   },
   r3: {
-    startingFact: "AN = NB and line ℓ is perpendicular to AB at N.",
+    startingFact: "At the mid-point N of chord AB, AN = NB and ℓ ⊥ AB.",
     resultFact: "The centre O lies on line ℓ.",
     contrast:
       "Both mid-point and perpendicular are already given. This reason locates the centre; O is not a starting point.",
@@ -132,7 +133,13 @@ export type FlowStage = "base" | "given" | "result";
 type MarkBase = { id: string; stage: FlowStage };
 export type FlowMark = MarkBase &
   (
-    | { kind: "line"; a: FlowPoint; b: FlowPoint; dashed?: boolean }
+    | {
+        kind: "line";
+        a: FlowPoint;
+        b: FlowPoint;
+        dashed?: boolean;
+        highlightOnReveal?: boolean;
+      }
     | { kind: "path"; d: string; vertex?: FlowPoint }
     | { kind: "circle"; at: FlowPoint; radius: number }
     | { kind: "dot"; at: FlowPoint }
@@ -237,6 +244,22 @@ export function buildReasonFlow(
     stage: FlowStage = "base",
     dashed = false,
   ) => marks.push({ id, kind: "line", a, b, stage, dashed });
+  // A chord or distance exists before its equality is proved. Keep its neutral
+  // outline visible until the matching ticks and their colour are revealed.
+  const measuredSegment = (
+    id: string,
+    a: FlowPoint,
+    b: FlowPoint,
+    equality: FlowStage,
+  ) =>
+    marks.push({
+      id,
+      kind: "line",
+      a,
+      b,
+      stage: equality === "result" ? "base" : equality,
+      highlightOnReveal: equality === "result",
+    });
   const text = (
     id: string,
     at: FlowPoint,
@@ -290,13 +313,13 @@ export function buildReasonFlow(
       dy = b.y - a.y,
       length = Math.hypot(dx, dy);
     for (let i = 0; i < count; i++) {
-      const shift = (i - (count - 1) / 2) * 7;
+      const shift = (i - (count - 1) / 2) * 9;
       const x = a.x + dx * fraction + (dx / length) * shift;
       const y = a.y + dy * fraction + (dy / length) * shift;
       line(
         `${id}-${i}`,
-        { x: x - (dy / length) * 7, y: y + (dx / length) * 7 },
-        { x: x + (dy / length) * 7, y: y - (dx / length) * 7 },
+        { x: x - (dy / length) * 9, y: y + (dx / length) * 9 },
+        { x: x + (dy / length) * 9, y: y - (dx / length) * 9 },
         stage,
       );
     }
@@ -310,8 +333,15 @@ export function buildReasonFlow(
   ) => {
     const lenA = Math.hypot(a.x - at.x, a.y - at.y);
     const lenB = Math.hypot(b.x - at.x, b.y - at.y);
-    const u = { x: ((a.x - at.x) / lenA) * 24, y: ((a.y - at.y) / lenA) * 24 };
-    const v = { x: ((b.x - at.x) / lenB) * 24, y: ((b.y - at.y) / lenB) * 24 };
+    const size = Math.min(24, lenA, lenB);
+    const u = {
+      x: ((a.x - at.x) / lenA) * size,
+      y: ((a.y - at.y) / lenA) * size,
+    };
+    const v = {
+      x: ((b.x - at.x) / lenB) * size,
+      y: ((b.y - at.y) / lenB) * size,
+    };
     marks.push({
       id,
       kind: "path",
@@ -370,8 +400,8 @@ export function buildReasonFlow(
       for (const shift of [-1.8, 1.8])
         line(
           `${id}-equal-${shift}`,
-          onCircle(start + sweep / 2 + shift, R - 7),
-          onCircle(start + sweep / 2 + shift, R + 7),
+          onCircle(start + sweep / 2 + shift, R - 9),
+          onCircle(start + sweep / 2 + shift, R + 9),
           stage,
         );
   };
@@ -394,7 +424,9 @@ export function buildReasonFlow(
     namedPoint("B", B);
     const labelN = outsideRightAngle(N, B, O);
     namedPoint("N", N, "base", labelN.dx, labelN.dy);
-    line("chord-AB", A, B);
+    const halfStage = reasonId === "r1" ? "result" : "given";
+    measuredSegment("chord-AB", A, B, halfStage);
+    let perpendicularArm = O;
     if (reasonId === "r3") {
       const theta = (((p.rotation ?? 0) - 90) * Math.PI) / 180;
       const start = {
@@ -406,6 +438,12 @@ export function buildReasonFlow(
         y: O.y - 145 * Math.sin(theta),
       };
       line("line-ell", start, end, "given");
+      // A full bisector continues beyond O even for a chord close to the centre.
+      perpendicularArm =
+        Math.hypot(start.x - N.x, start.y - N.y) >
+        Math.hypot(end.x - N.x, end.y - N.y)
+          ? start
+          : end;
       text(
         "line-name",
         { x: start.x + 18, y: start.y + 10 },
@@ -415,13 +453,18 @@ export function buildReasonFlow(
       );
       namedPoint("O", O, "result", 20, 5);
     } else {
-      line("join-ON", O, N);
+      line("join-ON", O, N, "given");
       namedPoint("O", O, "given", 20, 5);
     }
-    const halfStage = reasonId === "r1" ? "result" : "given";
     tick("equal-AN", A, N, halfStage);
     tick("equal-NB", N, B, halfStage);
-    square("right-angle-N", N, B, O, reasonId === "r2" ? "result" : "given");
+    square(
+      "right-angle-N",
+      N,
+      B,
+      perpendicularArm,
+      reasonId === "r2" ? "result" : "given",
+    );
   } else if (reasonId === "r4" || reasonId === "r5") {
     const A = pos("A"),
       B = pos("B"),
@@ -435,14 +478,14 @@ export function buildReasonFlow(
       labelN = outsideRightAngle(N, D, O);
     namedPoint("M", M, "base", labelM.dx, labelM.dy);
     namedPoint("N", N, "base", labelN.dx, labelN.dy);
-    line("chord-AB", A, B);
-    line("chord-CD", C, D);
-    line("distance-OM", O, M);
-    line("distance-ON", O, N);
-    square("right-angle-M", M, B, O, "given");
-    square("right-angle-N", N, D, O, "given");
     const chordStage = reasonId === "r4" ? "given" : "result";
     const distanceStage = reasonId === "r5" ? "given" : "result";
+    measuredSegment("chord-AB", A, B, chordStage);
+    measuredSegment("chord-CD", C, D, chordStage);
+    measuredSegment("distance-OM", O, M, distanceStage);
+    measuredSegment("distance-ON", O, N, distanceStage);
+    square("right-angle-M", M, B, O, "given");
+    square("right-angle-N", N, D, O, "given");
     tick("equal-chord-AB", A, B, chordStage, 2, 0.3);
     tick("equal-chord-CD", C, D, chordStage, 2, 0.3);
     tick("equal-distance-OM", O, M, distanceStage);
@@ -511,8 +554,13 @@ export function buildReasonFlow(
       C = pos("C"),
       D = pos("D");
     for (const [name, p] of Object.entries({ A, B, C, D })) namedPoint(name, p);
-    line("chord-AB", A, B);
-    line("chord-CD", C, D);
+    const chordEquality = ["r13", "r14"].includes(reasonId)
+      ? "given"
+      : ["r12", "r15"].includes(reasonId)
+        ? "result"
+        : "base";
+    measuredSegment("chord-AB", A, B, chordEquality);
+    measuredSegment("chord-CD", C, D, chordEquality);
     if (reasonId === "r17") {
       const P = pos("P"),
         Q = pos("Q");
@@ -525,9 +573,11 @@ export function buildReasonFlow(
       angle("angle-P", P, A, B, "θ", "given");
       angle("angle-Q", Q, C, D, "φ", "given");
     } else {
-      namedPoint("O", O, "given", 20, 8);
-      for (const [name, p] of Object.entries({ A, B, C, D }))
-        line(`radius-O${name}`, O, p);
+      const chordAndArcOnly = reasonId === "r14" || reasonId === "r15";
+      namedPoint("O", O, chordAndArcOnly ? "base" : "given", 20, 8);
+      if (!chordAndArcOnly)
+        for (const [name, p] of Object.entries({ A, B, C, D }))
+          line(`radius-O${name}`, O, p);
       if (["r10", "r11", "r12", "r13", "r16"].includes(reasonId)) {
         const stage = ["r11", "r13"].includes(reasonId) ? "result" : "given";
         angle("angle-AOB", O, A, B, "θ", stage, 30, sweepA);

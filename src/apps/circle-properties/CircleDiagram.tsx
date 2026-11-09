@@ -9,6 +9,7 @@ import {
   distance,
   dragParameter,
   getScene,
+  nAtMidpoint,
   type Parameters,
   type Point,
   type Scene,
@@ -25,7 +26,6 @@ import {
   rightAngleSize,
 } from "./diagramLayout";
 import InkLayer from "./InkLayer";
-import { evaluateMission, missions } from "./missions";
 import type { InkBoardController } from "./useInkBoard";
 
 const focusNotes: Record<LabId, string> = {
@@ -135,6 +135,7 @@ export default function CircleDiagram({
   showMeasurements = true,
   showAngles = showMeasurements,
   showAngleMarks = true,
+  chordReason,
   highlightKey = 0,
   showInstructions = true,
   missionIndex,
@@ -147,6 +148,8 @@ export default function CircleDiagram({
   showAngles?: boolean;
   /** False also hides the arc or right-angle square, which would give a result away. */
   showAngleMarks?: boolean;
+  /** The original chord lessons build different deductions on the same construction. */
+  chordReason?: "r1" | "r2";
   /** Increment to replay a brief emphasis without remounting the draggable SVG. */
   highlightKey?: number;
   showInstructions?: boolean;
@@ -168,11 +171,8 @@ export default function CircleDiagram({
       ? Math.min(1, distance(scene.points.O, scene.points.N) / 16)
       : 1;
   // Like the length labels, the ticks are hidden while the lengths are.
-  const equalHalves =
-    lab === "bisector" &&
-    !diameter &&
-    showMeasurements &&
-    evaluateMission(missions.bisector[0], parameters).complete;
+  const midpoint = lab === "bisector" && nAtMidpoint(parameters);
+  const equalHalves = midpoint && showMeasurements;
   const focusLines =
     lab === "bisector" && !diameter
       ? [
@@ -224,6 +224,7 @@ export default function CircleDiagram({
           if (event.target === event.currentTarget) stop(event);
         }}
         data-testid="circle-diagram"
+        data-chord-reason={midpoint ? chordReason : undefined}
       >
         <title id={`${id}-title`}>Interactive circle construction</title>
         <desc id={`${id}-description`}>
@@ -270,6 +271,7 @@ export default function CircleDiagram({
             x2={scene.points[line.to].x}
             y2={scene.points[line.to].y}
             className={`${styles.line} ${styles[line.tone]}`}
+            data-segment={`${line.from}${line.to}`}
             strokeWidth={line.width ?? 2.2}
             strokeDasharray={line.dashed ? "6 5" : undefined}
           />

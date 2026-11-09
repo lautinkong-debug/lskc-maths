@@ -16,6 +16,17 @@ import {
 } from "./reasonExploration";
 
 describe("reason inference diagrams", () => {
+  it.each(["r10", "r11", "r12", "r13"])(
+    "%s starts with equal central angles that cannot be explained as vertically opposite",
+    (id) => {
+      const { A, B, C, D, O } = buildReasonFlow(id).points;
+      expect(angleAt(A, O, B)).toBeCloseTo(angleAt(C, O, D), 10);
+      for (const first of [A, B])
+        for (const second of [C, D])
+          expect(angleAt(first, O, second)).toBeLessThan(179);
+    },
+  );
+
   it("withholds a displaced centre label and its aria-hidden leader until the conclusion", () => {
     const parameters = {
       primary: 0.5,

@@ -20,11 +20,13 @@ import s from "./reason-flow.module.css";
 const colours = { base: "#65788e", given: "#2454c6", result: "#18764b" };
 
 // Keep dots and names above the selected rays, especially at a shared vertex.
-function vocabularyLayer(mark: FlowMark, selected: ReadonlySet<string>) {
+function diagramLayer(mark: FlowMark, selected?: ReadonlySet<string>) {
   if (mark.kind === "text") return 4;
   if (mark.kind === "dot") return 3;
-  if (!selected.has(mark.id)) return 0;
-  return mark.kind === "path" && mark.vertex ? 2 : 1;
+  if (selected && !selected.has(mark.id)) return 0;
+  if ((mark.kind === "path" && mark.vertex) || mark.id.includes("equal-"))
+    return 2;
+  return mark.stage === "base" && !selected ? 0 : 1;
 }
 
 /** Reveal only the new conclusion marks; the blue givens remain in place. */
@@ -61,13 +63,13 @@ export default function ReasonFlowDiagram({
   const model = buildReasonFlow(reasonId, current);
   const diagramName = reveal ? "Therefore" : "Given";
   const vocabulary = focusMarks ? vocabularyView(model, focusMarks) : undefined;
-  const marks = vocabulary
-    ? [...vocabulary.marks].sort(
-        (a, b) =>
-          vocabularyLayer(a, vocabulary.selected) -
-          vocabularyLayer(b, vocabulary.selected),
-      )
-    : visibleReasonMarks(model, reveal);
+  const marks = [
+    ...(vocabulary?.marks ?? visibleReasonMarks(model, reveal)),
+  ].sort(
+    (a, b) =>
+      diagramLayer(a, vocabulary?.selected) -
+      diagramLayer(b, vocabulary?.selected),
+  );
 
   function move(event: PointerEvent<SVGSVGElement>) {
     const drag = dragRef.current;
@@ -164,27 +166,34 @@ export default function ReasonFlowDiagram({
       {reveal && proofLines && (
         <ReasonProofLines reasonId={reasonId} model={model} />
       )}
-      {vocabulary &&
-        marks.map(
-          (mark) =>
-            mark.kind === "path" &&
-            mark.vertex &&
-            vocabulary.selected.has(mark.id) && (
-              <path
-                key={mark.id}
-                className={s.termSector}
-                d={`${mark.d} L ${mark.vertex.x} ${mark.vertex.y} Z`}
-                aria-hidden="true"
-                data-term-sector={mark.id}
-              />
-            ),
-        )}
+      {marks.map(
+        (mark) =>
+          mark.kind === "path" &&
+          mark.vertex &&
+          (!vocabulary || vocabulary.selected.has(mark.id)) && (
+            <path
+              key={mark.id}
+              className={vocabulary ? s.termSector : s.inferenceSector}
+              fill={colours[mark.stage]}
+              d={`${mark.d} L ${mark.vertex.x} ${mark.vertex.y} Z`}
+              aria-hidden="true"
+              data-term-sector={vocabulary ? mark.id : undefined}
+            />
+          ),
+      )}
       {marks.map((mark) => {
-        const colour = colours[mark.stage];
+        const stage =
+          mark.kind === "line" &&
+          mark.highlightOnReveal &&
+          reveal &&
+          !vocabulary
+            ? "result"
+            : mark.stage;
+        const colour = colours[stage];
         const selected = vocabulary?.selected.has(mark.id);
         const common = {
           "data-mark": mark.id,
-          "data-stage": mark.stage,
+          "data-stage": stage,
           "data-shape": mark.kind,
           "data-term-part": vocabulary
             ? selected
@@ -216,7 +225,7 @@ export default function ReasonFlowDiagram({
                 x2={mark.b.x}
                 y2={mark.b.y}
                 stroke={colour}
-                strokeWidth={mark.stage === "base" ? 1.8 : 3.5}
+                strokeWidth={stage === "base" ? 1.8 : 4}
                 strokeDasharray={mark.dashed ? "6 5" : undefined}
                 strokeLinecap="round"
               />
@@ -234,7 +243,7 @@ export default function ReasonFlowDiagram({
                     {...common}
                     d={mark.d}
                     stroke={colour}
-                    strokeWidth={3.5}
+                    strokeWidth={4}
                     fill="none"
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -248,7 +257,7 @@ export default function ReasonFlowDiagram({
                 {...common}
                 d={mark.d}
                 stroke={colour}
-                strokeWidth={3.5}
+                strokeWidth={4.5}
                 fill="none"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -261,8 +270,17 @@ export default function ReasonFlowDiagram({
                 {...common}
                 cx={mark.at.x}
                 cy={mark.at.y}
-                r={selected ? 6.5 : mark.stage === "base" ? 3 : 4}
+                r={
+                  selected || stage === "result" ? 7 : stage === "given" ? 5 : 3
+                }
                 fill={colour}
+                stroke={stage !== "base" ? "white" : undefined}
+                strokeWidth={stage !== "base" ? 2 : undefined}
+                className={
+                  stage === "result" && !vocabulary
+                    ? s.locatedCentre
+                    : undefined
+                }
               />
             );
           case "text":
