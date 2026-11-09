@@ -74,6 +74,38 @@
   font-size: 1.05rem;
   line-height: 1.4;
 }
+.lesson[data-step="0"] .boardTitle {
+  padding-bottom: 0.2rem;
+}
+.lesson .wordCue {
+  padding: 0 1rem 0.75rem;
+  background: #fff4d8;
+  color: #354b65;
+  font-size: 0.97rem;
+  line-height: 1.45;
+}
+.boardCaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0 0.5rem;
+  background: #fff4d8;
+}
+.boardCaption .secondChordButton {
+  margin: 0.35rem 0.85rem;
+  min-height: 44px;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid #2454bf;
+  background: #fff;
+  color: #193d8f;
+  font-weight: 700;
+}
+.diagramJump {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0.4rem 0.8rem;
+}
 .stageNav,
 .panel {
   background: #fff8e8;
@@ -296,11 +328,27 @@
     border-radius: 12px;
   }
   .stageNav > div {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 0.3rem;
   }
-  .stageNav button {
-    font-size: 0.77rem;
-    padding: 0.2rem 0.45rem;
+  .lesson .stageNav button {
+    grid-column: span 2;
+    justify-content: center;
+    gap: 0.22rem;
+    min-width: 0;
+    min-height: 44px;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    padding: 0.25rem;
+  }
+  .lesson .stageNav button:nth-last-child(-n + 2) {
+    grid-column: span 3;
+  }
+  .lesson .stageNav button span {
+    min-width: 1.18rem;
+    height: 1.18rem;
+    flex-shrink: 0;
   }
   .board > svg {
     max-height: min(38vh, 295px);
@@ -311,5 +359,11 @@
   }
   .scratch textarea {
     font-size: 16px;
+  }
+}
+@media (max-width: 360px) {
+  .lesson .stageNav button {
+    flex-direction: column;
+    gap: 0.1rem;
   }
 }

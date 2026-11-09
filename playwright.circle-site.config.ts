@@ -3,7 +3,7 @@ import { defineConfig } from "@playwright/test";
 // Runs against the production build: `npx next build` first.
 export default defineConfig({
   testDir: "./tests/e2e",
-  testMatch: "circle-site-load.spec.ts",
+  testMatch: ["circle-site-load.spec.ts", "circle-two-chords.spec.ts"],
   outputDir: "./out/circle-site-tests",
   workers: 1,
   reporter: "list",

@@ -8,6 +8,40 @@
   touch-action: none;
   cursor: grabbing;
 }
+
+.diagram[data-vocabulary] {
+  --term-ink: #164caf;
+  --term-context: #75869a;
+}
+.diagram :is(line, path, [data-shape="circle"])[data-term-part="context"] {
+  stroke: var(--term-context);
+  stroke-width: 1.8;
+}
+.diagram :is(line, path, [data-shape="circle"])[data-term-part="selected"] {
+  stroke: var(--term-ink);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.diagram [data-shape="dot"][data-term-part="selected"] {
+  fill: var(--term-ink);
+  stroke: white;
+  stroke-width: 2;
+}
+.diagram [data-shape="dot"][data-term-part="context"] {
+  fill: #53667b;
+}
+.diagram text[data-term-part="context"] {
+  fill: #44566b;
+}
+.diagram text[data-term-part="selected"] {
+  fill: var(--term-ink);
+  font-weight: 750;
+}
+.termSector {
+  fill: #a8c9ff;
+  pointer-events: none;
+}
 .savedLines {
   stroke: #65788e;
   stroke-width: 1.7px;

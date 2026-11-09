@@ -6,6 +6,8 @@ import {
   reasonFlow,
   reasonResultFact,
   visibleReasonMarks,
+  vocabularyView,
+  type FlowMark,
 } from "./reasonFlow";
 import { dragReasonPoint, initialReasonParameters } from "./reasonExploration";
 import type { DragKey, Parameters, Point } from "./geometry";
@@ -17,6 +19,14 @@ import s from "./reason-flow.module.css";
 
 const colours = { base: "#65788e", given: "#2454c6", result: "#18764b" };
 
+// Keep dots and names above the selected rays, especially at a shared vertex.
+function vocabularyLayer(mark: FlowMark, selected: ReadonlySet<string>) {
+  if (mark.kind === "text") return 4;
+  if (mark.kind === "dot") return 3;
+  if (!selected.has(mark.id)) return 0;
+  return mark.kind === "path" && mark.vertex ? 2 : 1;
+}
+
 /** Reveal only the new conclusion marks; the blue givens remain in place. */
 export default function ReasonFlowDiagram({
   reasonId,
@@ -25,6 +35,7 @@ export default function ReasonFlowDiagram({
   onChange,
   trails = [],
   focusMarks,
+  focusLabel,
   ink,
   proofLines = false,
 }: {
@@ -35,6 +46,7 @@ export default function ReasonFlowDiagram({
   trails?: Parameters[];
   /** Vocabulary tags point out individual parts without exposing conclusion marks. */
   focusMarks?: readonly string[];
+  focusLabel?: string;
   ink?: InkBoardController;
   proofLines?: boolean;
 }) {
@@ -48,6 +60,14 @@ export default function ReasonFlowDiagram({
   const current = parameters ?? initialReasonParameters(reasonId);
   const model = buildReasonFlow(reasonId, current);
   const diagramName = reveal ? "Therefore" : "Given";
+  const vocabulary = focusMarks ? vocabularyView(model, focusMarks) : undefined;
+  const marks = vocabulary
+    ? [...vocabulary.marks].sort(
+        (a, b) =>
+          vocabularyLayer(a, vocabulary.selected) -
+          vocabularyLayer(b, vocabulary.selected),
+      )
+    : visibleReasonMarks(model, reveal);
 
   function move(event: PointerEvent<SVGSVGElement>) {
     const drag = dragRef.current;
@@ -98,6 +118,7 @@ export default function ReasonFlowDiagram({
       aria-labelledby={`${id}-title ${id}-description`}
       data-testid={`reason-flow-${reasonId}`}
       data-revealed={reveal}
+      data-vocabulary={vocabulary ? "true" : undefined}
       onPointerMove={move}
       onPointerUp={stop}
       onPointerCancel={stop}
@@ -105,11 +126,14 @@ export default function ReasonFlowDiagram({
         if (event.target === event.currentTarget) stop(event);
       }}
     >
-      <title
-        id={`${id}-title`}
-      >{`${reason.number}: ${reveal ? "given facts and conclusion" : "given facts only"}`}</title>
+      <title id={`${id}-title`}>
+        {vocabulary
+          ? (focusLabel ?? reason.number)
+          : `${reason.number}: ${reveal ? "given facts and conclusion" : "given facts only"}`}
+      </title>
       <desc id={`${id}-description`}>
-        {`Blue given facts: ${flow.startingFact}${reveal ? ` Green conclusion: ${reasonResultFact(reasonId, current)}` : " The conclusion markings are hidden."}`}
+        {!vocabulary &&
+          `Blue given facts: ${flow.startingFact}${reveal ? ` Green conclusion: ${reasonResultFact(reasonId, current)}` : " The conclusion markings are hidden."}`}
         {onChange &&
           " Drag a ringed point to change the shape while keeping the givens. Focus a point and use the arrow keys, or hold Shift for larger movements."}
         {reasonId === "r3" &&
@@ -140,25 +164,39 @@ export default function ReasonFlowDiagram({
       {reveal && proofLines && (
         <ReasonProofLines reasonId={reasonId} model={model} />
       )}
-      {visibleReasonMarks(model, reveal).map((mark) => {
+      {vocabulary &&
+        marks.map(
+          (mark) =>
+            mark.kind === "path" &&
+            mark.vertex &&
+            vocabulary.selected.has(mark.id) && (
+              <path
+                key={mark.id}
+                className={s.termSector}
+                d={`${mark.d} L ${mark.vertex.x} ${mark.vertex.y} Z`}
+                aria-hidden="true"
+                data-term-sector={mark.id}
+              />
+            ),
+        )}
+      {marks.map((mark) => {
         const colour = colours[mark.stage];
+        const selected = vocabulary?.selected.has(mark.id);
         const common = {
-          key: mark.id,
           "data-mark": mark.id,
           "data-stage": mark.stage,
-          opacity:
-            focusMarks?.length &&
-            !focusMarks.some(
-              (prefix) =>
-                mark.id === prefix || mark.id.startsWith(prefix + "-"),
-            )
-              ? 0.55
-              : 1,
+          "data-shape": mark.kind,
+          "data-term-part": vocabulary
+            ? selected
+              ? "selected"
+              : "context"
+            : undefined,
         };
         switch (mark.kind) {
           case "circle":
             return (
               <circle
+                key={mark.id}
                 {...common}
                 cx={mark.at.x}
                 cy={mark.at.y}
@@ -171,6 +209,7 @@ export default function ReasonFlowDiagram({
           case "line":
             return (
               <line
+                key={mark.id}
                 {...common}
                 x1={mark.a.x}
                 y1={mark.a.y}
@@ -205,6 +244,7 @@ export default function ReasonFlowDiagram({
               );
             return (
               <path
+                key={mark.id}
                 {...common}
                 d={mark.d}
                 stroke={colour}
@@ -217,10 +257,11 @@ export default function ReasonFlowDiagram({
           case "dot":
             return (
               <circle
+                key={mark.id}
                 {...common}
                 cx={mark.at.x}
                 cy={mark.at.y}
-                r={mark.stage === "base" ? 3 : 4}
+                r={selected ? 6.5 : mark.stage === "base" ? 3 : 4}
                 fill={colour}
               />
             );

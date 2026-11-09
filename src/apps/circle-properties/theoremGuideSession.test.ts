@@ -10,6 +10,30 @@ import { getGuideCase } from "./theoremCaseBank";
 import { reasonMeasurements } from "./reasonExploration";
 
 describe("theorem practice history", () => {
+  it("keeps the single-chord and intersection predictions independent across visits", () => {
+    const oldGuide = restoreGuide("r3", { stage: 2, prediction: 1 })!;
+    expect(oldGuide.secondChordShown).toBe(false);
+    expect(oldGuide.intersectionPrediction).toBeNull();
+    const twoChords = restoreGuide("r3", {
+      ...oldGuide,
+      secondChordShown: true,
+      intersectionPrediction: 0,
+    })!;
+    expect(twoChords).toMatchObject({
+      stage: 2,
+      prediction: 1,
+      intersectionPrediction: 0,
+      secondChordShown: true,
+    });
+    expect(
+      restoreGuide("r3", { ...twoChords, intersectionPrediction: 7 })
+        ?.intersectionPrediction,
+    ).toBeNull();
+    expect(startGuide("r3").intersectionPrediction).toBeNull();
+    expect(restoreGuide("r4", twoChords)).not.toHaveProperty(
+      "secondChordShown",
+    );
+  });
   it("restores an earlier student's active card, answers and writing without inferring a written reason", () => {
     const restored = restoreGuide("r4", {
       stage: 4,

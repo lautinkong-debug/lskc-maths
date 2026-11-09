@@ -1,4 +1,5 @@
 import type { DragKey } from "./geometry";
+export { vocabularyView } from "./reasonVocabulary";
 import { placeDiagramLabel, type LayoutBox } from "./diagramLayout";
 import {
   FLOW_CENTRE,
@@ -104,13 +105,15 @@ export const reasonFlow: Record<string, ReasonFlow> = {
     contrast: "Start with equal curved arcs; obtain equal straight chords.",
   },
   r16: {
-    startingFact: "The corresponding centre angles are θ and φ.",
+    startingFact:
+      "In this circle, the turn at O for arc AB is θ. The turn at O for arc CD is φ.",
     resultFact: "Arc AB : arc CD = θ : φ.",
     contrast:
       "Use the ratio of angles at O. This is an arc-length ratio, not a chord-length ratio.",
   },
   r17: {
-    startingFact: "The corresponding circumference angles are θ and φ.",
+    startingFact:
+      "∠APB = θ intercepts arc AB. ∠CQD = φ intercepts arc CD in the same circle.",
     resultFact: "Arc AB : arc CD = θ : φ.",
     contrast:
       "Use the ratio of angles at P and Q. Each intercepted arc excludes its own angle vertex.",
@@ -130,7 +133,7 @@ type MarkBase = { id: string; stage: FlowStage };
 export type FlowMark = MarkBase &
   (
     | { kind: "line"; a: FlowPoint; b: FlowPoint; dashed?: boolean }
-    | { kind: "path"; d: string }
+    | { kind: "path"; d: string; vertex?: FlowPoint }
     | { kind: "circle"; at: FlowPoint; radius: number }
     | { kind: "dot"; at: FlowPoint }
     | {
@@ -313,6 +316,7 @@ export function buildReasonFlow(
       id,
       kind: "path",
       stage,
+      vertex: at,
       d: `M ${at.x + u.x} ${at.y + u.y} l ${v.x} ${v.y} l ${-u.x} ${-u.y}`,
     });
   };
@@ -342,6 +346,7 @@ export function buildReasonFlow(
       id,
       kind: "path",
       stage,
+      vertex: at,
       d: `M ${pa.x} ${pa.y} A ${radius} ${radius} 0 ${Math.abs(sweep) > Math.PI ? 1 : 0} ${sweep > 0 ? 1 : 0} ${pb.x} ${pb.y}`,
     });
     const label = polar(begin + sweep / 2, radius + 20);

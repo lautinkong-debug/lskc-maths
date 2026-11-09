@@ -10,6 +10,14 @@ Review locally at `http://127.0.0.1:3391/`. On this computer, `out/review/Start-
 
 The full unit suite passed 2,798 tests. Twenty browser checks covered form navigation, catalogue filters and return links, mobile keyboard navigation, Circle Lab loading without Firebase, interrupted downloads and simulated iPad lesson layouts. At 390, 820 and 1440 pixels, the homepage and F5 page both fitted the viewport.
 
+### Circle Lab teacher and pupil review, 16.3–16.16
+
+- In 16.3 choose **Predict → Add a second chord**. Students can turn two non-parallel chords, predict the centre, then reveal the intersection of the perpendicular bisectors. The two predictions and the dragged construction are saved separately.
+- Words now identifies the relevant parts for all 42 vocabulary tags. Students can trace the selected angle rays, vertex and shaded turn, or select an arc, mid-point or perpendicular to highlight its own marks. In 16.9 a separate diameter example lets pupils learn the word before they deduce which chord is a diameter.
+- Investigation instructions sit immediately above the diagram. After a correct prediction students can return directly to the diagram. Teachers can hide and reveal its conclusion marks while retaining the given marks.
+- Verified 2,823 unit tests and all 19 guided browser scenarios, including 16.6 vocabulary changes at phone and projector sizes. A separate phone walkthrough exercised incorrect answers and retries in each of the 14 lessons. No live deployment.
+- The final local website and standalone classroom page passed four further 16.3 touch checks on simulated phone and iPad screens. They covered dragging, labels, the unique crossing, saved answers and offline classroom interaction after loading.
+
 - 09/11/2026 · Added Classroom Games to Web Apps. Five StudyBot players accept the school's maths practice bank or a teacher's imported questions. INK-Shoot opens the original game with its built-in questions, with a separate StudyBot link for teachers.
 
 ## Circle Lab guided lessons for 16.3–16.17 (local preview, 07/11/2026)

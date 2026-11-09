@@ -19,8 +19,22 @@ export type GuidedReasonId =
 
 type Triple = [string, string, string];
 type Choice = { options: Triple; answer: 0 | 1 | 2; feedback: Triple };
+export const bisectorIntersection: Choice & { question: string } = {
+  question: "Where is the centre of this circle?",
+  options: [
+    "At N, the mid-point of AB",
+    "At M, the mid-point of CD",
+    "Where the two perpendicular bisectors meet",
+  ],
+  answer: 2,
+  feedback: [
+    "N marks the middle of AB. Trace the bisector of CD as well. Which point belongs to both bisectors?",
+    "M marks the middle of CD. Trace the bisector of AB as well. Where do the two lines cross?",
+    "Yes. The centre lies on the perpendicular bisector of each chord. Their intersection is the centre O.",
+  ],
+};
 type Case = Choice & { given: string; target: string };
-type Term = { term: string; meaning: string; marks?: string[] };
+type Term = { term: string; meaning: string; marks: string[] };
 export type TheoremLesson = {
   title: string;
   terms: Term[];
@@ -35,40 +49,52 @@ export type TheoremLesson = {
 const chord: Term = {
   term: "Chord",
   meaning: "Trace the straight segment joining A and B on the circle.",
-  marks: ["chord-AB"],
+  marks: ["chord-AB", "point-A", "point-B"],
 };
 const perpendicularDistance: Term = {
-  term: "Distance from a point to a chord",
+  term: "Perpendicular distance",
   meaning:
-    "Trace OM from O to AB. The square at M tells you this is the shortest distance.",
-  marks: ["distance-OM", "right-angle-M"],
+    "Trace OM from the centre O to chord AB. The right angle at M makes OM the shortest distance from O to AB.",
+  marks: ["distance-OM", "right-angle-M", "point-O", "point-M"],
 };
 const centreAngle: Term = {
   term: "Angle at the centre",
-  meaning: "Trace AO, then OB. The middle letter in ∠AOB names the vertex O.",
+  meaning:
+    "Trace AO, turn at O, then follow OB. The middle letter in ∠AOB names the vertex O.",
+  marks: ["radius-OA", "radius-OB", "angle-AOB", "point-O", "label-O"],
 };
 const minorArc: Term = {
   term: "Minor arc",
   meaning: "Follow the shorter curved path from A to B around the circle.",
+  marks: ["arc-AB", "point-A", "point-B"],
 };
 const circumferenceAngle: Term = {
   term: "Angle at the circumference",
   meaning: "Trace AP, then PB. The vertex P of ∠APB is on the circle.",
-  marks: ["PA", "PB"],
+  marks: ["PA", "PB", "angle-P", "point-P", "label-P"],
 };
 const diameter: Term = {
   term: "Diameter",
-  meaning: "A chord through the centre. Both ends are on the circle.",
+  meaning:
+    "Follow the straight segment from A through the centre O to B. Both endpoints lie on the circle.",
+  marks: ["diameter-AB", "point-A", "point-B", "point-O", "label-O"],
 };
 const circleSize: Term = {
   term: "Equal circles",
   meaning:
-    "Two circles are equal in size when their radii are equal. The diagram uses one circle.",
+    "Each circle here has a radius of 4 cm, so the circles are equal in size. The investigation uses two chords or arcs in one circle.",
+  marks: [
+    "example-rim-1",
+    "example-radius-1",
+    "example-rim-2",
+    "example-radius-2",
+  ],
 };
 const ratio: Term = {
   term: "Arc-length ratio",
   meaning:
     "For arc AB ÷ arc CD, use the curved length from A to B first and the curved length from C to D second.",
+  marks: ["arc-AB", "arc-CD", "point-A", "point-B", "point-C", "point-D"],
 };
 
 /** The two earlier directions reappear when a pupil compares all three chord reasons. */
@@ -106,13 +132,27 @@ export const theoremLessons: Record<GuidedReasonId, TheoremLesson> = {
       {
         term: "Mid-point",
         meaning: "The matching ticks on AN and NB place N halfway along AB.",
-        marks: ["equal-AN", "equal-NB"],
+        marks: [
+          "half-AN",
+          "half-NB",
+          "equal-AN-0",
+          "equal-NB-0",
+          "point-N",
+          "label-N",
+        ],
       },
       {
         term: "Perpendicular bisector",
         meaning:
           "Line ℓ crosses AB at its mid-point and makes a right angle there.",
-        marks: ["line-ell", "right-angle-N"],
+        marks: [
+          "line-ell",
+          "line-name",
+          "equal-AN-0",
+          "equal-NB-0",
+          "right-angle-N",
+          "point-N",
+        ],
       },
     ],
     investigate:
@@ -251,16 +291,21 @@ export const theoremLessons: Record<GuidedReasonId, TheoremLesson> = {
     title: "Follow one arc",
     terms: [
       circumferenceAngle,
-      { ...centreAngle, marks: ["OA", "OB"] },
+      {
+        ...centreAngle,
+        meaning:
+          "Trace AO, then OB. Follow the marked turn at O on the side of the arc that leaves out P. The turn can be reflex.",
+        marks: ["OA", "OB", "angle-O", "point-O", "label-O"],
+      },
       {
         term: "Intercepted arc",
         meaning:
           "Follow arc AB between the two arms of ∠APB, along the part of the circle that leaves out P.",
-        marks: ["same-arc-AB"],
+        marks: ["same-arc-AB", "point-A", "point-B"],
       },
     ],
     investigate:
-      "Drag P along its arc while A and B stay fixed. Trace the highlighted arc with your finger, then trace the angle at O that turns through that arc.",
+      "Drag P along one arc with A and B fixed. Then move P to the other side of chord AB. Trace the intercepted arc each time. Which turn at O follows it?",
     prediction: {
       question:
         "∠APB is θ. How large is the centre angle following the same arc?",
@@ -312,7 +357,14 @@ export const theoremLessons: Record<GuidedReasonId, TheoremLesson> = {
         term: "Same segment",
         meaning:
           "P and Q lie on the circumference on the same side of the line through AB.",
-        marks: ["chord-AB"],
+        marks: [
+          "chord-AB",
+          "same-segment-boundary",
+          "point-P",
+          "point-Q",
+          "label-P",
+          "label-Q",
+        ],
       },
     ],
     investigate:
@@ -361,16 +413,17 @@ export const theoremLessons: Record<GuidedReasonId, TheoremLesson> = {
   r8: {
     title: "Start with a diameter",
     terms: [
-      { ...diameter, marks: ["diameter-AB"] },
+      diameter,
       {
         term: "Semicircle",
         meaning:
-          "Either half of the circumference between the endpoints of a diameter.",
+          "Follow the half-turn from A to B that leaves out C. The diameter divides the circle into two semicircles.",
+        marks: ["semicircular-arc", "diameter-AB", "point-A", "point-B"],
       },
       {
         term: "Angle standing on AB",
         meaning: "Follow CA and CB to find the angle at C.",
-        marks: ["CA", "CB"],
+        marks: ["CA", "CB", "turn-at-C", "point-C", "label-C"],
       },
     ],
     investigate:
@@ -417,10 +470,21 @@ export const theoremLessons: Record<GuidedReasonId, TheoremLesson> = {
       {
         term: "Right angle",
         meaning: "The square at C gives ∠ACB = 90° before you know the centre.",
-        marks: ["right-angle-C"],
+        marks: ["CA", "CB", "right-angle-C", "point-C", "label-C"],
       },
       chord,
-      diameter,
+      {
+        term: "Diameter",
+        meaning:
+          "In this separate example, EF passes through the centre K and has both endpoints on the circle. Look for those features in the investigation.",
+        marks: [
+          "example-diameter-EF",
+          "example-point-E",
+          "example-point-F",
+          "example-point-K",
+          "example-label-K",
+        ],
+      },
     ],
     investigate:
       "Drag C and watch the square move with it. Find the chord opposite that square. Predict where its line will pass when the centre is revealed.",
@@ -461,7 +525,7 @@ export const theoremLessons: Record<GuidedReasonId, TheoremLesson> = {
   },
   r10: {
     title: "From angles to a curved path",
-    terms: [{ ...centreAngle, marks: ["angle-AOB"] }, minorArc, circleSize],
+    terms: [centreAngle, minorArc, circleSize],
     investigate:
       "Drag B to open the two marked angles together. Trace the two shorter curved paths cut off by their arms.",
     prediction: {
@@ -512,7 +576,7 @@ export const theoremLessons: Record<GuidedReasonId, TheoremLesson> = {
   },
   r11: {
     title: "From arcs to a turn",
-    terms: [{ ...minorArc, marks: ["arc-AB"] }, centreAngle, circleSize],
+    terms: [minorArc, centreAngle, circleSize],
     investigate:
       "Follow the two marked arcs along the circumference. Drag A to shorten or lengthen them together. For each arc, trace the radii to its endpoints.",
     prediction: {
@@ -559,7 +623,7 @@ export const theoremLessons: Record<GuidedReasonId, TheoremLesson> = {
   },
   r12: {
     title: "From angles to a straight span",
-    terms: [{ ...centreAngle, marks: ["angle-AOB"] }, chord, circleSize],
+    terms: [centreAngle, chord, circleSize],
     investigate:
       "Drag B to change the two equal centre angles. Now trace the straight segments AB and CD with your finger. Predict how the spans compare.",
     prediction: {
@@ -702,7 +766,7 @@ export const theoremLessons: Record<GuidedReasonId, TheoremLesson> = {
   },
   r15: {
     title: "From arcs to straight spans",
-    terms: [{ ...minorArc, marks: ["arc-AB"] }, chord, circleSize],
+    terms: [minorArc, chord, circleSize],
     investigate:
       "Trace the equal curved arcs. Drag A to make them smaller. Join each pair of arc endpoints with a straight segment and compare the spans.",
     prediction: {
@@ -749,8 +813,36 @@ export const theoremLessons: Record<GuidedReasonId, TheoremLesson> = {
   r16: {
     title: "Compare turns at the centre",
     terms: [
-      { ...centreAngle, marks: ["angle-AOB", "angle-COD"] },
-      minorArc,
+      {
+        term: "Centre angle for arc AB",
+        meaning:
+          "Start on OA, follow the marked turn to OB, then trace the corresponding curved arc AB. A reflex turn sweeps the longer arc.",
+        marks: [
+          "radius-OA",
+          "radius-OB",
+          "angle-AOB",
+          "point-O",
+          "label-O",
+          "arc-AB",
+          "point-A",
+          "point-B",
+        ],
+      },
+      {
+        term: "Centre angle for arc CD",
+        meaning:
+          "Start on OC and follow the marked turn to OD. Its endpoints select arc CD. Keep this angle and its arc together.",
+        marks: [
+          "radius-OC",
+          "radius-OD",
+          "angle-COD",
+          "point-O",
+          "label-O",
+          "arc-CD",
+          "point-C",
+          "point-D",
+        ],
+      },
       ratio,
     ],
     investigate:
@@ -810,7 +902,7 @@ export const theoremLessons: Record<GuidedReasonId, TheoremLesson> = {
         term: "The arc seen by an angle",
         meaning:
           "For ∠APB, follow arc AB on the side that leaves out P. For ∠CQD, follow arc CD on the side that leaves out Q.",
-        marks: ["PA", "PB", "QC", "QD"],
+        marks: ["arc-AB", "arc-CD", "PA", "PB", "QC", "QD"],
       },
       ratio,
     ],

@@ -9,6 +9,7 @@ export default defineConfig({
     "circle-ipad.spec.ts",
     "circle-guided-lessons.spec.ts",
     "circle-site-load.spec.ts",
+    "circle-two-chords.spec.ts",
   ],
   globalSetup: "./tests/e2e/global-setup.ts",
   fullyParallel: false,

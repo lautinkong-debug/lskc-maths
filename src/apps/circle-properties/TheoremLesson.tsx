@@ -12,6 +12,7 @@ import MeasurementList from "./MeasurementList";
 import InkToolbar from "./InkToolbar";
 import { useInkBoard } from "./useInkBoard";
 import ReasonFlowDiagram from "./ReasonFlowDiagram";
+import TwoBisectorsDiagram from "./TwoBisectorsDiagram";
 import { proofLineHints } from "./ReasonProofLines";
 import ReasonLabel from "./ReasonLabel";
 import {
@@ -20,7 +21,11 @@ import {
   type ReasonParameters,
 } from "./reasonExploration";
 import { reasonFlow, reasonResultFact } from "./reasonFlow";
-import { theoremLessons, type GuidedReasonId } from "./theoremLessonData";
+import {
+  bisectorIntersection,
+  theoremLessons,
+  type GuidedReasonId,
+} from "./theoremLessonData";
 import {
   anotherGuideShape,
   guideSteps,
@@ -203,9 +208,11 @@ function LessonActivity({
   const [penOpen, setPenOpen] = useState(false);
   const [focus, setFocus] = useState(false);
   const [showLines, setShowLines] = useState(false);
+  const [hideConclusion, setHideConclusion] = useState(false);
   const [confirmRestart, setConfirmRestart] = useState(false);
   const caseHeading = useRef<HTMLHeadingElement>(null);
   const lessonPanel = useRef<HTMLElement>(null);
+  const board = useRef<HTMLDivElement>(null);
   const lesson = theoremLessons[id];
   const reason = reasonById(id);
   const termInfo = lesson.terms[term];
@@ -214,17 +221,45 @@ function LessonActivity({
   const proofReason = writtenReasonQuestion(id);
   const currentCase = stage === 3 ? transfer : lesson.write;
   const answer = attempt.selected;
-  const predicted = prediction === lesson.prediction.answer;
+  const comparingChords =
+    id === "r3" && stage === 2 && !!progress.secondChordShown;
+  const question = comparingChords ? bisectorIntersection : lesson.prediction;
+  const selectedPrediction = comparingChords
+    ? (progress.intersectionPrediction ?? null)
+    : prediction;
+  const predicted = selectedPrediction === question.answer;
+  const reveal = stage === 2 && predicted && !hideConclusion;
   const complete =
     written === lesson.write.answer && writtenReason === proofReason.answer;
+  function showBoardOnPhone() {
+    if (!window.matchMedia("(max-width: 760px)").matches) return;
+    requestAnimationFrame(() => {
+      const node = board.current;
+      if (!node) return;
+      const top = node.getBoundingClientRect().top;
+      if (top < 0 || top > window.innerHeight / 3) {
+        node.focus({ preventScroll: true });
+        node.scrollIntoView({ block: "start" });
+      }
+    });
+  }
+  function chooseTerm(next: number) {
+    update({ term: next });
+    showBoardOnPhone();
+  }
   const step = (next: number) => {
+    setHideConclusion(false);
     setShowLines(false);
     setConfirmRestart(false);
     if (next >= 2) setFocus(false);
     update({ stage: next });
+    if (next === 0 || next === 1) showBoardOnPhone();
   };
   const changeShape = (next: ReasonParameters) =>
-    update({ shape: normaliseReasonParameters(id, next) });
+    update({
+      shape: normaliseReasonParameters(id, next),
+      exploredChords: undefined,
+    });
   const termFinished = term === lesson.terms.length - 1;
   function changeCase(direction: "previous" | "next" | "similar") {
     setProgress((previous) =>
@@ -241,6 +276,7 @@ function LessonActivity({
     });
   }
   function restart() {
+    setHideConclusion(false);
     ink.reset();
     setPenOpen(false);
     setFocus(false);
@@ -263,6 +299,7 @@ function LessonActivity({
         className={s.lesson}
         data-focused={focus}
         data-testid="theorem-lesson"
+        data-step={stage}
         data-reason={id}
         data-case-reason={stage === 3 ? attempt.id : undefined}
         data-case-variant={stage === 3 ? attempt.variant : undefined}
@@ -290,7 +327,13 @@ function LessonActivity({
           </div>
         </nav>
 
-        <div className={s.board} role="region" aria-label={c.boardLabel}>
+        <div
+          ref={board}
+          tabIndex={-1}
+          className={s.board}
+          role="region"
+          aria-label={c.boardLabel}
+        >
           {stage < 3 ? (
             <>
               <div className={s.boardTools}>
@@ -313,47 +356,80 @@ function LessonActivity({
                   {focus ? circleCopy.unfocus : circleCopy.focus}
                 </button>
               </div>
-              <h4 className={s.boardTitle}>
-                {stage === 0
-                  ? c.findParts
-                  : stage === 1
-                    ? c.changeShape
-                    : predicted
-                      ? c.readMarks
-                      : c.predict}
-              </h4>
-              <ReasonFlowDiagram
-                reasonId={id}
-                reveal={stage === 2 && predicted}
-                parameters={shape}
-                onChange={stage > 0 ? changeShape : undefined}
-                trails={stage > 0 && firstLine ? [firstLine] : undefined}
-                focusMarks={stage === 0 ? termInfo.marks : undefined}
-                proofLines={stage === 2 && predicted && showLines}
-                ink={ink}
-              />
+              <div className={s.boardCaption}>
+                <h4 className={s.boardTitle}>
+                  {stage === 0 ? (
+                    <MathText>{termInfo.term}</MathText>
+                  ) : stage === 1 ? (
+                    <MathText>{lesson.investigate}</MathText>
+                  ) : comparingChords ? (
+                    <MathText>
+                      {predicted ? c.centreLocated : c.compareBisectors}
+                    </MathText>
+                  ) : predicted ? (
+                    c.readMarks
+                  ) : (
+                    c.predict
+                  )}
+                </h4>
+                {id === "r3" && stage === 2 && (
+                  <button
+                    type="button"
+                    className={s.secondChordButton}
+                    onClick={() => {
+                      setShowLines(false);
+                      setHideConclusion(false);
+                      update({ secondChordShown: !comparingChords });
+                    }}
+                  >
+                    {comparingChords ? c.showOneChord : c.addSecondChord}
+                  </button>
+                )}
+              </div>
+              {stage === 0 && (
+                <p className={s.wordCue} aria-live="polite">
+                  <MathText>{termInfo.meaning}</MathText>
+                </p>
+              )}
+              {comparingChords ? (
+                <TwoBisectorsDiagram
+                  first={progress.exploredChords?.first ?? shape}
+                  other={progress.exploredChords?.second ?? firstLine}
+                  reveal={reveal}
+                  ink={ink}
+                  onMove={(first, second) =>
+                    update({ exploredChords: { first, second } })
+                  }
+                />
+              ) : (
+                <ReasonFlowDiagram
+                  reasonId={id}
+                  reveal={reveal}
+                  parameters={shape}
+                  onChange={stage > 0 ? changeShape : undefined}
+                  trails={stage === 1 && firstLine ? [firstLine] : undefined}
+                  focusMarks={stage === 0 ? termInfo.marks : undefined}
+                  focusLabel={stage === 0 ? termInfo.term : undefined}
+                  proofLines={reveal && showLines}
+                  ink={ink}
+                />
+              )}
               {stage === 0 ? (
                 <div className={s.tag} aria-live="polite">
                   <span>{c.termCount(term + 1, lesson.terms.length)}</span>
-                  <strong>
-                    <MathText>{termInfo.term}</MathText>
-                  </strong>
-                  <p>
-                    <MathText>{termInfo.meaning}</MathText>
-                  </p>
                   {focus && (
                     <div className={s.actions}>
                       <button
                         disabled={term === 0}
                         type="button"
-                        onClick={() => update({ term: term - 1 })}
+                        onClick={() => chooseTerm(term - 1)}
                       >
                         {c.previousTag}
                       </button>
                       <button
                         type="button"
                         onClick={() =>
-                          termFinished ? step(1) : update({ term: term + 1 })
+                          termFinished ? step(1) : chooseTerm(term + 1)
                         }
                       >
                         {termFinished ? c.investigateNext : c.nextTag}
@@ -362,67 +438,92 @@ function LessonActivity({
                   )}
                 </div>
               ) : (
-                <div className={s.boardFoot}>
-                  <span>
-                    {predicted && stage === 2 ? c.revealedKey : c.givenKey}
-                  </span>
-                  {stage === 2 && predicted && proofLineHints[id] && (
-                    <div className={s.shapeActions}>
-                      <button
-                        type="button"
-                        aria-pressed={showLines}
-                        onClick={() => setShowLines(!showLines)}
-                      >
-                        {showLines ? c.hideLines : c.showLines}
-                      </button>
-                      {showLines && (
-                        <p>
-                          <MathText>{proofLineHints[id]}</MathText>
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  {stage === 1 && (
-                    <div className={s.shapeActions}>
-                      {id === "r3" && (
+                (!comparingChords || focus || predicted) && (
+                  <div className={s.boardFoot}>
+                    {!comparingChords && (
+                      <span>{reveal ? c.revealedKey : c.givenKey}</span>
+                    )}
+                    {stage === 2 && predicted && id !== "r17" && (
+                      <div className={s.shapeActions}>
                         <button
                           type="button"
-                          onClick={() => update({ firstLine: shape })}
+                          aria-pressed={reveal}
+                          onClick={() => {
+                            setHideConclusion(!hideConclusion);
+                            setShowLines(false);
+                          }}
                         >
-                          {firstLine ? c.replaceLine : c.keepLine}
+                          {reveal
+                            ? c.hideConclusionMarks
+                            : c.showConclusionMarks}
                         </button>
-                      )}
+                      </div>
+                    )}
+                    {reveal && !comparingChords && proofLineHints[id] && (
+                      <div className={s.shapeActions}>
+                        <button
+                          type="button"
+                          aria-pressed={showLines}
+                          onClick={() => setShowLines(!showLines)}
+                        >
+                          {showLines ? c.hideLines : c.showLines}
+                        </button>
+                        {showLines && (
+                          <p>
+                            <MathText>{proofLineHints[id]}</MathText>
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {stage === 1 && (
+                      <div className={s.shapeActions}>
+                        {id === "r3" && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              update({
+                                firstLine: shape,
+                                exploredChords: undefined,
+                              })
+                            }
+                          >
+                            {firstLine ? c.replaceLine : c.keepLine}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            changeShape(anotherGuideShape(id, shape))
+                          }
+                        >
+                          {c.anotherShape}
+                        </button>
+                        {focus && (
+                          <button type="button" onClick={() => step(2)}>
+                            {c.predictionNext}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    {focus && stage === 2 && !predicted && (
                       <button
                         type="button"
-                        onClick={() =>
-                          changeShape(anotherGuideShape(id, shape))
-                        }
+                        onClick={() => {
+                          setFocus(false);
+                          requestAnimationFrame(() =>
+                            lessonPanel.current
+                              ?.querySelector<HTMLButtonElement>(
+                                "[data-choice]",
+                              )
+                              ?.focus(),
+                          );
+                        }}
                       >
-                        {c.anotherShape}
+                        {c.answerPrediction}
                       </button>
-                      {focus && (
-                        <button type="button" onClick={() => step(2)}>
-                          {c.predictionNext}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                  {focus && stage === 2 && !predicted && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFocus(false);
-                        requestAnimationFrame(() =>
-                          lessonPanel.current
-                            ?.querySelector<HTMLButtonElement>("[data-choice]")
-                            ?.focus(),
-                        );
-                      }}
-                    >
-                      {c.answerPrediction}
-                    </button>
-                  )}
-                </div>
+                    )}
+                  </div>
+                )
               )}
             </>
           ) : (
@@ -477,7 +578,7 @@ function LessonActivity({
                     type="button"
                     key={item.term}
                     aria-pressed={term === index}
-                    onClick={() => update({ term: index })}
+                    onClick={() => chooseTerm(index)}
                   >
                     <MathText>{item.term}</MathText>
                   </button>
@@ -486,9 +587,7 @@ function LessonActivity({
               <button
                 type="button"
                 className={s.primary}
-                onClick={() =>
-                  termFinished ? step(1) : update({ term: term + 1 })
-                }
+                onClick={() => (termFinished ? step(1) : chooseTerm(term + 1))}
               >
                 {termFinished ? c.investigateNext : c.nextTag}
               </button>
@@ -502,9 +601,6 @@ function LessonActivity({
                   <MathText>{reasonFlow[id].startingFact}</MathText>
                 </p>
               </div>
-              <p>
-                <MathText>{lesson.investigate}</MathText>
-              </p>
               <details className={s.readings}>
                 <summary>{c.readings}</summary>
                 <p>{c.readingHint}</p>
@@ -525,22 +621,44 @@ function LessonActivity({
           {stage === 2 && (
             <>
               <Choices
-                question={lesson.prediction}
-                prompt={lesson.prediction.question}
-                selected={prediction}
-                onAnswer={(next) => update({ prediction: next })}
+                key={comparingChords ? "two-chord" : "one-case"}
+                question={question}
+                prompt={question.question}
+                selected={selectedPrediction}
+                onAnswer={(next) =>
+                  update(
+                    comparingChords
+                      ? { intersectionPrediction: next }
+                      : { prediction: next },
+                  )
+                }
               />
               {predicted && (
                 <>
-                  <div className={s.proof}>
-                    <b>{c.therefore}</b>
-                    <p>
-                      <MathText>{reasonResultFact(id, shape)}</MathText>
-                    </p>
-                    <p>
-                      <MathText>{lesson.explanation}</MathText>
-                    </p>
-                  </div>
+                  {!comparingChords && (
+                    <div className={s.proof}>
+                      <b>{c.therefore}</b>
+                      <p>
+                        <MathText>{reasonResultFact(id, shape)}</MathText>
+                      </p>
+                      <p>
+                        <MathText>{lesson.explanation}</MathText>
+                      </p>
+                    </div>
+                  )}
+                  {id !== "r17" && (
+                    <button
+                      type="button"
+                      className={s.diagramJump}
+                      onClick={() => {
+                        setHideConclusion(false);
+                        board.current?.focus({ preventScroll: true });
+                        board.current?.scrollIntoView({ block: "start" });
+                      }}
+                    >
+                      {comparingChords ? c.findIntersection : c.seeConclusion}
+                    </button>
+                  )}
                   <button
                     type="button"
                     className={s.primary}

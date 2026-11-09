@@ -31,6 +31,53 @@ async function openTopic(page: Page, topic: string) {
   await page.getByRole("button", { name: topic, exact: true }).click();
 }
 
+for (const [screen, viewport] of [
+  ["phone", { width: 390, height: 844 }],
+  ["projector", { width: 1366, height: 768 }],
+] as const) {
+  test(`16.6 vocabulary highlights the angle at its own vertex on a ${screen}`, async ({
+    page,
+  }) => {
+    await page.setViewportSize(viewport);
+    await openTopic(page, "Centre and circumference angles");
+    const guide = page.getByTestId("theorem-lesson");
+    const diagram = guide.getByTestId("reason-flow-r6");
+    const next = guide.getByRole("button", { name: /Show the next tag/ });
+    for (const [vertex, arms] of [
+      ["P", ["PA", "PB"]],
+      ["O", ["OA", "OB"]],
+    ] as const) {
+      const sector = diagram.locator(`[data-term-sector="angle-${vertex}"]`);
+      await expect(sector).toBeVisible();
+      await expect(
+        diagram.locator(`[data-mark="point-${vertex}"]`),
+      ).toHaveAttribute("data-term-part", "selected");
+      for (const arm of arms) {
+        const ray = diagram.locator(`[data-mark="${arm}"]`);
+        await expect(ray).toHaveAttribute("data-term-part", "selected");
+        const weight = await ray.evaluate((line) =>
+          parseFloat(getComputedStyle(line).strokeWidth),
+        );
+        const context = await diagram
+          .locator('[data-mark="circle"]')
+          .evaluate((circle) =>
+            parseFloat(getComputedStyle(circle).strokeWidth),
+          );
+        expect(weight).toBeGreaterThanOrEqual(context * 2);
+      }
+      await expect(diagram).not.toContainText("2θ");
+      await next.click();
+    }
+    await expect(diagram.locator('[data-mark="same-arc-AB"]')).toHaveAttribute(
+      "data-term-part",
+      "selected",
+    );
+    await expect(diagram.locator("[data-term-sector]")).toHaveCount(0);
+    await guide.getByRole("button", { name: "Predict", exact: true }).click();
+    await expect(diagram.locator('[data-stage="result"]')).toHaveCount(0);
+  });
+}
+
 for (const topic of topics) {
   for (const id of topic.ids) {
     test(
@@ -78,6 +125,24 @@ for (const topic of topics) {
         await expect(
           svg.locator('[data-stage="result"]').first(),
         ).toBeVisible();
+        if (id !== "r17") {
+          await guide
+            .getByRole("button", { name: "Hide conclusion marks" })
+            .click();
+          await expect(svg.locator('[data-stage="result"]')).toHaveCount(0);
+          await guide
+            .getByRole("button", { name: "Show conclusion marks" })
+            .click();
+          await expect(
+            svg.locator('[data-stage="result"]').first(),
+          ).toBeVisible();
+          await guide
+            .getByRole("button", { name: "See the conclusion on the diagram" })
+            .click();
+          await expect(
+            guide.getByRole("region", { name: "Guided lesson board" }),
+          ).toBeFocused();
+        }
         if (["r3", "r4", "r5", "r6", "r7", "r8", "r9", "r17"].includes(id)) {
           await expect(svg.locator("[data-proof-guide]")).toHaveCount(0);
           await guide.getByRole("button", { name: "Show proof lines" }).click();

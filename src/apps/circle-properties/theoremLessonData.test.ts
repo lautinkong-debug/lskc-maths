@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { reasons } from "./content";
-import { buildReasonFlow, visibleReasonMarks } from "./reasonFlow";
+import { buildReasonFlow, vocabularyView } from "./reasonFlow";
 import {
   chordComparisonChecks,
   theoremLessons,
@@ -15,22 +15,18 @@ describe("guided circle lessons", () => {
   });
 
   it.each(ids)(
-    "%s highlights only visible givens and uses a fresh written case",
+    "%s illustrates every selected term without showing conclusion markings and uses a fresh written case",
     (id) => {
       const lesson = theoremLessons[id];
       const diagram = buildReasonFlow(id);
-      const givenMarks = visibleReasonMarks(diagram, false).map(
-        (mark) => mark.id,
-      );
       for (const term of lesson.terms) {
-        for (const prefix of term.marks ?? []) {
-          expect(
-            givenMarks.some(
-              (mark) => mark === prefix || mark.startsWith(prefix + "-"),
-            ),
-            prefix,
-          ).toBe(true);
-        }
+        const view = vocabularyView(diagram, term.marks);
+        expect(view.selected.size, term.term).toBeGreaterThan(0);
+        const visibleIds = new Set(view.marks.map((mark) => mark.id));
+        for (const id of view.selected)
+          expect(visibleIds.has(id), id).toBe(true);
+        expect(visibleIds.size).toBe(view.marks.length);
+        expect(view.marks.some((mark) => mark.stage === "result")).toBe(false);
       }
       expect(diagram.marks.some((mark) => mark.stage === "result")).toBe(true);
       expect(lesson.write.given).not.toBe(lesson.check.given);

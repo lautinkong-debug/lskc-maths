@@ -33,6 +33,9 @@ export type GuideProgress = {
   term: number;
   shape: ReasonParameters;
   firstLine?: ReasonParameters;
+  secondChordShown?: boolean;
+  intersectionPrediction?: number | null;
+  exploredChords?: { first: ReasonParameters; second: ReasonParameters };
   prediction: number | null;
   history: CaseAttempt[];
   cursor: number;
@@ -49,6 +52,10 @@ export function startGuide(id: GuidedReasonId): GuideProgress {
     stage: 0,
     term: 0,
     shape,
+    ...(id === "r3" && {
+      secondChordShown: false,
+      intersectionPrediction: null,
+    }),
     prediction: null,
     history: [newAttempt(family[Math.floor(Math.random() * family.length)])],
     cursor: 0,
@@ -178,6 +185,10 @@ export function restoreGuide(
   if (!raw || typeof raw !== "object") return;
   const saved = raw as Partial<GuideProgress>;
   const fresh = startGuide(id);
+  const first =
+    id === "r3" && parseReasonParameters(id, saved.exploredChords?.first);
+  const second =
+    id === "r3" && parseReasonParameters(id, saved.exploredChords?.second);
   return {
     stage: indexIn(saved.stage, guideSteps.length) ? saved.stage! : 0,
     term: indexIn(saved.term, theoremLessons[id].terms.length)
@@ -186,6 +197,11 @@ export function restoreGuide(
     shape: parseReasonParameters(id, saved.shape) ?? fresh.shape,
     firstLine:
       id === "r3" ? parseReasonParameters(id, saved.firstLine) : undefined,
+    ...(id === "r3" && {
+      secondChordShown: saved.secondChordShown === true,
+      intersectionPrediction: choice(saved.intersectionPrediction),
+      ...(first && second && { exploredChords: { first, second } }),
+    }),
     prediction: choice(saved.prediction),
     written: choice(saved.written),
     ...restoreAttempts(id, saved, fresh),

@@ -1,0 +1,114 @@
+.construction {
+  min-width: 0;
+}
+.diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 390px;
+}
+.first {
+  color: #2454c6;
+}
+.second {
+  color: #833c85;
+}
+.chord {
+  stroke: #586d84;
+  stroke-width: 2;
+}
+.bisector,
+.tick,
+.square {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+.tick {
+  stroke-width: 2.8;
+}
+.halo {
+  fill: none;
+  stroke: white;
+  stroke-width: 6;
+  stroke-linejoin: round;
+}
+.point {
+  fill: #233f63;
+}
+.answer {
+  fill: #137044;
+}
+.answer circle {
+  stroke: white;
+  stroke-width: 2;
+}
+.letter {
+  font:
+    italic 600 21px Cambria,
+    Georgia,
+    serif;
+  paint-order: stroke;
+  stroke: white;
+  stroke-width: 4;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.handle {
+  cursor: grab;
+  outline: none;
+  touch-action: none;
+}
+.handle:active {
+  cursor: grabbing;
+}
+.ring {
+  fill: transparent;
+  stroke: #2454c6;
+  stroke-width: 1.7;
+}
+.handle[data-midpoint="M"] .ring {
+  stroke: #833c85;
+}
+.handle:hover .ring,
+.handle:focus-visible .ring {
+  stroke-width: 3;
+  fill: #f1cd4538;
+}
+.hint {
+  margin: 0 0.85rem 0.25rem;
+  text-align: center;
+  color: #354b65;
+  font-size: 0.88rem;
+}
+.sliders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  padding: 0.25rem 1rem 0.6rem;
+}
+.sliders label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1 1 155px;
+  min-width: 0;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+.sliders input {
+  accent-color: currentColor;
+  color: inherit;
+  flex: 1;
+  min-width: 42px;
+  width: 4.4rem;
+  height: 44px;
+}
+@media (max-width: 700px) {
+  .hit {
+    r: 34px;
+  }
+}
