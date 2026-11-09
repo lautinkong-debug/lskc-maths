@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { sessionPrefix } from "../../src/apps/circle-properties/session";
 
 const lesson = "/apps/circle-properties";
 const question = "Where is the centre of this circle?";
@@ -71,7 +72,7 @@ async function assertDiagramLabels(diagram: Locator, names: string[]) {
   const boxes = await diagram.locator("text").evaluateAll(
     (text, labels) =>
       text.flatMap((tag) => {
-        const name = tag.textContent?.trim();
+        const name = tag.closest("[data-point]")?.getAttribute("data-point");
         if (!name || !labels.includes(name)) return [];
         const { x, y, width, height } = tag.getBoundingClientRect();
         return [{ name, x, y, width, height }];
@@ -96,6 +97,36 @@ async function assertDiagramLabels(diagram: Locator, names: string[]) {
   }
 }
 
+async function assertVisibleIntersection(diagram: Locator) {
+  await expect(diagram.locator('[data-point="O"] text')).toHaveText(
+    /Centre\s*O/,
+  );
+  await assertConstruction(diagram);
+  const offsets = await diagram.evaluate((root) => {
+    const centre = root.querySelector(
+      '[data-point="O"] circle',
+    ) as SVGCircleElement;
+    const circle = root.querySelector("svg > circle") as SVGCircleElement;
+    const x = centre.cx.baseVal.value,
+      y = centre.cy.baseVal.value;
+    const outside = Math.hypot(
+      x - circle.cx.baseVal.value,
+      y - circle.cy.baseVal.value,
+    );
+    const distances = [
+      ...root.querySelectorAll<SVGLineElement>("[data-bisector]"),
+    ].map((line) => {
+      const a = line.x1.baseVal.value,
+        b = line.y1.baseVal.value;
+      const dx = line.x2.baseVal.value - a,
+        dy = line.y2.baseVal.value - b;
+      return Math.abs(dx * (y - b) - dy * (x - a)) / Math.hypot(dx, dy);
+    });
+    return [outside, ...distances];
+  });
+  for (const offset of offsets) expect(offset).toBeLessThan(0.01);
+}
+
 for (const [device, viewport] of [
   ["phone", { width: 390, height: 844 }],
   ["iPad", { width: 820, height: 1180 }],
@@ -103,6 +134,82 @@ for (const [device, viewport] of [
   test.describe(device, () => {
     test.use({ viewport, isMobile: true, hasTouch: true });
     for (const path of [lesson, lesson + "/classroom"]) {
+      for (const previous of [false, true]) {
+        test(`16.3 Investigate opens with crossing bisectors (${previous ? "old coincident lines" : "fresh pupil"}) at ${path}`, async ({
+          page,
+        }) => {
+          await page.goto(path);
+          await page.getByRole("button", { name: /^16\.3 ·/ }).tap();
+          const guide = page.getByTestId("theorem-lesson");
+          if (previous) {
+            // Reproduce a pupil's old saved construction in which the two rays overlapped.
+            await page.evaluate((key) => {
+              const shape = { primary: 5, secondary: 0.5, rotation: 23 };
+              localStorage.setItem(
+                key,
+                JSON.stringify({
+                  stage: 1,
+                  term: 0,
+                  shape,
+                  firstLine: shape,
+                  prediction: null,
+                }),
+              );
+            }, sessionPrefix + "guided-theorem-r3-v1");
+            await page.reload();
+          } else {
+            await guide
+              .getByRole("button", { name: "Investigate", exact: true })
+              .tap();
+          }
+          const pair = guide.getByTestId("two-bisectors");
+          await expect(
+            guide.getByRole("button", { name: "Investigate", exact: true }),
+          ).toHaveAttribute("aria-current", "step");
+          await assertVisibleIntersection(pair);
+          if (previous)
+            await expect(pair.getByText(/CD has been turned/)).toBeVisible();
+          const draw = pair.getByRole("button", {
+            name: "Trace the bisectors",
+          });
+          await draw.tap();
+          await expect(pair.locator("[data-trace]")).toHaveCount(2);
+          const bisector = pair.locator('[data-bisector="CD"]');
+          const before = await bisector.getAttribute("x1");
+          await touchMove(page, pair.locator('[data-midpoint="M"]'));
+          await expect.poll(() => bisector.getAttribute("x1")).not.toBe(before);
+          await assertVisibleIntersection(pair);
+          await guide
+            .getByRole("button", { name: "Show one chord", exact: true })
+            .tap();
+          await expect(pair).toHaveCount(0);
+          await expect(guide.getByTestId("reason-flow-r3")).toBeVisible();
+          await guide
+            .getByRole("button", { name: "Show both bisectors", exact: true })
+            .tap();
+          await assertVisibleIntersection(pair);
+          await guide
+            .getByRole("button", { name: "Predict", exact: true })
+            .tap();
+          const answers = guide.getByRole("group", {
+            name: question,
+            exact: true,
+          });
+          await expect(answers).toBeVisible();
+          await expect(pair.locator('[data-point="O"]')).toHaveCount(0);
+          await expect(draw).toHaveCount(0);
+          await answers
+            .getByRole("button")
+            .filter({ hasNotText: correct })
+            .first()
+            .tap();
+          await expect(pair.locator('[data-point="O"]')).toHaveCount(0);
+          await answers
+            .getByRole("button", { name: new RegExp(correct) })
+            .tap();
+          await assertVisibleIntersection(pair);
+        });
+      }
       test(`16.3 locates the centre with two chords at ${path}`, async ({
         page,
       }) => {

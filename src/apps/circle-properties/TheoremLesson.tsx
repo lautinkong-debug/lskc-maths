@@ -209,6 +209,7 @@ function LessonActivity({
   const [focus, setFocus] = useState(false);
   const [showLines, setShowLines] = useState(false);
   const [hideConclusion, setHideConclusion] = useState(false);
+  const [investigateBoth, setInvestigateBoth] = useState(true);
   const [confirmRestart, setConfirmRestart] = useState(false);
   const caseHeading = useRef<HTMLHeadingElement>(null);
   const lessonPanel = useRef<HTMLElement>(null);
@@ -221,8 +222,12 @@ function LessonActivity({
   const proofReason = writtenReasonQuestion(id);
   const currentCase = stage === 3 ? transfer : lesson.write;
   const answer = attempt.selected;
+  const exploringIntersection = id === "r3" && stage === 1 && investigateBoth;
   const comparingChords =
-    id === "r3" && stage === 2 && !!progress.secondChordShown;
+    exploringIntersection ||
+    (id === "r3" && stage === 2 && !!progress.secondChordShown);
+  const activeShape =
+    id === "r3" ? (progress.exploredChords?.first ?? shape) : shape;
   const question = comparingChords ? bisectorIntersection : lesson.prediction;
   const selectedPrediction = comparingChords
     ? (progress.intersectionPrediction ?? null)
@@ -248,11 +253,16 @@ function LessonActivity({
     showBoardOnPhone();
   }
   const step = (next: number) => {
+    if (next === 1) setInvestigateBoth(true);
     setHideConclusion(false);
     setShowLines(false);
     setConfirmRestart(false);
     if (next >= 2) setFocus(false);
-    update({ stage: next });
+    update(
+      id === "r3" && stage === 1 && next === 2
+        ? { stage: next, secondChordShown: investigateBoth }
+        : { stage: next },
+    );
     if (next === 0 || next === 1) showBoardOnPhone();
   };
   const changeShape = (next: ReasonParameters) =>
@@ -276,6 +286,7 @@ function LessonActivity({
     });
   }
   function restart() {
+    setInvestigateBoth(true);
     setHideConclusion(false);
     ink.reset();
     setPenOpen(false);
@@ -361,7 +372,11 @@ function LessonActivity({
                   {stage === 0 ? (
                     <MathText>{termInfo.term}</MathText>
                   ) : stage === 1 ? (
-                    <MathText>{lesson.investigate}</MathText>
+                    <MathText>
+                      {exploringIntersection
+                        ? c.investigateCrossing
+                        : lesson.investigate}
+                    </MathText>
                   ) : comparingChords ? (
                     <MathText>
                       {predicted ? c.centreLocated : c.compareBisectors}
@@ -372,17 +387,24 @@ function LessonActivity({
                     c.predict
                   )}
                 </h4>
-                {id === "r3" && stage === 2 && (
+                {id === "r3" && (stage === 1 || stage === 2) && (
                   <button
                     type="button"
                     className={s.secondChordButton}
                     onClick={() => {
                       setShowLines(false);
                       setHideConclusion(false);
-                      update({ secondChordShown: !comparingChords });
+                      if (stage === 1) setInvestigateBoth(!investigateBoth);
+                      else update({ secondChordShown: !comparingChords });
                     }}
                   >
-                    {comparingChords ? c.showOneChord : c.addSecondChord}
+                    {stage === 1
+                      ? investigateBoth
+                        ? c.investigateOne
+                        : c.investigateBoth
+                      : comparingChords
+                        ? c.showOneChord
+                        : c.addSecondChord}
                   </button>
                 )}
               </div>
@@ -393,9 +415,9 @@ function LessonActivity({
               )}
               {comparingChords ? (
                 <TwoBisectorsDiagram
-                  first={progress.exploredChords?.first ?? shape}
+                  first={activeShape}
                   other={progress.exploredChords?.second ?? firstLine}
-                  reveal={reveal}
+                  reveal={exploringIntersection || reveal}
                   ink={ink}
                   onMove={(first, second) =>
                     update({ exploredChords: { first, second } })
@@ -405,9 +427,8 @@ function LessonActivity({
                 <ReasonFlowDiagram
                   reasonId={id}
                   reveal={reveal}
-                  parameters={shape}
+                  parameters={activeShape}
                   onChange={stage > 0 ? changeShape : undefined}
-                  trails={stage === 1 && firstLine ? [firstLine] : undefined}
                   focusMarks={stage === 0 ? termInfo.marks : undefined}
                   focusLabel={stage === 0 ? termInfo.term : undefined}
                   proofLines={reveal && showLines}
@@ -438,7 +459,7 @@ function LessonActivity({
                   )}
                 </div>
               ) : (
-                (!comparingChords || focus || predicted) && (
+                (!comparingChords || focus || (stage === 2 && predicted)) && (
                   <div className={s.boardFoot}>
                     {!comparingChords && (
                       <span>{reveal ? c.revealedKey : c.givenKey}</span>
@@ -477,27 +498,16 @@ function LessonActivity({
                     )}
                     {stage === 1 && (
                       <div className={s.shapeActions}>
-                        {id === "r3" && (
+                        {!exploringIntersection && (
                           <button
                             type="button"
                             onClick={() =>
-                              update({
-                                firstLine: shape,
-                                exploredChords: undefined,
-                              })
+                              changeShape(anotherGuideShape(id, activeShape))
                             }
                           >
-                            {firstLine ? c.replaceLine : c.keepLine}
+                            {c.anotherShape}
                           </button>
                         )}
-                        <button
-                          type="button"
-                          onClick={() =>
-                            changeShape(anotherGuideShape(id, shape))
-                          }
-                        >
-                          {c.anotherShape}
-                        </button>
                         {focus && (
                           <button type="button" onClick={() => step(2)}>
                             {c.predictionNext}
@@ -598,17 +608,30 @@ function LessonActivity({
               <div className={s.given}>
                 <b>{circleLessonCopy.given}</b>
                 <p>
-                  <MathText>{reasonFlow[id].startingFact}</MathText>
+                  <MathText>
+                    {exploringIntersection
+                      ? c.intersectionGivens
+                      : reasonFlow[id].startingFact}
+                  </MathText>
                 </p>
               </div>
-              <details className={s.readings}>
-                <summary>{c.readings}</summary>
-                <p>{c.readingHint}</p>
-                <MeasurementList
-                  label={c.readingLabel}
-                  measurements={reasonMeasurements(id, shape)}
-                />
-              </details>
+              {exploringIntersection ? (
+                <div className={s.proof}>
+                  <b>{c.therefore}</b>
+                  <p>
+                    <MathText>{c.intersectionReason}</MathText>
+                  </p>
+                </div>
+              ) : (
+                <details className={s.readings}>
+                  <summary>{c.readings}</summary>
+                  <p>{c.readingHint}</p>
+                  <MeasurementList
+                    label={c.readingLabel}
+                    measurements={reasonMeasurements(id, activeShape)}
+                  />
+                </details>
+              )}
               <button
                 type="button"
                 className={s.primary}
@@ -639,7 +662,7 @@ function LessonActivity({
                     <div className={s.proof}>
                       <b>{c.therefore}</b>
                       <p>
-                        <MathText>{reasonResultFact(id, shape)}</MathText>
+                        <MathText>{reasonResultFact(id, activeShape)}</MathText>
                       </p>
                       <p>
                         <MathText>{lesson.explanation}</MathText>

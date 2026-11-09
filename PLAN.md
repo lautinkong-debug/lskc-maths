@@ -12,7 +12,7 @@ The full unit suite passed 2,798 tests. Twenty browser checks covered form navig
 
 ### Circle Lab teacher and pupil review, 16.3–16.16
 
-- In 16.3 choose **Predict → Add a second chord**. Students can turn two non-parallel chords, predict the centre, then reveal the intersection of the perpendicular bisectors. The two predictions and the dragged construction are saved separately.
+- In 16.3 open **Investigate** to see both perpendicular bisectors meet at the labelled centre O. **Trace the bisectors** follows them from the two chord mid-points to O. Drag either mid-point to try a new construction, or choose **Show one chord** to examine one bisector. **Make a prediction** carries the current construction to a question and reveals its conclusion after a correct answer.
 - Words now identifies the relevant parts for all 42 vocabulary tags. Students can trace the selected angle rays, vertex and shaded turn, or select an arc, mid-point or perpendicular to highlight its own marks. In 16.9 a separate diameter example lets pupils learn the word before they deduce which chord is a diameter.
 - Investigation instructions sit immediately above the diagram. After a correct prediction students can return directly to the diagram. Teachers can hide and reveal its conclusion marks while retaining the given marks.
 - Verified 2,823 unit tests and all 19 guided browser scenarios, including 16.6 vocabulary changes at phone and projector sizes. A separate phone walkthrough exercised incorrect answers and retries in each of the 14 lessons. No live deployment.

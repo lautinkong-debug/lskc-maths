@@ -106,15 +106,15 @@ for (const topic of topics) {
         await nav
           .getByRole("button", { name: "Investigate", exact: true })
           .click();
+        if (id === "r3") {
+          await expect(
+            guide.getByTestId("two-bisectors").locator('[data-point="O"]'),
+          ).toBeVisible();
+          await guide.getByRole("button", { name: "Show one chord" }).click();
+        }
         const original = await svg.innerHTML();
-        if (id === "r3")
-          await guide
-            .getByRole("button", { name: "Keep this bisector" })
-            .click();
         await guide.getByRole("button", { name: "Try another shape" }).click();
         await expect.poll(() => svg.innerHTML()).not.toBe(original);
-        if (id === "r3")
-          await expect(svg.locator("[data-saved-bisector]")).toHaveCount(1);
         await nav.getByRole("button", { name: "Predict", exact: true }).click();
         const choose = (index: number) =>
           guide.locator('[data-choice="' + index + '"]').click();

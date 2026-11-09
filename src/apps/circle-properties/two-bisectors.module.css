@@ -11,7 +11,32 @@
   color: #2454c6;
 }
 .second {
-  color: #833c85;
+  color: #813888;
+}
+.legend {
+  margin: 0;
+  padding: 0.65rem 0.6rem 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.15rem;
+  list-style: none;
+}
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+.solidKey,
+.dashedKey {
+  display: inline-block;
+  width: 1.55rem;
+  border-top: 4px solid currentColor;
+}
+.dashedKey {
+  border-top-style: dashed;
 }
 .chord {
   stroke: #586d84;
@@ -29,6 +54,9 @@
 .tick {
   stroke-width: 2.8;
 }
+.bisector {
+  stroke-width: 4.5;
+}
 .halo {
   fill: none;
   stroke: white;
@@ -39,11 +67,127 @@
   fill: #233f63;
 }
 .answer {
-  fill: #137044;
+  pointer-events: none;
 }
-.answer circle {
+.leader {
+  stroke: #19613e;
+  stroke-width: 1.8;
+  stroke-dasharray: 2.5 2.5;
+}
+.centreHalo,
+.haloOutline {
+  fill: none;
+}
+.haloOutline {
+  stroke: #fff;
+  stroke-width: 6;
+}
+.centreHalo {
+  stroke: #08794b;
+  stroke-width: 3;
+}
+.centreDot {
+  fill: #086a42;
+  stroke: #fff;
+  stroke-width: 1.25;
+}
+.badge {
+  fill: #e8f7ed;
+  stroke: #288352;
+  stroke-width: 1.6;
+}
+.badgeText {
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 750;
+  fill: #124e33;
+}
+.trace {
+  pointer-events: none;
+}
+.traceFirst {
+  --trail: #81c5ff;
+  --dot: #174aaa;
+  --start: 0s;
+}
+.traceSecond {
+  --trail: #efa6ff;
+  --dot: #71317d;
+  --start: 0.95s;
+}
+.trace line {
+  stroke: var(--trail);
+  stroke-linecap: round;
+  stroke-width: 3.5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: drawTrace 0.85s ease-in-out var(--start) forwards;
+}
+.traveller {
+  opacity: 0;
+  fill: var(--dot);
   stroke: white;
   stroke-width: 2;
+  animation: travel 0.85s ease-in-out var(--start);
+}
+.traceFinish {
+  fill: none;
+  stroke: #08794b;
+  stroke-width: 3;
+  opacity: 0;
+  animation: reachCentre 0.7s ease-out 1.72s;
+}
+@keyframes drawTrace {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes travel {
+  from {
+    transform: translate(var(--from-x), var(--from-y));
+    opacity: 1;
+  }
+  to {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+@keyframes reachCentre {
+  from {
+    r: 11px;
+    opacity: 0.95;
+  }
+  to {
+    r: 24px;
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trace line {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .traveller,
+  .traceFinish {
+    animation: none;
+    opacity: 0;
+  }
+}
+.replay {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 0 0.75rem 0.5rem;
+}
+.replay button {
+  min-height: 44px;
+  font-weight: 650;
+}
+.replay p {
+  color: #205a3b;
+  font-size: 0.91rem;
+  line-height: 1.45;
+  text-align: center;
 }
 .letter {
   font:

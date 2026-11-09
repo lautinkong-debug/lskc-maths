@@ -4,6 +4,7 @@ import {
   useId,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
 } from "react";
@@ -64,7 +65,9 @@ export default function TwoBisectorsDiagram({
   const svgRef = useRef<SVGSVGElement>(null);
   const drag = useRef<{ chord: ChordId; pointerId: number } | null>(null);
   const [pair, setPair] = useState(() => startingChords(first, other));
+  const [trace, setTrace] = useState(0);
   function change(next: ChordPair) {
+    setTrace(0);
     setPair(next);
     onMove?.(next.AB, next.CD);
   }
@@ -86,10 +89,7 @@ export default function TwoBisectorsDiagram({
       occupied.push({ ...point, width: size, height: size });
     }
   }
-  if (reveal) {
-    points.O = O;
-    occupied.push({ ...O, width: 15, height: 15 });
-  }
+  if (reveal) occupied.push({ ...O, width: 30, height: 30 });
   function label(name: string, preferred: Point) {
     const box = placeDiagramLabel(
       { ...preferred, width: 18, height: 23 },
@@ -108,12 +108,42 @@ export default function TwoBisectorsDiagram({
       y: 2 * ch.mid.y - ch.corner.y,
     });
   }
+  let badge: LayoutBox | undefined;
   if (reveal) {
+    // Keep the result badge clear of the diagram lines as well as the point names.
+    for (const key of ids) {
+      const ch = chords[key];
+      for (const [start, end] of [[ch.a, ch.b], ch.line]) {
+        for (let t = 0; t <= 1; t += 1 / 32) {
+          occupied.push({
+            x: start.x + t * (end.x - start.x),
+            y: start.y + t * (end.y - start.y),
+            width: 6,
+            height: 6,
+          });
+        }
+      }
+    }
+    for (let degrees = 0; degrees < 360; degrees += 6) {
+      const a = (degrees * Math.PI) / 180;
+      occupied.push({
+        x: O.x + FLOW_RADIUS * Math.cos(a),
+        y: O.y + FLOW_RADIUS * Math.sin(a),
+        width: 8,
+        height: 8,
+      });
+    }
     const a = chords.AB.normal,
       b = chords.CD.normal;
     const sign = a.x * b.x + a.y * b.y > 0 ? -1 : 1;
     const gap = { x: a.x + sign * b.x, y: a.y + sign * b.y };
-    label("O", shift(O, gap, 21 / Math.hypot(gap.x, gap.y)));
+    const space = shift(O, gap, 70 / Math.hypot(gap.x, gap.y));
+    badge = placeDiagramLabel(
+      { ...space, width: 98, height: 32 },
+      occupied,
+      { left: 4, right: 416, top: 5, bottom: 355 },
+      [{ x: 2 * O.x - space.x, y: 2 * O.y - space.y }],
+    );
   }
 
   function move(event: PointerEvent<SVGSVGElement>) {
@@ -165,6 +195,19 @@ export default function TwoBisectorsDiagram({
       data-testid="two-bisectors"
       data-revealed={reveal}
     >
+      <ul className={s.legend}>
+        {ids.map((key) => (
+          <li className={key === "AB" ? s.first : s.second} key={key}>
+            <span
+              aria-hidden="true"
+              className={key === "AB" ? s.solidKey : s.dashedKey}
+            />
+            <span>
+              <MathText>{c.bisectorOf(key)}</MathText>
+            </span>
+          </li>
+        ))}
+      </ul>
       <svg
         ref={svgRef}
         className={s.diagram}
@@ -206,7 +249,9 @@ export default function TwoBisectorsDiagram({
                 data-bisector={key}
                 {...segment(ch.line[0], ch.line[1])}
                 className={s.bisector}
-                strokeDasharray={key === "CD" ? "9 5" : undefined}
+                pathLength={100}
+                strokeDasharray={key === "CD" ? "6 4" : undefined}
+                strokeDashoffset={key === "CD" ? 3 : undefined}
               />
               {[-0.5, 0.5].map((side) => (
                 <g key={side} data-equal-half={key}>
@@ -234,13 +279,33 @@ export default function TwoBisectorsDiagram({
             </g>
           );
         })}
+        {badge && trace > 0 && (
+          <g key={trace} className={s.trace} aria-hidden="true">
+            {ids.map((key) => (
+              <g
+                key={key}
+                className={key === "AB" ? s.traceFirst : s.traceSecond}
+                style={
+                  {
+                    "--from-x": chords[key].mid.x - O.x + "px",
+                    "--from-y": chords[key].mid.y - O.y + "px",
+                  } as CSSProperties
+                }
+              >
+                <line
+                  {...segment(chords[key].mid, O)}
+                  pathLength={1}
+                  data-trace={key}
+                />
+                <circle cx={O.x} cy={O.y} r={5.5} className={s.traveller} />
+              </g>
+            ))}
+            <circle cx={O.x} cy={O.y} r={16} className={s.traceFinish} />
+          </g>
+        )}
         {Object.entries(points).map(([name, p]) => (
-          <g
-            key={name}
-            data-point={name}
-            className={name === "O" ? s.answer : s.point}
-          >
-            <circle cx={p.x} cy={p.y} r={name === "O" ? 5 : 2.8} />
+          <g key={name} data-point={name} className={s.point}>
+            <circle cx={p.x} cy={p.y} r={2.8} />
             <MathSvgText
               x={positions[name].x}
               y={positions[name].y}
@@ -252,6 +317,31 @@ export default function TwoBisectorsDiagram({
             </MathSvgText>
           </g>
         ))}
+        {badge && (
+          <g className={s.answer} data-point="O">
+            <line {...segment(O, badge)} className={s.leader} />
+            <circle cx={O.x} cy={O.y} r={11} className={s.haloOutline} />
+            <circle cx={O.x} cy={O.y} r={11} className={s.centreHalo} />
+            <circle cx={O.x} cy={O.y} r={4} className={s.centreDot} />
+            <rect
+              x={badge.x - badge.width / 2}
+              y={badge.y - badge.height / 2}
+              width={badge.width}
+              height={badge.height}
+              rx={8}
+              className={s.badge}
+            />
+            <MathSvgText
+              x={badge.x}
+              y={badge.y}
+              dominantBaseline="central"
+              textAnchor="middle"
+              className={s.badgeText}
+            >
+              {c.centreLabel}
+            </MathSvgText>
+          </g>
+        )}
         {ids.map((key) => {
           const p = chords[key].mid;
           return (
@@ -287,6 +377,18 @@ export default function TwoBisectorsDiagram({
         })}
         {ink && <InkLayer board={ink} svgRef={svgRef} />}
       </svg>
+      {reveal && (
+        <div className={s.replay}>
+          <button type="button" onClick={() => setTrace((n) => n + 1)}>
+            {c.traceAction}
+          </button>
+          {trace > 0 && (
+            <p role="status">
+              <MathText>{c.traceSummary}</MathText>
+            </p>
+          )}
+        </div>
+      )}
       <p className={s.hint}>
         {other && !distinctlyTurned(first, other) && (
           <>
