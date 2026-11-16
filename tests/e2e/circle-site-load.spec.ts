@@ -5,6 +5,8 @@ import { expect, test, type Page, type Request } from "@playwright/test";
  * These numbers are what let 32 iPads open the lesson together on one Wi-Fi link.
  */
 const lesson = "/apps/circle-properties";
+// Circle Lab opens on the Learn path. These checks are about the Explore lesson.
+const explore = `${lesson}#explore`;
 const firebase =
   /firestore|identitytoolkit|securetoken|firebaseinstallations|127\.0\.0\.1:(8080|9099|9199)/;
 
@@ -38,7 +40,7 @@ test("a student opens the lesson without touching Firebase or other apps", async
     if (response.request().resourceType() === "script")
       scripts.push(await response.text().catch(() => ""));
   });
-  await page.goto(lesson);
+  await page.goto(explore);
   await ready(page);
   // Long enough for anything put off until after the first screen.
   await page.waitForTimeout(4000);
@@ -63,7 +65,7 @@ test("the lesson opens with Firebase completely unreachable", async ({
 }) => {
   await page.route(firebase, (route) => route.abort());
   await page.route(/googleapis|firebaseapp/, (route) => route.abort());
-  await page.goto(lesson);
+  await page.goto(explore);
   await ready(page);
 });
 
@@ -81,7 +83,7 @@ test("a whole class is served from the cache, not one request each", async ({
 });
 
 test("the small favicon stays small", async ({ page, request }) => {
-  await page.goto(lesson);
+  await page.goto(explore);
   const href = await page
     .locator('link[rel="icon"]')
     .first()
@@ -100,7 +102,7 @@ test("a download cut off by the Wi-Fi offers a way back", async ({ page }) => {
   await page.route("**/_next/static/chunks/*.js", (route) =>
     onPage(route.request().url()) ? route.continue() : route.abort(),
   );
-  await page.goto(lesson);
+  await page.goto(explore);
   const reload = page.getByRole("button", { name: "Reload the page" });
   await expect(reload).toBeVisible({ timeout: 20_000 });
   await expect(
@@ -133,18 +135,17 @@ for (const [width, height] of [
   test.describe(`on the website at ${width}x${height}`, () => {
     test.use({ viewport: { width, height } });
 
-    test("the step buttons and heading stay inside the panel", async ({
-      page,
-    }) => {
-      await page.goto(lesson);
-      const steps = page
-        .getByRole("navigation", { name: "Lesson steps" })
-        .getByRole("button");
+    test("the step buttons stay inside the step bar", async ({ page }) => {
+      await page.goto(explore);
+      // The seven steps run across the top of the lesson, above the circle.
+      const bar = page.getByRole("navigation", { name: "Lesson steps" });
+      const steps = bar.getByRole("button");
       await expect(steps).toHaveCount(7);
-      const panel = (await page.locator("aside").last().boundingBox())!;
       for (let i = 0; i < 7; i++) {
         await steps.nth(i).tap();
+        const panel = (await bar.boundingBox())!;
         const box = (await steps.nth(i).boundingBox())!;
+        expect(box.x).toBeGreaterThanOrEqual(panel.x);
         expect(box.x + box.width).toBeLessThanOrEqual(panel.x + panel.width);
         // Browsers report layout in fractions of a pixel: 44 can read as 43.99997.
         expect(box.height).toBeGreaterThanOrEqual(43.99);

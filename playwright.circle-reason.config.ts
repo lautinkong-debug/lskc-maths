@@ -6,6 +6,7 @@ export default defineConfig({
     "circle-reason-challenge.spec.ts",
     "circle-ipad.spec.ts",
     "circle-guided-lessons.spec.ts",
+    "circle-learn.spec.ts",
   ],
   outputDir: "./out/circle-reason-tests",
   workers: 1,

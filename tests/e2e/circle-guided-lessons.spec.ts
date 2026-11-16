@@ -24,7 +24,7 @@ const topics: { name: string; ids: GuidedReasonId[] }[] = [
 ];
 
 async function openTopic(page: Page, topic: string) {
-  await page.goto("/");
+  await page.goto("/#explore");
   await expect(page.getByTestId("paper-circle")).toBeVisible();
   const menu = page.locator("button[aria-controls='circle-property-menu']");
   if (await menu.isVisible()) await menu.click();

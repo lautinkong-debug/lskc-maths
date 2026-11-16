@@ -5,12 +5,19 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type ReactNode,
   type SetStateAction,
 } from "react";
-import { circleCopy as c, circleLessonCopy, circleTheoremLessonCopy } from "@/lib/copy";
+import {
+  circleCopy as c,
+  circleLessonCopy,
+  circlePathCopy,
+  circleTheoremLessonCopy,
+} from "@/lib/copy";
 import { labs, reasons, type LabId } from "./content";
 import CircleDiagram from "./CircleDiagram";
 import ReasonExplorer from "./ReasonExplorer";
+import LearnPath from "./path/LearnPath";
 import ReasonChallenge from "./ReasonChallengeGame";
 import InkToolbar from "./InkToolbar";
 import { useInkBoard } from "./useInkBoard";
@@ -24,9 +31,11 @@ import {
 } from "./geometry";
 import { snapParameters, type SnapResult } from "./snapping";
 import { allMissions, evaluateMission, missions } from "./missions";
-import ChordLesson, { ChordLessonQuestions } from "./ChordLesson";
+import ChordLesson, {
+  ChordLessonQuestions,
+  ChordLessonSteps,
+} from "./ChordLesson";
 import TheoremLesson from "./TheoremLesson";
-import guideStyles from "./theorem-lesson.module.css";
 import PaperCircleDemo from "./PaperCircleDemo";
 import {
   isPaperStep,
@@ -53,6 +62,7 @@ import type { Experiment } from "./conditions";
 import { useLocalSession, clearLocalSessions } from "./useLocalSession";
 import {
   initialWorkspace,
+  modeFromHash,
   parseWorkspace,
   initialPlayground,
   parsePlayground,
@@ -67,50 +77,30 @@ import {
   legacyStorageKey,
   type Progress,
 } from "./progress";
-import { LabIcon, Orb, Star } from "./LabSprites";
+import { Orb, Star } from "./LabSprites";
 import s from "./circle.module.css";
 import MathText from "./MathText";
 import MeasurementList from "./MeasurementList";
 import ExactNumberInput from "./ExactNumberInput";
 
-const places: Record<LabId, { name: string; subtitle: string; tone: string }> =
-  {
-    bisector: {
-      name: "Chord balance",
-      subtitle: "Perpendiculars and chord mid-points",
-      tone: "blue",
-    },
-    chords: {
-      name: "Twin chords",
-      subtitle: "Equal chords and distances",
-      tone: "mint",
-    },
-    centre: {
-      name: "Double vision",
-      subtitle: "Centre and circumference angles",
-      tone: "purple",
-    },
-    segment: {
-      name: "Angle twins",
-      subtitle: "Angles in the same segment",
-      tone: "pink",
-    },
-    semicircle: {
-      name: "Right-angle hunt",
-      subtitle: "Angle in a semicircle",
-      tone: "yellow",
-    },
-    "equal-arcs": {
-      name: "Perfect match",
-      subtitle: "Angles, arcs and chords",
-      tone: "mint",
-    },
-    ratios: {
-      name: "Ratio remix",
-      subtitle: "Arc and angle ratios",
-      tone: "purple",
-    },
-  };
+const places: Record<LabId, { subtitle: string }> = {
+  bisector: { subtitle: "Perpendiculars and chord mid-points" },
+  chords: { subtitle: "Equal chords and distances" },
+  centre: { subtitle: "Centre and circumference angles" },
+  segment: { subtitle: "Angles in the same segment" },
+  semicircle: { subtitle: "Angle in a semicircle" },
+  "equal-arcs": { subtitle: "Angles, arcs and chords" },
+  ratios: { subtitle: "Arc and angle ratios" },
+};
+/** "16.1–16.3" for a topic with several reasons, "16.6" for one. */
+function reasonRange(lab: (typeof labs)[number]) {
+  const numbers = lab.reasonIds.map(
+    (id) => reasons.find((reason) => reason.id === id)!.number,
+  );
+  return numbers.length > 1
+    ? `${numbers[0]}–${numbers[numbers.length - 1]}`
+    : numbers[0];
+}
 const numeric = (n: number, digits = 1) => Number(n.toFixed(digits)).toString();
 function randomShape(labId: LabId) {
   const next = normalise(labId, { ...defaults[labId] });
@@ -132,17 +122,63 @@ export default function CircleLab() {
     () => false,
   );
   const [epoch, setEpoch] = useState(0);
+  // A link such as …#explore opens that activity. It is read as the page opens
+  // and then taken off the address, so a reload returns to wherever the student
+  // has moved on to. It still applies after "Reset progress" on the same visit.
+  const [link, setLink] = useState(() => ({
+    mode:
+      typeof window === "undefined"
+        ? undefined
+        : modeFromHash(window.location.hash),
+    turn: 0,
+  }));
+  useEffect(() => {
+    const clear = () => {
+      if (!modeFromHash(window.location.hash)) return;
+      try {
+        window.history.replaceState(
+          window.history.state,
+          "",
+          window.location.pathname + window.location.search,
+        );
+      } catch {
+        // Some browsers refuse this for a file opened from disk. The link then stays.
+      }
+    };
+    const follow = () => {
+      const mode = modeFromHash(window.location.hash);
+      if (!mode) return;
+      setLink((previous) => ({ mode, turn: previous.turn + 1 }));
+      clear();
+    };
+    clear();
+    window.addEventListener("hashchange", follow);
+    return () => window.removeEventListener("hashchange", follow);
+  }, []);
   return hydrated ? (
-    <CircleWorkspace key={epoch} onReset={() => setEpoch((x) => x + 1)} />
+    <CircleWorkspace
+      key={`${epoch}.${link.turn}`}
+      start={link.mode}
+      onReset={() => setEpoch((x) => x + 1)}
+    />
   ) : (
     <p role="status">{c.loading}</p>
   );
 }
-function CircleWorkspace({ onReset }: { onReset: () => void }) {
+function CircleWorkspace({
+  onReset,
+  start,
+}: {
+  onReset: () => void;
+  start?: WorkspaceMode;
+}) {
   const [workspace, setWorkspace, workspaceFailed] = useLocalSession(
     "workspace",
-    initialWorkspace,
-    parseWorkspace,
+    () => (start ? { ...initialWorkspace, mode: start } : initialWorkspace),
+    (raw) => {
+      const saved = parseWorkspace(raw);
+      return saved && start ? { ...saved, mode: start } : saved;
+    },
   );
   const [progress, setProgress, progressFailed] = useLocalSession<Progress>(
     "progress",
@@ -241,6 +277,7 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
         <nav className={s.tabs} aria-label={c.activities}>
           {(
             [
+              ["learn", circlePathCopy.learn, circlePathCopy.learnHint],
               ["explore", c.explore, c.tabHints.explore],
               ["reasons-relay", c.reasonsRelay, c.tabHints.relay],
               ["reasons-play", c.reasonsPlay, c.tabHints.play],
@@ -262,8 +299,18 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
           ))}
         </nav>
         <details className={s.settings} ref={settingsRef}>
-          <summary>{c.settings}</summary>
+          <summary>{c.more}</summary>
           <div className={s.settingsPanel}>
+            {mode === "explore" && (
+              <div className={s.howTo} role="note" aria-label={c.howTo}>
+                <strong>{c.howTo}</strong>
+                <ol>
+                  {c.howToSteps.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
+                </ol>
+              </div>
+            )}
             <label>
               {c.appearance}
               <select
@@ -313,89 +360,51 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
           </div>
         </details>
       </header>
+      {mode === "learn" && <LearnPath onExplore={explore} />}
       {mode === "explore" && (
-        <>
-          {!workspace.welcomeDismissed && (
-            <div className={s.howTo} role="note" aria-label={c.howTo}>
-              <strong>{c.howTo}</strong>
-              <ol>
-                {c.howToSteps.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
+        <Playground
+          key={labId}
+          labId={labId}
+          collected={progress.missions}
+          onCollect={(id) => collect("missions", id)}
+          onRelay={() => practise(labId)}
+          picker={
+            <div
+              className={s.picker}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  setPropertyMenu(false);
+                  event.currentTarget.querySelector("button")?.focus();
+                }
+              }}
+            >
               <button
                 type="button"
-                onClick={() =>
-                  setWorkspace((p) => ({ ...p, welcomeDismissed: true }))
-                }
+                aria-expanded={propertyMenu}
+                aria-controls="circle-property-menu"
+                onClick={() => setPropertyMenu((v) => !v)}
               >
-                {c.gotIt}
+                <span>{c.property}</span>
+                <strong>{places[labId].subtitle}</strong>
+                <span aria-hidden="true">{propertyMenu ? "▴" : "▾"}</span>
               </button>
-            </div>
-          )}
-          <div
-            className={s.mobileProperty}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                setPropertyMenu(false);
-                event.currentTarget.querySelector("button")?.focus();
-              }
-            }}
-          >
-            <button
-              type="button"
-              aria-expanded={propertyMenu}
-              aria-controls="circle-property-menu"
-              onClick={() => setPropertyMenu((v) => !v)}
-            >
-              <span>{c.property}</span>
-              <strong>{places[labId].subtitle}</strong>
-              <span aria-hidden="true">{propertyMenu ? "−" : "+"}</span>
-            </button>
-            {propertyMenu && (
-              <nav
-                id="circle-property-menu"
-                aria-label={c.chooseProperty}
-                className={s.propertyMenu}
-              >
-                {labs.map((lab) => (
-                  <button
-                    type="button"
-                    key={lab.id}
-                    aria-pressed={labId === lab.id}
-                    onClick={() => explore(lab.id)}
-                  >
-                    {places[lab.id].subtitle}
-                  </button>
-                ))}
-              </nav>
-            )}
-          </div>
-          <div className={s.explorer}>
-            <aside className={s.rail}>
-              <div className={s.railHeading}>
-                <h2>{c.chooseProperty}</h2>
-              </div>
-              <div className={s.labButtons}>
-                {labs.map((lab) => (
-                  <button
-                    type="button"
-                    key={lab.id}
-                    data-tone={places[lab.id].tone}
-                    aria-label={places[lab.id].subtitle}
-                    aria-pressed={labId === lab.id}
-                    onClick={() => explore(lab.id)}
-                  >
-                    <span className={s.labIcon}>
-                      <LabIcon id={lab.id} />
-                    </span>
-                    <span className={s.labName}>
-                      {places[lab.id].subtitle}
-                      <small>{places[lab.id].name}</small>
-                      <span
-                        className={s.miniStars}
-                        aria-label={`${missions[lab.id].filter((m) => progress.missions.includes(m.id)).length} of ${missions[lab.id].length} ${c.tasks}`}
-                      >
+              {propertyMenu && (
+                <nav
+                  id="circle-property-menu"
+                  aria-label={c.chooseProperty}
+                  className={s.propertyMenu}
+                >
+                  {labs.map((lab) => (
+                    <button
+                      type="button"
+                      key={lab.id}
+                      aria-label={places[lab.id].subtitle}
+                      aria-pressed={labId === lab.id}
+                      onClick={() => explore(lab.id)}
+                    >
+                      <span className={s.menuNumbers}>{reasonRange(lab)}</span>
+                      <span>{places[lab.id].subtitle}</span>
+                      <span className={s.miniStars} aria-hidden="true">
                         {missions[lab.id].map((m) => (
                           <Star
                             key={m.id}
@@ -403,21 +412,13 @@ function CircleWorkspace({ onReset }: { onReset: () => void }) {
                           />
                         ))}
                       </span>
-                    </span>
-                  </button>
-                ))}
-              </div>
-              <p className={s.railNote}>{c.suggested}</p>
-            </aside>
-            <Playground
-              key={labId}
-              labId={labId}
-              collected={progress.missions}
-              onCollect={(id) => collect("missions", id)}
-              onRelay={() => practise(labId)}
-            />
-          </div>
-        </>
+                    </button>
+                  ))}
+                </nav>
+              )}
+            </div>
+          }
+        />
       )}
       {mode === "reasons-play" && (
         <ReasonPractice
@@ -466,11 +467,14 @@ function Playground({
   collected,
   onCollect,
   onRelay,
+  picker,
 }: {
   labId: LabId;
   collected: string[];
   onCollect: (id: string) => void;
   onRelay: () => void;
+  /** The property menu: it shares one row with the play style. */
+  picker: ReactNode;
 }) {
   const lab = labs.find((l) => l.id === labId)!;
   // Only Topic 1 has the guided 16.1 / 16.2 lesson; other topics never read this record.
@@ -503,10 +507,13 @@ function Playground({
   // Also not saved: a paper circle demonstration always opens at its first stage.
   const [paper, setPaper] = useState({ step: -1, stage: 0, chord: 0 });
   const boardRef = useRef<HTMLDivElement>(null);
+  const toolsRef = useRef<HTMLDetailsElement>(null);
   const ink = useInkBoard(`playground-${labId}`);
   const reasonRef = useRef<HTMLDivElement>(null);
   const sliderKeyboard = useRef(false);
   const [penOpen, setPenOpen] = useState(false);
+  // A guided theorem lesson puts its 16.x buttons in the row above, through this slot.
+  const [selectorSlot, setSelectorSlot] = useState<HTMLDivElement | null>(null);
   const [conditionOpen, setConditionOpen] = useState(false);
   const [conditionParameters, setConditionParameters] =
     useState<Parameters | null>(null);
@@ -691,10 +698,15 @@ function Playground({
     setLessonReadings({ step: -1 });
     setParameters(shape);
   }
+  /** Once a tool is in hand, Tools closes again. Its own row appears above the task. */
+  function closeTools() {
+    if (toolsRef.current) toolsRef.current.open = false;
+  }
   function togglePen() {
     // A hidden pen must never keep capturing drags meant for the circle.
     if (penOpen) ink.setMode("move");
     setPenOpen(!penOpen);
+    closeTools();
   }
   const conditionPrompt =
     labId === "bisector"
@@ -741,6 +753,7 @@ function Playground({
   /** The enlarged board starts at the top of the screen, so its buttons stay in reach. */
   function toggleFocus() {
     setFocus((x) => !x);
+    closeTools();
     if (!focus)
       requestAnimationFrame(() =>
         boardRef.current?.scrollIntoView({ block: "start", behavior: "auto" }),
@@ -783,63 +796,79 @@ function Playground({
   }
   const slide = (key: DragKey, value: number) =>
     normalise(labId, { ...parameters, [key]: value });
-  const lessonHeader = (
-    <>
-      <div className={s.stageHeading}>
-        <div>
-          <p className={s.chapter}>
-            Ch.16 ·{" "}
-            {lab.reasonIds
-              .map((id) => reasons.find((r) => r.id === id)!.number)
-              .join(" / ")}
-          </p>
-          <h2>{places[labId].subtitle}</h2>
-          <p className={s.propertyName}>{places[labId].name}</p>
-        </div>
-        <div className={s.playSwitch} role="group" aria-label={c.playStyle}>
-            <button
-              type="button"
-              aria-pressed={lessonMode || theoremMode}
-              onClick={() => {
-                if (labId === "bisector" && !theoremMode) openChordLesson();
-                else setTheoremMode(true);
-              }}
-            >
-              {circleLessonCopy.mode}
-            </button>
-          <button
-            type="button"
-            aria-pressed={tasks}
-            onClick={() => chooseStyle(false)}
-          >
-            {c.missions}
-          </button>
-          <button
-            type="button"
-            aria-pressed={free && !lessonMode && !theoremMode}
-            onClick={() => chooseStyle(true)}
-          >
-            {c.free}
-          </button>
-        </div>
-      </div>
-    </>
-  );
   const chordSelector = labId === "bisector" && (lessonMode || theoremMode) && (
-        <nav className={guideStyles.reasonNav} aria-label={circleTheoremLessonCopy.chordLessons}>
-          <button type="button" aria-pressed={lessonMode} onClick={openChordLesson}>
-            {circleTheoremLessonCopy.originalChords}
-          </button>
-          <button type="button" aria-pressed={theoremMode} onClick={() => setTheoremMode(true)}>
-            {circleTheoremLessonCopy.locateCentre}
-          </button>
-        </nav>
+    <nav
+      className={s.lessonChips}
+      aria-label={circleTheoremLessonCopy.chordLessons}
+    >
+      {(
+        [
+          [circleTheoremLessonCopy.originalChords, lessonMode, openChordLesson],
+          [
+            circleTheoremLessonCopy.locateCentre,
+            theoremMode,
+            () => setTheoremMode(true),
+          ],
+        ] as const
+      ).map(([name, pressed, open]) => (
+        // The number is enough on the button: the heading below gives the title.
+        <button
+          type="button"
+          key={name}
+          aria-label={name}
+          title={name}
+          aria-pressed={pressed}
+          onClick={open}
+        >
+          {name.split(" · ")[0]}
+        </button>
+      ))}
+    </nav>
+  );
+  const contextBar = (
+    <div className={s.contextBar}>
+      <h2 className={s.visuallyHidden}>{places[labId].subtitle}</h2>
+      {picker}
+      {lessonMode && chordSelector}
+      <div className={s.lessonSlot} ref={setSelectorSlot} />
+      <div className={s.playSwitch} role="group" aria-label={c.playStyle}>
+        <button
+          type="button"
+          aria-pressed={lessonMode || theoremMode}
+          onClick={() => {
+            if (labId === "bisector" && !theoremMode) openChordLesson();
+            else setTheoremMode(true);
+          }}
+        >
+          {circleLessonCopy.mode}
+        </button>
+        <button
+          type="button"
+          aria-pressed={tasks}
+          onClick={() => chooseStyle(false)}
+        >
+          {c.missions}
+        </button>
+        <button
+          type="button"
+          aria-pressed={free && !lessonMode && !theoremMode}
+          onClick={() => chooseStyle(true)}
+        >
+          {c.free}
+        </button>
+      </div>
+    </div>
   );
   if (theoremMode) {
     return (
-      <section className={s.playground} aria-label={places[labId].subtitle} data-tone={places[labId].tone}>
-        {lessonHeader}
-        <TheoremLesson lab={lab} onRelay={onRelay} chordSelector={chordSelector || undefined} />
+      <section className={s.playground} aria-label={places[labId].subtitle}>
+        {contextBar}
+        <TheoremLesson
+          lab={lab}
+          onRelay={onRelay}
+          chordSelector={chordSelector || undefined}
+          selectorSlot={selectorSlot}
+        />
       </section>
     );
   }
@@ -847,10 +876,16 @@ function Playground({
     <section
       className={`${s.playground} ${focus ? s.focused : ""}`}
       aria-label={places[labId].subtitle}
-      data-tone={places[labId].tone}
     >
-      {lessonHeader}
-      {chordSelector}
+      {contextBar}
+      {lessonMode && !focus && !conditionOpen && (
+        <ChordLessonSteps
+          state={lesson}
+          onState={setLesson}
+          onShape={lessonShape}
+          onPaperRestart={restartPaper}
+        />
+      )}
       <div
         className={`${s.playArea} ${conditionOpen && !angleCondition ? s.testingCondition : ""} ${lessonMode ? s.lessonArea : ""}`}
       >
@@ -861,40 +896,48 @@ function Playground({
           role="region"
           aria-label={c.board}
         >
-          <div className={s.boardTools}>
-            {conditionOpen ? (
-              <>
-                {!angleCondition && <span>{c.changeCondition}</span>}
-                <button type="button" onClick={() => {
-                  setConditionOpen(false);
-                  setFocus(false);
-                  setShowReasons(true);
-                  requestAnimationFrame(() => reasonRef.current?.scrollIntoView({ block: "start" }));
-                }}>Compare this topic’s reasons</button>
-                <button type="button" onClick={closeCondition}>
-                  {c.backToCircle}
-                </button>
-              </>
-            ) : (
-              <>
-                {penOpen && <InkToolbar board={ink} />}
-                <button
-                  type="button"
-                  aria-pressed={penOpen}
-                  onClick={togglePen}
-                >
-                  {penOpen ? c.hidePen : c.pen}
-                </button>
-                <button
-                  type="button"
-                  onClick={toggleFocus}
-                  aria-pressed={focus}
-                >
-                  {focus ? c.unfocus : c.focus}
-                </button>
-              </>
-            )}
-          </div>
+          {/* Nothing sits above the task until a tool is in use. */}
+          {(conditionOpen || penOpen || focus) && (
+            <div className={s.boardTools}>
+              {conditionOpen ? (
+                <>
+                  {!angleCondition && <span>{c.changeCondition}</span>}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConditionOpen(false);
+                      setFocus(false);
+                      setShowReasons(true);
+                      requestAnimationFrame(() =>
+                        reasonRef.current?.scrollIntoView({ block: "start" }),
+                      );
+                    }}
+                  >
+                    {c.compareReasons}
+                  </button>
+                  <button type="button" onClick={closeCondition}>
+                    {c.backToCircle}
+                  </button>
+                </>
+              ) : (
+                <>
+                  {penOpen && (
+                    <>
+                      <InkToolbar board={ink} />
+                      <button type="button" onClick={togglePen}>
+                        {c.hidePen}
+                      </button>
+                    </>
+                  )}
+                  {focus && (
+                    <button type="button" onClick={toggleFocus}>
+                      {c.unfocus}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          )}
           {conditionOpen && !angleCondition ? (
             <ConditionsLab
               labId={labId}
@@ -1022,137 +1065,162 @@ function Playground({
               )}
             </>
           )}
-          {!conditionOpen && paperStep === null && (
-            <details className={s.boardOptions}>
+          {!conditionOpen && (
+            // A new step starts with Tools closed, so each step opens on its task alone.
+            <details
+              className={s.boardOptions}
+              ref={toolsRef}
+              key={lessonMode ? lesson.step : "tools"}
+            >
               <summary>{c.tools}</summary>
-              <div className={s.toolSwitches}>
-                <label className={s.snapToggle} title={c.snapHelp}>
-                  <input
-                    type="checkbox"
-                    checked={autoSnap}
-                    onChange={(e) => {
-                      update("autoSnap", e.target.checked);
-                      setSnapResult(null);
-                    }}
-                  />
-                  {c.autoSnap}
-                </label>
-                <div
-                  className={s.measurementButtons}
-                  role="group"
-                  aria-label={c.measurementButtons}
+              <div className={s.toolButtons}>
+                <button
+                  type="button"
+                  aria-pressed={penOpen}
+                  onClick={togglePen}
                 >
-                  <button
-                    type="button"
-                    aria-pressed={display.lengths}
-                    onClick={() => toggleReading("lengths")}
-                  >
-                    {display.lengths ? c.hideLengths : c.showLengths}
-                  </button>
-                  <button
-                    type="button"
-                    aria-pressed={display.angles}
-                    onClick={() => toggleReading("angles")}
-                  >
-                    {display.angles ? c.hideAngles : c.showAngles}
-                  </button>
-                </div>
-              </div>
-              <div className={s.boardCaption}>
-                <span>
-                  <MathText>{model.description}</MathText>
-                </span>
-              </div>
-              <MeasurementList
-                label={c.liveMeasurements}
-                measurements={visibleMeasurements}
-              />
-              <p className={s.snapHelp}>{c.snapHelp}</p>
-              <div className={s.boardActions}>
-                <button type="button" onClick={newShape}>
-                  <span aria-hidden="true">⤨</span>
-                  {c.shuffle}
+                  {c.pen}
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    (lessonMode ? lessonShape : setParameters)({
-                      ...defaults[labId],
-                    });
-                  }}
+                  aria-pressed={focus}
+                  onClick={toggleFocus}
                 >
-                  <span aria-hidden="true">↺</span>
-                  {c.reset}
+                  {c.focus}
                 </button>
               </div>
-              <details className={s.controls}>
-                <summary>{c.controls}</summary>
-                <p className={s.precision}>{c.precision}</p>
-                <div>
-                  {model.controls.map((control) => (
-                    <label key={control.key}>
-                      <span>
-                        <MathText>{control.label}</MathText>
-                        <output>{numeric(params[control.key])}</output>
-                      </span>
+              {paperStep === null && (
+                <>
+                  <div className={s.toolSwitches}>
+                    <label className={s.snapToggle} title={c.snapHelp}>
                       <input
-                        type="range"
-                        aria-label={control.label}
-                        min={control.min}
-                        max={control.max}
-                        step={control.step}
-                        value={params[control.key]}
-                        onPointerDown={() => {
-                          sliderKeyboard.current = false;
+                        type="checkbox"
+                        checked={autoSnap}
+                        onChange={(e) => {
+                          update("autoSnap", e.target.checked);
+                          setSnapResult(null);
                         }}
-                        onKeyDown={() => {
-                          sliderKeyboard.current = true;
-                        }}
+                      />
+                      {c.autoSnap}
+                    </label>
+                    <div
+                      className={s.measurementButtons}
+                      role="group"
+                      aria-label={c.measurementButtons}
+                    >
+                      <button
+                        type="button"
+                        aria-pressed={display.lengths}
+                        onClick={() => toggleReading("lengths")}
+                      >
+                        {display.lengths ? c.hideLengths : c.showLengths}
+                      </button>
+                      <button
+                        type="button"
+                        aria-pressed={display.angles}
+                        onClick={() => toggleReading("angles")}
+                      >
+                        {display.angles ? c.hideAngles : c.showAngles}
+                      </button>
+                    </div>
+                  </div>
+                  <div className={s.boardCaption}>
+                    <span>
+                      <MathText>{model.description}</MathText>
+                    </span>
+                  </div>
+                  <MeasurementList
+                    label={c.liveMeasurements}
+                    measurements={visibleMeasurements}
+                  />
+                  <p className={s.snapHelp}>{c.snapHelp}</p>
+                  <div className={s.boardActions}>
+                    <button type="button" onClick={newShape}>
+                      <span aria-hidden="true">⤨</span>
+                      {c.shuffle}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        (lessonMode ? lessonShape : setParameters)({
+                          ...defaults[labId],
+                        });
+                      }}
+                    >
+                      <span aria-hidden="true">↺</span>
+                      {c.reset}
+                    </button>
+                  </div>
+                  <details className={s.controls}>
+                    <summary>{c.controls}</summary>
+                    <p className={s.precision}>{c.precision}</p>
+                    <div>
+                      {model.controls.map((control) => (
+                        <label key={control.key}>
+                          <span>
+                            <MathText>{control.label}</MathText>
+                            <output>{numeric(params[control.key])}</output>
+                          </span>
+                          <input
+                            type="range"
+                            aria-label={control.label}
+                            min={control.min}
+                            max={control.max}
+                            step={control.step}
+                            value={params[control.key]}
+                            onPointerDown={() => {
+                              sliderKeyboard.current = false;
+                            }}
+                            onKeyDown={() => {
+                              sliderKeyboard.current = true;
+                            }}
+                            onChange={(e) =>
+                              sliderKeyboard.current
+                                ? applyShape(
+                                    slide(control.key, Number(e.target.value)),
+                                  )
+                                : changeByHand(
+                                    slide(control.key, Number(e.target.value)),
+                                    control.key,
+                                  )
+                            }
+                          />
+                          <ExactNumberInput
+                            label={`${control.label}: exact value`}
+                            min={control.min}
+                            max={control.max}
+                            step={control.step}
+                            value={params[control.key]}
+                            onCommit={(value) => {
+                              setSnapResult(null);
+                              applyShape(slide(control.key, value));
+                            }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </details>
+                  {model.toggleLabel && (
+                    <label className={s.toggle}>
+                      <input
+                        type="checkbox"
+                        checked={parameters.alternate}
                         onChange={(e) =>
-                          sliderKeyboard.current
-                            ? applyShape(
-                                slide(control.key, Number(e.target.value)),
-                              )
-                            : changeByHand(
-                                slide(control.key, Number(e.target.value)),
-                                control.key,
-                              )
+                          applyShape({ ...parameters, alternate: e.target.checked })
                         }
                       />
-                      <ExactNumberInput
-                        label={`${control.label}: exact value`}
-                        min={control.min}
-                        max={control.max}
-                        step={control.step}
-                        value={params[control.key]}
-                        onCommit={(value) => {
-                          setSnapResult(null);
-                          applyShape(slide(control.key, value));
-                        }}
-                      />
+                      <MathText>{model.toggleLabel}</MathText>
                     </label>
-                  ))}
-                </div>
-              </details>
-              {model.toggleLabel && (
-                <label className={s.toggle}>
-                  <input
-                    type="checkbox"
-                    checked={parameters.alternate}
-                    onChange={(e) =>
-                      applyShape({ ...parameters, alternate: e.target.checked })
-                    }
-                  />
-                  <MathText>{model.toggleLabel}</MathText>
-                </label>
+                  )}
+                  <button
+                    type="button"
+                    className={s.conditionTool}
+                    onClick={openCondition}
+                  >
+                    <MathText>{conditionPrompt}</MathText>
+                  </button>
+                </>
               )}
-              <button
-                type="button"
-                className={s.conditionTool}
-                onClick={openCondition}
-              >
-                <MathText>{conditionPrompt}</MathText>
-              </button>
             </details>
           )}
         </div>

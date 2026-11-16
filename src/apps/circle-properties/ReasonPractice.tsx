@@ -118,64 +118,43 @@ export default function ReasonPractice({
       <header className={styles.header}>
         <div>
           <h2>{c.title}</h2>
-          <p>
-            Use the diagram. Recall a reason. Check which conditions make it
-            work.
+          <p className={styles.where}>
+            <strong>{related}</strong>
+            {question && card && (
+              <span>
+                Question {view.index + 1} of {view.queue.length} · Round{" "}
+                {view.round}
+              </span>
+            )}
           </p>
         </div>
-      </header>
-      <div className={styles.route}>
-        <strong>{related}</strong>
-        <details className={styles.roundMenu}>
-          <summary>Change round</summary>
-          <div>
-            <button type="button" onClick={startMixed}>
-              Start a mixed round
-            </button>
-            <button type="button" onClick={() => startRound(true)}>
-              Review due reasons{summary.due ? ` (${summary.due})` : ""}
-            </button>
-          </div>
-        </details>
-      </div>
-      <nav className={styles.questionNav} aria-label={c.navigation}>
-        <button
-          type="button"
-          disabled={cursor <= 0}
-          onClick={() => visit(positions[cursor - 1])}
-        >
-          <span aria-hidden="true">← </span>
-          {c.previous}
-        </button>
-        <label>
-          <span>{c.goTo}</span>
-          <select
-            value={cursor}
-            onChange={(e) => visit(positions[Number(e.target.value)])}
+        <nav className={styles.questionNav} aria-label={c.navigation}>
+          <button
+            type="button"
+            disabled={cursor <= 0}
+            onClick={() => visit(positions[cursor - 1])}
           >
-            {positions.map((p, i) => (
-              <option key={`${p.round}-${p.index}`} value={i}>
-                Round {p.round} ·{" "}
-                {p.round === state.round && p.index === state.queue.length
-                  ? "Round review"
-                  : `Q${p.index + 1}`}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button
-          type="button"
-          disabled={!review && answer === null}
-          onClick={advance}
-        >
-          {c.next}
-          <span aria-hidden="true"> →</span>
-        </button>
-        <button type="button" className={styles.newSet} onClick={startMixed}>
-          <span aria-hidden="true">↻ </span>
-          {c.newSet}
-        </button>
-      </nav>
+            <span aria-hidden="true">← </span>
+            {c.previous}
+          </button>
+          <button
+            type="button"
+            disabled={!review && answer === null}
+            onClick={advance}
+          >
+            {c.next}
+            <span aria-hidden="true"> →</span>
+          </button>
+        </nav>
+      </header>
+      {question && card && (
+        <progress
+          className={styles.progress}
+          value={view.index}
+          max={view.queue.length}
+          aria-label="Relay progress"
+        />
+      )}
       {review && (
         <div className={styles.reviewBar}>
           <span>{c.reviewing(view.round, view.index + 1)}</span>
@@ -206,32 +185,6 @@ export default function ReasonPractice({
             highlightKey={highlightKey}
           />
           <div className={styles.question}>
-            <div className={styles.topline}>
-              <span>
-                Question {view.index + 1} of {view.queue.length} · Round{" "}
-                {view.round}
-              </span>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={state.recall}
-                  disabled={review}
-                  onChange={(e) =>
-                    setState({
-                      ...state,
-                      recall: e.target.checked,
-                      revealed: false,
-                    })
-                  }
-                />
-                Recall before choices
-              </label>
-            </div>
-            <progress
-              value={view.index}
-              max={view.queue.length}
-              aria-label="Relay progress"
-            />
             <div
               className={`${styles.given} ${answer !== null && !correct ? styles.highlight : ""}`}
             >
@@ -389,87 +342,130 @@ export default function ReasonPractice({
           </button>
         </div>
       )}
-      <details className={styles.history}>
-        <summary>Your reason review record · {summary.seen} tried</summary>
-        <div className={styles.recordActions}>
-          {confirmReset ? (
-            <div role="group" aria-label={c.resetRecord}>
-              <p>{c.resetRecordPrompt}</p>
-              <button
-                type="button"
-                onClick={() => {
-                  setState({
-                    ...initialPractice(),
-                    recall: state.recall,
-                    lastFocusToken: state.lastFocusToken,
-                  });
-                  onResetRecord();
-                  setNotice(c.recordReset);
-                  setHighlightKey(0);
-                  setConfirmReset(false);
-                }}
-              >
-                {c.confirmReset}
-              </button>
-              <button type="button" onClick={() => setConfirmReset(false)}>
-                {c.cancelReset}
-              </button>
-            </div>
-          ) : (
-            <button type="button" onClick={() => setConfirmReset(true)}>
-              {c.resetRecord}
-            </button>
-          )}
+      <details className={styles.more}>
+        <summary>{c.more}</summary>
+        <div className={styles.moreRow}>
+          <button type="button" onClick={startMixed}>
+            <span aria-hidden="true">↻ </span>
+            {c.newSet}
+          </button>
+          <button type="button" onClick={() => startRound(true)}>
+            Review due reasons{summary.due ? ` (${summary.due})` : ""}
+          </button>
+          <label>
+            <span>{c.goTo}</span>
+            <select
+              value={cursor}
+              onChange={(e) => visit(positions[Number(e.target.value)])}
+            >
+              {positions.map((p, i) => (
+                <option key={`${p.round}-${p.index}`} value={i}>
+                  Round {p.round} ·{" "}
+                  {p.round === state.round && p.index === state.queue.length
+                    ? "Round review"
+                    : `Q${p.index + 1}`}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={state.recall}
+              disabled={review}
+              onChange={(e) =>
+                setState({
+                  ...state,
+                  recall: e.target.checked,
+                  revealed: false,
+                })
+              }
+            />
+            Recall before choices
+          </label>
         </div>
-        <div className={styles.stats} aria-label="Practice evidence">
-          <span>
-            <b>{summary.seen}</b> Tried
-          </span>
-          <span>
-            <b>{summary.correctOnce}</b> Correct at least once
-          </span>
-          <span>
-            <b>{summary.reviewedLater}</b> Correct on a later day
-          </span>
-        </div>
-        <p>
-          “Correct at least once” includes valid successes saved from the
-          earlier version. Their original dates are unknown, so they do not
-          count as later-day reviews.
-        </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Reason</th>
-              <th>Attempts</th>
-              <th>Errors</th>
-              <th>Review evidence</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reasons.map((r) => {
-              const h = state.history[r.id];
-              return (
-                <tr key={r.id}>
-                  <td>
-                    {r.number} · {r.label}
-                  </td>
-                  <td>{h?.seen ?? 0}</td>
-                  <td>{h?.mistakes ?? 0}</td>
-                  <td>
-                    {h?.reviewedLater
-                      ? "Correct on a later day"
-                      : h?.correct
-                        ? "Correct at least once"
-                        : h?.seen
-                          ? "Needs another example"
-                          : "Not tried"}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <details className={styles.history}>
+          <summary>Your reason review record · {summary.seen} tried</summary>
+          <div className={styles.recordActions}>
+            {confirmReset ? (
+              <div role="group" aria-label={c.resetRecord}>
+                <p>{c.resetRecordPrompt}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setState({
+                      ...initialPractice(),
+                      recall: state.recall,
+                      lastFocusToken: state.lastFocusToken,
+                    });
+                    onResetRecord();
+                    setNotice(c.recordReset);
+                    setHighlightKey(0);
+                    setConfirmReset(false);
+                  }}
+                >
+                  {c.confirmReset}
+                </button>
+                <button type="button" onClick={() => setConfirmReset(false)}>
+                  {c.cancelReset}
+                </button>
+              </div>
+            ) : (
+              <button type="button" onClick={() => setConfirmReset(true)}>
+                {c.resetRecord}
+              </button>
+            )}
+          </div>
+          <div className={styles.stats} aria-label="Practice evidence">
+            <span>
+              <b>{summary.seen}</b> Tried
+            </span>
+            <span>
+              <b>{summary.correctOnce}</b> Correct at least once
+            </span>
+            <span>
+              <b>{summary.reviewedLater}</b> Correct on a later day
+            </span>
+          </div>
+          <p>
+            “Correct at least once” includes valid successes saved from the
+            earlier version. Their original dates are unknown, so they do not
+            count as later-day reviews.
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Reason</th>
+                <th>Attempts</th>
+                <th>Errors</th>
+                <th>Review evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reasons.map((r) => {
+                const h = state.history[r.id];
+                return (
+                  <tr key={r.id}>
+                    <td>
+                      {r.number} · {r.label}
+                    </td>
+                    <td>{h?.seen ?? 0}</td>
+                    <td>{h?.mistakes ?? 0}</td>
+                    <td>
+                      {h?.reviewedLater
+                        ? "Correct on a later day"
+                        : h?.correct
+                          ? "Correct at least once"
+                          : h?.seen
+                            ? "Needs another example"
+                            : "Not tried"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </details>
       </details>
     </section>
   );

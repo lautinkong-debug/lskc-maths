@@ -1,70 +1,29 @@
+/* The card beside the circle. White, like the Learn path: colour only for meaning. */
 .lesson {
   display: grid;
   /* A fixed column: without it, a wide child stretches the panel past its own edge. */
   grid-template-columns: minmax(0, 1fr);
-  gap: 12px;
-  font-size: 1rem;
+  gap: 14px;
+  font-size: 1.0625rem;
+  line-height: 1.5;
 }
 :global([data-presentation="true"]) .lesson {
   font-size: 1.3rem;
 }
-.title {
-  font-size: 1.25em;
-}
-/* Each button is as wide as its words and the rows fill up, at any panel width. */
-.steps {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.lesson .steps button {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: center;
-  gap: 7px;
-  min-width: 0;
-  max-width: 100%;
-  min-height: 44px;
-  padding: 6px 12px 6px 8px;
-  font-size: 0.875em;
-  font-weight: 700;
-  line-height: 1.25;
-}
-.lesson .steps button > span {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #e8eefb;
-  font-size: 0.75em;
-}
-.lesson .steps button[data-done="true"] > span {
-  background: #1b714a;
-  color: white;
-}
-.lesson .steps button[aria-current="step"] {
-  border-color: var(--blue);
-  box-shadow: inset 0 0 0 1px var(--blue);
-}
-.stepOf {
-  font-size: 0.8em;
-  color: #6b5a33;
-}
-.lesson h4 {
-  font-size: 1.1em;
+/* The step's own heading. Headings inside the reason panel keep their size. */
+.lesson > h4 {
+  font-size: 1.3em;
+  letter-spacing: -0.02em;
 }
 .task {
   font-size: 1.08em;
   font-weight: 700;
 }
 .waiting {
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: #fffdf5;
-  border: 1px dashed #d9c58f;
-  color: #6b5a33;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f4f8ff;
+  color: #4a6081;
 }
 .paperList,
 .proof {
@@ -79,10 +38,10 @@
   color: #b3264a;
 }
 .seen {
-  padding: 12px;
-  border-radius: 12px;
-  border: 1px solid #a8ceba;
-  background: #e4f6eb;
+  padding: 12px 14px;
+  border-left: 5px solid #18764b;
+  border-radius: 10px;
+  background: #e3f6ec;
   color: #174f36;
   font-weight: 600;
 }
@@ -94,9 +53,9 @@
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 2px 14px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  background: white;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f4f8ff;
 }
 .proof li[data-current="true"] {
   outline: 2px solid #d97706;
@@ -109,10 +68,9 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 8px;
-  padding: 14px;
+  padding: 16px;
   border-radius: 14px;
-  border: 1px solid #a8ceba;
-  background: #e4f6eb;
+  background: #e3f6ec;
   color: #174f36;
 }
 .complete > strong {
@@ -136,29 +94,27 @@
   /* Fixed, so a long reason wraps inside its cell in every browser. */
   table-layout: fixed;
   border-collapse: collapse;
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
   font-size: 0.95em;
 }
 .compare th,
 .compare td {
-  padding: 8px;
-  border: 1px solid #e3d6b4;
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--line, #d8e4f4);
   text-align: left;
   vertical-align: top;
 }
-.compare thead th {
-  background: #fff4d8;
+.compare tbody tr:nth-child(odd) td {
+  border-bottom: 0;
 }
 .compare thead th:first-child {
   width: 3.6em;
 }
 .trap {
-  padding: 8px 10px;
-  border-left: 4px solid var(--circle-red);
-  background: white;
-  font-size: 0.92em;
+  padding: 10px 14px;
+  border-left: 5px solid var(--circle-red);
+  border-radius: 10px;
+  background: #fdecef;
+  font-size: 0.95em;
 }
 .trap ul {
   margin: 2px 0 0;
@@ -167,10 +123,9 @@
 /* Fills the row below the circle and the panel, using the whole width of the board. */
 .questions {
   grid-column: 1 / -1;
-  padding: 14px;
-  border: 1px solid #e4d7af;
-  border-radius: 12px;
-  background: #fff8e7;
+  padding: 20px;
+  border-radius: 20px;
+  background: white;
   scroll-margin-top: 10px;
 }
 .cards {
@@ -197,9 +152,9 @@
   align-content: start;
   gap: 8px;
   /* The extra top space keeps the stamp clear of the question. */
-  padding: 18px 12px 12px;
-  border-radius: 12px;
-  border: 2px solid #e3d6b4;
+  padding: 18px 14px 14px;
+  border-radius: 14px;
+  border: 2px solid var(--line, #d8e4f4);
   background: white;
 }
 .cards > li[data-result="true"] {

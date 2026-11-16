@@ -25,14 +25,17 @@ const sizes = [
 ];
 
 async function open(page: Page) {
-  await page.goto("/");
+  await page.goto("/#explore");
   await expect(page.getByTestId("paper-circle")).toBeVisible();
 }
 
 const steps = (page: Page) =>
   page.getByRole("navigation", { name: "Lesson steps" }).getByRole("button");
+/** Pen, Focus, measurements and sliders wait behind one control under the circle. */
+const tools = (page: Page) =>
+  page.locator("summary").filter({ hasText: /^Tools$/ });
 
-/** Runs in the page: anything in the lesson panel that leaves its box. */
+/** Runs in the page: anything in the step bar or the lesson panel that leaves its box. */
 function lessonEscapes(): string[] {
   const problems: string[] = [];
   const screen = document.documentElement.clientWidth;
@@ -45,8 +48,10 @@ function lessonEscapes(): string[] {
     range.selectNodeContents(element);
     return range.getBoundingClientRect();
   };
-  const buttons = lesson.querySelectorAll('nav[aria-label="Lesson steps"] button');
-  for (const button of buttons) {
+  // The seven steps run across the top of the lesson, above the circle.
+  const bar = document.querySelector('nav[aria-label="Lesson steps"]')!;
+  const barBox = bar.getBoundingClientRect();
+  for (const button of bar.querySelectorAll("button")) {
     const label = button.textContent ?? "";
     const box = button.getBoundingClientRect();
     const style = getComputedStyle(button);
@@ -57,8 +62,8 @@ function lessonEscapes(): string[] {
       problems.push(`"${label}" starts before its padding`);
     if (text.bottom > box.bottom || text.top < box.top)
       problems.push(`"${label}" is taller than its button`);
-    if (box.right > panel.right || box.left < panel.left)
-      problems.push(`"${label}" leaves the panel`);
+    if (box.right > barBox.right || box.left < barBox.left)
+      problems.push(`"${label}" leaves the step bar`);
     // Rounded: a button easing back from a press measures 43.9999.
     if (Math.round(box.height) < 44) problems.push(`"${label}" is too short`);
   }
@@ -97,6 +102,7 @@ for (const { width, height } of sizes) {
       await page.reload();
       await expect(steps(page).first()).toBeVisible();
       await everyLessonStepFits(page);
+      await tools(page).tap();
       for (const name of [/Pen$/, /^Focus$/, /^Tasks$/, /^Free play$/]) {
         const box = await page
           .getByRole("button", { name })
@@ -136,10 +142,13 @@ test.describe("on an iPad", () => {
     hasTouch: true,
   });
 
-  test("the how-to strip keeps its numbers apart from the item before", async ({
+  test("the how-to list keeps its numbers apart from the item before", async ({
     page,
   }) => {
     await open(page);
+    // The three lines wait in More, so the lesson opens on its first task.
+    await expect(page.getByRole("note", { name: "How to use" })).toHaveCount(0);
+    await page.getByText("More", { exact: true }).tap();
     const items = page
       .getByRole("note", { name: "How to use" })
       .getByRole("listitem");
@@ -248,12 +257,18 @@ test.describe("on an iPad", () => {
     }) => {
       await open(page);
       await steps(page).nth(step).tap();
+      await tools(page).tap();
       await page.getByRole("button", { name: "Focus", exact: true }).tap();
       const unfocus = page.getByRole("button", {
         name: "Show mission panel",
         exact: true,
       });
       await expect(unfocus).toBeInViewport();
+      // Focus leaves the board alone on the screen: no step bar, no lesson card.
+      await expect(
+        page.getByRole("region", { name: "Guided lesson" }),
+      ).toBeHidden();
+      await expect(steps(page)).toHaveCount(0);
       if (step === 0) {
         await expect(
           page
@@ -282,7 +297,6 @@ test.describe("on an iPad", () => {
     page,
   }) => {
     await open(page);
-    await page.getByRole("button", { name: "Got it", exact: true }).tap();
     await steps(page).nth(4).tap();
     await page.getByText("For teachers", { exact: true }).tap();
     await page
@@ -291,6 +305,7 @@ test.describe("on an iPad", () => {
     await page.getByRole("button", { name: "Reset progress", exact: true }).tap();
     await expect(page.getByTestId("paper-circle")).toBeVisible();
     await expect(steps(page).first()).toHaveAttribute("aria-current", "step");
+    await page.getByText("More", { exact: true }).tap();
     await expect(page.getByRole("note", { name: "How to use" })).toBeVisible();
   });
 });

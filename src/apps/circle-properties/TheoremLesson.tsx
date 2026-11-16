@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import {
   circleCopy,
   circleLessonCopy,
@@ -16,6 +17,8 @@ import ReasonEvidencePanel from "./ReasonEvidencePanel";
 import TwoBisectorsDiagram from "./TwoBisectorsDiagram";
 import { proofLineHints } from "./ReasonProofLines";
 import ReasonLabel from "./ReasonLabel";
+import LessonSteps, { LessonWhere } from "./LessonSteps";
+import type { CpaStage } from "./path/types";
 import {
   normaliseReasonParameters,
   reasonMeasurements,
@@ -46,15 +49,26 @@ function lessonIds(lab: Lab) {
   );
 }
 const reasonById = (id: string): Reason => reasons.find((r) => r.id === id)!;
+/** Tap and drag the diagram, then read its marks, then write the reason. */
+const stepCpa: readonly CpaStage[] = [
+  "concrete",
+  "concrete",
+  "pictorial",
+  "abstract",
+  "abstract",
+];
 
 export default function TheoremLesson({
   lab,
   onRelay,
   chordSelector,
+  selectorSlot,
 }: {
   lab: Lab;
   onRelay: () => void;
   chordSelector?: ReactNode;
+  /** Where the 16.x buttons go: beside the property menu, above the lesson. */
+  selectorSlot: HTMLElement | null;
 }) {
   const ids = lessonIds(lab);
   const [selected, select, saveFailed] = useLocalSession<GuidedReasonId>(
@@ -67,16 +81,22 @@ export default function TheoremLesson({
     chordSelector ??
     (ids.length > 1 && (
       <nav className={s.reasonNav} aria-label={c.chooseTheorem}>
-        {ids.map((id) => (
-          <button
-            key={id}
-            type="button"
-            aria-pressed={id === active}
-            onClick={() => select(id)}
-          >
-            {reasonById(id).number} · {theoremLessons[id].title}
-          </button>
-        ))}
+        {ids.map((id) => {
+          const name = `${reasonById(id).number} · ${theoremLessons[id].title}`;
+          // The number is enough on the button: the heading below gives the title.
+          return (
+            <button
+              key={id}
+              type="button"
+              aria-label={name}
+              title={name}
+              aria-pressed={id === active}
+              onClick={() => select(id)}
+            >
+              {reasonById(id).number}
+            </button>
+          );
+        })}
       </nav>
     ));
   return (
@@ -85,6 +105,7 @@ export default function TheoremLesson({
         key={active}
         id={active}
         selector={selector}
+        selectorSlot={selectorSlot}
         onRelay={onRelay}
       />
       {saveFailed && <p role="status">{c.selectionFailed}</p>}
@@ -182,10 +203,12 @@ function LessonActivity({
   id,
   onRelay,
   selector,
+  selectorSlot,
 }: {
   id: GuidedReasonId;
   onRelay: () => void;
   selector: ReactNode;
+  selectorSlot: HTMLElement | null;
 }) {
   const [progress, setProgress, failed] = useLocalSession(
     `guided-theorem-${id}-v1`,
@@ -215,6 +238,7 @@ function LessonActivity({
   const caseHeading = useRef<HTMLHeadingElement>(null);
   const lessonPanel = useRef<HTMLElement>(null);
   const board = useRef<HTMLDivElement>(null);
+  const tools = useRef<HTMLDetailsElement>(null);
   const lesson = theoremLessons[id];
   const reason = reasonById(id);
   const termInfo = lesson.terms[term];
@@ -296,17 +320,32 @@ function LessonActivity({
     setConfirmRestart(false);
     setProgress(startGuide(id));
   }
+  /** Once a tool is in hand, Tools closes again. Its own row appears above the task. */
+  function closeTools() {
+    if (tools.current) tools.current.open = false;
+  }
+  function togglePen() {
+    // A hidden pen must never keep capturing drags meant for the circle.
+    if (penOpen) ink.setMode("move");
+    setPenOpen(!penOpen);
+    closeTools();
+  }
   return (
     <>
       {selector &&
-        (stage === 3 ? (
-          <details className={s.switchTheorem}>
-            <summary>{c.chooseTheorem}</summary>
-            {selector}
-          </details>
-        ) : (
-          selector
-        ))}
+        selectorSlot &&
+        createPortal(
+          // Mixed practice must not show which theorem the lesson started from.
+          stage === 3 ? (
+            <details>
+              <summary>{c.chooseTheorem}</summary>
+              {selector}
+            </details>
+          ) : (
+            selector
+          ),
+          selectorSlot,
+        )}
       <section
         className={s.lesson}
         data-focused={focus}
@@ -317,27 +356,17 @@ function LessonActivity({
         data-case-variant={stage === 3 ? attempt.variant : undefined}
         aria-label={stage === 3 ? c.mixedPractice : c.lessonName(reason.number)}
       >
-        <nav className={s.stageNav} aria-label={c.stepsLabel}>
-          <h3>
-            {stage === 3
-              ? c.mixedPractice
-              : reason.number + " · " + lesson.title}
-          </h3>
-          <div>
-            {guideSteps.map((name, index) => (
-              <button
-                type="button"
-                key={name}
-                aria-current={index === stage ? "step" : undefined}
-                aria-label={name}
-                onClick={() => step(index)}
-              >
-                <span aria-hidden="true">{index + 1}</span>
-                {name}
-              </button>
-            ))}
-          </div>
-        </nav>
+        <div className={s.steps}>
+          <LessonSteps
+            label={c.stepsLabel}
+            current={stage}
+            onSelect={step}
+            steps={guideSteps.map((name, index) => ({
+              name,
+              cpa: stepCpa[index],
+            }))}
+          />
+        </div>
 
         <div
           ref={board}
@@ -348,26 +377,24 @@ function LessonActivity({
         >
           {stage < 3 ? (
             <>
-              <div className={s.boardTools}>
-                {penOpen && <InkToolbar board={ink} />}
-                <button
-                  type="button"
-                  aria-pressed={penOpen}
-                  onClick={() => {
-                    if (penOpen) ink.setMode("move");
-                    setPenOpen(!penOpen);
-                  }}
-                >
-                  {penOpen ? circleCopy.hidePen : circleCopy.pen}
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={focus}
-                  onClick={() => setFocus(!focus)}
-                >
-                  {focus ? circleCopy.unfocus : circleCopy.focus}
-                </button>
-              </div>
+              {/* Nothing sits above the task until a tool is in use. */}
+              {(penOpen || focus) && (
+                <div className={s.boardTools}>
+                  {penOpen && (
+                    <>
+                      <InkToolbar board={ink} />
+                      <button type="button" onClick={togglePen}>
+                        {circleCopy.hidePen}
+                      </button>
+                    </>
+                  )}
+                  {focus && (
+                    <button type="button" onClick={() => setFocus(false)}>
+                      {circleCopy.unfocus}
+                    </button>
+                  )}
+                </div>
+              )}
               <div className={s.boardCaption}>
                 <h4 className={s.boardTitle}>
                   {stage === 0 ? (
@@ -536,6 +563,28 @@ function LessonActivity({
                   </div>
                 )
               )}
+              <details className={s.tools} ref={tools} key={stage}>
+                <summary>{circleCopy.tools}</summary>
+                <div>
+                  <button
+                    type="button"
+                    aria-pressed={penOpen}
+                    onClick={togglePen}
+                  >
+                    {circleCopy.pen}
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={focus}
+                    onClick={() => {
+                      setFocus(!focus);
+                      closeTools();
+                    }}
+                  >
+                    {circleCopy.focus}
+                  </button>
+                </div>
+              </details>
             </>
           ) : (
             <div className={s.caseSheet}>
@@ -580,6 +629,16 @@ function LessonActivity({
           className={s.panel}
           aria-label={guideSteps[stage]}
         >
+          <LessonWhere
+            cpa={stepCpa[stage]}
+            count={circleLessonCopy.stepOf(stage + 1, guideSteps.length)}
+          >
+            <h3>
+              {stage === 3
+                ? c.mixedPractice
+                : reason.number + " · " + lesson.title}
+            </h3>
+          </LessonWhere>
           {(stage === 1 || stage === 2) && (
             <ReasonEvidencePanel
               reasonId={id}

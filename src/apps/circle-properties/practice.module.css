@@ -1,202 +1,136 @@
+/* Reasons Play. Calm, like the Learn path: one question as two white cards.
+   Blue is given, green is what we want to justify. */
 .root {
-  color: var(--ink, #143b68);
+  --given: #2454c6;
+  --given-bg: #e9f0ff;
+  --get: #18764b;
+  --get-bg: #e3f6ec;
+  --soft: #5a6f8c;
   max-width: 1180px;
   margin: auto;
-  padding: 8px 0;
+  color: var(--ink, #143b68);
+  font-size: 1.0625rem;
+  line-height: 1.5;
 }
 .header {
   display: flex;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 10px 20px;
   margin-bottom: 12px;
 }
 .header h2 {
-  font-size: 1.65rem;
+  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
 }
-.header p {
-  margin-top: 8px !important;
-  max-width: 58ch;
-}
-.stats {
+.where {
   display: flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.stats span {
-  display: flex;
-  flex-direction: column;
-  max-width: 110px;
-  padding: 10px;
-  border: 1px solid #cfdded;
-  background: #fff;
-  border-radius: 12px;
-  font-size: 0.78rem;
-}
-.stats b {
-  font-size: 1.45rem;
-}
-.route {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
-  padding: 12px 15px;
-  background: #dfeaff;
-  border-radius: 12px;
-  margin-bottom: 14px;
+  gap: 2px 12px;
+  margin-top: 4px !important;
+  color: var(--soft);
+  font-size: 0.95rem;
 }
-.roundMenu > div {
+.where strong {
+  color: var(--ink, #143b68);
+}
+.questionNav {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
-  padding-top: 8px;
 }
-.questionNav,
-.reviewBar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.questionNav label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-  font-weight: 650;
-}
-.questionNav select,
-.root .questionNav button,
-.root .reviewBar button {
-  min-height: 44px;
-  padding: 7px 12px;
-  border: 1px solid #bacfe7;
-  border-radius: 9px;
-  background: #fff;
-  color: #153f6e;
-  font: inherit;
-}
-.root .questionNav .newSet {
-  margin-inline-start: auto;
-  background: #e7f0ff;
-  border-color: #90b3f0;
+.root .questionNav button {
+  min-height: 46px;
+  padding: 10px 16px;
   font-weight: 700;
+  font-size: 0.95rem;
 }
 .root .questionNav button:disabled {
   opacity: 0.48;
 }
+.progress {
+  display: block;
+  width: 100%;
+  height: 6px;
+  margin: 0 0 14px;
+  border: 0;
+  border-radius: 3px;
+  overflow: hidden;
+  accent-color: var(--blue, #3769f4);
+}
+.progress::-webkit-progress-bar {
+  background: #c9d5e8;
+}
+.progress::-webkit-progress-value {
+  background: var(--get);
+}
 .reviewBar,
 .archivedNote {
-  padding: 8px 12px;
-  background: #eef5ff;
-  border-radius: 10px;
-  font-size: 0.93rem;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--given-bg);
+  font-size: 0.95rem;
+}
+.reviewBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.root .reviewBar button {
+  min-height: 44px;
 }
 .reviewChoice {
   display: block;
   font-weight: 700;
 }
-.recordActions {
-  margin-bottom: 16px;
-}
-.recordActions button {
-  margin: 6px 8px 6px 0;
-  min-height: 44px;
-}
-.recordActions p {
-  max-width: 65ch;
-  line-height: 1.5;
-}
-@media (max-width: 600px) {
-  .questionNav {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .questionNav label {
-    grid-column: 1 / -1;
-    grid-row: 1;
-  }
-  .questionNav select {
-    flex: 1;
-    min-width: 0;
-  }
-  .root .questionNav button {
-    padding-inline: 4px;
-    text-align: center;
-  }
-  .root .questionNav .newSet {
-    margin: 0;
-  }
-}
-.roundMenu summary {
-  cursor: pointer;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  font-size: 0.88rem;
-  font-weight: 600;
-}
-.roundMenu summary::after {
-  content: "+";
-  margin-left: 10px;
-}
-.roundMenu[open] summary::after {
-  content: "−";
-}
 .root summary:focus-visible {
   outline: 3px solid #244cc6;
   outline-offset: 3px;
 }
-.root .route button {
-  font-size: 0.85rem;
-  padding: 8px 12px;
-}
 .saveNote {
-  margin: 10px 0 16px !important;
-  font-size: 0.85rem;
-  color: #4c6584;
+  margin: 0 0 14px !important;
+  color: var(--soft);
+  font-size: 0.9rem;
 }
 .notice {
-  padding: 12px 15px;
-  margin-bottom: 16px !important;
-  background: #fff5d9;
-  border: 1px solid #dfc47d;
-  border-radius: 10px;
+  margin-bottom: 14px !important;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff6dd;
+  color: #6b4a0f;
 }
 .layout {
   display: grid;
   grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.15fr);
-  gap: 20px;
+  gap: 18px;
   align-items: start;
 }
 .diagram {
-  margin: 0;
-  background: white;
-  border: 2px solid #d8e4f4;
-  border-radius: 18px;
-  padding: 16px 10px;
   position: sticky;
   top: 12px;
+  margin: 0;
+  padding: 16px 10px;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  background: white;
 }
 .diagram svg {
-  width: 100%;
   display: block;
+  width: 100%;
   max-height: 380px;
   overflow: visible;
 }
 .diagram figcaption {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   padding: 0 12px 5px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 .diagram figcaption span {
-  color: #526783;
-  font-size: 0.8rem;
+  color: var(--soft);
+  font-size: 0.82rem;
 }
 .circle {
   fill: #f9fcff;
@@ -242,9 +176,9 @@
   stroke-width: 4;
   fill: none;
 }
+/* After an answer the given marks are what to look at: blue, like every given. */
 .emphasised {
-  border-color: #d49d32;
-  background: #fff9e8;
+  border-color: #2454c6;
 }
 .emphasised .givenLine,
 .emphasised .selectedArc,
@@ -272,136 +206,124 @@
     animation: none;
   }
 }
-.question {
-  background: white;
+.question,
+.roundEnd {
   padding: 22px;
-  border-radius: 18px;
-  border: 1px solid #d8e4f4;
-}
-.topline {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  font-size: 0.85rem;
-}
-.topline label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.question progress {
-  display: block;
-  width: 100%;
-  height: 8px;
-  margin: 12px 0 20px;
-  accent-color: #3769f4;
+  border-radius: 20px;
+  background: white;
 }
 .given,
 .conclusion {
-  padding: 14px 16px;
-  border-left: 4px solid #3769f4;
-  background: #edf4ff;
-  margin-bottom: 12px;
-  border-radius: 0 10px 10px 0;
+  margin-bottom: 10px;
+  padding: 12px 16px;
+  border-left: 5px solid var(--given);
+  border-radius: 10px;
+  background: var(--given-bg);
 }
 .conclusion {
-  border-color: #167d73;
-  background: #eaf8f3;
+  border-color: var(--get);
+  background: var(--get-bg);
 }
 .given > span,
 .conclusion > span {
   display: block;
-  font-size: 0.82rem;
+  margin-bottom: 3px;
+  font-size: 0.85rem;
   font-weight: 700;
-  margin-bottom: 5px;
 }
+/* After a wrong choice, the given facts are what to read again. */
 .highlight {
-  outline: 2px solid #d49d32;
-  background: #fff5d9;
+  outline: 2px solid var(--given);
 }
 .question h3 {
-  font-size: 1.12rem;
   margin: 16px 0 12px !important;
+  font-size: 1.15rem;
 }
 .recall {
-  background: #f5f7fc;
-  padding: 17px;
-  border-radius: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #f4f8ff;
 }
 .recall small,
 .feedback small {
   display: block;
-  margin: 8px 0 14px;
-  font-size: 0.82rem;
-  color: #4c6584;
+  margin: 6px 0 14px;
+  color: var(--soft);
+  font-size: 0.85rem;
 }
 .root .primary {
-  background: #3769f4;
+  min-height: 52px;
+  padding: 12px 26px;
+  border-color: var(--blue-dark, #244cc6);
+  border-radius: 14px;
+  background: var(--blue, #3769f4);
+  box-shadow: 0 4px 0 var(--blue-dark, #244cc6);
   color: white;
-  border-color: #244cc6;
+  font-weight: 800;
   text-align: center;
-  font-weight: 700;
-  min-height: 46px;
 }
 .root .primary:hover:not(:disabled) {
-  background: #244cc6;
+  background: var(--blue-dark, #244cc6);
   color: white;
 }
 .choices {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 9px;
+  gap: 10px;
 }
 .root .choices button {
   display: flex;
-  gap: 12px;
   align-items: center;
-  padding: 12px;
-  min-height: 55px;
-  font-size: 0.96rem;
+  gap: 14px;
+  min-height: 56px;
+  padding: 12px 16px;
+  border: 2px solid var(--line, #d8e4f4);
+  border-radius: 14px;
+  font-size: 1.02rem;
 }
 .choices button > span:first-child {
   display: grid;
   place-items: center;
-  min-width: 28px;
-  height: 28px;
-  background: #edf4ff;
-  border-radius: 7px;
-  font-weight: 700;
+  min-width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: #e7eefa;
+  font-weight: 800;
+  font-size: 0.9rem;
 }
 .root .choices button:disabled {
   opacity: 1;
 }
 .root .choices button[data-result="correct"] {
-  background: #e5f6ec;
-  border-color: #31905b;
+  border-color: var(--get);
+  background: var(--get-bg);
 }
 .root .choices button[data-result="incorrect"] {
-  background: #fff0ed;
-  border-color: #c55a48;
+  border-color: #e7b3bf;
+  background: #fdecef;
 }
 .feedback {
   margin-top: 16px;
   padding: 16px;
-  background: #fff7e3;
-  border: 1px solid #e4c16d;
+  border-left: 5px solid #c98a00;
   border-radius: 12px;
+  background: #fff6dd;
 }
 .feedback[data-correct="true"] {
-  background: #eef9f1;
-  border-color: #a7d0b4;
+  border-color: var(--get);
+  background: var(--get-bg);
+}
+.feedback h3 {
+  margin-top: 0 !important;
 }
 .feedback p + p {
-  margin-top: 12px !important;
+  margin-top: 10px !important;
 }
 .root .figureAction {
   margin-top: 10px;
   min-height: 44px;
   color: #244cc6;
-  border-color: #9eb6e5;
-  background: white;
-  font-weight: 650;
+  font-weight: 700;
 }
 .feedbackDetails {
   margin: 8px 0 14px;
@@ -410,7 +332,7 @@
   display: flex;
   align-items: center;
   min-height: 44px;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -422,91 +344,120 @@
   width: 100%;
 }
 .correction {
-  padding: 9px 0;
+  padding: 6px 0;
   font-weight: 600;
 }
 .roundEnd {
   max-width: 620px;
-  margin: 25px auto;
-  padding: 30px;
-  border-radius: 18px;
-  background: white;
-  border: 1px solid #d8e4f4;
+  margin: 8px auto 0;
 }
 .roundEnd p {
-  margin: 15px 0 !important;
+  margin: 12px 0 !important;
 }
 .score {
   font-size: 2rem;
   font-weight: 800;
 }
-.history {
-  margin-top: 24px;
-  padding: 14px 20px;
-  border: 1px solid #d8e4f4;
+
+/* ---------- More: rounds, jumping to a question, and the record ---------- */
+.more {
+  margin-top: 18px;
+  color: var(--soft);
+  font-size: 0.92rem;
+}
+.more > summary {
+  width: fit-content;
+}
+.moreRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-bottom: 8px;
+}
+.root .moreRow button {
+  min-height: 44px;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+.moreRow label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-weight: 700;
+}
+.moreRow select {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 1.5px solid var(--line, #d8e4f4);
   border-radius: 12px;
+  background: white;
+  color: var(--ink, #143b68);
+  font: inherit;
+}
+.history {
+  color: var(--ink, #143b68);
+}
+.history[open] {
+  padding: 0 18px 14px;
+  border-radius: 16px;
   background: white;
 }
 .history p {
-  font-size: 0.9rem;
   max-width: 80ch;
-  margin-bottom: 15px !important;
+  margin-bottom: 14px !important;
+  font-size: 0.9rem;
 }
-.history .stats {
+.recordActions {
+  margin-bottom: 14px;
+}
+.recordActions button {
+  margin: 6px 8px 6px 0;
+  min-height: 44px;
+}
+.recordActions p {
+  max-width: 65ch;
+  line-height: 1.5;
+}
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin: 14px 0;
 }
-:global([data-appearance="calm"]) .header p {
-  display: none;
+.stats span {
+  display: flex;
+  flex-direction: column;
+  min-width: 105px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f4f8ff;
+  font-size: 0.82rem;
 }
-:global([data-appearance="calm"]) .route {
-  padding: 0 0 8px;
-  background: transparent;
-  border-radius: 0;
-  border-bottom: 1px solid #cad7e4;
-}
-:global([data-appearance="calm"]) .question {
-  padding: 6px 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-}
-:global([data-appearance="calm"]) .given,
-:global([data-appearance="calm"]) .conclusion {
-  padding: 8px 12px;
-  background: transparent;
-  border-radius: 0;
-}
-:global([data-appearance="calm"]) .feedback {
-  border-radius: 4px;
+.stats b {
+  font-size: 1.45rem;
 }
 .history table {
-  border-collapse: collapse;
   width: 100%;
-  font-size: 0.86rem;
+  border-collapse: collapse;
+  font-size: 0.88rem;
 }
 .history th,
 .history td {
-  text-align: left;
   padding: 10px 8px;
-  border-bottom: 1px solid #d8e4f4;
-}
-.history th {
-  background: #edf4ff;
+  border-bottom: 1px solid var(--line, #d8e4f4);
+  text-align: left;
 }
 @media (max-width: 900px) {
-  .header {
-    flex-direction: column;
-  }
-  .stats span {
-    max-width: none;
-    min-width: 105px;
-  }
   .layout {
     grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1fr);
     gap: 12px;
   }
-  .question {
-    padding: 15px;
+  .question,
+  .roundEnd {
+    padding: 16px;
   }
 }
 @media (max-width: 650px) {
@@ -520,48 +471,27 @@
   .diagram svg {
     max-height: 260px;
   }
-  .stats {
+  .questionNav {
     width: 100%;
-    gap: 5px;
+  }
+  .root .questionNav button {
+    flex: 1;
+    text-align: center;
   }
   .stats span {
-    min-width: 0;
     flex: 1;
-    font-size: 0.78rem;
-    padding: 9px;
+    min-width: 0;
   }
-  .header h2 {
-    font-size: 1.7rem;
-  }
-  .topline {
-    flex-wrap: wrap;
-  }
-  .route {
-    padding: 12px;
-  }
-  .root .route button {
-    font-size: 0.82rem;
-  }
-  .question {
-    padding: 14px;
-  }
-  .given,
-  .conclusion {
-    padding: 12px;
-  }
-  .history {
-    padding: 12px 8px;
+  .history[open] {
+    padding: 0 10px 12px;
     overflow-x: auto;
   }
   .history th,
   .history td {
     padding: 8px 5px;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
   }
   .history td:first-child {
     min-width: 135px;
-  }
-  .roundEnd {
-    padding: 20px;
   }
 }

@@ -4,9 +4,17 @@ import { getReasonChallenge } from "../../src/apps/circle-properties/reasonChall
 test.use({ actionTimeout: 10_000 });
 
 async function open(page: Page) {
-  await page.goto("/");
+  await page.goto("/#explore");
   await expect(page.getByTestId("paper-circle")).toBeVisible();
 }
+/** Pen, Focus, measurements and sliders wait behind one control under the circle. */
+const tools = (page: Page) =>
+  page.locator("summary").filter({ hasText: /^Tools$/ });
+/** The seven steps run across the top of the lesson, above the circle. */
+const stepButton = (page: Page, name: string) =>
+  page
+    .getByRole("navigation", { name: "Lesson steps" })
+    .getByRole("button", { name });
 
 test("reason game keeps four-step drafts and checked answers when returning to question one", async ({
   page,
@@ -110,9 +118,8 @@ test("reason game keeps four-step drafts and checked answers when returning to q
 });
 
 async function placeNAtMidpoint(page: Page) {
-  const tools = page.getByText("Tools: measurements, snapping and sliders");
   const fine = page.getByText("Fine-tune / keyboard controls");
-  if (!(await fine.isVisible())) await tools.click();
+  if (!(await fine.isVisible())) await tools(page).click();
   const exact = page.getByLabel("Position of N along AB: exact value");
   if (!(await exact.isVisible())) await fine.click();
   await exact.fill("0");
@@ -125,7 +132,7 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await open(page);
   const lesson = page.getByRole("region", { name: "Guided lesson" });
   await expect(lesson).toBeVisible();
-  await lesson.getByRole("button", { name: "16.1 Right angle" }).click();
+  await stepButton(page, "16.1 Right angle").click();
   await expect(
     lesson.getByText("First make the condition true: the angle at N is 90°."),
   ).toBeVisible();
@@ -133,7 +140,7 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
   await expect(diagram).not.toContainText("AN =");
 
   // A teacher can reveal or hide a reading; the step's reveal still works afterwards.
-  await page.getByText("Tools: measurements, snapping and sliders").click();
+  await tools(page).click();
   await page.getByRole("button", { name: "Show lengths" }).click();
   await expect(diagram).toContainText("AN =");
   await page.getByRole("button", { name: "Hide lengths" }).click();
@@ -164,9 +171,10 @@ test("topic 1 guided lesson reveals the result only after the given fact is made
     ).toBeVisible();
     await expect(diagram).not.toContainText("AN =");
     await expect(diagram.locator("[data-angle-square]")).toHaveCount(0);
-    await expect(
-      lesson.getByRole("button", { name: "16.1 Right angle" }),
-    ).toHaveAttribute("data-done", "true");
+    await expect(stepButton(page, "16.1 Right angle")).toHaveAttribute(
+      "data-done",
+      "true",
+    );
   };
   await page.reload();
   await again();
@@ -311,7 +319,7 @@ test("the paper circle demonstrations move on one stage per press", async ({
     await checkHeightLabel(height);
     await press("What do we see? →");
   }
-  await lesson.getByRole("button", { name: "Mirror proof" }).click();
+  await stepButton(page, "Mirror proof").click();
 
   // Mirror: the triangle flips, then each blank waits for a press.
   await press("Flip it →");
@@ -343,12 +351,16 @@ test.describe("laptop layout", () => {
     page,
   }) => {
     await open(page);
+    // Nothing sits above the task until the pen is taken out of Tools.
+    await expect(page.getByRole("button", { name: "Hide pen" })).toHaveCount(0);
+    await tools(page).click();
     await page.getByRole("button", { name: /Pen$/ }).first().click();
     const top = async (name: string | RegExp) =>
       (await page.getByRole("button", { name }).first().boundingBox())!.y;
     const undo = await top("Undo");
     expect(Math.abs((await top("Hide pen")) - undo)).toBeLessThan(20);
-    expect(Math.abs((await top("Focus")) - undo)).toBeLessThan(20);
+    const paper = (await page.getByTestId("paper-circle").boundingBox())!.y;
+    expect(undo).toBeLessThan(paper);
 
     await page.evaluate(() =>
       localStorage.setItem(
@@ -362,7 +374,7 @@ test.describe("laptop layout", () => {
     await lesson
       .getByRole("button", { name: "Show what we can deduce →" })
       .click();
-    const marks = lesson.locator("dd mark");
+    const marks = lesson.locator('[data-proof-stage="reason"] mark');
     await expect(marks).toHaveCount(2);
     const given = (await marks.first().boundingBox())!;
     const result = (await marks.last().boundingBox())!;
@@ -424,6 +436,7 @@ test.describe("touch screens", () => {
     // The circle stays under the finger, even if a shorter task line shifts the page.
     expect(Math.abs((await place()) - before)).toBeLessThan(2);
 
+    await tools(page).tap();
     await page.getByRole("button", { name: /Pen$/ }).first().tap();
     await page.getByRole("button", { name: "Pen", exact: true }).tap();
     // Tapping the buttons above may scroll them into view; drawing must not.

@@ -1,0 +1,60 @@
+.figure,
+.small {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.figure {
+  max-height: min(58vh, 520px);
+}
+.small {
+  max-height: 190px;
+}
+.turning {
+  transition: transform 1.1s ease-in-out;
+}
+.spot {
+  cursor: pointer;
+  outline: none;
+}
+.spot circle {
+  fill: #fff;
+  stroke: #3769f4;
+  stroke-width: 3;
+  transition:
+    fill 0.15s,
+    stroke 0.15s;
+}
+.spot text {
+  font:
+    800 20px "Trebuchet MS",
+    Arial,
+    sans-serif;
+  fill: #143b68;
+  pointer-events: none;
+}
+.spot:focus-visible circle {
+  stroke: #143b68;
+  stroke-width: 5;
+  fill: #ffe9a8;
+}
+@media (hover: hover) {
+  .spot:hover circle {
+    fill: #edf5ff;
+  }
+}
+.spot[data-state="right"] circle {
+  fill: #c9f0df;
+  stroke: #18764b;
+}
+.spot[data-state="wrong"] circle {
+  fill: #fde3e8;
+  stroke: #c53a5c;
+}
+@media (prefers-reduced-motion: reduce) {
+  .turning {
+    transition: none;
+  }
+}

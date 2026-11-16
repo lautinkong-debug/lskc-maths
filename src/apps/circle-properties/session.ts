@@ -3,15 +3,20 @@ import { labs, type LabId } from "./content";
 import { evaluateMission, missions } from "./missions";
 
 export const sessionPrefix = "lskc-circle-workspace-v3:";
-export type WorkspaceMode = "explore" | "reasons-relay" | "reasons-play";
+export type WorkspaceMode =
+  | "learn"
+  | "explore"
+  | "reasons-relay"
+  | "reasons-play";
 export type WorkspaceState = {
   mode: WorkspaceMode;
   labId: LabId;
   appearance: "playful" | "calm";
   welcomeDismissed: boolean;
 };
+/** A new student lands on the Learn path; a saved mode is always kept. */
 export const initialWorkspace: WorkspaceState = {
-  mode: "explore",
+  mode: "learn",
   labId: "bisector",
   appearance: "playful",
   welcomeDismissed: false,
@@ -24,10 +29,26 @@ const legacyModes: Record<string, WorkspaceMode> = {
   quest: "reasons-relay",
 };
 const workspaceModes: WorkspaceMode[] = [
+  "learn",
   "explore",
   "reasons-relay",
   "reasons-play",
 ];
+/**
+ * A link can name the activity to open: …#explore for a teacher-led lesson,
+ * …#learn for self-study. The name in the link wins over the saved activity.
+ */
+const hashModes: Record<string, WorkspaceMode> = {
+  learn: "learn",
+  explore: "explore",
+  relay: "reasons-relay",
+  "reasons-relay": "reasons-relay",
+  play: "reasons-play",
+  "reasons-play": "reasons-play",
+};
+export const modeFromHash = (hash: string): WorkspaceMode | undefined =>
+  hashModes[hash.replace(/^#/, "").toLowerCase()];
+
 export function parseWorkspace(raw: unknown): WorkspaceState | undefined {
   if (!raw || typeof raw !== "object") return;
   const value = raw as Partial<WorkspaceState>;

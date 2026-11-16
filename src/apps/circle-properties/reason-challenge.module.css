@@ -1,9 +1,17 @@
+/* Reasons Relay. Calm, like the Learn path: a list of levels, then one question
+   as two white cards. Blue is given, green is what you get.
+   The shell clears the margin of every heading and paragraph, so a rule that
+   gives one of them a margin starts with .game to win. */
 .game {
-  --blue: #2454c8;
-  --ink: #143b68;
-  color: var(--ink);
+  --given: #2454c6;
+  --given-bg: #e9f0ff;
+  --get: #18764b;
+  --get-bg: #e3f6ec;
+  --soft: #5a6f8c;
   max-width: 1180px;
   margin: auto;
+  color: var(--ink, #143b68);
+  font-size: 1.0625rem;
   line-height: 1.5;
 }
 .game button,
@@ -13,12 +21,6 @@
   min-height: 44px;
 }
 .game button {
-  padding: 10px 14px;
-  border: 1px solid #bcd0eb;
-  border-radius: 10px;
-  color: var(--ink);
-  background: white;
-  cursor: pointer;
   touch-action: manipulation;
 }
 .game button:disabled {
@@ -30,299 +32,282 @@
   outline-offset: 3px;
 }
 .game .primary {
-  background: #2454c8;
+  min-height: 52px;
+  padding: 12px 26px;
+  border-color: var(--blue-dark, #244cc6);
+  border-radius: 14px;
+  background: var(--blue, #3769f4);
+  box-shadow: 0 4px 0 var(--blue-dark, #244cc6);
   color: white;
-  border-color: #2454c8;
-  box-shadow: 0 3px 0 #153784;
-  font-weight: 750;
+  font-weight: 800;
+  text-align: center;
+}
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.small {
+  color: var(--soft);
+  font-size: 0.85rem;
+}
+.game .notice {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff6dd;
+  color: #6b4a0f;
+  font-size: 0.95rem;
 }
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 24px 28px;
-  background: #e1edff;
-  border: 1px solid #b8cff4;
-  border-radius: 20px;
+  display: grid;
+  gap: 4px;
 }
 .header h2 {
-  margin: 4px 0;
-  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  margin: 0;
+  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
 }
-.header p {
-  margin: 5px 0 0;
-  color: #456489;
-  font-size: 0.9rem;
+.game .header p {
+  margin: 0 0 16px;
+  color: var(--soft);
 }
-.kicker {
-  color: #426caa;
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-.score {
-  display: grid;
-  text-align: center;
-  flex-shrink: 0;
-  background: white;
-  border: 1px solid #c3d6f3;
-  padding: 10px 17px;
+.reviewBanner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 12px 16px;
   border-radius: 14px;
+  background: var(--given-bg);
+  font-weight: 650;
 }
-.score strong {
-  color: #2454c8;
-  font-size: 1.8rem;
+.reviewBanner > :is(span, p) {
+  flex: 1 1 250px;
+  margin: 0;
 }
-.score span {
-  font-size: 0.72rem;
-  color: #54708f;
-}
+
+/* ---------- Choose a level ---------- */
 .levels {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  margin: 22px 0;
-}
-.recordTools {
-  margin: 24px 0 0;
-  font-size: 0.85rem;
-}
-.recordTools summary {
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  color: #536d8b;
-  cursor: pointer;
-}
-.recordTools > button {
-  margin: 4px 0 10px;
-}
-.recordTools .reviewBanner {
-  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 .game .levels button {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid transparent;
+  border-radius: 18px;
+  background: white;
   text-align: left;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 15px;
-  border: 2px solid #c6d8f0;
-  border-radius: 16px;
-  box-shadow: 0 3px 0 #d5e2f5;
 }
 .game .levels button[aria-pressed="true"] {
-  background: #eef4ff;
-  border-color: #3769f4;
-  box-shadow: 0 3px 0 #3769f4;
+  border-color: var(--blue, #3769f4);
 }
 .levelNumber {
   display: grid;
   place-items: center;
-  width: 35px;
-  height: 35px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: #e1eaff;
-  color: #2454c8;
+  background: var(--given-bg);
+  color: var(--given);
   font-weight: 800;
 }
-.levels strong {
-  font-size: 0.93rem;
+.levelText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
 }
 .levels small {
-  color: #536d8b;
-  font-size: 0.74rem;
-  margin-top: auto;
+  color: var(--soft);
+  font-size: 0.82rem;
+  white-space: nowrap;
 }
 .setup {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 18px;
-  padding: 22px;
-  border-radius: 16px;
-  border: 1px solid #c6d8ed;
+  gap: 12px 16px;
+  margin-top: 14px;
+  padding: 16px 18px;
+  border-radius: 18px;
   background: white;
-}
-.setup > div {
-  flex: 1 1 300px;
 }
 .setup h3 {
-  margin: 0 0 6px;
-}
-.setup p {
+  flex: 1 1 240px;
   margin: 0;
-  font-size: 0.88rem;
-  color: #536d8b;
+  font-size: 1.15rem;
 }
 .setup label {
-  display: grid;
-  gap: 5px;
-  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--soft);
+  font-size: 0.9rem;
   font-weight: 700;
 }
-.setup select {
+.setup select,
+.setToolbar select {
   max-width: 100%;
-  border: 1px solid #bccfe7;
-  border-radius: 9px;
-  padding: 9px;
-  background: white;
-  color: var(--ink);
-  font-size: 0.85rem;
-}
-.guide {
-  font-size: 0.85rem;
-  padding: 15px 18px;
-  background: #fff8e3;
-  color: #77571d;
+  padding: 9px 10px;
+  border: 1.5px solid var(--line, #d8e4f4);
   border-radius: 12px;
-  margin-top: 18px;
+  background: white;
+  color: var(--ink, #143b68);
 }
+.game .setup + .small {
+  margin: 10px 4px 0;
+}
+
+/* ---------- One question ---------- */
 .roundBar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
-  margin: 18px 0 10px;
-  font-size: 0.86rem;
+  align-items: center;
+  gap: 8px 14px;
+  margin-bottom: 10px;
 }
-.setToolbar,
-.reviewBanner {
+.roundBar strong {
+  flex: 1 1 200px;
+  font-size: 1rem;
+}
+.tally {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
   flex-wrap: wrap;
-  gap: 12px;
-  margin: 16px 0;
+  gap: 2px 14px;
+  color: var(--soft);
+  font-size: 0.85rem;
 }
-.setToolbar label {
-  display: grid;
-  gap: 5px;
-  min-width: 0;
-  flex: 1 1 300px;
-  font-weight: 700;
-}
-.setToolbar select {
-  width: 100%;
-  max-width: 100%;
-  border: 1px solid #bcd0eb;
-  border-radius: 10px;
-  background: white;
-  color: var(--ink);
-  padding: 10px;
-}
-.reviewBanner {
-  padding: 12px 16px;
-  border: 1px solid #b8cff4;
-  border-radius: 12px;
-  background: #eaf2ff;
-  font-weight: 650;
-}
-.reviewBanner > span {
-  flex: 1 1 250px;
-}
-.reviewChoice {
-  display: block;
-  font-weight: 750;
-  margin-top: 4px;
-}
-.reviewChoice:empty {
-  display: none;
-}
-.game .choices button[data-correct-choice="true"] {
-  border-color: #3a8d60;
-  background: #eaf8ef;
-  color: #155737;
+.tally b {
+  color: var(--ink, #143b68);
 }
 .timer {
-  padding: 9px 14px;
-  border-radius: 25px;
-  background: #fff1ce;
-  color: #865900;
-  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: white;
+  color: var(--soft);
+  font-size: 0.9rem;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .timer[data-urgent="true"] {
-  background: #ffe5e9;
+  background: #fdecef;
   color: #a12445;
-}
-.progress {
-  width: 100%;
-  height: 9px;
-  border: 0;
-  border-radius: 8px;
-  overflow: hidden;
-  accent-color: #3169df;
-}
-.progress::-webkit-progress-bar {
-  background: #dce7f7;
-}
-.progress::-webkit-progress-value {
-  background: #3169df;
-  border-radius: 8px;
 }
 .navigation {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 16px 0;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 .navigation > div {
   display: flex;
   flex: 1;
-  justify-content: center;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 5px;
 }
-.navigation button {
+.game .navigation button {
   min-width: 44px;
-  font-size: 0.82rem;
-  padding: 8px 10px;
+  padding: 8px 12px;
+  border: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
 }
-.navigation button[aria-current="step"] {
-  background: #2454c8;
+.game .navigation button[aria-current="step"] {
+  background: var(--blue, #3769f4);
   color: white;
-  border-color: #2454c8;
 }
-.navigation button[data-solved="true"]:not([aria-current="step"]) {
-  background: #e3f5e9;
-  border-color: #7fbf9a;
-  color: #176c46;
+.game .navigation button[data-solved="true"]:not([aria-current="step"]) {
+  background: var(--get-bg);
+  color: var(--get);
 }
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 22px;
+  gap: 18px;
   align-items: start;
+}
+.figure,
+.answerPanel,
+.ready {
+  min-width: 0;
+  padding: 20px;
+  border-radius: 20px;
+  background: white;
 }
 .figure {
   position: sticky;
   top: 12px;
-  min-width: 0;
 }
 .questionCount {
-  font-size: 0.82rem;
-  color: #607797;
+  color: var(--soft);
+  font-size: 0.85rem;
 }
-.figure h3 {
-  font-size: 1.2rem;
-  margin: 5px 0 12px;
+.game .figure h3 {
+  margin: 4px 0 12px;
+  font-size: 1.25rem;
 }
 .given {
-  padding: 15px;
-  border-left: 4px solid #3769f4;
-  background: #edf4ff;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+  padding: 12px 14px;
+  border-left: 5px solid var(--given);
+  border-radius: 10px;
+  background: var(--given-bg);
 }
 .given strong {
-  font-size: 0.83rem;
+  font-size: 0.85rem;
 }
-.given p {
-  margin: 7px 0 0;
-  line-height: 1.7;
+.game .given p {
+  margin: 4px 0 0;
+  line-height: 1.6;
+}
+/* The diagram sits straight on the card, with no frame of its own. */
+.figure svg {
+  max-height: 360px;
+  border: 0;
+}
+/* Locked, it is one quiet line. Unlocked, it is the conclusion, in green. */
+.reasonLock {
+  margin-top: 8px;
+  color: var(--soft);
+  font-size: 0.85rem;
+}
+.reasonLock > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.reasonLock svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.game .reasonLock p {
+  margin: 2px 0 0;
+}
+.reasonLock[data-unlocked="true"] {
+  padding: 12px 14px;
+  border-left: 5px solid var(--get);
+  border-radius: 10px;
+  background: var(--get-bg);
+  color: #125638;
+}
+.reasonLock[data-unlocked="true"] p {
+  font-size: 1.05rem;
+  font-weight: 700;
 }
 .figureTools {
   display: flex;
@@ -330,97 +315,134 @@
   gap: 8px;
   margin-top: 12px;
 }
-.figureTools button {
-  font-size: 0.84rem;
+.game .figureTools button {
+  font-size: 0.9rem;
+  font-weight: 700;
 }
-.answerPanel {
-  padding: 20px;
-  border: 1px solid #c7d9ef;
-  border-radius: 16px;
-  background: white;
-  min-width: 0;
+.game .figureTools ~ .small {
+  margin: 8px 0 0;
 }
+.game .figureTools ~ .notice {
+  margin: 10px 0 0;
+}
+/* Which of the four parts are filled in, and after checking, which are right. */
 .gates {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
 }
 .gates > span {
-  display: grid;
-  justify-items: center;
-  gap: 3px;
-  padding: 8px 5px;
-  background: #eef3fa;
-  border: 1px solid #d4dfed;
-  border-radius: 10px;
-  color: #72839b;
-  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f1f5fc;
+  color: var(--soft);
+  font-weight: 700;
+}
+.gates svg {
+  display: block;
+  width: 16px;
+  height: 16px;
 }
 .gates small {
-  font-weight: 600;
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   text-transform: capitalize;
 }
 .gates [data-ready="true"] {
-  background: #e8f0ff;
-  border-color: #7298e6;
-  color: #2454c8;
+  background: var(--given-bg);
+  color: var(--given);
 }
 .gates [data-correct="true"] {
-  background: #e6f7ed;
-  border-color: #7ac298;
-  color: #147649;
+  background: var(--get-bg);
+  color: var(--get);
 }
 .gates [data-correct="false"] {
   background: #fff2dc;
-  border-color: #d8b166;
   color: #8b6017;
 }
 .step {
   min-width: 0;
-  border: 0;
+  margin: 22px 0 0;
   padding: 0;
-  margin: 25px 0;
+  border: 0;
 }
 .step legend {
   display: flex;
-  align-items: center;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
-  font-size: 1.04rem;
-  font-weight: 750;
+  margin-bottom: 6px;
   padding: 0;
-  line-height: 1.5;
+  font-size: 1.12rem;
+  font-weight: 800;
+  line-height: 1.4;
 }
 .step legend b {
   display: inline-grid;
   place-items: center;
-  width: 29px;
-  height: 29px;
-  border-radius: 50%;
-  color: #2454c8;
-  background: #e3edff;
   flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--given-bg);
+  color: var(--given);
+  font-size: 0.9rem;
 }
-.step > p {
-  margin: 0 0 10px;
-  color: #556e8b;
-  font-size: 0.84rem;
+.game .step > p {
+  margin: 0 0 8px;
+  color: var(--soft);
+  font-size: 0.9rem;
 }
-.step label {
+.choices {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.game .choices button {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 2px solid var(--line, #d8e4f4);
+  border-radius: 14px;
+  font-size: 1rem;
+  line-height: 1.55;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.game .choices button[aria-pressed="true"] {
+  border-color: var(--blue, #3769f4);
+  background: var(--given-bg);
+}
+.game .choices button:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.game .choices button[data-correct-choice="true"] {
+  border-color: var(--get);
+  background: var(--get-bg);
+  color: #125638;
+}
+.radio {
+  flex-shrink: 0;
+  color: var(--soft);
+  line-height: 1.55;
+}
+.choiceText {
+  min-width: 0;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+.reviewChoice {
   display: block;
-  font-size: 0.85rem;
-  margin-bottom: 6px;
+  margin-top: 4px;
+  font-weight: 750;
 }
-.step input {
-  width: 100%;
-  border: 1.5px solid #b7cdeb;
-  border-radius: 10px;
-  padding: 12px;
-  color: var(--ink);
-  background: #fbfdff;
-  box-sizing: border-box;
+.reviewChoice:empty {
+  display: none;
 }
 /* "x = [ ]" on one line, as written in an exercise book. */
 .valueRow {
@@ -430,111 +452,67 @@
 }
 .valueRow label {
   flex-shrink: 0;
-  margin-bottom: 0;
   font-size: 1.15rem;
   font-weight: 700;
 }
-.choices {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 9px;
-}
-.game .choices button {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  text-align: left;
-  padding: 12px 13px;
-  border: 1.5px solid #c0d3ee;
-  border-radius: 11px;
-  font-size: 0.88rem;
-  line-height: 1.65;
-  overflow-wrap: anywhere;
-}
-.game .choices button[aria-pressed="true"] {
-  background: #edf3ff;
-  border-color: #3769f4;
-  color: #1747a4;
-}
-.game .choices button:disabled {
-  opacity: 1;
-  cursor: default;
-}
-.radio {
-  flex-shrink: 0;
-  line-height: 1.65;
-  font-size: 1.03em;
-}
-.choiceText {
-  min-width: 0;
-  white-space: normal;
-  word-break: normal;
-  overflow-wrap: normal;
-}
-.small {
-  color: #59718d;
-  font-size: 0.8rem;
-}
-.notice {
+.step input {
+  width: 100%;
   padding: 12px;
-  background: #fff4d8;
-  color: #805b1b;
-  border-radius: 10px;
-  font-size: 0.88rem;
+  border: 2px solid var(--line, #d8e4f4);
+  border-radius: 14px;
+  background: white;
+  color: var(--ink, #143b68);
+  box-sizing: border-box;
+}
+.game .fieldFeedback {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.answerPanel > .primary {
+  margin-top: 20px;
+}
+.game .answerPanel > .small {
+  margin: 8px 0 0;
 }
 .success,
 .review {
   margin-top: 20px;
-  border-radius: 13px;
   padding: 16px;
-  line-height: 1.65;
-  font-size: 0.9rem;
+  border-left: 5px solid;
+  border-radius: 12px;
+  font-size: 0.98rem;
+  line-height: 1.6;
 }
 .success {
-  background: #eaf8ef;
-  border: 1px solid #a7d6b8;
-  color: #1a7048;
+  border-color: var(--get);
+  background: var(--get-bg);
+  color: #125638;
 }
 .review {
-  background: #fff5de;
-  border: 1px solid #e3c17a;
-  color: #805516;
+  border-color: #c98a00;
+  background: #fff6dd;
+  color: #6b4a0f;
 }
-.success h4,
-.review h4 {
-  margin: 0 0 8px;
+.game .success h4,
+.game .review h4 {
+  margin: 0 0 6px;
   font-size: 1.25rem;
 }
-.success p,
-.review p {
-  margin: 8px 0;
+.game .success p,
+.game .review p {
+  margin: 6px 0;
 }
 .success button,
 .review button {
   margin: 8px 6px 0 0;
 }
 .working {
-  padding: 10px 13px;
-  background: white;
-  border: 1px solid #b7dcc5;
-  border-radius: 10px;
   margin: 12px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: white;
   overflow-wrap: anywhere;
-}
-.finish {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-  margin: 15px 0;
-  padding: 17px;
-  border: 1px solid #a8ceba;
-  border-radius: 13px;
-  background: #e4f6eb;
-  color: #1b714a;
-}
-.finish strong {
-  font-size: 1.2rem;
 }
 .actions {
   display: flex;
@@ -542,245 +520,89 @@
   gap: 10px;
   margin-top: 10px;
 }
+.finish {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 14px;
+  padding: 16px 18px;
+  border-left: 5px solid var(--get);
+  border-radius: 14px;
+  background: var(--get-bg);
+  color: #125638;
+}
+.finish strong {
+  font-size: 1.2rem;
+}
+.finish span {
+  font-size: 0.92rem;
+}
 .finish .actions {
   flex-basis: 100%;
-  margin-top: 0;
+  margin-top: 4px;
 }
 .ready {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   justify-items: start;
-  gap: 12px;
-  margin-top: 16px;
-  padding: 22px;
-  border: 1px solid #c6d8ed;
-  border-radius: 16px;
-  background: white;
+  gap: 10px;
 }
-.ready h3,
-.ready p {
-  margin: 0;
+.ready h3 {
+  font-size: 1.25rem;
 }
 .ready p {
-  color: #536d8b;
-}
-.finish span {
-  font-size: 0.88rem;
-}
-.footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin: 24px 0;
-  font-size: 0.8rem;
-  color: #58718f;
-}
-.footer span {
-  max-width: 65ch;
-}
-.footer button {
-  font-size: 0.82rem;
-}
-@media (max-width: 900px) {
-  .levels {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .figure {
-    position: static;
-  }
-  .figure svg {
-    max-height: 330px;
-  }
-}
-@media (max-width: 560px) {
-  .header {
-    padding: 17px 13px;
-    gap: 10px;
-  }
-  .header h2 {
-    font-size: 1.7rem;
-  }
-  .header p {
-    font-size: 0.79rem;
-  }
-  .kicker {
-    font-size: 0.75rem;
-  }
-  .score {
-    padding: 9px;
-  }
-  .score strong {
-    font-size: 1.45rem;
-  }
-  .score span {
-    font-size: 0.63rem;
-  }
-  .levels {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin: 16px 0;
-  }
-  .game .levels button {
-    padding: 12px;
-    gap: 7px;
-  }
-  .levels button:last-child {
-    grid-column: 1/-1;
-  }
-  .levels strong {
-    font-size: 0.88rem;
-  }
-  .setup {
-    padding: 15px;
-  }
-  .setup label,
-  .setup select {
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-  }
-  .setup .primary {
-    width: 100%;
-  }
-  .roundBar strong {
-    order: 3;
-    flex-basis: 100%;
-  }
-  .navigation > div {
-    order: 3;
-    flex-basis: 100%;
-  }
-  .navigation {
-    gap: 7px;
-  }
-  .navigation button {
-    padding: 7px 9px;
-  }
-  .answerPanel {
-    padding: 14px 12px;
-  }
-  .given {
-    padding: 12px;
-    font-size: 0.88rem;
-  }
-  .figure svg {
-    max-height: 300px;
-  }
-  .step legend {
-    font-size: 0.96rem;
-  }
-  .game .choices button {
-    font-size: 0.86rem;
-    padding: 11px;
-  }
-  .gates small {
-    font-size: 0.61rem;
-  }
-  .guide {
-    font-size: 0.79rem;
-    padding: 13px;
-  }
-  .footer .primary {
-    width: 100%;
-  }
+  color: var(--soft);
 }
 
-.reasonLock {
-  margin: 12px 0;
-  padding: 13px 15px;
-  border: 1px solid #bfcee2;
-  border-radius: 12px;
-  background: #f1f5fb;
-  color: #526c8a;
-}
-.reasonLock > div {
-  display: flex;
-  align-items: center;
-  gap: 9px;
+/* ---------- More: old sets, how the points work, the saved record ---------- */
+.more {
+  margin-top: 18px;
+  color: var(--soft);
   font-size: 0.9rem;
 }
-.reasonLock p {
-  margin: 8px 0 0;
-  font-size: 0.83rem;
-  line-height: 1.6;
+.more > summary {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 44px;
+  cursor: pointer;
 }
-.reasonLock[data-unlocked="true"] {
-  background: #e7f7ed;
-  color: #18734c;
-  border-color: #86c69f;
+.more > summary::before {
+  content: "▸";
+  margin-right: 8px;
 }
-.reasonLock[data-unlocked="true"] p {
-  font-size: 1rem;
+.more[open] > summary::before {
+  content: "▾";
+}
+.more > summary::-webkit-details-marker {
+  display: none;
+}
+.game .more p {
+  max-width: 75ch;
+  margin: 0 0 10px;
+}
+.setToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.setToolbar label {
+  display: grid;
+  flex: 0 1 420px;
+  gap: 4px;
+  min-width: 0;
   font-weight: 700;
 }
-.game .skillHand {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  align-items: stretch;
-  gap: 9px;
-  padding: 6px 0 10px;
+.setToolbar select {
+  width: 100%;
 }
-.game .choices .skillCard {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 145px;
-  padding: 13px 11px;
-  background: linear-gradient(150deg, #fff, #edf3ff);
-  border: 2px solid #bdd0ed;
-  border-radius: 14px;
-  box-shadow: 0 5px 0 #d4e0f1;
+.more .reviewBanner {
+  margin-top: 10px;
 }
-.skillBody {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  min-width: 0;
-  gap: 12px;
-}
-.skillBody small {
-  font-size: 0.6rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  color: #5376a8;
-}
-.game .choices .skillCard[aria-pressed="true"] {
-  border-color: #3769f4;
-  background: #e8f0ff;
-  box-shadow:
-    0 5px 0 #3769f4,
-    0 0 0 2px #d7e5ff;
-}
-.game .choices .skillCard .radio {
-  align-self: flex-end;
-  line-height: 1;
-}
-.game .choices .skillCard:hover:not(:disabled) {
-  border-color: #3769f4;
-}
-.gates svg {
-  display: block;
-}
-@media (max-width: 560px) {
-  .game .skillHand {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .game .choices .skillCard {
-    min-height: 90px;
-    flex-direction: row;
-    align-items: center;
-    padding: 13px;
-  }
-  .game .choices .skillCard .radio {
-    align-self: center;
-  }
-  .skillBody {
-    gap: 5px;
-  }
-}
+
 @media (prefers-reduced-motion: no-preference) {
   .success {
     animation: proof-complete 500ms ease-out;
@@ -799,25 +621,57 @@
     }
   }
 }
-.chainBadge {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 9px;
-  width: fit-content;
-  padding: 7px 13px;
-  margin: 10px 0 15px auto;
-  border: 1px solid #d8bb74;
-  border-radius: 22px;
-  color: #815711;
-  background: #fff6dc;
-  font-size: 0.8rem;
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .figure {
+    position: static;
+  }
+  .figure svg {
+    max-height: 330px;
+  }
 }
-.chainBadge > span:first-child {
-  font-size: 1.2rem;
+/* An upright iPad: one level to a row, so each name stays on one or two lines. */
+@media (max-width: 900px) {
+  .levels {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
-.chainBadge > span:last-child {
-  color: #796342;
-  border-left: 1px solid #ddc998;
-  padding-left: 9px;
+@media (max-width: 560px) {
+  .game .levels button {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 12px;
+    padding: 12px;
+  }
+  .levels small {
+    grid-column: 2;
+  }
+  .setup {
+    padding: 14px;
+  }
+  .setup label {
+    flex: 1 1 100%;
+  }
+  /* A select is as wide as its longest option unless it is told to share the row. */
+  .setup select {
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+  }
+  .setup .primary {
+    width: 100%;
+  }
+  .navigation > div {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .figure,
+  .answerPanel,
+  .ready {
+    padding: 16px;
+  }
+  .figure svg {
+    max-height: 300px;
+  }
 }

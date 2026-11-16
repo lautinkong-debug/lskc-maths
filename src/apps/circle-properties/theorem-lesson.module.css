@@ -1,5 +1,5 @@
+/* A guided lesson for one reason: the step bar, the board, then a white card. */
 .reasonNav,
-.stageNav > div,
 .actions,
 .shapeActions,
 .termList {
@@ -7,16 +7,6 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.45rem;
-}
-.reasonNav {
-  margin: 0 0 0.85rem;
-}
-.switchTheorem {
-  margin: 0 0 0.85rem;
-}
-.switchTheorem summary {
-  padding: 0.55rem;
-  cursor: pointer;
 }
 .resetPrompt {
   padding: 0.8rem;
@@ -29,23 +19,20 @@
 .scratch small {
   font-weight: 400;
 }
-.reasonNav button,
 .termList button {
-  padding: 0.45rem 0.8rem;
-  font-size: 0.87rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.95rem;
 }
-.reasonNav button[aria-pressed="true"],
 .termList button[aria-pressed="true"] {
-  background: #e5eeff;
+  background: #e9f0ff;
   border-color: #3563ca;
   color: #123e95;
 }
 .lesson {
   display: grid;
-  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
-  grid-template-areas: "board nav" "board panel";
-  grid-template-rows: auto 1fr;
-  gap: 0 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas: "steps steps" "board panel";
+  gap: 14px 18px;
   align-items: start;
 }
 .lesson h3,
@@ -53,36 +40,23 @@
 .lesson p {
   margin: 0;
 }
+.steps {
+  grid-area: steps;
+  min-width: 0;
+}
 .board,
-.stageNav,
 .panel {
   min-width: 0;
-  border: 1px solid var(--line, #d8e4f4);
+  border-radius: 20px;
+  background: #fff;
 }
 .board {
   grid-area: board;
   overflow: hidden;
-  background: #fff;
-  border-radius: 15px;
 }
+/* On a laptop or an iPad on its side the circle and its buttons fit one screen. */
 .board > svg {
-  max-height: clamp(260px, 42vh, 420px);
-}
-.boardTitle {
-  background: #fff4d8;
-  padding: 0.78rem 1rem;
-  font-size: 1.05rem;
-  line-height: 1.4;
-}
-.lesson[data-step="0"] .boardTitle {
-  padding-bottom: 0.2rem;
-}
-.lesson .wordCue {
-  padding: 0 1rem 0.75rem;
-  background: #fff4d8;
-  color: #354b65;
-  font-size: 0.97rem;
-  line-height: 1.45;
+  max-height: clamp(260px, 46vh, 440px);
 }
 .boardCaption {
   display: flex;
@@ -90,15 +64,22 @@
   align-items: center;
   justify-content: space-between;
   gap: 0 0.5rem;
-  background: #fff4d8;
+}
+.boardTitle {
+  padding: 16px 20px 6px;
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+.lesson .wordCue {
+  padding: 0 20px 8px;
+  color: #4a6081;
+  font-size: 1rem;
+  line-height: 1.45;
 }
 .boardCaption .secondChordButton {
   margin: 0.35rem 0.85rem;
   min-height: 44px;
   padding: 0.4rem 0.8rem;
-  border: 1px solid #2454bf;
-  background: #fff;
-  color: #193d8f;
   font-weight: 700;
 }
 .diagramJump {
@@ -106,98 +87,82 @@
   min-height: 44px;
   padding: 0.4rem 0.8rem;
 }
-.stageNav,
-.panel {
-  background: #fff8e8;
-  border-color: #ead7aa;
-}
-.stageNav {
-  grid-area: nav;
-  border-radius: 15px 15px 0 0;
-  padding: 1rem 1rem 0.85rem;
-}
-.stageNav h3 {
-  font-size: 1.1rem;
-  margin: 0 0 0.65rem;
-}
-.stageNav button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.6rem;
-  font-size: 0.82rem;
-  min-height: 44px;
-}
-.stageNav button span {
-  display: inline-grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #e8effb;
-  min-width: 1.5rem;
-  height: 1.5rem;
-}
-.stageNav button[aria-current="step"] {
-  border-color: #2d58cc;
-  box-shadow: inset 0 0 0 1px #2d58cc;
-}
-.stageNav button[aria-current="step"] span {
-  background: #244cc6;
-  color: white;
-}
 .panel {
   grid-area: panel;
-  border-radius: 0 0 15px 15px;
-  border-top: 0;
-  padding: 1rem;
   display: grid;
-  gap: 0.9rem;
   grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  padding: 20px;
+  font-size: 1.0625rem;
 }
 .panel h4,
 .caseSheet h4 {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   line-height: 1.45;
 }
 .tag,
 .boardFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
   margin: 0;
-  border-top: 1px solid #dce7f6;
-  padding: 0.75rem 1rem;
-}
-.tag {
-  background: #f2f7ff;
-  display: grid;
-  gap: 0.2rem;
+  padding: 6px 20px 4px;
 }
 .tag > span:first-child,
 .boardFoot > span {
-  color: #4d6380;
-  font-size: 0.8rem;
-}
-.tag strong {
-  font-size: 1.16rem;
-}
-.boardFoot .shapeActions {
-  margin-top: 0.4rem;
+  color: #5a6f8c;
+  font-size: 0.85rem;
 }
 .boardTools {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.65rem;
-  border-bottom: 1px solid var(--line);
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 12px 0;
 }
-.boardTools > button {
-  font-size: 0.8rem;
-  padding: 0.4rem 0.65rem;
+.lesson .boardTools > button {
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #f1f5fc;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+/* Pen and Focus wait here, out of the way, until the teacher wants them. */
+.tools {
+  padding: 0 20px;
+}
+.tools > summary {
+  color: #5a6f8c;
+  font-size: 0.9rem;
+}
+.tools > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 14px;
+}
+.lesson .tools button {
+  min-height: 44px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.lesson .tools button[aria-pressed="true"] {
+  border-color: #3769f4;
+  background: #e9f0ff;
+  color: #2454c6;
 }
 .lesson[data-focused="true"] {
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas: "board";
 }
-.lesson[data-focused="true"] .stageNav,
+.lesson[data-focused="true"] .steps,
 .lesson[data-focused="true"] .panel {
   display: none;
 }
@@ -205,18 +170,24 @@
   max-height: min(70vh, 700px);
 }
 .shapeActions button {
-  padding: 0.3rem 0.65rem;
-  font-size: 0.82rem;
+  min-height: 44px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 .panel .primary {
-  background: #2454bf;
-  color: white;
-  border-color: #2454bf;
-  font-weight: 700;
   justify-self: start;
+  min-height: 52px;
+  padding: 12px 24px;
+  border-color: var(--blue-dark, #244cc6);
+  border-radius: 14px;
+  background: var(--blue, #3769f4);
+  box-shadow: 0 4px 0 var(--blue-dark, #244cc6);
+  color: white;
+  font-weight: 800;
 }
 .panel .primary:hover:not(:disabled) {
-  background: #173f9a;
+  background: var(--blue-dark, #244cc6);
 }
 .caseSheet {
   display: grid;
@@ -314,44 +285,29 @@
   background: #e5f4e9;
   color: #18583a;
 }
-@media (max-width: 760px) {
+/* An iPad held upright or a phone: the circle on top at full width, the words below. */
+@media (max-width: 859px) {
   .lesson {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "nav" "board" "panel";
-    grid-template-rows: auto;
-    gap: 0.6rem;
+    grid-template-areas: "steps" "board" "panel";
   }
-  .stageNav,
-  .panel {
-    padding: 0.7rem;
-    border: 1px solid #ead7aa;
-    border-radius: 12px;
-  }
-  .stageNav > div {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 0.3rem;
-  }
-  .lesson .stageNav button {
-    grid-column: span 2;
-    justify-content: center;
-    gap: 0.22rem;
-    min-width: 0;
-    min-height: 44px;
-    font-size: 0.8rem;
-    line-height: 1.2;
-    padding: 0.25rem;
-  }
-  .lesson .stageNav button:nth-last-child(-n + 2) {
-    grid-column: span 3;
-  }
-  .lesson .stageNav button span {
-    min-width: 1.18rem;
-    height: 1.18rem;
-    flex-shrink: 0;
-  }
+}
+@media (max-width: 600px) {
   .board > svg {
-    max-height: min(38vh, 295px);
+    max-height: min(40vh, 310px);
+  }
+  .boardTitle {
+    padding: 14px 14px 4px;
+    font-size: 1.05rem;
+  }
+  .lesson .wordCue,
+  .tag,
+  .boardFoot,
+  .tools {
+    padding-inline: 14px;
+  }
+  .panel {
+    padding: 16px;
   }
   .caseSheet {
     padding: 0.8rem;
@@ -359,11 +315,5 @@
   }
   .scratch textarea {
     font-size: 16px;
-  }
-}
-@media (max-width: 360px) {
-  .lesson .stageNav button {
-    flex-direction: column;
-    gap: 0.1rem;
   }
 }

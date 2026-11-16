@@ -19,7 +19,7 @@ async function openExperiment(page: Page) {
 test("the mid-point is given in 16.2; the centre is concluded in 16.3", async ({
   page,
 }) => {
-  await page.goto("/apps/circle-properties");
+  await page.goto("/apps/circle-properties#explore");
   const activity = await openExperiment(page);
   const choose = activity.getByRole("combobox");
   await choose.selectOption("midpoint");
@@ -64,7 +64,7 @@ test("the mid-point is given in 16.2; the centre is concluded in 16.3", async ({
 test("equal centre angles imply equal lengths only in equal circles", async ({
   page,
 }) => {
-  await page.goto("/apps/circle-properties");
+  await page.goto("/apps/circle-properties#explore");
   const activity = await openExperiment(page);
   await activity.getByRole("combobox").selectOption("radii");
   await activity.getByRole("button", { name: /reveal lengths/i }).click();
@@ -83,7 +83,7 @@ test("equal centre angles imply equal lengths only in equal circles", async ({
 });
 
 test("moving a vertex to the opposite segment removes the inapplicable reason", async ({ page }) => {
-  await page.goto("/apps/circle-properties");
+  await page.goto("/apps/circle-properties#explore");
   const topics = page.locator('button[aria-controls="circle-property-menu"]');
   await expect(page.getByTestId("paper-circle")).toBeVisible();
   if (await topics.isVisible()) await topics.click();
@@ -122,7 +122,7 @@ for (const [device, viewport] of [
       test(`16.1 marks equal chord halves only through the centre at ${route}`, async ({
         page,
       }) => {
-        await page.goto(route);
+        await page.goto(`${route}#explore`);
         const activity = await openExperiment(page);
         const diagram = activity.getByTestId("perpendicular-chord-diagram");
         const reason = activity.getByRole("complementary", {

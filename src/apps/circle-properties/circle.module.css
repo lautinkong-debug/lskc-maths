@@ -1,3 +1,6 @@
+/* Circle Lab shell and the Explore board. Calm on purpose, like the Learn path:
+   one task on a screen, white cards on the pale blue page, and colour used only
+   for meaning. Blue is given, green is what you get. */
 .app {
   --ink: #143b68;
   --blue: #3769f4;
@@ -8,16 +11,21 @@
   --pink: #ee6b86;
   --mint: #c9f0df;
   --purple: #e5dcff;
+  --given: #2454c6;
+  --given-bg: #e9f0ff;
+  --get: #18764b;
+  --get-bg: #e3f6ec;
+  --soft: #5a6f8c;
   --circle-navy: var(--blue);
   --circle-red: #d94b72;
   --circle-paper: #ffffff;
   --circle-graphite: var(--ink);
   max-width: 1510px;
   margin: auto;
-  padding: 22px;
+  padding: 16px;
   color: var(--ink);
   background: var(--sky);
-  border-radius: 26px;
+  border-radius: 18px;
   font-family: var(--font-plex-sans, Arial), sans-serif;
   font-size: 16px;
   line-height: 1.5;
@@ -113,25 +121,36 @@
   background: var(--blue-dark);
   color: white;
 }
-.primary svg {
-  width: 23px;
-  height: 23px;
-  color: var(--gold);
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* ---------- Header: name, the four activities, More ---------- */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 0 8px 22px;
+  gap: 16px;
+  padding: 0 0 16px;
 }
 .brand {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 0 0 auto;
 }
 .brandOrb {
-  width: 62px;
+  width: 36px;
   flex-shrink: 0;
 }
 .brandOrb svg {
@@ -139,1367 +158,38 @@
   width: 100%;
 }
 .brand h1 {
-  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
-}
-.brand p {
-  font-size: 0.79rem;
-  margin-top: 5px;
-  color: #4c6584;
+  font-size: 1.6rem;
 }
 .tabs {
   display: flex;
   gap: 5px;
-  background: #dfeaff;
-  padding: 5px;
+  padding: 3px;
   border-radius: 17px;
+  background: #dfeaff;
 }
-.tabs button {
+.app .tabs button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-height: 44px;
+  padding: 9px 14px;
   border-color: transparent;
   background: transparent;
   font-weight: 800;
-  padding: 12px 20px;
-  display: flex;
-  gap: 9px;
-  align-items: center;
+  font-size: 0.9rem;
+  text-align: center;
 }
-.tabs button > span {
-  font-size: 1.35rem;
-  line-height: 1;
-}
-.tabs button[aria-pressed="true"] {
+.app .tabs button[aria-pressed="true"] {
   background: var(--blue);
   color: white;
   box-shadow: 0 3px 0 var(--blue-dark);
 }
-.collection {
-  display: flex;
-  gap: 9px;
-}
-.collection > span {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 10px 11px;
-  background: white;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  font-weight: 800;
-  white-space: nowrap;
-}
-.collection svg {
-  width: 23px;
-  height: 23px;
-  color: #bc7d00;
-}
-.collection small {
+.tabHint {
   font-size: 0.7rem;
-  font-weight: 500;
-  color: #4c6584;
-}
-.collection b {
-  color: #7651bf;
-  font-size: 1.45rem;
-}
-.explorer {
-  display: grid;
-  grid-template-columns: 215px minmax(0, 1fr);
-  gap: 22px;
-  align-items: start;
-}
-.railHeading {
-  padding: 7px 6px 14px;
-}
-.railHeading h2 {
-  font-size: 0.95rem;
-  letter-spacing: -0.01em;
-}
-.railHeading > span {
-  display: block;
-  color: #506989;
-  font-size: 0.74rem;
-  margin-top: 4px;
-}
-.labButtons {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-.labButtons button {
-  padding: 11px 10px;
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  border: 2px solid white;
-  border-bottom-color: #c6d5e9;
-  border-bottom-width: 4px;
-  min-height: 83px;
-}
-.labButtons button[aria-pressed="true"] {
-  border-color: var(--blue);
-  background: white;
-  box-shadow: 0 2px 0 var(--blue);
-}
-.labIcon {
-  height: 46px;
-  width: 46px;
-  border-radius: 13px;
-  display: block;
-  flex-shrink: 0;
-  background: #e3ebff;
-  color: #3154c8;
-  padding: 2px;
-}
-.labIcon svg {
-  width: 100%;
-  height: 100%;
-}
-[data-tone="mint"] .labIcon {
-  background: #d6f4e7;
-  color: #18785a;
-}
-[data-tone="purple"] .labIcon {
-  background: var(--purple);
-  color: #7046bb;
-}
-[data-tone="pink"] .labIcon {
-  background: #ffe0e9;
-  color: #b73a62;
-}
-[data-tone="yellow"] .labIcon {
-  background: #fff0c8;
-  color: #916600;
-}
-.labName {
-  display: block;
-  font-size: 0.86rem;
-  font-weight: 800;
-  min-width: 0;
-}
-.labName small {
-  display: block;
-  font-size: 0.67rem;
-  font-weight: 400;
-  margin: 3px 0 4px;
-  color: #526783;
-}
-.miniStars {
-  display: flex;
-  gap: 3px;
-  color: #a97208;
-}
-.miniStars svg {
-  width: 12px;
-  height: 12px;
-}
-.railNote {
-  font-size: 0.8rem;
-  padding: 17px 7px;
-  color: #536b87;
-}
-.playground {
-  min-width: 0;
-}
-.stageHeading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 3px 2px 15px;
-  gap: 15px;
-}
-.chapter {
-  color: #586b85;
-  font-size: 0.72rem;
-  margin-bottom: 5px !important;
-}
-.stageHeading h2 {
-  font-size: clamp(1.65rem, 2.6vw, 2.1rem);
-}
-.playSwitch {
-  display: flex;
-  padding: 4px;
-  border-radius: 12px;
-  background: #dce8f9;
-  flex-shrink: 0;
-}
-.playSwitch button {
-  min-height: 36px;
-  border: none;
-  border-radius: 9px;
-  background: transparent;
-  padding: 8px 13px;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-.playSwitch button[aria-pressed="true"] {
-  background: white;
-  box-shadow: 0 2px 0 #bed0e7;
-}
-.playArea {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 18px;
-  align-items: start;
-}
-.board {
-  background: white;
-  border: 1px solid var(--line);
-  border-bottom: 5px solid #cddcf0;
-  border-radius: 21px;
-  overflow: hidden;
-  min-width: 0;
-}
-.boardTools {
-  position: relative;
-  flex-wrap: wrap;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #edf2fa;
-  gap: 10px;
-}
-.boardTools > span {
-  display: flex;
-  gap: 7px;
-  align-items: center;
-  font-size: 0.75rem;
   font-weight: 600;
-}
-.boardTools i {
-  height: 8px;
-  width: 8px;
-  border-radius: 50%;
-  background: var(--blue);
-  box-shadow: 0 0 0 4px #e4edff;
-}
-.boardTools button {
-  border: 0;
-  padding: 5px 8px;
-  font-size: 0.7rem;
-  min-height: 34px;
-  color: #4a6081;
-  background: #f1f5fc;
-  border-radius: 8px;
-}
-.canvas {
-  background: radial-gradient(ellipse at 50% 52%, #f8fbff 0 48%, white 49%);
-  padding: 2px 8px;
-}
-.canvas svg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-.boardCaption {
-  margin: 0 18px 12px;
-  display: flex;
-  gap: 8px;
-  justify-content: space-between;
-  align-items: flex-start;
-  font-size: 0.73rem;
-  color: #4c6583;
-}
-.boardCaption > span {
-  max-width: 46ch;
-}
-.boardCaption label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-shrink: 0;
-  font-size: 0.68rem;
-}
-.boardActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0 16px 12px;
-}
-.boardActions button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  flex: 1;
-  justify-content: center;
-  border-radius: 10px;
-}
-.boardActions button > span {
-  font-size: 1.3rem;
-}
-.controls {
-  margin: 0 16px;
-  border-top: 1px solid var(--line);
-  font-size: 0.75rem;
-}
-.controls summary {
-  color: #4c6583;
-  padding: 12px 0;
-}
-.controls > div {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px 18px;
-  padding: 3px 0 16px;
-}
-.controls label > span {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-.controls output {
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.controls input[type="range"] {
-  display: block;
-  width: 100%;
-  margin: 7px 0 0;
-  accent-color: var(--blue);
-  min-height: 24px;
-}
-.toggle {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  border-top: 1px solid var(--line);
-  padding: 12px 16px;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-.missionPanel {
-  background: #fff8e7;
-  border: 1.5px solid #ecdcae;
-  border-bottom: 5px solid #e3cea0;
-  border-radius: 21px;
-  padding: 18px;
-}
-.missionTop {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 12px;
-}
-.orb {
-  width: 70px;
-  flex-shrink: 0;
-}
-.orb svg {
-  width: 100%;
-  display: block;
-}
-.missionTop > div:last-child > span {
-  font-size: 0.7rem;
-  color: #75623c;
-  font-weight: 700;
-}
-.missionTop h3 {
-  font-size: 1.25rem;
-  margin-top: 4px;
-}
-.missionSteps {
-  display: flex;
-  gap: 8px;
-  margin: 4px 0 15px;
-}
-.missionSteps button {
-  min-height: 35px;
-  padding: 6px 10px;
-  background: #fffdf5;
-  border: 1px solid #dfd2b0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  flex: 1;
-  color: #917119;
-  font-size: 0.8rem;
-  border-radius: 10px;
-}
-.missionSteps svg {
-  width: 17px;
-  height: 17px;
-}
-.missionSteps button[aria-current="step"] {
-  background: var(--gold);
-  border-color: #d1a745;
-  color: #664800;
-  font-weight: 700;
-}
-.missionInstruction {
-  font-size: 0.88rem;
-  margin-bottom: 16px !important;
-}
-.target {
-  background: white;
-  border: 1px dashed #d6bf80;
-  border-radius: 13px;
-  padding: 14px;
-  text-align: center;
-}
-.target > span {
-  display: block;
-  font-size: 0.72rem;
-  color: #75623c;
-  margin-bottom: 5px;
-}
-.target strong {
-  font-size: 1.15rem;
-  color: var(--ink);
-}
-.targetStatus {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
-  margin: 12px 0 16px;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 0.78rem;
-  color: #685a3c;
-  background: #f7edd3;
-}
-.targetStatus > span {
-  font-weight: 800;
-}
-.targetStatus[data-ready="true"] {
-  background: #d7f2e3;
-  color: #1e6148;
-}
-.feedback {
-  font-size: 0.77rem;
-  color: #355476;
-  margin-top: 12px !important;
-}
-.feedback:empty {
-  display: none;
-}
-.app .nextMission {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  background: #fffefa;
-  margin-top: 12px;
-  font-size: 0.84rem;
-  font-weight: 700;
-  border-color: #d9cca7;
-}
-.nextMission > span {
-  font-size: 1.3rem;
-}
-.app .hintButton {
-  border: 0;
-  background: transparent;
-  padding: 12px 0 6px;
-  color: #786131;
-  font-size: 0.78rem;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.hint {
-  border-left: 3px solid #c2a04d;
-  padding: 7px 0 7px 10px;
-  font-size: 0.8rem;
-  margin: 4px 0 10px !important;
-}
-.reasonDrawer {
-  margin: 13px -18px -18px;
-  border-top: 1px solid #e8d8b3;
-}
-.reasonDrawer > button {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  border: 0;
-  border-radius: 0 0 16px 16px;
-  width: 100%;
-  background: #fff3d5;
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 15px 18px;
-}
-.reasonDrawer > button > span:last-child {
-  margin-left: auto;
-}
-.reasonDrawer > div {
-  padding: 0 18px 18px;
-  background: #fffdf8;
-  border-radius: 0 0 16px 16px;
-}
-.reasonDrawer h4 {
-  font-size: 0.85rem;
-  padding-top: 16px;
-}
-.reasonDrawer article {
-  padding: 14px 0;
-  border-bottom: 1px solid #eae1cb;
-}
-.reasonDrawer article > span {
-  color: #775e2a;
-  font-size: 0.71rem;
-  font-weight: 700;
-}
-.reasonDrawer p {
-  font-size: 0.78rem;
-  margin-top: 6px;
-}
-.reasonDrawer small {
-  display: block;
-  color: #5b6a7e;
-  font-size: 0.7rem;
-}
-.formalReason {
-  font-weight: 800;
-  color: #234e9b;
-}
-.reasonDrawer summary {
-  font-size: 0.78rem;
-}
-.reasonDrawer > div > button {
-  margin-top: 12px;
-  font-size: 0.75rem;
-}
-.freeInstructions p {
-  font-size: 0.87rem;
-  margin: 12px 0;
-}
-.freeInstructions .primary {
-  margin: 20px 0;
-}
-.focused .playArea {
-  grid-template-columns: minmax(0, 1fr);
-}
-.focused .missionPanel {
-  display: none;
-}
-.focused .canvas svg {
-  max-height: 65vh;
-}
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.relay {
-  padding: 15px 20px 25px;
-  max-width: 1210px;
-  margin: auto;
-}
-.relayHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 25px;
-}
-.relayHeader h2 {
-  font-size: 2rem;
-}
-.relayHeader p {
-  font-size: 0.9rem;
-  margin-top: 9px;
-}
-.reasonCount {
-  white-space: nowrap;
-  font-size: 0.85rem;
-  border-radius: 13px;
-  padding: 12px 18px;
-  color: #6744a6;
-  background: var(--purple);
-  font-weight: 700;
-}
-.relayLayout {
-  display: grid;
-  grid-template-columns: 225px minmax(0, 1fr);
-  gap: 30px;
-  align-items: start;
-}
-.relayCompanion {
-  text-align: center;
-  padding: 18px 0;
-}
-.relayCompanion > svg {
-  width: 160px;
-  height: 160px;
-}
-.relayCompanion h3 {
-  font-size: 1.3rem;
-  margin: 12px 0;
-}
-.relayCompanion p {
-  color: #526c8c;
-  font-size: 0.85rem;
-}
-.roundStars {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin: 20px 0 10px;
-  color: #a67000;
-}
-.roundStars svg {
-  width: 23px;
-  height: 23px;
-}
-.relayCompanion small {
-  color: #536b87;
-}
-.challenge {
-  background: white;
-  border: 1px solid var(--line);
-  border-bottom: 5px solid #c9d8ed;
-  border-radius: 22px;
-  padding: 25px;
-  min-width: 0;
-}
-.challengeTop {
-  display: flex;
-  gap: 15px;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.76rem;
-}
-.challengeTop > span {
-  font-weight: 800;
-  color: #556fa0;
-}
-.challengeTop label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #536a8a;
-}
-.challenge progress {
-  display: block;
-  width: 100%;
-  height: 7px;
-  border: 0;
-  border-radius: 7px;
-  margin: 15px 0 25px;
-  accent-color: var(--blue);
-  overflow: hidden;
-}
-.challenge progress::-webkit-progress-bar {
-  background: #e8effa;
-}
-.challenge progress::-webkit-progress-value {
-  background: var(--blue);
-  border-radius: 7px;
-}
-.ifThen {
-  margin-bottom: 25px;
-  display: grid;
-  gap: 12px;
-}
-.ifThen > div {
-  padding: 16px 18px;
-  border-radius: 13px;
-  background: #f0f4ff;
-  border-left: 4px solid #98b2ff;
-}
-.ifThen > div + div {
-  background: #e5f6ee;
-  border-left-color: #72bfa4;
-}
-.ifThen span {
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: #526c93;
-}
-.ifThen p {
-  margin-top: 5px;
-  font-size: 1.05rem;
-}
-.challenge h3 {
-  font-size: 1.1rem;
-}
-.answerOptions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 16px;
-}
-.answerOptions button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 83px;
-  border: 2px solid #d5dff0;
-  border-bottom-width: 4px;
-  background: #fff;
-  font-size: 0.87rem;
-}
-.answerOptions button > span {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 29px;
-  width: 29px;
-  border-radius: 9px;
-  color: #3053aa;
-  background: #e7edff;
-  font-size: 0.85rem;
-  font-weight: 800;
-}
-.answerOptions button[data-result="correct"] {
-  background: #e5f6ee;
-  border-color: #60a68d;
-  color: #205c48;
-  opacity: 1;
-}
-.answerOptions button[data-result="incorrect"] {
-  border-color: #dd8d9f;
-  background: #fff1f4;
-  opacity: 1;
-}
-.recall {
-  border: 2px dashed #cbbbe9;
-  padding: 23px;
-  margin-top: 18px;
-  border-radius: 16px;
-  background: #f8f4ff;
-}
-.recall p {
-  margin-bottom: 18px;
-  font-size: 0.9rem;
-}
-.gameFeedback {
-  border-top: 1px solid var(--line);
-  margin-top: 23px;
-  padding-top: 20px;
-}
-.gameFeedback p {
-  margin-top: 10px;
-  font-size: 0.9rem;
-}
-.gameFeedback small {
-  display: block;
-  margin-top: 9px;
-  color: #536b87;
-}
-.gameFeedback .primary {
-  margin-top: 20px;
-  width: auto;
-  min-width: 190px;
-}
-.roundEnd {
-  background: white;
-  border: 1px solid var(--line);
-  border-bottom: 5px solid #c9d8ed;
-  border-radius: 24px;
-  padding: 35px;
-  text-align: center;
-}
-.trophy {
-  height: 90px;
-  width: 90px;
-  color: #d39a1b;
-  background: #fff3ce;
-  border-radius: 50%;
-  padding: 15px;
-  margin: 0 auto 20px;
-}
-.roundEnd h3 {
-  font-size: 2rem;
-}
-.roundEnd p {
-  margin-top: 15px;
-}
-.roundEnd p strong {
-  font-size: 2.3rem;
-  color: var(--blue);
-}
-.roundEnd .actions {
-  justify-content: center;
-  margin-top: 25px;
-}
-.roundEnd .primary {
-  width: auto;
-}
-.footer {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 25px 7px 0;
-  color: #536b87;
-  font-size: 0.73rem;
-}
-.footer > span {
-  padding-top: 12px;
-}
-.footer details {
-  max-width: 70ch;
-}
-.footer p {
-  margin: 10px 0;
-}
-.footer button {
-  font-size: 0.75rem;
-}
-.celebrate {
-  animation: capture 0.4s ease-out;
-}
-@keyframes capture {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  45% {
-    transform: scale(1.055) rotate(-1deg);
-  }
-}
-@media (min-width: 1650px) {
-  .app {
-    font-size: 17px;
-  }
-  .playArea {
-    grid-template-columns: minmax(0, 1fr) 330px;
-  }
-}
-@media (max-width: 1200px) {
-  .header {
-    flex-wrap: wrap;
-    gap: 14px;
-  }
-  .collection {
-    margin-left: auto;
-  }
-  .explorer {
-    grid-template-columns: 175px minmax(0, 1fr);
-    gap: 15px;
-  }
-  .labButtons button {
-    gap: 7px;
-    padding: 10px 7px;
-  }
-  .labIcon {
-    width: 37px;
-    height: 37px;
-  }
-  .labName {
-    font-size: 0.77rem;
-  }
-  .labName small {
-    font-size: 0.62rem;
-  }
-  .playArea {
-    grid-template-columns: minmax(0, 1fr) 265px;
-    gap: 13px;
-  }
-  .missionPanel {
-    padding: 15px;
-  }
-  .missionTop h3 {
-    font-size: 1.12rem;
-  }
-  .orb {
-    width: 58px;
-  }
-  .reasonDrawer {
-    margin-inline: -15px;
-    margin-bottom: -15px;
-  }
-  .boardCaption {
-    flex-wrap: wrap;
-  }
-}
-@media (max-width: 1000px) {
-  .explorer {
-    display: block;
-  }
-  .railHeading,
-  .railNote {
-    display: none;
-  }
-  .labButtons {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 2px 3px 12px;
-    margin-bottom: 13px;
-    scroll-snap-type: x proximity;
-  }
-  .labButtons button {
-    flex: 0 0 155px;
-    scroll-snap-align: start;
-    min-height: 74px;
-  }
-  .labName small {
-    display: none;
-  }
-  .miniStars {
-    margin-top: 7px;
-  }
-  .playArea {
-    grid-template-columns: minmax(0, 1fr) 280px;
-  }
-  .brand {
-    flex: 1;
-  }
-  .brand p {
-    display: none;
-  }
-  .tabs {
-    order: 3;
-    width: 100%;
-  }
-  .tabs button {
-    flex: 1;
-    justify-content: center;
-  }
-  .relayLayout {
-    grid-template-columns: 160px minmax(0, 1fr);
-    gap: 18px;
-  }
-  .relayCompanion > svg {
-    width: 130px;
-    height: 130px;
-  }
-}
-.mobileTarget {
-  display: none;
-}
-@media (min-width: 1001px) and (max-height: 820px) {
-  .playground:not(.focused) .canvas svg {
-    max-height: 330px;
-  }
-  .labButtons button {
-    min-height: 67px;
-    padding-block: 7px;
-  }
-  .labName small {
-    display: none;
-  }
-}
-@media (max-width: 700px) {
-  .mobileTarget {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 10px 13px;
-    background: #fff5d9;
-    border-bottom: 1px solid #f1dfaa;
-  }
-  .mobileTarget span {
-    font-size: 0.75rem;
-  }
-  .mobileTarget strong {
-    font-size: 0.88rem;
-  }
-  .mobileTarget[data-ready="true"] {
-    background: #ddf4e8;
-  }
-  .app {
-    padding: 12px;
-    border-radius: 17px;
-  }
-  .header {
-    padding: 0 0 16px;
-    gap: 12px;
-  }
-  .brand h1 {
-    font-size: 1.7rem;
-  }
-  .brandOrb {
-    width: 44px;
-  }
-  .collection {
-    gap: 4px;
-  }
-  .collection > span {
-    font-size: 0.82rem;
-    padding: 8px;
-    border-radius: 10px;
-  }
-  .collection small {
-    font-size: 0.6rem;
-  }
-  .collection > span + span {
-    display: none;
-  }
-  .collection svg {
-    width: 19px;
-    height: 19px;
-  }
-  .tabs button {
-    padding: 10px;
-    font-size: 0.9rem;
-  }
-  .playArea {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .stageHeading {
-    gap: 8px;
-    padding-bottom: 13px;
-  }
-  .stageHeading h2 {
-    font-size: 1.45rem;
-  }
-  .chapter {
-    font-size: 0.61rem;
-    max-width: 23ch;
-  }
-  .playSwitch button {
-    font-size: 0.7rem;
-    padding: 7px 9px;
-  }
-  .boardTools {
-    padding: 8px 11px;
-  }
-  .boardTools > span {
-    font-size: 0.66rem;
-  }
-  .boardTools button {
-    font-size: 0.62rem;
-    max-width: 100px;
-  }
-  .canvas {
-    padding: 0;
-  }
-  .boardCaption {
-    margin-inline: 12px;
-  }
-  .boardActions {
-    padding-inline: 11px;
-    gap: 6px;
-  }
-  .boardActions button {
-    font-size: 0.68rem;
-    padding: 9px;
-  }
-  .controls > div {
-    grid-template-columns: 1fr;
-  }
-  .missionPanel {
-    padding: 17px;
-  }
-  .missionTop {
-    gap: 13px;
-  }
-  .missionTop h3 {
-    font-size: 1.25rem;
-  }
-  .orb {
-    width: 66px;
-  }
-  .reasonDrawer {
-    margin-inline: -17px;
-    margin-bottom: -17px;
-  }
-  .missionInstruction {
-    font-size: 0.9rem;
-  }
-  .relay {
-    padding: 8px 0;
-  }
-  .relayHeader {
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 15px;
-  }
-  .relayHeader h2 {
-    font-size: 1.7rem;
-  }
-  .relayHeader p {
-    font-size: 0.84rem;
-  }
-  .reasonCount {
-    padding: 8px 12px;
-  }
-  .relayLayout {
-    display: block;
-  }
-  .relayCompanion {
-    display: none;
-  }
-  .challenge {
-    padding: 17px;
-  }
-  .challengeTop {
-    font-size: 0.65rem;
-    gap: 7px;
-  }
-  .challengeTop > label {
-    max-width: 175px;
-  }
-  .ifThen > div {
-    padding: 13px;
-  }
-  .ifThen p {
-    font-size: 0.95rem;
-  }
-  .answerOptions {
-    grid-template-columns: 1fr;
-  }
-  .answerOptions button {
-    min-height: 65px;
-  }
-  .roundEnd {
-    padding: 25px 18px;
-  }
-  .footer {
-    display: block;
-    padding: 16px 2px 0;
-  }
-  .footer > span {
-    display: block;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .app *,
-  .app *::before,
-  .app *::after {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* Learning workspace: keep the mathematical purpose visible at every size. */
-.header {
-  flex-wrap: wrap;
-  gap: 14px;
-}
-.tabs button {
-  padding: 11px 15px;
-}
-.collection small {
-  max-width: 85px;
-  white-space: normal;
-  font-size: 0.75rem;
-}
-.workspaceTools {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin: -7px 4px 18px;
-  color: #405d7c;
-  font-size: 0.82rem;
-}
-.workspaceTools label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-}
-.workspaceTools select {
-  background: white;
-  color: var(--ink);
-  border: 1px solid #b5c9df;
-  padding: 8px 10px;
-  border-radius: 8px;
-  min-height: 44px;
-  font: inherit;
-}
-.welcome {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 15px 18px;
-  margin-bottom: 20px;
-  background: #fff6df;
-  border-left: 4px solid #cc8a0b;
-  border-radius: 4px 14px 14px 4px;
-}
-.welcome > div {
-  flex: 1 1 310px;
-}
-.welcome p {
-  font-size: 0.88rem;
-  margin-top: 4px;
-  max-width: 62ch;
-}
-.welcome button {
-  font-size: 0.83rem;
-}
-.propertyName {
-  font-size: 0.9rem;
-  color: #3f5b7a;
-  margin-top: 5px !important;
-}
-.labName small {
-  display: block;
-  font-size: 0.75rem;
-  line-height: 1.35;
-}
-.labButtons button {
-  min-height: 89px;
-}
-.chapter {
-  font-size: 0.76rem;
-}
-.boardTools > span,
-.boardTools button {
-  font-size: 0.8rem;
-}
-.boardCaption {
-  font-size: 0.8rem;
-}
-.precision {
-  font-size: 0.82rem;
-  line-height: 1.5;
-  margin: 0 0 12px !important;
-}
-.controls input[type="number"] {
-  width: 100%;
-  min-height: 44px;
-  border: 1px solid #aec4de;
-  border-radius: 8px;
-  padding: 8px 10px;
-  background: white;
-  color: var(--ink);
-}
-.conditionsEntry {
-  margin-top: 24px;
-  background: white;
-  border: 1px solid var(--line);
-  border-radius: 15px;
-  padding: 0 18px;
-}
-.conditionsEntry > summary {
-  font-size: 1rem;
-  padding: 16px 0;
-}
-.conditionsEntry > summary span {
-  display: block;
-  font-size: 0.84rem;
-  font-weight: 400;
-  color: #405d7c;
-  margin-top: 3px;
-}
-.app[data-appearance="calm"] {
-  --sky: #f4f7fa;
-  --gold: #dce7f5;
-  background: var(--sky);
-  border-radius: 12px;
-}
-.app[data-appearance="calm"] :is(.brandOrb, .orb) {
-  display: none;
-}
-.app[data-appearance="calm"] .labIcon {
-  background: #e5edf6;
-  color: var(--ink);
-}
-.app[data-appearance="calm"] .missionPanel {
-  background: #f7f9fc;
-}
-.app[data-appearance="calm"] button {
-  box-shadow: none;
-}
-.app[data-appearance="calm"] .welcome {
-  background: #eaf1f9;
-  border-color: #315f91;
-}
-@media (min-width: 1001px) and (max-height: 820px) {
-  .labButtons button {
-    min-height: 78px;
-  }
-  .labName small {
-    display: block;
-  }
-  .playground:not(.focused) .canvas svg {
-    max-height: 320px;
-  }
-}
-@media (max-width: 1000px) {
-  .labButtons button {
-    flex-basis: 190px;
-    min-height: 94px;
-  }
-  .labName small {
-    display: block;
-  }
-}
-@media (max-width: 700px) {
-  .workspaceTools {
-    align-items: flex-start;
-    margin: 0 0 12px;
-  }
-  .workspaceTools > p {
-    display: none;
-  }
-  .workspaceTools label {
-    margin-left: auto;
-    font-size: 0.8rem;
-  }
-  .welcome {
-    padding: 12px;
-    gap: 8px;
-  }
-  .welcome p {
-    font-size: 0.85rem;
-  }
-  .welcome button {
-    width: 100%;
-  }
-  .tabs {
-    gap: 2px;
-  }
-  .tabs button {
-    padding: 10px 7px;
-    font-size: 0.83rem;
-    min-height: 48px;
-  }
-  .playSwitch button {
-    font-size: 0.8rem;
-  }
-  .stageHeading {
-    flex-wrap: wrap;
-  }
-  .boardTools {
-    flex-wrap: wrap;
-  }
-  .boardTools > span,
-  .boardTools button {
-    font-size: 0.78rem;
-  }
-  .boardTools button {
-    max-width: none;
-  }
-  .boardCaption {
-    font-size: 0.8rem;
-  }
-  .boardActions button {
-    font-size: 0.8rem;
-  }
-  .conditionsEntry {
-    padding: 0 12px;
-  }
-}
-
-/* V4: the construction is the workspace; navigation and tools stay quiet. */
-.app {
-  padding: 16px;
-  border-radius: 18px;
-}
-.header {
-  gap: 16px;
-  padding: 0 0 16px;
-  flex-wrap: nowrap;
-}
-.brand {
-  flex: 0 0 auto;
-}
-.brand h1 {
-  font-size: 1.6rem;
-}
-.brandOrb {
-  width: 36px;
-}
-.tabs {
-  order: initial;
-  width: auto;
-  padding: 3px;
-}
-.tabs button {
-  min-height: 44px;
-  padding: 9px 14px;
-  font-size: 0.9rem;
+  opacity: 0.85;
 }
 .settings {
   position: relative;
@@ -1507,23 +197,21 @@
   flex: 0 0 auto;
 }
 .settings > summary {
-  border: 1px solid var(--line);
-  padding: 10px 12px;
-  border-radius: 9px;
+  padding: 10px 14px;
+  border-radius: 12px;
   background: white;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 .settingsPanel {
   position: absolute;
   right: 0;
   top: calc(100% + 6px);
-  width: min(310px, calc(100vw - 40px));
+  width: min(320px, calc(100vw - 40px));
   padding: 16px;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 14px;
-  border: 1px solid #b8cde5;
-  border-radius: 12px;
+  border-radius: 16px;
   background: white;
   box-shadow: 0 12px 28px #143b6826;
 }
@@ -1546,16 +234,56 @@
 .settingsPanel p {
   font-size: 0.85rem;
 }
-.settingsPanel .collection {
+.howTo {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.95rem;
+}
+/* The numbers are part of each item, so they cannot run into the item before. */
+.howTo ol {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: how-to;
+}
+.howTo li {
+  counter-increment: how-to;
+}
+.howTo li::before {
+  content: counter(how-to) ". ";
+  font-weight: 700;
+}
+.collection {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 9px;
 }
-.settingsPanel .collection > span {
+.collection > span {
   display: flex;
+  align-items: center;
+  gap: 5px;
   padding: 8px;
+  border-radius: 12px;
+  background: var(--sky);
+  font-weight: 800;
 }
-.settingsPanel .collection small {
+.collection svg {
+  width: 23px;
+  height: 23px;
+  color: #bc7d00;
+}
+.collection small {
   font-size: 0.75rem;
+  font-weight: 500;
+  color: #4c6584;
+}
+.collection b {
+  color: #7651bf;
+  font-size: 1.45rem;
 }
 .quickGuide {
   border-top: 1px solid var(--line);
@@ -1563,148 +291,252 @@
 .quickGuide p {
   margin: 8px 0;
 }
-.mobileProperty {
-  display: none;
+
+/* ---------- Explore: one row to choose, then the work ---------- */
+.playground {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  min-width: 0;
 }
-.explorer {
-  grid-template-columns: 180px minmax(0, 1fr);
-  gap: 16px;
+.contextBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
 }
-.railHeading {
-  padding: 0 4px 10px;
+/* On an upright iPad the name wraps to two lines so the whole row still fits. */
+.picker {
+  position: relative;
+  flex: 1 1 220px;
+  max-width: max-content;
+  min-width: 0;
 }
-.labButtons button {
-  min-height: 78px;
-  padding: 9px;
-  gap: 9px;
-  border-bottom-width: 2px;
+.app .picker > button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 14px;
 }
-.labIcon {
-  height: 30px;
-  width: 30px;
+.picker > button > span:first-child {
+  color: var(--soft);
+  font-size: 0.8rem;
 }
-.labName {
+.picker strong {
+  font-size: 1rem;
+  line-height: 1.3;
+}
+.propertyMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 8;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  width: max-content;
+  max-width: min(460px, calc(100vw - 36px));
+  padding: 6px;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 12px 28px #143b6826;
+}
+.app .propertyMenu button {
+  display: grid;
+  grid-template-columns: 5.4em minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.app .propertyMenu button[aria-pressed="true"] {
+  background: var(--given-bg);
+}
+.menuNumbers {
+  color: var(--soft);
   font-size: 0.82rem;
-  line-height: 1.35;
-}
-.labName small {
-  display: block;
-  font-size: 0.73rem;
-  margin-top: 3px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 .miniStars {
-  margin-top: 5px;
+  display: flex;
+  gap: 2px;
+  color: #c98a00;
 }
-.stageHeading {
-  padding: 0 0 10px;
-  align-items: start;
+.miniStars svg {
+  width: 13px;
+  height: 13px;
 }
-.stageHeading h2 {
-  font-size: clamp(1.25rem, 2vw, 1.6rem);
-  max-width: 34ch;
+/* The lessons of this property, by reason number: 16.1–16.2, 16.3. */
+.lessonChips,
+.lessonSlot,
+.lessonSlot nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
-.chapter {
+.lessonSlot:empty {
   display: none;
 }
-.propertyName {
-  font-size: 0.8rem;
-  margin-top: 3px !important;
-}
-.playSwitch button {
+.app .lessonChips button,
+.app .lessonSlot nav button {
   min-height: 44px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+.app .lessonChips button[aria-pressed="true"],
+.app .lessonSlot nav button[aria-pressed="true"] {
+  background: var(--given-bg);
+  box-shadow: inset 0 0 0 2px var(--blue);
+  color: var(--given);
+}
+.lessonSlot details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.app .lessonSlot summary {
+  padding: 10px 4px;
+  color: var(--soft);
+  font-size: 0.9rem;
+}
+.playSwitch {
+  display: flex;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 4px;
+  border-radius: 14px;
+  background: #dfeaff;
+}
+.app .playSwitch button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+}
+.app .playSwitch button[aria-pressed="true"] {
+  background: white;
+  box-shadow: 0 2px 0 #b9c8dc;
 }
 .playArea {
-  grid-template-columns: minmax(0, 1fr) 270px;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
+  gap: 18px;
+  align-items: start;
 }
+/* A guided lesson gives the words as much room as the circle. */
+.playArea.lessonArea {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.playArea.testingCondition,
+.focused .playArea,
+.focused .playArea.lessonArea {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ---------- The board: the task, the circle, then Tools ---------- */
 .board {
-  border-bottom-width: 2px;
-  border-radius: 14px;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 20px;
+  background: white;
   scroll-margin-top: 10px;
 }
 .boardTools {
-  padding: 4px 12px;
-  min-height: 44px;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
   gap: 6px;
+  min-height: 44px;
+  padding: 8px 12px 0;
 }
-.boardTools button {
-  min-height: 36px;
-  font-size: 0.78rem;
-  max-width: none;
+.boardTools > span {
+  margin-right: auto;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.app .boardTools > button {
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #f1f5fc;
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 .currentTask {
-  padding: 10px 14px;
-  background: #fff5d9;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  padding: 16px 20px 6px;
 }
 .currentTask strong {
-  font-size: 0.98rem;
-  line-height: 1.45;
+  font-size: 1.15rem;
+  line-height: 1.4;
 }
 .currentTask > span {
+  color: var(--soft);
+  font-size: 0.8rem;
   white-space: nowrap;
-  color: #5c5a50;
-  font-size: 0.74rem;
 }
 .canvas {
-  padding: 0 6px;
-  background: white;
+  padding: 0 8px;
 }
+.canvas svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* On a laptop or an iPad on its side the circle, its button and Tools fit one screen. */
 .playground:not(.focused) .canvas svg {
-  max-height: min(400px, 47vh);
+  max-height: min(440px, 46vh);
 }
-.boardOptions {
-  border-top: 1px solid var(--line);
-  padding: 0 12px;
+.playground:not(.focused) .paperCanvas svg {
+  max-height: min(400px, 44vh);
 }
-.boardOptions > summary {
-  font-size: 0.85rem;
-  padding: 10px 0;
+/* Focus enlarges the board, but its buttons sit below it and must stay on screen. */
+.focused .canvas svg {
+  max-height: max(300px, calc(100vh - 220px));
 }
-.boardOptions .boardCaption {
-  margin: 8px 0;
-  flex-wrap: wrap;
-  font-size: 0.85rem;
+.focused .paperCanvas svg {
+  max-height: max(300px, calc(100vh - 240px));
 }
-.boardOptions .boardCaption label {
-  min-height: 44px;
-  font-size: 0.85rem;
+.snapStatus {
+  min-height: 28px;
+  padding: 2px 12px;
+  color: #226042;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  text-align: center;
 }
-.boardOptions .boardActions,
-.boardOptions .controls {
-  margin: 8px 0;
-  padding: 0;
-}
-.boardOptions .boardActions button {
-  font-size: 0.85rem;
-}
-.conditionTool {
-  margin: 8px 0 14px;
-}
-.missionPanel {
-  padding: 14px;
-  border-radius: 12px;
-  border: 1px solid #e4d7af;
-  border-bottom-width: 1px;
-}
-.missionTop {
-  padding: 0;
-  margin-bottom: 10px;
-}
-.missionTop h3 {
-  font-size: 1rem;
-}
-.reasonDrawer {
-  margin: 12px -14px -14px;
-}
-.testingCondition {
-  grid-template-columns: minmax(0, 1fr);
+.snapStatus > span {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: var(--get-bg);
 }
 .angleExperiment {
-  padding: 12px 14px;
+  padding: 12px 20px;
   border-top: 1px solid var(--line);
   font-size: 0.95rem;
 }
@@ -1714,98 +546,246 @@
   gap: 8px;
   margin-top: 10px;
 }
-.app[data-appearance="calm"] .labIcon,
-.app[data-appearance="calm"] .labName small,
-.app[data-appearance="calm"] .miniStars,
-.app[data-appearance="calm"] .propertyName,
-.app[data-appearance="calm"] .railNote {
-  display: none;
+.boardOptions {
+  padding: 0 20px;
 }
-.app[data-appearance="calm"] .labButtons button {
-  min-height: 58px;
-  border-radius: 6px;
+.boardOptions > summary {
+  color: var(--soft);
+  font-size: 0.9rem;
 }
-.app[data-appearance="calm"] .currentTask {
-  background: #edf3f8;
+.boardOptions[open] {
+  padding-bottom: 14px;
 }
-.app[data-appearance="calm"] .missionTop {
-  display: none;
+.toolButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 6px;
 }
-.app[data-appearance="calm"] .missionPanel {
+.app .toolButtons button,
+.app .toolSwitches button {
+  min-height: 44px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.app .toolButtons button[aria-pressed="true"],
+.app .toolSwitches button[aria-pressed="true"] {
+  border-color: var(--blue);
+  background: var(--given-bg);
+  color: var(--given);
+}
+.toolSwitches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+}
+.toolSwitches [role="group"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.snapToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.boardCaption {
+  margin: 8px 0;
+  color: #4c6583;
+  font-size: 0.85rem;
+}
+.boardCaption > span {
+  display: block;
+  max-width: 60ch;
+}
+.snapHelp {
+  padding-bottom: 12px;
+  color: #4a6081;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.boardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+.app .boardActions button {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.boardActions button > span {
+  font-size: 1.3rem;
+}
+.controls {
+  margin: 8px 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.85rem;
+}
+.controls summary {
+  color: #4c6583;
+}
+.controls > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 18px;
+  padding: 3px 0 16px;
+}
+.controls label > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.controls output {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.controls input[type="range"] {
+  display: block;
+  width: 100%;
+  min-height: 24px;
+  margin: 7px 0 0;
+  accent-color: var(--blue);
+}
+.controls input[type="number"] {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid #aec4de;
+  border-radius: 8px;
   background: white;
-  border-color: var(--line);
+  color: var(--ink);
 }
-/* iPads and small laptops have no room for three columns, so the property list
-   becomes the drop-down above the circle and the circle and lesson share the width. */
-@media (max-width: 1399px) {
+.precision {
+  margin: 0 0 12px !important;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.conditionTool {
+  margin: 8px 0 0;
+}
+
+/* ---------- The card beside the board ---------- */
+.missionPanel {
+  min-width: 0;
+  padding: 20px;
+  border-radius: 20px;
+  background: white;
+}
+/* Focus leaves only the board, enlarged. */
+.focused .missionPanel {
+  display: none;
+}
+.freeInstructions p {
+  margin: 12px 0;
+}
+.freeInstructions .primary {
+  margin: 16px 0 10px;
+}
+.reasonDrawer {
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.app .reasonDrawer > button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 12px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--soft);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.reasonDrawer > button > span:last-child {
+  margin-left: auto;
+}
+.reasonWorkspace {
+  min-width: 0;
+  scroll-margin-top: 16px;
+}
+.reasonExplanation {
+  margin-top: 12px;
+  padding: 4px 20px;
+  border-radius: 16px;
+  background: white;
+}
+.reasonExplanation p {
+  padding-bottom: 14px;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 22px 6px 0;
+  color: #536b87;
+  font-size: 0.8rem;
+}
+.footer > span {
+  padding-top: 12px;
+}
+.footer details {
+  max-width: 70ch;
+}
+.footer p {
+  margin: 10px 0;
+}
+.footer button {
+  font-size: 0.8rem;
+}
+
+/* ---------- "Simple" appearance, chosen in More ---------- */
+.app[data-appearance="calm"] {
+  --sky: #f4f7fa;
+  --gold: #dce7f5;
+  border-radius: 12px;
+}
+.app[data-appearance="calm"] .brandOrb {
+  display: none;
+}
+.app[data-appearance="calm"] button,
+.app[data-appearance="calm"] .tabs button[aria-pressed="true"],
+.app[data-appearance="calm"] .playSwitch button[aria-pressed="true"] {
+  box-shadow: none;
+}
+
+/* ---------- Sizes ---------- */
+@media (min-width: 1650px) {
   .app {
-    padding: 12px;
-  }
-  .explorer {
-    display: block;
-  }
-  .rail {
-    display: none;
-  }
-  .mobileProperty {
-    display: block;
-    position: relative;
-    margin-bottom: 8px;
-  }
-  .mobileProperty > button {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 10px;
-    align-items: center;
-    width: 100%;
-    padding: 9px 12px;
-    border-radius: 9px;
-  }
-  .mobileProperty > button > span:first-child {
-    font-size: 0.75rem;
-    color: #52677d;
-  }
-  .mobileProperty strong {
-    font-size: 0.92rem;
-    line-height: 1.35;
-  }
-  .propertyMenu {
-    position: absolute;
-    top: calc(100% + 4px);
-    width: 100%;
-    z-index: 8;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    padding: 7px;
-    gap: 4px;
-    background: white;
-    border: 1px solid #b8cde5;
-    border-radius: 10px;
-    box-shadow: 0 10px 20px #143b6826;
-  }
-  .propertyMenu button {
-    border: 0;
-    font-size: 0.9rem;
-  }
-  .propertyMenu button[aria-pressed="true"] {
-    color: white;
-    background: var(--blue-dark);
-  }
-  .stageHeading > div:first-child {
-    display: none;
-  }
-  .stageHeading {
-    justify-content: flex-end;
-    padding-bottom: 7px;
-  }
-  .playSwitch {
-    padding: 0;
-  }
-  .playSwitch button {
-    padding: 6px 12px;
+    font-size: 17px;
   }
 }
 @media (max-width: 1000px) {
+  .app {
+    padding: 12px;
+  }
   .header {
     flex-wrap: wrap;
     gap: 8px;
@@ -1820,10 +800,14 @@
     order: 3;
     width: 100%;
   }
-  .playArea {
-    grid-template-columns: minmax(0, 1fr) 265px;
+  .app .tabs button {
+    flex: 1;
   }
-  .playArea.testingCondition {
+}
+/* An iPad held upright: the circle on top at full width, the words below it. */
+@media (max-width: 859px) {
+  .playArea,
+  .playArea.lessonArea {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -1833,7 +817,7 @@
     border-radius: 12px;
   }
   .header {
-    padding-bottom: 8px;
+    padding-bottom: 10px;
   }
   .brand h1 {
     font-size: 1.4rem;
@@ -1841,259 +825,75 @@
   .brandOrb {
     width: 30px;
   }
-  .tabs button {
-    min-height: 42px;
-    padding: 8px 6px;
-    font-size: 0.85rem;
+  .playground {
+    gap: 10px;
   }
-  .mobileProperty > button {
-    padding: 8px 10px;
-    gap: 8px;
+  .picker {
+    flex: 1 1 100%;
+    max-width: none;
   }
-  .mobileProperty > button > span:first-child {
+  .picker > button > span:first-child {
     display: none;
   }
-  .mobileProperty > button {
+  .app .picker > button {
     grid-template-columns: minmax(0, 1fr) auto;
   }
-  .stageHeading {
-    margin-top: -2px;
+  .propertyMenu {
+    width: 100%;
+    max-width: none;
   }
-  .playArea {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
+  .playSwitch {
+    flex: 1 1 100%;
+    margin-left: 0;
   }
-  .boardTools {
-    padding: 3px 10px;
-    flex-wrap: nowrap;
-    gap: 4px;
-  }
-  .boardTools > span {
-    font-size: 0.76rem;
-  }
-  .boardTools button {
-    font-size: 0.74rem;
-    min-height: 36px;
-    padding: 5px;
+  .app .playSwitch button {
+    flex: 1;
+    padding-inline: 6px;
   }
   .currentTask {
-    padding: 9px 11px;
+    padding: 14px 14px 4px;
   }
   .currentTask strong {
-    font-size: 0.91rem;
+    font-size: 1.05rem;
   }
   .currentTask > span {
     display: none;
   }
-  .playground:not(.focused) .canvas svg {
-    max-height: min(310px, 38vh);
-  }
   .canvas {
     padding: 0;
   }
-  .boardOptions > summary {
-    min-height: 40px;
-    padding: 8px 0;
+  .boardOptions {
+    padding-inline: 14px;
+  }
+  .controls > div {
+    grid-template-columns: 1fr;
   }
   .missionPanel {
-    padding: 11px;
-  }
-  .missionTop {
-    display: none;
-  }
-  .reasonDrawer {
-    margin: 10px -11px -11px;
+    padding: 16px;
   }
   .footer {
-    font-size: 0.76rem;
+    display: block;
+    padding: 16px 2px 0;
+  }
+  .footer > span {
+    display: block;
   }
 }
-.snapToggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 40px;
-  color: #143b68;
-  font-size: 0.86rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-.snapToggle input {
-  width: 18px;
-  height: 18px;
-  accent-color: #3769f4;
-}
-.snapStatus {
-  min-height: 28px;
-  padding: 2px 12px;
-  color: #226042;
-  font-size: 0.82rem;
-  text-align: center;
-  line-height: 1.5;
-}
-.snapStatus > span {
-  display: inline-block;
-  padding: 1px 8px;
-  background: #eaf8f0;
-  border-radius: 6px;
-}
-.snapHelp {
-  margin: 0;
-  padding: 0 14px 12px;
-  color: #4a6081;
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-.reasonWorkspace {
-  grid-column: 1 / -1;
-  margin-top: 24px;
-  scroll-margin-top: 16px;
-  min-width: 0;
-}
-.reasonExplanation {
-  padding: 14px 18px;
-  color: #143b68;
-  background: white;
-  border: 1px solid #d5e3f2;
-  border-radius: 12px;
-  margin-top: 12px;
-}
-.reasonExplanation summary {
-  min-height: 32px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.reasonExplanation p {
-  margin-top: 8px;
-}
-
-.measurementButtons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-.boardTools .measurementButtons button {
-  min-height: 44px;
-  border: 1px solid #c5d6e8;
-  white-space: nowrap;
-}
-.boardTools .measurementButtons button[aria-pressed="true"] {
-  background: #eaf1ff;
-  border-color: #3769f4;
-  color: #1945a6;
-}
-.boardTools {
-  flex-wrap: wrap;
-}
-
 @media (max-width: 600px) {
   .tabs {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    width: 100%;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2px;
   }
-  .tabs button {
+  .app .tabs button {
     min-width: 0;
-    min-height: 44px;
-    padding: 9px 6px;
+    padding: 8px 4px;
+    font-size: 0.82rem;
+    line-height: 1.2;
   }
-}
-
-/* Tab descriptions, the first-visit guide and the tidied board tools. */
-.tabs button {
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-}
-.tabHint {
-  font-size: 0.7rem;
-  font-weight: 600;
-  opacity: 0.85;
-}
-.howTo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 16px;
-  margin: 0 0 16px;
-  padding: 12px 16px;
-  background: #fff6df;
-  border-left: 4px solid #cc8a0b;
-  border-radius: 4px 14px 14px 4px;
-}
-/* The numbers are part of each item, so they cannot run into the item before. */
-.howTo ol {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 22px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: how-to;
-}
-.howTo li {
-  counter-increment: how-to;
-}
-.howTo li::before {
-  content: counter(how-to) ". ";
-  font-weight: 700;
-}
-.howTo button {
-  margin-left: auto;
-  font-size: 0.85rem;
-}
-.boardTools {
-  justify-content: flex-end;
-}
-.toolSwitches {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 12px 16px 8px;
-}
-.toolSwitches label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-.toolSwitches [role="group"] {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.toolSwitches button {
-  min-height: 40px;
-  padding: 6px 10px;
-  font-size: 0.8rem;
-}
-.toolSwitches button[aria-pressed="true"] {
-  background: #eaf1ff;
-  border-color: #3769f4;
-  color: #1945a6;
-}
-.currentTask strong {
-  font-size: 1.08rem;
-}
-@media (max-width: 480px) {
   .tabHint {
     display: none;
   }
-}
-/* The lesson panel is wide enough for a whole reason on one row; the circle gives way. */
-@media (min-width: 701px) {
-  .playArea.lessonArea {
-    grid-template-columns: minmax(0, 1fr) minmax(340px, 47%);
-  }
-  .focused .playArea.lessonArea {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-.playground:not(.focused) .lessonArea .canvas svg {
-  max-height: min(340px, 42vh);
 }
 /* The task can change mid-drag; a steady height keeps the circle still under the finger. */
 @media (max-width: 1200px) {
@@ -2101,32 +901,26 @@
     min-height: 72px;
   }
 }
-/* Focus enlarges a demonstration, but its buttons sit below it and must stay on screen. */
-.focused .paperCanvas svg {
-  max-height: max(300px, calc(100vh - 390px));
-}
 /* Safari zooms the page when a form field under 16px is tapped. */
 @media (pointer: coarse) {
-  .app .boardTools button,
-  .app .playSwitch button {
-    min-height: 44px;
-  }
   .app select,
   .app textarea,
   .app input:not([type="checkbox"], [type="radio"], [type="range"]) {
     font-size: 16px;
   }
 }
+@media (prefers-reduced-motion: reduce) {
+  .app *,
+  .app *::before,
+  .app *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
 /* Site Presentation mode: the circle, its task and the lesson fill the projector. */
 :global([data-presentation="true"]) .app {
   max-width: none;
-}
-:global([data-presentation="true"]) .explorer {
-  grid-template-columns: minmax(0, 1fr);
-}
-:global([data-presentation="true"]) .rail,
-:global([data-presentation="true"]) .howTo {
-  display: none;
 }
 :global([data-presentation="true"]) .currentTask strong {
   font-size: 1.5rem;

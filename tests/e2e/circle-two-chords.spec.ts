@@ -138,7 +138,7 @@ for (const [device, viewport] of [
         test(`16.3 Investigate opens with crossing bisectors (${previous ? "old coincident lines" : "fresh pupil"}) at ${path}`, async ({
           page,
         }) => {
-          await page.goto(path);
+          await page.goto(`${path}#explore`);
           await page.getByRole("button", { name: /^16\.3 ·/ }).tap();
           const guide = page.getByTestId("theorem-lesson");
           if (previous) {
@@ -215,7 +215,7 @@ for (const [device, viewport] of [
       }) => {
         const errors: string[] = [];
         page.on("pageerror", (error) => errors.push(error.message));
-        await page.goto(path);
+        await page.goto(`${path}#explore`);
         await page.getByRole("button", { name: /^16\.3 ·/ }).tap();
         // A class can keep working after its single-file lesson has loaded.
         if (path.endsWith("/classroom")) await page.context().setOffline(true);

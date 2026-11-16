@@ -375,7 +375,7 @@ export default function ReasonChallenge({
         .join(" · ");
     return (
       <div
-        className={key === "reason" ? `${s.choices} ${s.skillHand}` : s.choices}
+        className={s.choices}
         role="group"
         aria-label={
           key === "condition"
@@ -392,8 +392,7 @@ export default function ReasonChallenge({
           <button
             type="button"
             key={value}
-            className={key === "reason" ? s.skillCard : undefined}
-            // The name skips the decorative "Reason card" label but keeps the review note.
+            // A reason's name is its wording, with the review note when there is one.
             aria-label={
               key !== "reason"
                 ? undefined
@@ -410,24 +409,12 @@ export default function ReasonChallenge({
             <span className={s.radio} aria-hidden="true">
               {draft.response[key] === value ? "●" : "○"}
             </span>
-            {key === "reason" ? (
-              <span className={s.skillBody}>
-                <small>{c.reasonCard}</small>
-                <span className={s.choiceText}>
-                  <MathText>{labelFor(value)}</MathText>
-                </span>
-                {review && (
-                  <small className={s.reviewChoice}>{reviewNote(value)}</small>
-                )}
-              </span>
-            ) : (
-              <span className={s.choiceText}>
-                <MathText>{value}</MathText>
-                {review && (
-                  <small className={s.reviewChoice}>{reviewNote(value)}</small>
-                )}
-              </span>
-            )}
+            <span className={s.choiceText}>
+              <MathText>{key === "reason" ? labelFor(value) : value}</MathText>
+              {review && (
+                <small className={s.reviewChoice}>{reviewNote(value)}</small>
+              )}
+            </span>
           </button>
         ))}
       </div>
@@ -474,29 +461,13 @@ export default function ReasonChallenge({
     </div>
   );
 
-  return (
-    <section className={s.game} aria-label={c.region} ref={top}>
-      <header className={s.header}>
-        <div>
-          <span className={s.kicker}>{c.kicker}</span>
-          <h2>{c.title}</h2>
-          <p>{c.intro}</p>
-        </div>
-        <div className={s.score}>
-          <strong>{score}</strong>
-          <span>{c.levelPoints}</span>
-        </div>
-      </header>
-      <div className={s.chainBadge} title={c.chainHelp}>
-        <span aria-hidden="true">✦</span>
-        <strong>{c.chainCount(view.streak)}</strong>
-        <span>{c.bestChain(state.bestStreak)}</span>
-      </div>
-      {saveFailed && (
-        <p className={s.notice} role="status">
-          {c.saveFailed}
-        </p>
-      )}
+  const choosing =
+    (!state.started && !review) || !challenge || (!draft && !awaitingStart);
+  /** Everything that is not the question waits here: old sets, scoring, the record. */
+  const more = (
+    // Closed again whenever the screen changes between the levels and a question.
+    <details className={s.more} key={choosing ? "levels" : "question"}>
+      <summary>{c.more}</summary>
       {(state.queue.length > 0 || state.archive.length > 0) && (
         <div className={s.setToolbar}>
           <label>
@@ -536,11 +507,32 @@ export default function ReasonChallenge({
             </select>
           </label>
           {(review || state.started) && (
-            <button type="button" className={s.primary} onClick={() => start()}>
+            <button type="button" onClick={() => start()}>
               {c.newSetSameLevel}
             </button>
           )}
         </div>
+      )}
+      <p>{c.setup}</p>
+      <p>{c.scoring}</p>
+      <p>{c.setPersistence}</p>
+      <button type="button" onClick={() => setConfirmRecord("reset")}>
+        {c.resetRecord}
+      </button>
+      {confirmRecord === "reset" && confirmPanel}
+    </details>
+  );
+
+  return (
+    <section className={s.game} aria-label={c.region} ref={top}>
+      <header className={s.header}>
+        <h2 className={choosing ? undefined : s.visuallyHidden}>{c.title}</h2>
+        {choosing && <p>{c.intro}</p>}
+      </header>
+      {saveFailed && (
+        <p className={s.notice} role="status">
+          {c.saveFailed}
+        </p>
       )}
       {review && (
         <div className={s.reviewBanner}>
@@ -565,9 +557,7 @@ export default function ReasonChallenge({
         </div>
       )}
       {confirmRecord === "delete" && confirmPanel}
-      {(!state.started && !review) ||
-      !challenge ||
-      (!draft && !awaitingStart) ? (
+      {choosing ? (
         <>
           {notice && (
             <p className={s.notice} role="status">
@@ -586,13 +576,18 @@ export default function ReasonChallenge({
                 }}
               >
                 <span className={s.levelNumber}>{i + 1}</span>
-                <strong>{g.title}</strong>
-                <span className={s.small}>
-                  {c.reasonNumbers(
-                    g.reasonIds.map(
-                      (id) =>
-                        reasons.find((reason) => reason.id === id)!.number,
-                    ),
+                <span className={s.levelText}>
+                  <strong>{g.title}</strong>
+                  {/* The mixed level says "All 17 reasons" in its title. */}
+                  {g.reasonIds.length < reasons.length && (
+                    <span className={s.small}>
+                      {c.reasonNumbers(
+                        g.reasonIds.map(
+                          (id) =>
+                            reasons.find((reason) => reason.id === id)!.number,
+                        ),
+                      )}
+                    </span>
                   )}
                 </span>
                 <small>
@@ -605,10 +600,7 @@ export default function ReasonChallenge({
             ))}
           </div>
           <div className={s.setup}>
-            <div>
-              <h3>{challengeGroup(picked.group).title}</h3>
-              <p>{c.setup}</p>
-            </div>
+            <h3>{challengeGroup(picked.group).title}</h3>
             <label>
               {c.pace}
               <select
@@ -653,7 +645,6 @@ export default function ReasonChallenge({
               picked.seconds !== state.seconds) && (
               <p className={s.small}>{c.startSavesSet}</p>
             )}
-          <p className={s.guide}>{c.scoring}</p>
         </>
       ) : (
         <>
@@ -674,6 +665,13 @@ export default function ReasonChallenge({
             <strong>
               {c.runProgress(group.title, solved, view.queue.length)}
             </strong>
+            <span className={s.tally} title={c.chainHelp}>
+              <span>
+                <b>{score}</b> {c.levelPoints}
+              </span>
+              <span>{c.chainCount(view.streak)}</span>
+              <span>{c.bestChain(state.bestStreak)}</span>
+            </span>
             <span
               className={s.timer}
               data-urgent={!review && !!draft?.deadline && remaining <= 20}
@@ -692,7 +690,7 @@ export default function ReasonChallenge({
             </span>
           </div>
           <progress
-            className={s.progress}
+            className={s.visuallyHidden}
             value={solved}
             max={view.queue.length}
             aria-label={c.missionsSolved}
@@ -794,6 +792,7 @@ export default function ReasonChallenge({
                       <MathText>{challenge.q.given}</MathText>
                     </p>
                   </div>
+                  <CheckDiagram q={challenge.q} reviewed={reasoningValid} />
                   <div
                     className={s.reasonLock}
                     role="region"
@@ -814,7 +813,6 @@ export default function ReasonChallenge({
                       <p>{c.unlockInstruction}</p>
                     )}
                   </div>
-                  <CheckDiagram q={challenge.q} reviewed={reasoningValid} />
                   <div className={s.figureTools}>
                     <button
                       type="button"
@@ -1027,21 +1025,9 @@ export default function ReasonChallenge({
               </div>
             </>
           )}
-          <div className={s.footer}>
-            <span>{c.setPersistence}</span>
-            <button type="button" onClick={() => start()}>
-              {c.restart}
-            </button>
-          </div>
         </>
       )}
-      <details className={s.recordTools}>
-        <summary>{c.manageRecord}</summary>
-        <button type="button" onClick={() => setConfirmRecord("reset")}>
-          {c.resetRecord}
-        </button>
-        {confirmRecord === "reset" && confirmPanel}
-      </details>
+      {more}
     </section>
   );
 }

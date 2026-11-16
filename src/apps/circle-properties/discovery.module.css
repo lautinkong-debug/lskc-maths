@@ -19,8 +19,9 @@
   min-height: 44px;
 }
 .steps button[aria-current="step"] {
-  background: #ffdf8d;
-  border-color: #a87817;
+  background: #e9f0ff;
+  border-color: #3769f4;
+  color: #2454c6;
 }
 .status {
   padding: 0;

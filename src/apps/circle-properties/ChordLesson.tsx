@@ -21,6 +21,8 @@ import type { Parameters } from "./geometry";
 import MathText from "./MathText";
 import ReasonLabel, { Highlight } from "./ReasonLabel";
 import ReasonEvidencePanel from "./ReasonEvidencePanel";
+import LessonSteps, { LessonWhere } from "./LessonSteps";
+import type { CpaStage } from "./path/types";
 import s from "./chord-lesson.module.css";
 
 const reason = (id: ChordReason) => reasons.find((item) => item.id === id)!;
@@ -63,7 +65,59 @@ function Stamp({ right }: { right: boolean }) {
   );
 }
 
-/** The panel beside the circle: the steps, each discovery and the reference table. */
+/** Paper first, then the picture and its proof, then the written reason. */
+export const chordStepCpa: readonly CpaStage[] = [
+  "concrete",
+  "concrete",
+  "pictorial",
+  "pictorial",
+  "pictorial",
+  "abstract",
+  "abstract",
+];
+
+type LessonMoves = {
+  onState: (update: (previous: ChordLessonState) => ChordLessonState) => void;
+  onShape: (parameters: Parameters) => void;
+  onPaperRestart: () => void;
+};
+function goToStep(
+  next: ChordLessonStep,
+  { onState, onShape, onPaperRestart }: LessonMoves,
+) {
+  // A diagram step always starts again from N off the mid-point, for the next class.
+  if (next === 3 || next === 4) onShape({ ...chordLessonStarts[next] });
+  onPaperRestart();
+  onState((previous) => ({ ...previous, step: next }));
+}
+
+/** The seven steps across the top of the lesson, under their three stages. */
+export function ChordLessonSteps({
+  state,
+  ...moves
+}: { state: ChordLessonState } & LessonMoves) {
+  return (
+    <LessonSteps
+      label={c.stepsLabel}
+      current={state.step}
+      onSelect={(index) => goToStep(index as ChordLessonStep, moves)}
+      steps={c.steps.map((name, index) => ({
+        name,
+        cpa: chordStepCpa[index],
+        done:
+          index < 3
+            ? state.seen[index]
+            : index < 5
+              ? state.found[index - 3]
+              : index === 5
+                ? sortRight(state) === sortCards.length
+                : writeComplete(state),
+      }))}
+    />
+  );
+}
+
+/** The panel beside the circle: each discovery and the reference table. */
 export default function ChordLesson({
   state,
   onState,
@@ -89,41 +143,19 @@ export default function ChordLesson({
   paperChord: PaperChord;
   onPaperRestart: () => void;
 }) {
-  const { step, found } = state;
-  function go(next: ChordLessonStep) {
-    // A diagram step always starts again from N off the mid-point, for the next class.
-    if (next === 3 || next === 4) onShape({ ...chordLessonStarts[next] });
-    onPaperRestart();
-    onState((previous) => ({ ...previous, step: next }));
-  }
+  const { step } = state;
+  const go = (next: ChordLessonStep) =>
+    goToStep(next, { onState, onShape, onPaperRestart });
   const diagramStep = step === 3 ? c.perpendicular : c.midpoint;
 
   return (
     <section className={s.lesson} aria-label={c.mode}>
-      <h3 className={s.title}>{c.title}</h3>
-      <nav className={s.steps} aria-label={c.stepsLabel}>
-        {c.steps.map((label, index) => (
-          <button
-            type="button"
-            key={label}
-            aria-current={step === index ? "step" : undefined}
-            data-done={
-              index < 3
-                ? state.seen[index]
-                : index < 5
-                  ? found[index - 3]
-                  : index === 5
-                    ? sortRight(state) === sortCards.length
-                    : writeComplete(state)
-            }
-            onClick={() => go(index as ChordLessonStep)}
-          >
-            <span aria-hidden="true">{index + 1}</span>
-            {label}
-          </button>
-        ))}
-      </nav>
-      <p className={s.stepOf}>{c.stepOf(step + 1, c.steps.length)}</p>
+      <LessonWhere
+        cpa={chordStepCpa[step]}
+        count={c.stepOf(step + 1, c.steps.length)}
+      >
+        <h3>{c.title}</h3>
+      </LessonWhere>
 
       {isPaperStep(step) && (
         <PaperCirclePanel step={step} stage={paperStage} chord={paperChord} />

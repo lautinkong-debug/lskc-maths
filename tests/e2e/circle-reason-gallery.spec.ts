@@ -22,7 +22,7 @@ for (const layout of ["desktop", "phone"] as const) {
       page,
     }) => {
       test.setTimeout(90_000);
-      await page.goto("/apps/circle-properties");
+      await page.goto("/apps/circle-properties#explore");
       await expect(page.getByTestId("paper-circle")).toBeVisible();
       const gallery = page.getByRole("region", {
         name: "See how each reason works",
